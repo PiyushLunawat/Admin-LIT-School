@@ -47,9 +47,7 @@ export default function LoginPage() {
               <div className='flex-1 space-y-1'>
                 <Label htmlFor="email" className='text-sm font-normal pl-3'>Enter your Email</Label>
                 <Input id="email" type="email" placeholder="johndoe@gmail.com" 
-                value={email}1 items-center text-sm text-[#FF503D] font-normal pl-3'><AlertCircle className='w-3 h-3'/>This Email does not exists.</Label> */}
-                onChange={(e) => setEmail(e.target.value)}/>
-                {/* <Label htmlFor="email-error" className='flex gap-
+                value={email} className='items-center text-sm text-[#FF503D] font-normal pl-3'><AlertCircle className='w-3 h-3'/>This Email does not exists.</Label> 
               </div>
 
               <div className='flex-1 space-y-1'>

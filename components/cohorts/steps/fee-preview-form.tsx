@@ -19,6 +19,7 @@ interface FeePreviewFormProps {
   initialData?: {
     _id: string;
     baseFee: number;
+    isGSTIncluded: boolean
     cohortFeesDetail?: {
       applicationFee?: number;
       tokenFee?: number;
