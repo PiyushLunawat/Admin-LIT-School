@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Eye } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface StudentsListProps {
   onStudentSelect: (id: string) => void;
   selectedIds: string[];
@@ -57,7 +58,7 @@ export function StudentsList({
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "current":
         return "success";

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { DateRangePicker } from "./date-range-picker";
 import { Card } from "@/components/ui/card";
+import { DateRange } from "react-day-picker";
 
 export function FeesReports() {
   const [dateRange, setDateRange] = useState<{
@@ -21,6 +22,10 @@ export function FeesReports() {
   const handleExport = (format: "pdf" | "excel") => {
     console.log(`Exporting report in ${format} format for date range:`, dateRange);
   };
+
+  function onDateRangeChange(arg0: DateRange): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <div className="space-y-6">
@@ -41,7 +46,7 @@ export function FeesReports() {
       <Card className="p-4">
         <DateRangePicker
           dateRange={dateRange}
-          onDateRangeChange={setDateRange}
+          onDateRangeChange={(range) => onDateRangeChange(range ?? { from: undefined, to: undefined })}
         />
       </Card>
 

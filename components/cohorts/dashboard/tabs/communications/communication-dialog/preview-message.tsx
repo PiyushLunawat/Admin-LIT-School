@@ -4,6 +4,7 @@ import { CalendarIcon, CheckCircle, Clock4Icon, Mail } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface PreviousMessageProps {
   type: string;
   status: string;
@@ -25,12 +26,12 @@ export function PreviousMessage({
 }: PreviousMessageProps) {
 
     
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "sent":
         return "secondary";
       case "delivered":
-        return "primary";
+        return "default";
       case "opened":
         return "success";
       default:

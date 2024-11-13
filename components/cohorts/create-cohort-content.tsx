@@ -90,7 +90,7 @@ export function CreateCohortContent({
           <FeePreviewForm onNext={() => onStepChange("collaborators")} initialData={editingCohort}/>
         </TabsContent>
         <TabsContent value="collaborators">
-          <CollaboratorsForm onComplete={onComplete} initialData={editingCohort}/>
+          <CollaboratorsForm onComplete={onComplete} initialData={editingCohort }/>
         </TabsContent>
       </Tabs>
     </>

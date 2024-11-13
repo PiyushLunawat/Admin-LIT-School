@@ -35,7 +35,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CreateTemplate } from "./communication-dialog/create-template";
 
-
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface TemplatesTabProps {
   cohortId: string;
 }
@@ -90,12 +90,12 @@ export function TemplatesTab({ cohortId }: TemplatesTabProps) {
     setCommunicationType(type);
   };
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "sent":
         return "secondary";
       case "delivered":
-        return "primary";
+        return "default";
       case "opened":
         return "success";
       default:

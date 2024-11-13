@@ -10,6 +10,7 @@ import {
   CreditCard
 } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface Alert {
   id: string;
   type: 'interview' | 'evaluation' | 'payment';
@@ -55,7 +56,7 @@ export function AlertsSection({ cohortId }: AlertsSectionProps) {
     }
   };
 
-  const getPriorityColor = (priority: Alert['priority']): string => {
+  const getPriorityColor = (priority: Alert['priority']): BadgeVariant => {
     switch (priority) {
       case 'high':
         return 'destructive';

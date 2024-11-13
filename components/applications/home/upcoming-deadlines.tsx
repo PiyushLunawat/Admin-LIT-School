@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, AlertTriangle } from "lucide-react";
 
+
+type BadgeVariant = "destructive" | "warning" | "secondary" | "default";
+
 export function UpcomingDeadlines() {
   const deadlines = [
     {
@@ -30,7 +33,7 @@ export function UpcomingDeadlines() {
     },
   ];
 
-  const getPriorityColor = (priority: string): string => {
+  const getPriorityColor = (priority: string): BadgeVariant => {
     switch (priority) {
       case "high":
         return "destructive";

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface StudentHeaderProps {
   studentId: string;
 }
@@ -35,7 +36,7 @@ export function StudentApplicationHeader({ studentId }: StudentHeaderProps) {
     paymentStatus: "",
   };
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "accepted":
         return "success";

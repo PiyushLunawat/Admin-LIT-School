@@ -19,6 +19,8 @@ interface PaymentsListProps {
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 export function PaymentsList({
   onPaymentSelect,
   selectedIds,
@@ -54,7 +56,7 @@ export function PaymentsList({
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "completed":
         return "success";

@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Mail, UserMinus } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 interface Student {
   id: string;
   name: string;
@@ -86,7 +88,7 @@ export function StudentsList({
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "accepted":
         return "success";

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface PaymentDetailsProps {
   studentId: string;
   onClose: () => void;
@@ -75,7 +76,7 @@ export function PaymentDetails({ studentId, onClose }: PaymentDetailsProps) {
     ],
   };
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "paid":
         return "success";

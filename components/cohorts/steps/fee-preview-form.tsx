@@ -16,18 +16,7 @@ import { useEffect, useState } from "react";
 
 interface FeePreviewFormProps {
   onNext: () => void;
-  initialData?: {
-    _id: string;
-    baseFee: number;
-    isGSTIncluded: boolean
-    cohortFeesDetail?: {
-      applicationFee?: number;
-      tokenFee?: number;
-      semesters?: number;
-      installmentsPerSemester?: number;
-      oneShotDiscount?: number;
-    };
-  };
+  initialData?: any;
 }
 
 export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {

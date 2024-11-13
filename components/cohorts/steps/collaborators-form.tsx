@@ -21,10 +21,7 @@ import { updateCohort } from "@/app/api/cohorts";
 
 interface CollaboratorsFormProps {
   onComplete: () => void;
-  initialData?: {
-    _id: string; // Cohort ID to update
-    collaborators: { email: string; role: string }[];
-  };
+  initialData?: any;
 }
 
 const roles = [
@@ -86,33 +83,32 @@ export function CollaboratorsForm({ onComplete, initialData }: CollaboratorsForm
             <Card key={collaborator.id}>
               <CardContent className="pt-6">
                 <div className="grid gap-4">
-                    <div className="grid gap-3 flex-1">
-                      <Label>Email Address</Label>
-                      <Controller
-                        control={form.control}
-                        name={`collaborators.${index}.email`}
-                        render={({ field }) => (
-                  <div className="flex justify-between items-center">
+                  <div className="grid gap-3 flex-1">
+                    <Label>Email Address</Label>
+                    <Controller
+                      control={form.control}
+                      name={`collaborators.${index}.email`}
+                      render={({ field }) => (
+                        <div className="flex justify-between items-center">
                           <Input 
                             type="email" 
                             placeholder="email@example.com" 
-                            {...field} 
+                            {...field}
                           />
-                          
-                    {fields.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}</div>
-                        )}
-                      />
-                      <FormMessage>{form.formState.errors?.collaborators?.[index]?.email?.message}</FormMessage>
-                    
+                          {fields.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive"
+                              onClick={() => remove(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    />
+                    <FormMessage>{form.formState.errors?.collaborators?.[index]?.email?.message}</FormMessage>
                   </div>
                   <div className="grid gap-3">
                     <Label>Role</Label>

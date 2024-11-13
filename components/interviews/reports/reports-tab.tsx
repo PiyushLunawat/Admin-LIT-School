@@ -7,6 +7,7 @@ import { Download } from "lucide-react";
 import { PerformanceMetrics } from "./performance-metrics";
 import { InterviewInsights } from "./interview-insights";
 import { DateRangePicker } from "./date-range-picker";
+import { DateRange } from "react-day-picker";
 
 export function ReportsTab() {
   const [dateRange, setDateRange] = useState<{
@@ -20,6 +21,10 @@ export function ReportsTab() {
   const handleExport = (format: "pdf" | "excel") => {
     console.log(`Exporting report in ${format} format`);
   };
+
+  function onDateRangeChange(arg0: DateRange): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <div className="space-y-6">
@@ -45,7 +50,7 @@ export function ReportsTab() {
       <Card className="p-4">
         <DateRangePicker
           dateRange={dateRange}
-          onDateRangeChange={setDateRange}
+          onDateRangeChange={(range) => onDateRangeChange(range ?? { from: undefined, to: undefined })}
         />
       </Card>
 

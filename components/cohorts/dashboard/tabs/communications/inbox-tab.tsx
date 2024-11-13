@@ -28,6 +28,7 @@ import { Download, Search, Send, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface InboxTabProps {
   cohortId: string;
 }
@@ -63,12 +64,12 @@ export function InboxTab({ cohortId }: InboxTabProps) {
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "sent":
         return "secondary";
       case "delivered":
-        return "primary";
+        return "default";
       case "opened":
         return "success";
       default:

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Video, MapPin, PlayCircle, X } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface PresentationListProps {
   onPresentationSelect: (id: string) => void;
   selectedIds: string[];
@@ -52,10 +53,10 @@ export function PresentationList({
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "scheduled":
-        return "primary";
+        return "default";
       case "completed":
         return "success";
       case "cancelled":

@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Award } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 interface SubmissionsListProps {
   onSubmissionSelect: (id: string) => void;
   selectedIds: string[];
@@ -56,7 +58,7 @@ export function SubmissionsList({
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending":
         return "secondary";

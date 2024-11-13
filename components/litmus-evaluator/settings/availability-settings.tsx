@@ -102,7 +102,7 @@ export function AvailabilitySettings() {
           <Calendar
             mode="multiple"
             selected={selectedDays}
-            onSelect={setSelectedDays}
+            onSelect={(days) => setSelectedDays(days ?? [])}
             className="rounded-md border"
           />
 

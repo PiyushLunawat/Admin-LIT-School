@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Users, MessageSquare, PlayCircle } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 export function RecentCohorts() {
   const cohorts = [
     {
@@ -43,7 +45,7 @@ export function RecentCohorts() {
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "open":
         return "success";

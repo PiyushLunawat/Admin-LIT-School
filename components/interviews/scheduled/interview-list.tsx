@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Video, MapPin, PlayCircle, Clock, X } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 export function InterviewList() {
   const router = useRouter();
   const interviews = [
@@ -42,10 +44,10 @@ export function InterviewList() {
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "scheduled":
-        return "primary";
+        return "default";
       case "completed":
         return "success";
       case "cancelled":

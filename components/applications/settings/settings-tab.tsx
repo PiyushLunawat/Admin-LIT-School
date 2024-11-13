@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSettings } from "./profile-settings";
 import { SecuritySettings } from "./security-settings";
 import { AvailabilitySettings } from "./availability-settings";
-import { HelpSupport } from "./help-support";
 
 export function SettingsTab() {
   return (
@@ -38,7 +37,7 @@ export function SettingsTab() {
         </TabsContent>
 
         <TabsContent value="help">
-          <HelpSupport />
+          <div>Help Support</div>
         </TabsContent>
       </Tabs>
     </div>

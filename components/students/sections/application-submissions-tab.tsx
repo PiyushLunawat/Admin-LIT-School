@@ -80,7 +80,7 @@ export function ApplicationSubmissionsTab({ studentId }: ApplicationSubmissionsT
 
                 {task.type === "File" && (
                   <div className="space-y-2">
-                    {task.files.map((file, fileIndex) => (
+                    {task.files?.map((file, fileIndex) => (
                       <div
                         key={fileIndex}
                         className="flex items-center justify-between p-2 border rounded"

@@ -20,15 +20,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setErrorMessage(null); // Reset any previous errors
 
-    try {
-      const userData = await loginUser(email, password);
-      // Optionally save user data/token here, e.g., in local storage or context
-      router.push("/dashboard"); // Redirect to dashboard on success
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Login failed");
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
-      toast({ title: "Login Failed", description: errorMessage, variant: "destructive" });
-    }
+      router.push("/dashboard"); 
+   
   };
   
   return (
@@ -47,7 +40,8 @@ export default function LoginPage() {
               <div className='flex-1 space-y-1'>
                 <Label htmlFor="email" className='text-sm font-normal pl-3'>Enter your Email</Label>
                 <Input id="email" type="email" placeholder="johndoe@gmail.com" 
-                value={email} className='items-center text-sm text-[#FF503D] font-normal pl-3'><AlertCircle className='w-3 h-3'/>This Email does not exists.</Label> 
+                value={email} className='items-center text-sm text-[#FF503D] font-normal pl-3' />
+                  <Label className=""><AlertCircle className='w-3 h-3'/>This Email does not exists.</Label> 
               </div>
 
               <div className='flex-1 space-y-1'>

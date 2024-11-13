@@ -22,8 +22,8 @@ export default function CohortsPage() {
   const fetchCohorts = async () => {
     try {
       const cohorts = await getCohorts(); 
-      const active = cohorts.data.filter((cohort) => cohort.status !== "Archived");
-      const archived = cohorts.data.filter((cohort) => cohort.status === "Archived");
+      const active = cohorts.data.filter((cohort: any) => cohort.status !== "Archived");
+      const archived = cohorts.data.filter((cohort: any) => cohort.status === "Archived");
       setActiveCohorts(active);
       setArchivedCohorts(archived);
     } catch (error) {
@@ -41,7 +41,7 @@ export default function CohortsPage() {
     setEditingCohort(null);
   };
 
-  const handleEditCohort = (cohort) => {
+  const handleEditCohort = (cohort: any) => {
     setEditingCohort(cohort);
     setCurrentStep("basic-details");
   };

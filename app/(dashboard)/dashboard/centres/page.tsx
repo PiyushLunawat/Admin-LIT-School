@@ -220,7 +220,7 @@ export default function CentresPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {centerData.map((centre) => (
+            {centerData.map((centre: Centre) => (
               <TableRow key={centre._id}>
                 <TableCell>{centre.name}</TableCell>
                 <TableCell>{centre.location}</TableCell>

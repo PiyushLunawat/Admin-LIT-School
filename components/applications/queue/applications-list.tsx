@@ -19,6 +19,8 @@ interface ApplicationsListProps {
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 export function ApplicationsList({
   onApplicationSelect,
   selectedIds,
@@ -70,7 +72,7 @@ export function ApplicationsList({
     }
   };
 
-  const getPriorityColor = (priority: string): string => {
+  const getPriorityColor = (priority: string): BadgeVariant => {
     switch (priority.toLowerCase()) {
       case "high":
         return "destructive";
@@ -83,12 +85,12 @@ export function ApplicationsList({
     }
   };
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending review":
         return "warning";
       case "under review":
-        return "primary";
+        return "default";
       case "reviewed":
         return "success";
       default:

@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 export function CommunicationLog() {
   const communications = [
     {
@@ -48,12 +50,12 @@ export function CommunicationLog() {
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "sent":
         return "secondary";
       case "delivered":
-        return "primary";
+        return "default";
       case "opened":
         return "success";
       default:

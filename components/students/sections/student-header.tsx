@@ -12,6 +12,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 interface StudentHeaderProps {
   studentId: string;
 }
@@ -33,7 +35,7 @@ export function StudentHeader({ studentId }: StudentHeaderProps) {
     paymentStatus: "Token Paid",
   };
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "accepted":
         return "success";

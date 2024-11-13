@@ -17,6 +17,13 @@ export function LitmusReports() {
     to: undefined,
   });
 
+  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
+    setDateRange({
+      from: range.from ?? undefined,
+      to: range.to ?? undefined,
+    });
+  };
+
   const handleExport = (format: "pdf" | "excel") => {
     console.log(`Exporting report in ${format} format`);
   };
@@ -45,7 +52,7 @@ export function LitmusReports() {
       <Card className="p-4">
         <DateRangePicker
           dateRange={dateRange}
-          onDateRangeChange={setDateRange}
+          onDateRangeChange={handleDateRangeChange}
         />
       </Card>
 

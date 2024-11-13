@@ -20,6 +20,7 @@ import { PersonalDetailsTab } from "./application-dialog/personal-details-tab";
 import { PaymentInformationTab } from "./application-dialog/payment-info-tab";
 import { DocumentsTab } from "./application-dialog/document-tab";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface Application {
   id: string;
   name: string;
@@ -104,7 +105,7 @@ export function ApplicationsList({
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "under review":
         return "secondary";
@@ -115,7 +116,7 @@ export function ApplicationsList({
       case "on hold":
         return "onhold";
       case "interview scheduled":
-        return "primary";
+        return "default";
       case "interview rescheduled":
         return "lemon";
       case "update status":

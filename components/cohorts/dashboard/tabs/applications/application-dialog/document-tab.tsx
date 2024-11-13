@@ -59,7 +59,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <p className="font-medium">{doc.name}</p>
-                  {doc.required && !doc.uploadDate && (
+                  {!doc.uploadDate && (
                     <Badge variant="destructive">Required</Badge>
                   )}
                 </div>

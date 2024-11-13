@@ -16,6 +16,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState } from "react";
 import { ReviewComponent } from "./litmus-test-dialog/review";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface LitmusSubmission {
   id: string;
   applicantName: string;
@@ -67,7 +68,7 @@ export function LitmusTestList({
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending":
         return "secondary";

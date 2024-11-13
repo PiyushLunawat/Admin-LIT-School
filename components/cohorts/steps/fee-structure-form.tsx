@@ -17,16 +17,7 @@ import { updateCohort } from "@/app/api/cohorts";
 
 interface FeeStructureFormProps {
   onNext: () => void;
-  initialData?: {
-    _id: string;
-    cohortFeesDetail?: {
-      applicationFee?: number;
-      tokenFee?: number;
-      semesters?: number;
-      installmentsPerSemester?: number;
-      oneShotDiscount?: number;
-    };
-  };
+  initialData?: any;
 }
 
 // Define the Zod schema

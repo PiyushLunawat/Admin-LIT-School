@@ -23,6 +23,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState } from "react";
 import { PreviousMessage } from "./communication-dialog/preview-message";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface CommunicationLogProps {
   cohortId: string;
 }
@@ -76,12 +77,12 @@ export function CommunicationLog({ cohortId }: CommunicationLogProps) {
     },
   ];
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "sent":
         return "secondary";
       case "delivered":
-        return "primary";
+        return "default";
       case "opened":
         return "success";
       default:

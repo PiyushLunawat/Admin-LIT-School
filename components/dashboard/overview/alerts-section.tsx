@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 export function AlertsSection() {
   const alerts = [
     {
@@ -30,7 +32,7 @@ export function AlertsSection() {
     },
   ];
 
-  const getPriorityColor = (priority: string): string => {
+  const getPriorityColor = (priority: string): BadgeVariant => {
     switch (priority) {
       case "high":
         return "destructive";

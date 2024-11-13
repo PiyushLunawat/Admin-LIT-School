@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Mail } from "lucide-react";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface PaymentRecord {
   id: string;
   studentName: string;
@@ -73,7 +74,7 @@ export function PaymentsList({
     },
   ];
 
-  const getStatusColor = (status: PaymentRecord["status"]): string => {
+  const getStatusColor = (status: PaymentRecord["status"]): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "on time":
         return "success";

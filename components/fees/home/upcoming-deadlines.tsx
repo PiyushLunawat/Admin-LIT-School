@@ -33,7 +33,10 @@ export function UpcomingDeadlines() {
     },
   ];
 
-  const getPriorityColor = (priority: string): string => {
+  // Define the specific types allowed for Badge variant
+  type BadgeVariant = "destructive" | "warning" | "secondary" | "default";
+
+  const getPriorityColor = (priority: string): BadgeVariant => {
     switch (priority) {
       case "high":
         return "destructive";

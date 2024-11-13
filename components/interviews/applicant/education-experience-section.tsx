@@ -5,26 +5,27 @@ import { Badge } from "@/components/ui/badge";
 import { Briefcase, GraduationCap } from "lucide-react";
 
 interface EducationExperienceSectionProps {
-  data: {
-    education: {
-      level: string;
-      fieldOfStudy?: string;
-      graduationYear: string;
-      institution: string;
-      hasGraduated: boolean;
-    };
-    experience: {
-      hasExperience: boolean;
-      type?: "Freelancer" | "Working Professional" | "Business Owner";
-      details?: {
-        description?: string;
-        company?: string;
-        duration?: string;
-        revenue?: string;
-        startDate?: string;
-      };
-    };
-  };
+  data: any;
+  //  {
+  //   education: {
+  //     level: string;
+  //     fieldOfStudy?: string;
+  //     graduationYear: string;
+  //     institution: string;
+  //     hasGraduated: boolean;
+  //   };
+  //   experience: {
+  //     hasExperience: boolean;
+  //     type?: "Freelancer" | "Working Professional" | "Business Owner";
+  //     details?: {
+  //       description?: string;
+  //       company?: string;
+  //       duration?: string;
+  //       revenue?: string;
+  //       startDate?: string;
+  //     };
+  //   };
+  // };
 }
 
 export function EducationExperienceSection({ data }: EducationExperienceSectionProps) {
