@@ -1,3 +1,4 @@
+import { getCohorts } from "@/app/api/cohorts";
 import { CohortDashboard } from "@/components/cohorts/dashboard/cohort-dashboard";
 
 interface PageProps {
@@ -6,13 +7,19 @@ interface PageProps {
   };
 }
 
+// Use async data fetching directly in generateStaticParams
 export async function generateStaticParams() {
-  // In a real application, you would fetch this from your data source
-  const cohortIds = ["CM01JY", "CM02JY", "CM03JY", "CM04JY", "CM05JY"];
-  
-  return cohortIds.map((id) => ({
-    id,
-  }));
+  try {
+    const data = await getCohorts(); 
+    const cohortIds = data.data.map((cohort: any) => cohort._id); // Extract the _id values
+    
+    return cohortIds.map((id: any) => ({
+      id,
+    }));
+  } catch (error) {
+    console.error("Error fetching cohort IDs:", error);
+    return []; // Return an empty array if there’s an error to prevent build failure
+  }
 }
 
 export default function CohortDashboardPage({ params }: PageProps) {
