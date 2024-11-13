@@ -46,7 +46,7 @@ const formSchema = z.object({
   timeSlot: z.string().min(1, "Time slot is required"),
   totalSeats: z.string().min(1, "Number of seats is required"),
   baseFee: z.string().min(1, "Base fee is required"),
-  includeGst: z.boolean().default(false),
+  isGSTIncluded: z.boolean().default(true),
 });
 
 interface Program {
@@ -98,7 +98,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
       timeSlot: initialData?.timeSlot || "",
       totalSeats: initialData?.totalSeats || "",
       baseFee: initialData?.baseFee || "",
-      includeGst: initialData?.includeGst || false,
+      isGSTIncluded: initialData?.isGSTIncluded || true,
     },
   });
 
@@ -150,7 +150,8 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
       cohortId, 
       programDetail: selectedProgram, 
       centerDetail: selectedCentre,
-      status: "Draft"
+      status: "Draft",
+      isGSTIncluded: values.isGSTIncluded
     };
     try {
       await createCohort(dataWithCohortId);  // Call the API to create a cohort
@@ -235,7 +236,9 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             <FormItem>
               <FormLabel>Cohort ID</FormLabel>
               <FormControl>
-              <Input value={cohortId}  />
+                {initialData ? 
+                  <Input {...field} /> : <Input value={cohortId} />
+                }
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -411,7 +414,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
 
           <FormField
             control={form.control}
-            name="includeGst"
+            name="isGSTIncluded"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center gap-2">
                 <FormControl>

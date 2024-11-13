@@ -168,6 +168,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
     };
 
     switch (cohort.status) {
+      case "Open":
       case "Draft":
         return (
           <div className="flex gap-2 w-full">
@@ -235,7 +236,6 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
           </div>
         );
 
-      case "Open":
       case "Full":
         return (
           <div className="flex gap-2 w-full">

@@ -8,22 +8,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { Plus, Trash2, GripVertical, FileIcon, LinkIcon, Link2Icon, XIcon, FolderPlus } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
+import { z } from "zod";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+
+const formSchema = z.object({
+  tasks: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string().nonempty("Task title is required"),
+      type: z.string().nonempty("Task type is required"),
+      description: z.string(),
+      config: z.object({
+        characterLimit: z.number().optional(),
+        maxFiles: z.number().optional(),
+        maxFileSize: z.number().optional(),
+        allowedTypes: z.array(z.string()).optional(),
+      }),
+    })
+  ),
+  calendlyEmbedCode: z.string().optional(),
+});
 
 interface Task {
   id: string;
@@ -65,7 +72,28 @@ const fileTypeOptions = {
   ],
 };
 
-export function ApplicationFormBuilder({ onNext }: ApplicationFormBuilderProps) {
+export function ApplicationFormBuilder({ onNext, initialData }: ApplicationFormBuilderProps) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      tasks: [
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          title: "",
+          type: "",
+          description: "",
+          config: {},
+        },
+      ],
+      calendlyEmbedCode: "",
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "tasks",
+  });
+
   const [tasks, setTasks] = useState<Task[]>([ {
     id: Math.random().toString(36).substr(2, 9),
     title: "",
@@ -306,6 +334,11 @@ const toggleFileType = (type: string) => {
       default:
         return null;
     }
+  };
+
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log("Form data:", data);
+    onNext(); true
   };
 
   return (

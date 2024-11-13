@@ -17,10 +17,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Plus, Trash2 } from "lucide-react";
+import { updateCohort } from "@/app/api/cohorts";
 
 interface CollaboratorsFormProps {
   onComplete: () => void;
-  initialData?: any;
+  initialData?: {
+    _id: string; // Cohort ID to update
+    collaborators: { email: string; role: string }[];
+  };
 }
 
 const roles = [
@@ -40,11 +44,11 @@ const formSchema = z.object({
   ),
 });
 
-export function CollaboratorsForm({ onComplete }: CollaboratorsFormProps) {
+export function CollaboratorsForm({ onComplete, initialData }: CollaboratorsFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      collaborators: [{  email: "", role: "" }],
+      collaborators: initialData?.collaborators || [{ email: "", role: "" }],
     },
   });
 
@@ -53,9 +57,25 @@ export function CollaboratorsForm({ onComplete }: CollaboratorsFormProps) {
     name: "collaborators",
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log("Form data:", data);
-    onComplete();
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      if (initialData?._id) {
+        console.log("Collaborators data to send:", data.collaborators);
+
+        // Ensure that collaborators data is an array and correctly structured
+        if (Array.isArray(data.collaborators) && data.collaborators.length > 0) {
+          await updateCohort(initialData._id,  { collaborators : data.collaborators} );
+          console.log("Cohort updated successfully:", data);
+          onComplete(); // Proceed to the next step
+        } else {
+          console.error("Collaborators data is not formatted as an array:", data.collaborators);
+        }
+      } else {
+        console.error("Cohort ID is missing. Unable to update.");
+      }
+    } catch (error) {
+      console.error("Failed to update cohort:", error);
+    }
   };
 
   return (
@@ -140,7 +160,7 @@ export function CollaboratorsForm({ onComplete }: CollaboratorsFormProps) {
         </Button>
 
         <Button type="submit" className="w-full">
-          Create Cohort
+          Update Cohort
         </Button>
       </form>
     </Form>

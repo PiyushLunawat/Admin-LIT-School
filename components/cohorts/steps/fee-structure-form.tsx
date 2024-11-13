@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -14,9 +13,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { updateCohort } from "@/app/api/cohorts";
 
 interface FeeStructureFormProps {
   onNext: () => void;
+  initialData?: {
+    _id: string;
+    cohortFeesDetail?: {
+      applicationFee?: number;
+      tokenFee?: number;
+      semesters?: number;
+      installmentsPerSemester?: number;
+      oneShotDiscount?: number;
+    };
+  };
 }
 
 // Define the Zod schema
@@ -28,14 +38,32 @@ const formSchema = z.object({
   oneShotDiscount: z.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100"),
 });
 
-export function FeeStructureForm({ onNext }: FeeStructureFormProps) {
+export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      applicationFee: initialData?.cohortFeesDetail?.applicationFee ,
+      tokenFee: initialData?.cohortFeesDetail?.tokenFee ,
+      semesters: initialData?.cohortFeesDetail?.semesters ,
+      installmentsPerSemester: initialData?.cohortFeesDetail?.installmentsPerSemester ,
+      oneShotDiscount: initialData?.cohortFeesDetail?.oneShotDiscount ,
+    }
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log("Form data:", data);
-    onNext(); // Proceed to the next step
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    if (!initialData?._id) {
+      console.error("Cohort ID is missing. Unable to update.");
+      return;
+    }
+
+    try {
+      // Update cohort fee details
+      await updateCohort(initialData._id, { cohortFeesDetail: data });
+      console.log("Cohort fees updated successfully:", data);
+      onNext(); // Proceed to the next step
+    } catch (error) {
+      console.error("Failed to update cohort fees:", error);
+    }
   }
 
   return (

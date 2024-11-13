@@ -78,19 +78,19 @@ export function CreateCohortContent({
           <BasicDetailsForm onNext={() => onStepChange("application-form")} initialData={editingCohort}/>
         </TabsContent>
         <TabsContent value="application-form">
-          <ApplicationFormBuilder onNext={() => onStepChange("litmus-test")} />
+          <ApplicationFormBuilder onNext={() => onStepChange("litmus-test")} initialData={editingCohort}/>
         </TabsContent>
         <TabsContent value="litmus-test">
-          <LitmusTestForm onNext={() => onStepChange("fee-structure")} />
+          <LitmusTestForm onNext={() => onStepChange("fee-structure")} initialData={editingCohort}/>
         </TabsContent>
         <TabsContent value="fee-structure">
-          <FeeStructureForm onNext={() => onStepChange("fee-preview")} />
+          <FeeStructureForm onNext={() => onStepChange("fee-preview")} initialData={editingCohort}/>
         </TabsContent>
         <TabsContent value="fee-preview">
-          <FeePreviewForm onNext={() => onStepChange("collaborators")} />
+          <FeePreviewForm onNext={() => onStepChange("collaborators")} initialData={editingCohort}/>
         </TabsContent>
         <TabsContent value="collaborators">
-          <CollaboratorsForm onComplete={onComplete} />
+          <CollaboratorsForm onComplete={onComplete} initialData={editingCohort}/>
         </TabsContent>
       </Tabs>
     </>
