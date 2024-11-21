@@ -1,585 +1,961 @@
 "use client";
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChangeEvent, useState } from "react";
-import { CrossIcon, FileIcon, FilePlus, FolderPlus, GripVertical, Link2Icon, Plus, PlusIcon, Trash2, XIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  XIcon,
+  FolderPlus,
+  FileIcon,
+  Link2Icon,
+  PlusIcon,
+} from "lucide-react";
+import { z } from "zod";
+import {
+  useForm,
+  useFieldArray,
+  Controller,
+  UseFormReturn,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { updateCohort } from "@/app/api/cohorts";
+
+const formSchema = z.object({
+  litmusTasks: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string().nonempty("Task title is required"),
+      description: z.string().optional(),
+      submissionTypes: z.array(
+        z.object({
+          id: z.string(),
+          type: z.string().nonempty("Submission type is required"),
+          characterLimit: z.coerce.number().optional(),
+          maxFiles: z.coerce.number().optional(),
+          maxFileSize: z.coerce.number().optional(),
+          allowedTypes: z.array(z.string()).optional(),
+        })
+      ),
+      judgmentCriteria: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string().nonempty("Criteria name is required"),
+          points: z.coerce.number().min(1, "Points must be at least 1"),
+          description: z.string().optional(),
+        })
+      ),
+      resources: z.object({
+        uploadedFile: z.any().optional(),
+        resourceLink: z.string().optional(),
+      }),
+    })
+  ),
+  scholarshipSlabs: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string().nonempty("Slab name is required"),
+      percentage: z.coerce.number().min(0, "Percentage cannot be negative"),
+      clearance: z.coerce.number().min(0, "Clearance cannot be negative"),
+      description: z.string().optional(),
+    })
+  ),
+  litmusTestDuration: z.string().nonempty("Duration is required"),
+  litmusTestScheduler: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface LitmusTestFormProps {
   onNext: () => void;
+  onCohortCreated: (cohort: any) => void;
   initialData?: any;
 }
 
-interface Task {
-  id: string;
-  title: string;
-  type: string;
-  description: string;
-  config: {
-    characterLimit?: number;
-    maxFiles?: number;
-    maxFileSize?: number;
-    allowedTypes?: string[];
+export function LitmusTestForm({
+  onNext,
+  onCohortCreated,
+  initialData,
+}: LitmusTestFormProps) {const litmusTestDetail = initialData?.litmusTestDetail?.[0];
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: litmusTestDetail
+      ? {
+          litmusTasks: litmusTestDetail.litmusTasks,
+          scholarshipSlabs: litmusTestDetail.scholarshipSlabs,
+          litmusTestDuration: litmusTestDetail.litmusTestDuration,
+          litmusTestScheduler: litmusTestDetail.litmusTestScheduler,
+        }
+      : {
+          litmusTasks:  [
+            {
+              id: generateId(),
+              title: "",
+              description: "",
+              submissionTypes: [
+                {
+                  id: generateId(),
+                  type: "",
+                  characterLimit: undefined,
+                  maxFiles: undefined,
+                  maxFileSize: undefined,
+                  allowedTypes: ["All"],
+                },
+              ],
+              judgmentCriteria: [
+                {
+                  id: generateId(),
+                  name: "",
+                  points: "",
+                  description: "",
+                },
+              ],
+              resources: {
+                uploadedFile: null,
+                resourceLink: "",
+              },
+            },
+          ],
+          scholarshipSlabs: [
+            {
+              id: generateId(),
+              name: "",
+              percentage: "",
+              clearance: "",
+              description: "",
+            },
+          ],
+          litmusTestDuration: "",
+          litmusTestScheduler: "",
+        },
+
+  });
+
+  const { control, handleSubmit, watch } = form;
+  
+
+  const {
+    fields: taskFields,
+    append: appendTask,
+    remove: removeTask,
+  } = useFieldArray({
+    control,
+    name: "litmusTasks",
+  });
+
+  const {
+    fields: slabFields,
+    append: appendSlab,
+    remove: removeSlab,
+  } = useFieldArray({
+    control,
+    name: "scholarshipSlabs",
+  });
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      console.log("Form data before submission:", data);
+
+      if (initialData?._id) {
+        const createdCohort = await updateCohort(initialData._id, {
+          litmusTestDetail: data,
+        });
+        console.log("Cohort updated successfully");
+        onCohortCreated(createdCohort.data);
+        onNext();
+      } else {
+        console.error("Cohort ID is missing. Unable to update.");
+      }
+    } catch (error) {
+      console.error("Failed to update cohort:", error);
+    }
   };
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="max-h-[80vh] space-y-6 py-4"
+      >
+        {/* LITMUS Tasks Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">LITMUS Tasks</h3>
+          {taskFields.map((task, taskIndex) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              taskIndex={taskIndex}
+              control={control}
+              removeTask={removeTask}
+              form={form}
+            />
+          ))}
+          <Button type="button"
+            onClick={() =>
+              appendTask({
+                id: generateId(),
+                title: "",
+                description: "",
+                submissionTypes: [
+                  {
+                    id: generateId(),
+                    type: "",
+                    characterLimit: undefined,
+                    maxFiles: undefined,
+                    maxFileSize: undefined,
+                    allowedTypes: ["All"],
+                  },
+                ],
+                judgmentCriteria: [],
+                resources: {
+                  uploadedFile: null,
+                  resourceLink: "",
+                },
+              })
+            }
+            className="w-full"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Task
+          </Button>
+        </div>
+
+        {/* Scholarship Slabs Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Scholarship Slabs</h3>
+          {slabFields.map((slab, slabIndex) => (
+            <ScholarshipSlabItem
+            key={slab.id}
+            slab={slab}
+            slabIndex={slabIndex}
+            control={control}
+            removeSlab={removeSlab}
+            form={form}
+            />
+          ))}
+          <Button type="button"
+            onClick={() =>
+              appendSlab({
+                id: generateId(),
+                name: "",
+                percentage: 0,
+                clearance: 0,
+                description: "",
+              })
+            }
+            className="w-full"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Scholarship Slab
+          </Button>
+        </div>
+
+        {/* LITMUS Test Duration */}
+        <div className="space-y-2">
+          <FormField
+            control={control}
+            name="litmusTestDuration"
+            render={({ field }) => (
+              <FormItem>
+                <Label>LITMUS Test Duration</Label>
+                <FormControl>
+                  <Input placeholder="DD:HH:MM" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* LITMUS Test Scheduler */}
+        <div className="space-y-2">
+          <FormField
+            control={control}
+            name="litmusTestScheduler"
+            render={({ field }) => (
+              <FormItem>
+                <Label>LITMUS Test Presentation Scheduler</Label>
+                <FormControl>
+                  <Textarea placeholder="Paste Calendly embed code" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Button type="submit" className="w-full">
+          Next: Fee Structure
+        </Button>
+      </form>
+    </Form>
+  );
 }
 
-export function LitmusTestForm({ onNext }: LitmusTestFormProps) {
-  const [tasks, setTasks] = useState<Task[]>([{
-    id: Math.random().toString(36).substr(2, 9),
-    title: "",
-    type: "",
-    description: "",
-    config: {},
-  }]);
+// Helper function to generate unique IDs
+function generateId() {
+  return Math.random().toString(36).substr(2, 9);
+}
 
+// TaskItem Component
+function TaskItem({
+  task,
+  taskIndex,
+  control,
+  removeTask,
+  form,
+}: {
+  task: any;
+  taskIndex: number;
+  control: any;
+  removeTask: (index: number) => void;
+  form: UseFormReturn<FormData>;
+}) {
+  const {
+    fields: submissionTypeFields,
+    append: appendSubmissionType,
+    remove: removeSubmissionType,
+  } = useFieldArray({
+    control,
+    name: `litmusTasks.${taskIndex}.submissionTypes`,
+  });
 
-  const [submissionType, setSubmissionType] = useState<Array<{
-    id: string;
-    submissionType: string;
-    characterLimit?: number;
-    maxFiles?: number;
-    maxFileSize?: number;
-    allowedTypes?: string[];
-  }>>([]);
+  const {
+    fields: judgmentCriteriaFields,
+    append: appendJudgmentCriteria,
+    remove: removeJudgmentCriteria,
+  } = useFieldArray({
+    control,
+    name: `litmusTasks.${taskIndex}.judgmentCriteria`,
+  });
 
-  const [judgementCriteria, setJudgementCriteria] = useState<Array<{
-    id: string;
-    name: string;
-    points: number;
-    description: string;
-  }>>([]);
+  // Resource state
+  const [isLinkInputVisible, setIsLinkInputVisible] = React.useState(false);
 
-  const [scholarshipSlabs, setScholarshipSlabs] = useState<Array<{
-    id: string;
-    name: string;
-    percentage: number;
-    clearance: number;
-    description: string;
-  }>>([]);
+  return (
+    <Card key={task.id}>
+      <CardContent className="flex pl-0 items-start pt-6">
+        <div className="cursor-grab px-4" onMouseDown={(e) => e.preventDefault()}>
+          <GripVertical className="h-4 w-4" />
+        </div>
+        <div className="grid w-full gap-6">
+          {/* Task Title */}
+          <div className="flex justify-between items-end">
+            <FormField
+              control={control}
+              name={`litmusTasks.${taskIndex}.title`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <Label className="text-[#00A3FF]">Task 0{taskIndex+1}</Label>
+                  <FormControl>
+                    <Input placeholder="e.g., Create a pitch deck" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.getValues("litmusTasks").length > 1 && (
+              <Button type="button"
+                variant="ghost"
+                size="icon"
+                className="text-destructive"
+                onClick={() => removeTask(taskIndex)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
 
+          {/* Task Description */}
+          <FormField
+            control={control}
+            name={`litmusTasks.${taskIndex}.description`}
+            render={({ field }) => (
+              <FormItem>
+                <Label>Description</Label>
+                <FormControl>
+                  <Textarea placeholder="Instructions or details" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Submission Types */}
+          <div className="grid gap-3">
+            <Label>Submission Type</Label>
+            {submissionTypeFields.map((sub, subIndex) => (
+              <div className="flex gap-1 items-start" key={sub.id}>
+                <div className="flex flex-wrap w-full bg-secondary/60 rounded-md p-3 gap-1.5">
+                  <FormField
+                    control={control}
+                    name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.type`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <Label className="text-[#00A3FF]">
+                          Submission Type 0{subIndex + 1}
+                        </Label>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={(value) => field.onChange(value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="short">Short Answer</SelectItem>
+                              <SelectItem value="long">Long Text</SelectItem>
+                              <SelectItem value="image">Image</SelectItem>
+                              <SelectItem value="video">Video</SelectItem>
+                              <SelectItem value="file">File</SelectItem>
+                              <SelectItem value="link">Link</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Conditional Config Fields */}
+                  {renderConfigFields(
+                    control,
+                    taskIndex,
+                    subIndex,
+                    form.watch(
+                      `litmusTasks.${taskIndex}.submissionTypes.${subIndex}.type`
+                    )
+                  )}
+                </div>
+                <Button type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeSubmissionType(subIndex)}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <Button type="button"
+              variant="secondary"
+              className="flex flex-1 gap-2"
+              onClick={() =>
+                appendSubmissionType({
+                  id: generateId(),
+                  type: "",
+                  characterLimit: undefined,
+                  maxFiles: undefined,
+                  maxFileSize: undefined,
+                  allowedTypes: [],
+                })
+              }
+            >
+              <FolderPlus className="w-4 h-4" /> Add a Submission Type
+            </Button>
+          </div>
+
+          {/* Judgment Criteria */}
+          <div className="grid gap-3">
+            <Label>Judgment Criteria</Label>
+            {judgmentCriteriaFields.map((cri, criIndex) => (
+              <div className="flex gap-1 items-start" key={cri.id}>
+                <div className="w-full bg-secondary/60 rounded-md p-3 gap-1.5">
+                  <div className="flex gap-1.5 items-center">
+                    <FormField
+                      control={control}
+                      name={`litmusTasks.${taskIndex}.judgmentCriteria.${criIndex}.name`}
+                      render={({ field }) => (
+                        <FormItem className="w-1/2">
+                          <Label className="text-[#00A3FF]">
+                            Criteria 0{criIndex + 1}
+                          </Label>
+                          <FormControl>
+                            <Input
+                              placeholder="Type Here"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={control}
+                      name={`litmusTasks.${taskIndex}.judgmentCriteria.${criIndex}.points`}
+                      render={({ field }) => (
+                        <FormItem className="w-1/2">
+                          <Label>Max Points</Label>
+                          <FormControl>
+                            <Input type="number" placeholder="10" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={control}
+                    name={`litmusTasks.${taskIndex}.judgmentCriteria.${criIndex}.description`}
+                    render={({ field }) => (
+                      <FormItem className="mt-2">
+                        <Label>Describe this criteria</Label>
+                        <FormControl>
+                          <Textarea placeholder="Type here" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeJudgmentCriteria(criIndex)}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <Button type="button"
+              variant="secondary"
+              className="flex flex-1 gap-2"
+              onClick={() =>
+                appendJudgmentCriteria({
+                  id: generateId(),
+                  name: "",
+                  points: 0,
+                  description: "",
+                })
+              }
+            >
+              <PlusIcon className="w-4 h-4" /> Add Judgment Criteria
+            </Button>
+          </div>
+
+          {/* Resources Section */}
+          <ResourcesSection
+            control={control}
+            taskIndex={taskIndex}
+            isLinkInputVisible={isLinkInputVisible}
+            setIsLinkInputVisible={setIsLinkInputVisible}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Render Config Fields Based on Submission Type
+function renderConfigFields(
+  control: any,
+  taskIndex: number,
+  subIndex: number,
+  type: string
+) {
+  switch (type) {
+    case "short":
+    case "long":
+      return (
+        <FormField
+          control={control}
+          name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.characterLimit`}
+          render={({ field }) => (
+            <FormItem className="w-1/2">
+              <Label>Character Limit</Label>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter maximum characters"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      );
+    case "image":
+    case "video":
+      return (
+        <>
+          <FormField
+            control={control}
+            name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.maxFiles`}
+            render={({ field }) => (
+              <FormItem>
+                <Label>Max No. of Files</Label>
+                <FormControl>
+                  <Input type="number" placeholder="00" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.maxFileSize`}
+            render={({ field }) => (
+              <FormItem>
+                <Label>Max Size per File(MB)</Label>
+                <FormControl>
+                  <Input type="number" placeholder="15 MB" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
+      );
+      
+    case "file":
+      // Implement allowed file types if needed
+      return (
+        <>
+          <FormField
+            control={control}
+            name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.maxFiles`}
+            render={({ field }) => (
+              <FormItem>
+                <Label>Max No. of Files</Label>
+                <FormControl>
+                  <Input type="number" placeholder="00" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.maxFileSize`}
+            render={({ field }) => (
+              <FormItem>
+                <Label>Max Size per File(MB)</Label>
+                <FormControl>
+                  <Input type="number" placeholder="15 MB" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="grid gap-2 mt-1">
+            <Label>Allowed File Types</Label>
+            <Controller
+              control={control}
+              name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.allowedTypes`}
+              defaultValue={["All"]} // Initialize with "All" selected
+              render={({ field }) => (
+                <div className="flex flex-wrap gap-1">
+                  {["All", "DOC", "PPT", "PDF", "Excel", "PSD", "EPF", "AI"].map((type) => (
+                    <div key={type} className="flex items-center">
+                      <Checkbox className="hidden"
+                        id={`${type}-${taskIndex}-${subIndex}`}
+                        checked={field.value?.includes(type)}
+                        onCheckedChange={(checked) => {
+                          let newSelectedTypes = field.value || [];
+                          if (checked) {
+                            if (type === "All") {
+                              newSelectedTypes = ["All"];
+                            } else {
+                              newSelectedTypes = newSelectedTypes.filter((t:any) => t !== "All");
+                              newSelectedTypes.push(type);
+                            }
+                          } else {
+                            newSelectedTypes = newSelectedTypes.filter((t:any) => t !== type);
+                            if (newSelectedTypes.length === 0) {
+                              newSelectedTypes = ["All"];
+                            }
+                          }
+                          field.onChange(newSelectedTypes);
+                        }}
+                      />
+                      <Label
+                        htmlFor={`${type}-${taskIndex}-${subIndex}`}
+                        className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border ${
+                          field.value?.includes(type) ? "bg-[#6808FE]" : "bg-[#0A0A0A]"
+                        }`}
+                      >
+                        {type}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            />
+          </div>
+        </>
+      );
+    case "link":
+      return (
+        <FormField
+          control={control}
+          name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.characterLimit`}
+          render={({ field }) => (
+            <FormItem className="w-1/2">
+              <Label>Max No. of Links</Label>
+              <FormControl>
+                <Input type="number" placeholder="00" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      );
+    default:
+      return null;
+  }
+}
+
+// Resources Section Component
+function ResourcesSection({
+  control,
+  taskIndex,
+  isLinkInputVisible,
+  setIsLinkInputVisible,
+}: any) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [resourceLink, setResourceLink] = useState("");
-  const [isLinkInputVisible, setIsLinkInputVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const [addedLink, setAddedLink] = useState<string | null>(null);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(["All"]);
-  const suggestions = ["Communication", "Creativity", "Leadership", "Teamwork", "Problem Solving"];
-  const [suggestedItems, setSuggestedItems] = useState<string[]>(suggestions);
-  const [showSuggestion, setShowSuggestion] = useState(false);
-  const [showdescription, setShowdescription] = useState(false);
-
-  const handleAddCriteria = (name: string) => {
-    if (name.trim()) {
-      console.log("Criteria added:", name);
-      setInputValue("");
-      setShowSuggestion(false); // Hide suggestions after adding
-    }
-  };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    handleAddCriteria(suggestion);
-    setInputValue(suggestion);
-    setShowSuggestion(false); // Hide suggestions after selection
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputValue(value);
-
-    // Filter suggestions based on user input
-    if (value) {
-      const filteredSuggestions = suggestedItems.filter((item) =>
-        item.toLowerCase().includes(value.toLowerCase())
-      );
-      setSuggestedItems(filteredSuggestions);
-      setShowSuggestion(filteredSuggestions.length > 0);
-    } else {
-      setSuggestedItems(["Communication", "Creativity", "Leadership", "Teamwork", "Problem Solving"]); // Reset suggestions
-      setShowSuggestion(false);
-    }
-  };
-
-
-  const toggleFileType = (type: string) => {
-    if (type === "All") {
-      setSelectedTypes(["All"]);
-    } else {
-      setSelectedTypes((prevTypes) => {
-        if (prevTypes.includes(type)) {
-          const newTypes = prevTypes.filter((t) => t !== type);
-          return newTypes.length === 0 ? ["All"] : newTypes;
-        } else {
-          const newTypes = prevTypes.filter((t) => t !== "All");
-          return [...newTypes, type];
-        }
-      });
-    }
-  };
-
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setUploadedFile(e.target.files[0]);
     }
   };
-
+  
   const handleRemoveFile = () => {
     setUploadedFile(null);
   };
-
+  
   const handleAddLink = () => {
     setAddedLink(resourceLink);
-    setResourceLink("");
-    setIsLinkInputVisible(false);
   };
-
+  
   const handleRemoveLink = () => {
     setAddedLink(null);
   };
 
-
-  const addTask = () => {
-    setTasks([
-      ...tasks,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        title: "",
-        type: "",
-        description: "",
-        config: {},
-      },
-    ]);
-  };
-
-  const removeTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
-
-  const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks(tasks.map((task) => 
-      task.id === id ? { ...task, ...updates } : task
-    ));
-  };
-
-  const updateTaskConfig = (id: string, config: Partial<Task['config']>) => {
-    setTasks(tasks.map((task) => 
-      task.id === id ? { ...task, config: { ...task.config, ...config } } : task
-    ));
-  };
-
-  const addSubmissionType = () => {
-    setSubmissionType([
-      ...submissionType,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        submissionType: "",
-      },
-    ]);
-  };
-
-  const addJudgementCriteria = () => {
-    setJudgementCriteria([
-      ...judgementCriteria,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        name: "",
-        points: 0,
-        description:"",
-      },
-    ]);
-  };
-
-  const addScholarshipSlab = () => {
-    setScholarshipSlabs([
-      ...scholarshipSlabs,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        name: "",
-        percentage: 0,
-        clearance: 0,
-        description:"",
-      },
-    ]);
-  };
-
-  const renderConfigFields = (task: Task) => {
-    switch (task.type) {
-      case "short":
-      case "long":
-        return (
-          <div className="grid w-1/2 gap-2">
-            <Label>Character Limit</Label>
-            <Input
-              type="number"
-              placeholder="Enter maximum characters"
-              value={task.config.characterLimit || ""}
-              onChange={(e) => updateTaskConfig(task.id, {
-                characterLimit: parseInt(e.target.value) || undefined
-              })}
-            />
-          </div>
-        );
-
-      case "image":
-      case "video":
-        return (
-          <div className="flex gap-1.5">
-            <div className="grid gap-2">
-              <Label>Max No. of Files</Label>
-              <Input
-                type="number"
-                placeholder="00"
-                value={task.config.maxFiles || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFiles: parseInt(e.target.value) || undefined
-                })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Max Size per File(MB)</Label>
-              <Input
-                type="number"
-                placeholder="15 MB"
-                value={task.config.maxFileSize || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFileSize: parseInt(e.target.value) || undefined
-                })}
-              />
-            </div>
-          </div>
-        );
-
-      case "file":
-        return (
-          <>
-          <div className="flex gap-1.5">
-            <div className="grid gap-2">
-              <Label>Max No. of Files</Label>
-              <Input
-                type="number"
-                placeholder="00"
-                value={task.config.maxFiles || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFiles: parseInt(e.target.value) || undefined
-                })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Max Size per File(MB)</Label>
-              <Input
-                type="number"
-                placeholder="15 MB"
-                value={task.config.maxFileSize || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFileSize: parseInt(e.target.value) || undefined
-                })}
-              />
-            </div>
-            
-          </div>
-          <div className="grid gap-2 mt-1">
-            <Label>Allowed File Types</Label> 
-              <div className="flex flex-wrap gap-1">
-              {["All", "DOC Formats", "PPT Formats", "PDF", "Excel Formats", "PSD", "EPF", "AI"].map((type) => (
-                <div key={type} className="flex items-center">
-                <Checkbox id={type} className="hidden"
-                  onClick={() => toggleFileType(type)}
-                  checked={selectedTypes.includes(type)}
-                  onChange={() => toggleFileType(type)}/>
-                <Label
-                  htmlFor={type}
-                  className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border ${
-                    selectedTypes.includes(type) ? "bg-[#6808FE]" : "bg-[#0A0A0A]"
-                  }`}
-                >
-                  {type}
-                </Label>
-              </div>
-              ))}
-            </div>
-          </div>
-        </>
-        );
-
-        case "link":
-        return (
-          <div className="grid w-1/2 gap-2">
-            <Label>Max No. of Links</Label>
-            <Input
-              type="number"
-              placeholder="00"
-              value={task.config.characterLimit || ""}
-              onChange={(e) => updateTaskConfig(task.id, {
-                characterLimit: parseInt(e.target.value) || undefined
-              })}
-            />
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className="max-h-[80vh] overflow-y-auto space-y-6 py-4">
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">LITMUS Tasks</h3>
-        {tasks.map((task) => (
-          <Card key={task.id}>
-            <CardContent className="flex pl-0 items-start pt-6">
-            <div className="cursor-grab px-4" onMouseDown={(e) => e.preventDefault()} >
-              <GripVertical className="h-4 w-4" />
-            </div>
-              <div className="grid w-full gap-6">
-                <div className="flex justify-between items-end">
-                  <div className="grid gap-3 flex-1">
-                    <Label>Task Title</Label>
-                    <Input placeholder="e.g., Create a pitch deck" />
-                  </div>
-                  {(tasks.length > 1 && <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => setTasks(tasks.filter((t) => t.id !== task.id))}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>)}
-                </div>
-                <div className="grid gap-3">
-                  <Label>Description</Label>
-                  <Textarea placeholder="Instructions or details" />
-                </div>
-                <div className="grid gap-3">
-                  <Label>Submission Type</Label>
-                  {submissionType.map((sub, id) => (
-                    <div className="flex gap-1 items-start">
-                  <div className="flex flex-wrap w-full bg-secondary p-3 gap-1.5">
-                    <div className="flex flex-col flex-1 gap-2">
-                      <Label className="text-[#00A3FF]">Submission Type 0{id+1}</Label>
-                      <Select value={task.type} onValueChange={(value) => updateTask(task.id, { type: value, config: {} })} >
-                        <SelectTrigger>
-                          <SelectValue className="" placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="short">Short Answer</SelectItem>
-                          <SelectItem value="long">Long Text</SelectItem>
-                          <SelectItem value="image">Image</SelectItem>
-                          <SelectItem value="video">Video</SelectItem>
-                          <SelectItem value="file">File</SelectItem>
-                          <SelectItem value="link">Link</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div >
-                    {task.type && renderConfigFields(task)}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className=""
-                    onClick={() => setSubmissionType(submissionType.filter((s) => s.id !== sub.id))}
-                  >
-                    <XIcon className="h-4 w-4" />
-                  </Button>
-                  </div>
-                  ))}
-                  <Button variant='secondary' className="flex flex-1 gap-2" onClick={addSubmissionType}>
-                      <FolderPlus className="w-4 h-4"/> Add a Submission Type
-                    </Button>
-                </div>
-                <div className="grid gap-3">
-                  <Label>Judgement Criteria</Label>
-                  {judgementCriteria.map((cri, id) => (
-                    <div className="flex gap-1 items-start">
-                    <div className=" w-full bg-secondary/60 p-3 gap-1.5">
-                    <div className="flex gap-1.5 items-center">
-                    <div className="grid w-1/2 gap-2">
-                      <Label className="text-[#00A3FF]">Criteria 0{id+1}</Label>
-                      <div className="relative">
-        <div className="w-full border-b border-[#27272A] py-2 flex justify-between items-center">
-          <Input
-            id="criteria"
-            className=" "
-            type="text"
-            placeholder="Type Here"
-            value={inputValue}
-            onChange={handleInputChange}
-            required
-            onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleAddCriteria(inputValue);  // Use inputValue to add criteria
-                }
-              }}
-            onClick={() => { setShowSuggestion(true); }}
+    <div className="grid gap-3">
+      <Label>Resources</Label>
+      {uploadedFile && (
+        <div className="flex items-center justify-between gap-2 mt-2 p-2 border rounded">
+          <div className="flex gap-2 items-center text-sm">
+            <FileIcon className="w-4 h-4" />
+            {uploadedFile.name}
+          </div>
+          <XIcon
+            className="w-4 h-4 cursor-pointer"
+            onClick={() =>
+              control.setValue(
+                `litmusTasks.${taskIndex}.resources.uploadedFile`,
+                null
+              )
+            }
           />
         </div>
-        {showSuggestion && suggestedItems.length > 0 && (
-        <ul className="absolute left-0 top-full mt-1 bg-[#09090B] border text-white shadow-lg rounded-md z-10 w-full">
-          {suggestedItems.map((suggestion, index) => (
-            <li
-              key={index}
-              className="p-2 cursor-pointer hover:bg-gray-700"
-              onClick={() => handleSuggestionClick(suggestion)}
-            >
-              {suggestion}
-            </li>
-          ))}
-        </ul>
       )}
-      </div>
-                      </div >
-                      <div className="w-1/2 grid gap-2">
-                        <Label>Max Points</Label>
-                        <Input type="number" placeholder="10" />
-                      </div>
-                     </div>
-                    <div className="grid gap-2 mt-2">
-                      <Label>Describe this criteria</Label>
-                      <Textarea  placeholder="Type here" />
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className=""
-                    onClick={() => setJudgementCriteria(judgementCriteria.filter((s) => s.id !== cri.id))}
+      {isLinkInputVisible && (
+        <FormField
+          control={control}
+          name={`litmusTasks.${taskIndex}.resources.resourceLink`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <div className="relative flex items-center gap-2">
+                  <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
+                  <Input
+                    className="pl-8 text-sm"
+                    placeholder="Enter URL here"
+                    {...field}
+                  />
+                  {addedLink === null ? 
+                  <Button type="button"
+                    onClick={() => handleAddLink}
+                    disabled={!field.value}
+                    className="absolute right-2 top-1.5 h-7 rounded-full"
                   >
-                    <XIcon className="h-4 w-4" />
-                  </Button>
-                  </div>
-                  ))}
-                  <Button variant='secondary' className="flex flex-1 gap-2" onClick={addJudgementCriteria}>
-                      <PlusIcon className="w-4 h-4"/> Add Judgement Criteria
-                    </Button>
+                    Add
+                  </Button> : 
+                  <Button type="button"
+                    onClick={() => handleRemoveLink}
+                    size={"icon"} variant={"ghost"}
+                    className="absolute right-2 top-1.5 h-7 w-7"
+                  >
+                    <XIcon className="w-4 h-4"/>
+                  </Button>}
                 </div>
-                <div className="grid gap-3">
-                  <Label>Resources</Label>
-                  {uploadedFile && (
-                    <div className="flex items-center justify-between gap-2 mt-2 p-2 border rounded">
-                      <div className="flex gap-2 items-center text-sm">
-                        <FileIcon className="w-4 h-4" />
-                        {uploadedFile.name}
-                      </div>
-                      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveFile} />
-                    </div>
-                  )}
-                  {isLinkInputVisible && (
-                    <div className="relative flex items-center gap-2">
-                      <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
-                      <Input
-                        className="pl-8 text-sm"
-                        placeholder="Enter URL here"
-                        value={resourceLink}
-                        onChange={(e) => setResourceLink(e.target.value)}
-                      />
-                      <Button
-                        onClick={handleAddLink}
-                        disabled={!resourceLink}
-                        className="absolute right-2 top-1.5 h-7 rounded-full"
-                      >
-                        Add
-                      </Button>
-                    </div>
-                  )}
-          
-                  {/* Display Added Link */}
-                  {addedLink && (
-                    <div className="flex items-center gap-2 p-2 border rounded">
-                      <Link2Icon className="w-4 h-4" />
-                      <span className="flex-1">{addedLink}</span>
-                      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveLink} />
-                    </div>
-                  )}
-                  <div className="flex gap-2.5">
-                  <Button variant='secondary' className="flex flex-1 gap-2" onClick={() => document.getElementById(`file-upload-${task.id}`)?.click()}>
-                  <FileIcon className="w-4 h-4"/> Upload Resource File
-                    </Button>
-                    <input
-                      type="file"
-                      id={`file-upload-${task.id}`}
-                      style={{ display: "none" }}
-                      onChange={handleFileUpload}
-                    />
-                    <Button variant='secondary' className="flex flex-1 gap-2" onClick={() => setIsLinkInputVisible(true)}>
-                      <Link2Icon className="w-4 h-4"/> Attach Resource Link
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        <Button onClick={addTask} className="w-full">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Task
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+      {resourceLink && !isLinkInputVisible && (
+        <div className="flex items-center gap-2 p-2 border rounded">
+          <Link2Icon className="w-4 h-4" />
+          <span className="flex-1">{resourceLink}</span>
+          <XIcon
+            className="w-4 h-4 cursor-pointer"
+            onClick={() =>
+              control.setValue(
+                `litmusTasks.${taskIndex}.resources.resourceLink`,
+                ""
+              )
+            }
+          />
+        </div>
+      )}
+      <div className="flex gap-2.5">
+        <Button type="button"
+          variant="secondary"
+          className="flex flex-1 gap-2"
+          onClick={() =>
+            document
+              .getElementById(`file-upload-${taskIndex}`)
+              ?.click()
+          }
+        >
+          <FileIcon className="w-4 h-4" /> Upload Resource File
+        </Button>
+        <input
+          type="file"
+          id={`file-upload-${taskIndex}`}
+          style={{ display: "none" }}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            if (e.target.files && e.target.files.length > 0) {
+              control.setValue(
+                `litmusTasks.${taskIndex}.resources.uploadedFile`,
+                e.target.files[0]
+              );
+            }
+          }}
+        />
+        <Button type="button"
+          variant="secondary"
+          className="flex flex-1 gap-2"
+          onClick={() => setIsLinkInputVisible(true)}
+        >
+          <Link2Icon className="w-4 h-4" /> Attach Resource Link
         </Button>
       </div>
-
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Scholarship Slabs</h3>
-        {scholarshipSlabs.map((slab) => (
-          <Card key={slab.id}>
-            <CardContent className="flex pl-0 items-start pt-6">
-            <div className="cursor-grab px-4" onMouseDown={(e) => e.preventDefault()} >
-              <GripVertical className="h-4 w-4" />
-            </div>
-              <div className="grid w-full gap-4">
-                <div className="flex justify-between items-end">
-                  <div className="grid gap-3 flex-1">
-                    <Label>Slab Name</Label>
-                    <Input placeholder="e.g., Smart Mouth" />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => setScholarshipSlabs(scholarshipSlabs.filter((s) => s.id !== slab.id))}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                 <div className="flex gap-1.5 items-center">
-                  <div className="w-1/2 grid gap-3">
-                    <Label>Scholarship Percentage</Label>
-                    <Input placeholder="5" />
-                  </div>
-                  <div className="w-1/2 grid gap-3">
-                    <Label>LITMUS Challenge Clearanc</Label>
-                    <Input placeholder="10-30" />
-                  </div>
-                 </div>
-                <div className="grid gap-3">
-                  <Label>Scholarship Description</Label>
-                  <Textarea  placeholder="Describe who is this scholorship for?" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        <Button onClick={addScholarshipSlab} className="w-full">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Scholarship Slab
-        </Button>
-      </div>
-      
-      <div className="space-y-2">
-        <Label>LITMUS Test Duration</Label>
-        <Input placeholder="DD:HH:MM" />
-      </div>
-
-      <div className="space-y-2">
-        <Label>LITMUS Test Presentaton Scheduler</Label>
-        <Textarea placeholder="Paste Calendly embed code" />
-      </div>
-      
-      <Button onClick={onNext} className="w-full">
-        Next: Fee Structure
-      </Button>
     </div>
+  );
+}
+
+// ScholarshipSlabItem Component
+function ScholarshipSlabItem({
+  slab,
+  slabIndex,
+  control,
+  removeSlab,
+  form,
+}: {
+  slab: any;
+  slabIndex: number;
+  control: any;
+  removeSlab: (index: number) => void;
+  form: UseFormReturn<FormData>;
+}) {
+
+  return (
+    <Card key={slab.id}>
+      <CardContent className="flex pl-0 items-start pt-6">
+        <div className="cursor-grab px-4" onMouseDown={(e) => e.preventDefault()}>
+          <GripVertical className="h-4 w-4" />
+        </div>
+        <div className="grid w-full gap-4">
+          <div className="flex justify-between items-end">
+            <FormField
+              control={control}
+              name={`scholarshipSlabs.${slabIndex}.name`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <Label>Slab Name</Label>
+                  <FormControl>
+                    <Input placeholder="e.g., Smart Mouth" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.getValues("scholarshipSlabs").length > 1 && (
+              <Button type="button"
+                variant="ghost"
+                size="icon"
+                className="text-destructive"
+                onClick={() => removeSlab(slabIndex)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <FormField
+              control={control}
+              name={`scholarshipSlabs.${slabIndex}.percentage`}
+              render={({ field }) => (
+                <FormItem className="w-1/2">
+                  <Label>Scholarship Percentage</Label>
+                  <FormControl>
+                    <Input type="number" placeholder="5" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name={`scholarshipSlabs.${slabIndex}.clearance`}
+              render={({ field }) => (
+                <FormItem className="w-1/2">
+                  <Label>LITMUS Challenge Clearance (%)</Label>
+                  <FormControl>
+                    <Input type="number" placeholder="10-30" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={control}
+            name={`scholarshipSlabs.${slabIndex}.description`}
+            render={({ field }) => (
+              <FormItem>
+                <Label>Scholarship Description</Label>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe who is this scholarship for?"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

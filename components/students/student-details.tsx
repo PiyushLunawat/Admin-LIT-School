@@ -17,10 +17,10 @@ import { DocumentsTab } from "@/components/students/sections/documents-tab";
 import { InternalNotesTab } from "@/components/students/sections/internal-notes-tab";
 
 interface StudentDetailsProps {
-  studentId: string;
+  student: any;
 }
 
-export function StudentDetails({ studentId }: StudentDetailsProps) {
+export function StudentDetails({ student }: StudentDetailsProps) {
   const router = useRouter();
   const [currentTab, setCurrentTab] = useState("personal");
 
@@ -34,7 +34,7 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
         <h1 className="text-3xl font-bold">Student Details</h1>
       </div>
 
-      <StudentHeader studentId={studentId} />
+      {/* <StudentHeader studentId={studentId} /> */}
 
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
         <TabsList className="w-full">
@@ -43,14 +43,14 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
           <TabsTrigger value="interview">Interview</TabsTrigger>
           <TabsTrigger value="litmus">LITMUS Test</TabsTrigger> */}
           <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="communications">Communications</TabsTrigger>
-          <TabsTrigger value="activity">Activity Log</TabsTrigger>
+          {/* <TabsTrigger value="communications">Communications</TabsTrigger> */}
+          {/* <TabsTrigger value="activity">Activity Log</TabsTrigger> */}
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="notes">Internal Notes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal">
-          <PersonalDetailsTab studentId={studentId} />
+          {/* <PersonalDetailsTab studentId={studentId} /> */}
         </TabsContent>
 {/* 
         <TabsContent value="application">
@@ -66,23 +66,23 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
         </TabsContent> */}
 
         <TabsContent value="payment">
-          <PaymentInformationTab studentId={studentId} />
+          {/* <PaymentInformationTab studentId={studentId} /> */}
         </TabsContent>
 
-        <TabsContent value="communications">
+        {/* <TabsContent value="communications">
           <CommunicationsTab studentId={studentId} />
         </TabsContent>
 
         <TabsContent value="activity">
           <ActivityLogTab studentId={studentId} />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="documents">
-          <DocumentsTab studentId={studentId} />
+          {/* <DocumentsTab studentId={studentId} /> */}
         </TabsContent>
 
         <TabsContent value="notes">
-          <InternalNotesTab studentId={studentId} />
+          {/* <InternalNotesTab studentId={studentId} /> */}
         </TabsContent>
       </Tabs>
     </div>

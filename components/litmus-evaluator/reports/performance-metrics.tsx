@@ -90,14 +90,7 @@ export function PerformanceMetrics({ dateRange }: PerformanceMetricsProps) {
                   %
                 </span>
               </div>
-              <Progress
-                value={
-                  (metrics.recommendations.stronglyRecommend /
-                    recommendationTotal) *
-                  100
-                }
-                className="bg-success/20"
-              />
+              <Progress states={[ {value:((metrics.recommendations.stronglyRecommend / recommendationTotal) * 100)} ]} className="bg-success/20"/>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -112,11 +105,7 @@ export function PerformanceMetrics({ dateRange }: PerformanceMetricsProps) {
                   %
                 </span>
               </div>
-              <Progress
-                value={
-                  (metrics.recommendations.recommend / recommendationTotal) * 100
-                }
-              />
+            <Progress states={[ {value:((metrics.recommendations.recommend / recommendationTotal) * 100)} ]} />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -131,11 +120,7 @@ export function PerformanceMetrics({ dateRange }: PerformanceMetricsProps) {
                   %
                 </span>
               </div>
-              <Progress
-                value={
-                  (metrics.recommendations.neutral / recommendationTotal) * 100
-                }
-              />
+            <Progress states={[ {value:((metrics.recommendations.neutral / recommendationTotal) * 100)} ]} />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -152,13 +137,7 @@ export function PerformanceMetrics({ dateRange }: PerformanceMetricsProps) {
                   %
                 </span>
               </div>
-              <Progress
-                value={
-                  (metrics.recommendations.doNotRecommend / recommendationTotal) *
-                  100
-                }
-                className="bg-destructive/20"
-              />
+              <Progress states={[ {value:((metrics.recommendations.doNotRecommend / recommendationTotal) * 100)} ]} className="bg-destructive/20"/>
             </div>
           </div>
         </div>

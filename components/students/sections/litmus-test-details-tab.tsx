@@ -70,7 +70,7 @@ export function LitmusTestDetailsTab({ studentId }: LitmusTestDetailsTabProps) {
               <span>Overall Score</span>
               <span>{litmusTest.overallScore}%</span>
             </div>
-            <Progress value={litmusTest.overallScore} />
+            <Progress states={[ {value:(litmusTest.overallScore)} ]} />
           </div>
         </CardContent>
       </Card>

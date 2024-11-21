@@ -136,8 +136,7 @@ export function StudentsList({
               </TableCell>
               <TableCell>
                 <div className="space-y-2">
-                  <Progress 
-                    value={calculateProgress(student.paidAmount, student.totalFees)} 
+                <Progress states={[ {value:(calculateProgress(student.paidAmount, student.totalFees))} ]}
                   />
                   <div className="flex justify-between text-sm">
                     <span>{student.paidAmount}</span>

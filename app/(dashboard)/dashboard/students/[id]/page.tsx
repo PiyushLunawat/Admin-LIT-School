@@ -1,4 +1,8 @@
+// app/dashboard/students/[id]/page.tsx
+
+import { getCurrentStudents } from "@/app/api/student";
 import { StudentDetails } from "@/components/students/student-details";
+import { useEffect, useState } from "react";
 
 interface PageProps {
   params: {
@@ -6,19 +10,15 @@ interface PageProps {
   };
 }
 
-export async function generateStaticParams() {
-  // In a real application, you would fetch this from your data source
-  const studentIds = ["1", "2", "3"];
-  
-  return studentIds.map((id) => ({
-    id,
-  }));
-}
+export default async function StudentDetailsPage({ params }: PageProps) {
+  // const [student, setStudent] = useState<any>(null);
+  const student = await getCurrentStudents(params.id);
 
-export default function StudentDetailsPage({ params }: PageProps) {
+
+
   return (
     <div className="h-full">
-      <StudentDetails studentId={params.id} />
+      <StudentDetails student={student} />
     </div>
   );
 }

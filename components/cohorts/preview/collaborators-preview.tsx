@@ -47,7 +47,7 @@ export function CollaboratorsPreview() {
       {/* Dialog for Collaborators Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-6">
-          <CollaboratorsForm onComplete={() => console.log("Form complete")} />
+          {/* <CollaboratorsForm onComplete={() => console.log("Form complete")} /> */}
         </DialogContent>
       </Dialog>
     </Card>

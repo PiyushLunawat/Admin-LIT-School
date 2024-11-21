@@ -33,7 +33,7 @@ export function PresentationSchedule() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Today's Presentations</CardTitle>
+            <CardTitle>Today&apos;s Presentations</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {presentations.map((presentation) => (

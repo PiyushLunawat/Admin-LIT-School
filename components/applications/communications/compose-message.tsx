@@ -79,7 +79,7 @@ export function ComposeMessage() {
           <h3 className="font-medium">Available Variables</h3>
           <div className="space-y-2">
             <p className="text-sm">
-              <code className="bg-muted px-1 rounded">{"{{name}}"}</code> - Applicant's name
+              <code className="bg-muted px-1 rounded">{"{{name}}"}</code> - Applicant&apos;s name
             </p>
             <p className="text-sm">
               <code className="bg-muted px-1 rounded">{"{{id}}"}</code> - Application ID

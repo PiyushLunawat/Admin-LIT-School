@@ -21,7 +21,9 @@ export function CohortHeader({ cohortId }: CohortHeaderProps) {
     endDate: "Feb 28, 2025",
     schedule: "Morning Batch (M-W-F)",
     seats: 50,
-    filled: 25,
+    registered: 35,
+    applicationfee: 25,
+    filled: 15,
     status: "Open",
   };
 
@@ -54,7 +56,13 @@ export function CohortHeader({ cohortId }: CohortHeaderProps) {
               <span>Filled</span>
               <span>{cohort.filled}/{cohort.seats}</span>
             </div>
-            <Progress value={(cohort.filled / cohort.seats) * 100} />
+            <Progress
+              states={[
+                { value: ((cohort.registered - cohort.applicationfee) / cohort.seats) * 100, color: '#2EB88A' },
+                { value: ((cohort.applicationfee - cohort.filled) / cohort.seats) * 100, color: '#FBBF24' },
+                { value: (cohort.filled / cohort.seats) * 100, color: '#EF4444' },
+              ]}
+            />
           </div>
         </div>
         <div className="pt-4">

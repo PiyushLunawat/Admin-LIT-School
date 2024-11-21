@@ -46,7 +46,7 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{summary.totalExpected}</div>
-          <Progress value={summary.collectionProgress} className="mt-2" />
+          <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" />
           <p className="text-xs text-muted-foreground mt-2">
             {summary.collectionProgress}% collected
           </p>
@@ -99,9 +99,9 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {summary.instalmentBreakdown.map((semester, semesterIndex) => (
-      <div className="space-y-2">
+      <div key={semesterIndex} className="space-y-2">
         <Badge variant="blue" className="py-1">Semester {semesterIndex + 1}</Badge>
-        <Card key={semesterIndex} className="md:col-span-1 lg:col-span-1">
+        <Card className="md:col-span-1 lg:col-span-1">
           <CardContent className="pt-4">
             <div className="space-y-4">
               {semester.map((instalment, instalmentIndex) => (
@@ -112,11 +112,8 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
                       {instalment.received} / {instalment.total}
                     </span>
                   </div>
-                  <Progress
-                    value={
-                      (parseInt(instalment.received.replace(/[^0-9]/g, "")) /
-                      parseInt(instalment.total.replace(/[^0-9]/g, ""))) * 100
-                    }
+                  <Progress states={[ {value:((parseInt(instalment.received.replace(/[^0-9]/g, "")) /
+                      parseInt(instalment.total.replace(/[^0-9]/g, ""))) * 100)} ]}
                     className={`${
                       instalment.status === "complete"
                         ? "bg-success"
@@ -149,10 +146,8 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
                       18,34,455 / 20,00,000
                     </span>
                   </div>
-                  <Progress 
-                    value={666/700
-                    }
-                  />
+
+                  <Progress states={[ {value:(666/700)} ]} />
                 </div>
               </div>
           </div>

@@ -55,7 +55,7 @@ interface Cohort {
   filledSeats: [];
   status: CohortStatus;
   baseFee: string;
-  isComplete: boolean;
+  collaborators: [];
 }
 
 interface CohortGridProps {
@@ -168,7 +168,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
     };
 
     switch (cohort.status) {
-      case "Open":
+      case "Draft":
         return (
           <div className="flex gap-2 w-full">
             <Button 
@@ -178,9 +178,9 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
               onClick={() => handleAction(cohort.cohortId, "continue")}
             >
               <Edit className="h-4 w-4 mr-2" />
-              {cohort.isComplete ? 'Edit' : 'Continue'}
+              {cohort.collaborators.length > 0 ? 'Edit' : 'Continue'}
             </Button>
-            {cohort.isComplete && (
+            {cohort.collaborators.length > 0 && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 
@@ -226,7 +226,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => deleteCohort(cohort._id)}>
+                  <AlertDialogAction onClick={() => { deleteCohort(cohort._id); onStatusChange();}}>
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -235,10 +235,20 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
           </div>
         );
 
-      case "Draft":
+      case "Open":
         case "Full":
         return (
           <div className="flex gap-2 w-full">
+            {cohort.filledSeats.length < 1 &&
+            <Button 
+              variant="outline" 
+              className="px-4" 
+              size="sm"
+              onClick={() => handleAction(cohort.cohortId, "continue")}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>}
             <Button 
               variant="outline" 
               className="flex-1" 
@@ -400,7 +410,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                   <span>Seats Filled</span>
                   <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
                 </div>
-                <Progress value={(cohort.filledSeats.length / cohort.totalSeats) * 100} />
+                <Progress states={[ {value:((cohort.filledSeats.length / cohort.totalSeats) * 100)} ]} />
               </div>
             )}
           </CardContent>
@@ -444,7 +454,8 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                   <span>Seats Filled</span>
                   <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
                 </div>
-                <Progress value={(cohort.filledSeats.length / cohort.totalSeats) * 100} />
+                <Progress states={[ {value:((cohort.filledSeats.length / cohort.totalSeats) * 100)} ]} />
+
               </div>
             )}
           </CardContent>

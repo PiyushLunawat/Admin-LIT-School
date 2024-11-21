@@ -11,7 +11,7 @@ export function ApplicationsHome() {
       {/* Welcome Message */}
       <div>
         <h2 className="text-2xl font-bold">Welcome back, Sarah!</h2>
-        <p className="text-muted-foreground">Here's an overview of your review queue</p>
+        <p className="text-muted-foreground">Here&apos;s an overview of your review queue</p>
       </div>
 
       {/* Key Metrics */}

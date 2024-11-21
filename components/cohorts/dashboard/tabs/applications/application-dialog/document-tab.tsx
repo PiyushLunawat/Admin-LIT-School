@@ -54,8 +54,8 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {documents.required.map((doc, index) => (
-          <div className="p-4 border rounded-lg">
-            <div key={index} className="flex items-center justify-between ">
+          <div key={index} className="p-4 border rounded-lg">
+            <div className="flex items-center justify-between ">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <p className="font-medium">{doc.name}</p>

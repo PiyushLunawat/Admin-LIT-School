@@ -12,7 +12,7 @@ export function FeesHome() {
       {/* Welcome Message */}
       <div>
         <h2 className="text-2xl font-bold">Welcome back, Sarah!</h2>
-        <p className="text-muted-foreground">Here's your fee collection overview for today</p>
+        <p className="text-muted-foreground">Here&apos;s your fee collection overview for today</p>
       </div>
 
       {/* Key Metrics */}

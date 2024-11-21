@@ -276,42 +276,42 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Father's Name</Label>
+              <Label>Father&apos;s Name</Label>
               <Input
                 defaultValue={student.parentalInfo.fatherName}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
-              <Label>Mother's Name</Label>
+              <Label>Mother&apos;s Name</Label>
               <Input
                 defaultValue={student.parentalInfo.motherName}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
-              <Label>Father's Contact Number</Label>
+              <Label>Father&apos;s Contact Number</Label>
               <Input
                 defaultValue={student.parentalInfo.fatherContact}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
-              <Label>Mother's Contact Number</Label>
+              <Label>Mother&apos;s Contact Number</Label>
               <Input
                 defaultValue={student.parentalInfo.motherContact}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
-              <Label>Father's Occupation</Label>
+              <Label>Father&apos;s Occupation</Label>
               <Input
                 defaultValue={student.parentalInfo.fatherOccupation}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
-              <Label>Mother's Occupation</Label>
+              <Label>Mother&apos;s Occupation</Label>
               <Input
                 defaultValue={student.parentalInfo.motherOccupation}
                 readOnly={!isEditing}

@@ -8,6 +8,7 @@ import { LitmusTestForm } from "@/components/cohorts/steps/litmus-test-form";
 import { FeeStructureForm } from "@/components/cohorts/steps/fee-structure-form";
 import { FeePreviewForm } from "@/components/cohorts/steps/fee-preview-form";
 import { CollaboratorsForm } from "@/components/cohorts/steps/collaborators-form";
+import { useState } from "react";
 
 
 type StepId = "basic-details" | "application-form" | "litmus-test" | "fee-structure" | "fee-preview" | "collaborators";
@@ -37,14 +38,25 @@ interface CreateCohortContentProps {
   onStepChange: (step: StepId) => void;
   onComplete: () => void;
   editingCohort?: Cohort | null;
+  fetchCohorts: () => void; 
 }
 
 export function CreateCohortContent({
   currentStep,
   onStepChange,
   onComplete,
-  editingCohort,
+  editingCohort: initialEditingCohort,
+  fetchCohorts,
+  
 }: CreateCohortContentProps) {
+  const [editingCohort, setEditingCohort] = useState<Cohort | null>(initialEditingCohort || null);
+
+  const handleCohortCreated = (cohort: Cohort) => {
+    setEditingCohort(cohort); 
+    fetchCohorts();
+    console.log("111",editingCohort)
+  };
+
   const steps: Step[] = [
     { id: "basic-details", label: "Basic Details" },
     { id: "application-form", label: "Application Form" },
@@ -53,7 +65,6 @@ export function CreateCohortContent({
     { id: "fee-preview", label: "Fee Preview" },
     { id: "collaborators", label: "Collaborators" },
   ];
-  console.log("dfsd",editingCohort)
 
   return (
     <>
@@ -75,22 +86,26 @@ export function CreateCohortContent({
           ))}
         </TabsList>
         <TabsContent value="basic-details">
-          <BasicDetailsForm onNext={() => onStepChange("application-form")} initialData={editingCohort}/>
+          <BasicDetailsForm 
+            onNext={() => onStepChange("application-form")}
+            onCohortCreated={handleCohortCreated} // Pass the callback to handle cohort creation
+            initialData={editingCohort}
+          />
         </TabsContent>
         <TabsContent value="application-form">
-          <ApplicationFormBuilder onNext={() => onStepChange("litmus-test")} initialData={editingCohort}/>
+          <ApplicationFormBuilder onNext={() => onStepChange("litmus-test")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
         </TabsContent>
         <TabsContent value="litmus-test">
-          <LitmusTestForm onNext={() => onStepChange("fee-structure")} initialData={editingCohort}/>
+          <LitmusTestForm onNext={() => onStepChange("fee-structure")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
         </TabsContent>
         <TabsContent value="fee-structure">
-          <FeeStructureForm onNext={() => onStepChange("fee-preview")} initialData={editingCohort}/>
+          <FeeStructureForm onNext={() => onStepChange("fee-preview")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
         </TabsContent>
         <TabsContent value="fee-preview">
-          <FeePreviewForm onNext={() => onStepChange("collaborators")} initialData={editingCohort}/>
+          <FeePreviewForm onNext={() => onStepChange("collaborators")} initialData={editingCohort} />
         </TabsContent>
         <TabsContent value="collaborators">
-          <CollaboratorsForm onComplete={onComplete} initialData={editingCohort }/>
+          <CollaboratorsForm onComplete={onComplete} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
         </TabsContent>
       </Tabs>
     </>

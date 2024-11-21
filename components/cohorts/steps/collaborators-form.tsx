@@ -19,9 +19,15 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 import { updateCohort } from "@/app/api/cohorts";
 
+
 interface CollaboratorsFormProps {
   onComplete: () => void;
-  initialData?: any;
+  onCohortCreated: (cohort: any) => void;
+  initialData?: any; 
+}
+interface collaborator{
+  email:string,
+  role:string
 }
 
 const roles = [
@@ -41,13 +47,15 @@ const formSchema = z.object({
   ),
 });
 
-export function CollaboratorsForm({ onComplete, initialData }: CollaboratorsFormProps) {
+export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: CollaboratorsFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       collaborators: initialData?.collaborators || [{ email: "", role: "" }],
     },
   });
+
+  let collaborators:Array<collaborator> =[]
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -61,8 +69,9 @@ export function CollaboratorsForm({ onComplete, initialData }: CollaboratorsForm
 
         // Ensure that collaborators data is an array and correctly structured
         if (Array.isArray(data.collaborators) && data.collaborators.length > 0) {
-          await updateCohort(initialData._id,  { collaborators : data.collaborators} );
-          console.log("Cohort updated successfully:", data);
+          const createdCohort = await updateCohort(initialData._id, {collaborators : data.collaborators} );
+          console.log("Cohort updated successfully:", createdCohort.data);
+          onCohortCreated(createdCohort.data); 
           onComplete(); // Proceed to the next step
         } else {
           console.error("Collaborators data is not formatted as an array:", data.collaborators);
@@ -77,7 +86,7 @@ export function CollaboratorsForm({ onComplete, initialData }: CollaboratorsForm
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="max-h-[80vh] overflow-y-auto space-y-6 py-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-h-[80vh] space-y-6 py-4">
         <div className="space-y-4">
           {fields.map((collaborator, index) => (
             <Card key={collaborator.id}>
@@ -128,7 +137,8 @@ export function CollaboratorsForm({ onComplete, initialData }: CollaboratorsForm
                               <SelectItem
                                 key={role.value}
                                 value={role.value}
-                                disabled={fields.some(f => f.role === role.value && f.id !== collaborator.id)}
+                                disabled={role.value !== "evaluator" &&
+                                  fields.some(f => f.role === role.value && f.id !== collaborator.id)}
                               >
                                 {role.label}
                               </SelectItem>
@@ -149,7 +159,6 @@ export function CollaboratorsForm({ onComplete, initialData }: CollaboratorsForm
           onClick={() => append({ email: "", role: "" })}
           variant="outline"
           className="w-full"
-          disabled={fields.length >= roles.length}
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Collaborator

@@ -12,7 +12,7 @@ export function InterviewsHome() {
       {/* Welcome Message */}
       <div>
         <h2 className="text-2xl font-bold">Welcome back, Sarah!</h2>
-        <p className="text-muted-foreground">Here's your interview schedule for today</p>
+        <p className="text-muted-foreground">Here&apos;s your interview schedule for today</p>
       </div>
 
       {/* Key Metrics */}

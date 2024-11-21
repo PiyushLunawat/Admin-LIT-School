@@ -64,7 +64,7 @@ export function LitmusTestPreview() {
       {/* Dialog for Litmus Test Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-6">
-          <LitmusTestForm onNext={() => console.log("Navigating to fee-structure")} />
+          {/* <LitmusTestForm onNext={() => console.log("Navigating to fee-structure")} /> */}
         </DialogContent>
       </Dialog>
     </Card>

@@ -49,7 +49,7 @@ export function ApplicationFormPreview() {
       </CardContent>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-6">
-          <ApplicationFormBuilder onNext={() => console.log("Next clicked")} />
+          {/* <ApplicationFormBuilder onNext={() => console.log("Next clicked")} /> */}
         </DialogContent>
       </Dialog>
     </Card>

@@ -10,34 +10,35 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { updateCohort } from "@/app/api/cohorts";
+import { Label } from "@/components/ui/label";
 
 interface FeeStructureFormProps {
   onNext: () => void;
+  onCohortCreated: (cohort: any) => void;
   initialData?: any;
 }
 
 // Define the Zod schema
 const formSchema = z.object({
-  applicationFee: z.number().min(1, "Application fee is required"),
-  tokenFee: z.number().min(1, "Token fee is required"),
-  semesters: z.number().min(1, "Number of semesters is required"),
-  installmentsPerSemester: z.number().min(1, "Installments per semester are required"),
-  oneShotDiscount: z.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100"),
+  applicationFee: z.coerce.number().min(1, "Application fee is required"),
+  tokenFee: z.coerce.number().min(1, "Token fee is required"),
+  semesters: z.coerce.number().min(1, "Number of semesters is required"),
+  installmentsPerSemester: z.coerce.number().min(1, "Installments per semester are required"),
+  oneShotDiscount: z.coerce.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100"),
 });
 
-export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps) {
+export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeStructureFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      applicationFee: initialData?.cohortFeesDetail?.applicationFee ,
-      tokenFee: initialData?.cohortFeesDetail?.tokenFee ,
-      semesters: initialData?.cohortFeesDetail?.semesters ,
-      installmentsPerSemester: initialData?.cohortFeesDetail?.installmentsPerSemester ,
-      oneShotDiscount: initialData?.cohortFeesDetail?.oneShotDiscount ,
+      applicationFee: initialData?.cohortFeesDetail?.applicationFee || "" ,
+      tokenFee: initialData?.cohortFeesDetail?.tokenFee || "",
+      semesters: initialData?.cohortFeesDetail?.semesters || "",
+      installmentsPerSemester: initialData?.cohortFeesDetail?.installmentsPerSemester || "",
+      oneShotDiscount: initialData?.cohortFeesDetail?.oneShotDiscount || "",
     }
   });
 
@@ -49,8 +50,9 @@ export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps)
 
     try {
       // Update cohort fee details
-      await updateCohort(initialData._id, { cohortFeesDetail: data });
-      console.log("Cohort fees updated successfully:", data);
+      const createdCohort = await updateCohort(initialData._id, { cohortFeesDetail: data });
+      console.log("Cohort fees updated successfully:", createdCohort.data);
+      onCohortCreated(createdCohort.data); 
       onNext(); // Proceed to the next step
     } catch (error) {
       console.error("Failed to update cohort fees:", error);
@@ -66,13 +68,12 @@ export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps)
             name="applicationFee"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Application Fee</FormLabel>
+                <Label>Application Fee</Label>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder="500"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -85,13 +86,12 @@ export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps)
             name="tokenFee"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Token Fee</FormLabel>
+                <Label>Token Fee</Label>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder="50000"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -106,13 +106,12 @@ export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps)
             name="semesters"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of Semesters</FormLabel>
+                <Label>Number of Semesters</Label>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder="3"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -125,13 +124,12 @@ export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps)
             name="installmentsPerSemester"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Installments per Semester</FormLabel>
+                <Label>Installments per Semester</Label>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder="3"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -145,13 +143,12 @@ export function FeeStructureForm({ onNext, initialData }: FeeStructureFormProps)
           name="oneShotDiscount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>One-Shot Payment Discount (%)</FormLabel>
+              <Label>One-Shot Payment Discount (%)</Label>
               <FormControl>
                 <Input
                   type="number"
                   placeholder="10"
                   {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
               <FormMessage />

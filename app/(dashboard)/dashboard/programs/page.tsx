@@ -10,6 +10,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -179,17 +190,20 @@ export default function ProgramsPage() {
                 {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (months)</Label>
-                  <Input
-                    id="duration"
-                    type="number"
-                    placeholder="6"
-                    value={newProgram.duration}
-                    onChange={(e) => setNewProgram({ ...newProgram, duration: Number(e.target.value) })}
-                  />
-                  {errors.duration && <p className="text-red-500 text-sm">{errors.duration}</p>}
-                </div>
+              <div className="space-y-2">
+  <Label htmlFor="duration">Duration (months)</Label>
+  <Input
+    id="duration"
+    type="number"
+    placeholder="6"
+    value={newProgram.duration || ""}
+    onChange={(e) =>
+      setNewProgram({ ...newProgram, duration: e.target.value ? Number(e.target.value) : 0 })
+    }
+  />
+  {errors.duration && <p className="text-red-500 text-sm">{errors.duration}</p>}
+</div>
+
                 <div className="space-y-2">
                   <Label htmlFor="prefix">Program Prefix</Label>
                   <Input
@@ -236,14 +250,27 @@ export default function ProgramsPage() {
                   <Button variant="ghost" size="sm" onClick={() => handleEditProgram(program)}>
                     Edit
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleProgramStatus(program._id, program.status)}
-                    className={program.status ? "text-destructive" : "text-[#2EB88A]"}
-                  >
+                  <AlertDialog>
+              <AlertDialogTrigger asChild>
+                 <Button variant="ghost" size="sm" className={program.status ? "text-destructive" : "text-[#2EB88A]"}>
                     {program.status ? "Disable" : "Enable"}
                   </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle> {program.status ? "Disable" : "Enable"} Centre</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to  {program.status ? "Disable" : "Enable"} this center?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction className={`${program.status ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`} onClick={() => toggleProgramStatus(program._id, program.status)}>
+                  {program.status ? "Disable" : "Enable"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}

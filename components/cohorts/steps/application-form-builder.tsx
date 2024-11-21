@@ -5,294 +5,561 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
-import { Plus, Trash2, GripVertical, FileIcon, LinkIcon, Link2Icon, XIcon, FolderPlus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Trash2, GripVertical, XIcon, FolderPlus, Link2Icon, FileIcon } from "lucide-react";
 import { z } from "zod";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { updateCohort } from "@/app/api/cohorts";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
-  tasks: z.array(
+  applicationFormDetail: z.array(
     z.object({
-      id: z.string(),
-      title: z.string().nonempty("Task title is required"),
-      type: z.string().nonempty("Task type is required"),
-      description: z.string(),
-      config: z.object({
-        characterLimit: z.number().optional(),
-        maxFiles: z.number().optional(),
-        maxFileSize: z.number().optional(),
-        allowedTypes: z.array(z.string()).optional(),
-      }),
+      task: z.array(
+        z.object({
+          id: z.string(),
+          title: z.string().nonempty("Task title is required"),
+          description: z.string().optional(),
+          config: z.array(
+            z.object({
+              type: z.string().nonempty("Task type is required"),
+              characterLimit: z.coerce.number().optional(),
+              maxFiles: z.coerce.number().optional(),
+              maxFileSize: z.coerce.number().optional(),
+              allowedTypes: z.array(z.string()).optional(),
+            })
+          ),
+          resourceLink: z.string().optional(), // Add this line
+          // Note: We cannot include `uploadedFile` directly
+        })
+      ),
+      calendlyEmbedCode: z.string().optional(),
     })
   ),
-  calendlyEmbedCode: z.string().optional(),
 });
-
-interface Task {
-  id: string;
-  title: string;
-  type: string;
-  description: string;
-  config: {
-    characterLimit?: number;
-    maxFiles?: number;
-    maxFileSize?: number;
-    allowedTypes?: string[];
-  };
-}
 
 interface ApplicationFormBuilderProps {
   onNext: () => void;
+  onCohortCreated: (cohort: any) => void;
   initialData?: any;
 }
 
-const fileTypeOptions = {
-  image: [
-    { value: "image/jpeg", label: "JPEG" },
-    { value: "image/png", label: "PNG" },
-    { value: "image/gif", label: "GIF" },
-    { value: "image/webp", label: "WebP" },
-  ],
-  video: [
-    { value: "video/mp4", label: "MP4" },
-    { value: "video/webm", label: "WebM" },
-    { value: "video/quicktime", label: "MOV" },
-  ],
-  file: [
-    { value: "application/pdf", label: "PDF" },
-    { value: "application/msword", label: "DOC" },
-    { value: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", label: "DOCX" },
-    { value: "application/vnd.ms-powerpoint", label: "PPT" },
-    { value: "application/vnd.openxmlformats-officedocument.presentationml.presentation", label: "PPTX" },
-    { value: "text/plain", label: "TXT" },
-  ],
-};
-
-export function ApplicationFormBuilder({ onNext, initialData }: ApplicationFormBuilderProps) {
+export function ApplicationFormBuilder({
+  onNext,
+  onCohortCreated,
+  initialData,
+}: ApplicationFormBuilderProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      tasks: [
-        {
-          id: Math.random().toString(36).substr(2, 9),
-          title: "",
-          type: "",
-          description: "",
-          config: {},
-        },
-      ],
-      calendlyEmbedCode: "",
+      applicationFormDetail:
+        initialData?.applicationFormDetail && initialData.applicationFormDetail.length > 0
+          ? initialData.applicationFormDetail
+          : [
+              {
+                task: [
+                  {
+                    id: Math.random().toString(36).substr(2, 9),
+                    title: "",
+                    description: "",
+                    config: [
+                      {
+                        type: "",
+                        characterLimit: undefined,
+                        maxFiles: undefined,
+                        maxFileSize: undefined,
+                        allowedTypes: ["All"],
+                      },
+                    ],
+                    resourceLink: "",
+                  },
+                ],
+                calendlyEmbedCode: "",
+              },
+            ],
     },
+  });  
+
+  const { control, handleSubmit } = form;
+
+  const {
+    fields: applicationFormFields,
+  } = useFieldArray({
+    control,
+    name: "applicationFormDetail",
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "tasks",
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      console.log("Form data before submission:", data);
+
+      if (initialData?._id) {
+        const createdCohort = await updateCohort(initialData._id, {
+          applicationFormDetail: data.applicationFormDetail,
+        });
+        console.log("Cohort updated successfully");
+        onCohortCreated(createdCohort.data);
+        onNext();
+      } else {
+        console.error("Cohort ID is missing. Unable to update.");
+      }
+    } catch (error) {
+      console.error("Failed to update cohort:", error);
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-6 max-h-[80vh] p-4"
+      >
+        {applicationFormFields.map((applicationFormField, applicationFormIndex) => (
+          <div key={applicationFormField.id} className="space-y-4">
+            <TaskList
+              nestIndex={applicationFormIndex}
+              control={control}
+              form={form}
+            />
+
+            {/* Calendly Embed Code */}
+            <FormField
+              control={control}
+              name={`applicationFormDetail.${applicationFormIndex}.calendlyEmbedCode`}
+              render={({ field }) => (
+                <FormItem>
+                  <Label>Interview Scheduler (Calendly)</Label>
+                  <FormControl>
+                    <Textarea className="min-h-4" placeholder="Paste Calendly embed code" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        ))}
+
+        {/* Submit Button */}
+        <Button type="submit" className="w-full">
+          Next: LITMUS Test
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+function TaskList({ nestIndex, control, form }: any) {
+  const {
+    fields: taskFields,
+    append: appendTask,
+    remove: removeTask,
+  } = useFieldArray({
+    control,
+    name: `applicationFormDetail.${nestIndex}.task`,
   });
 
-  const [tasks, setTasks] = useState<Task[]>([ {
-    id: Math.random().toString(36).substr(2, 9),
-    title: "",
-    type: "",
-    description: "",
-    config: {},
-  }]);
-  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
-  const [openTypeSelect, setOpenTypeSelect] = useState<string | null>(null);
+  useEffect(() => {
+    if (taskFields.length === 0) {
+      appendTask({
+        id: Math.random().toString(36).substr(2, 9),
+        title: "",
+        description: "",
+        config: [
+          {
+            type: "",
+            characterLimit: undefined,
+            maxFiles: undefined,
+            maxFileSize: undefined,
+            allowedTypes: ["All"],
+          },
+        ],
+      });
+    }
+  }, [taskFields, appendTask]);
+
+  return (
+    <div className="space-y-4">
+      {taskFields.map((taskField: any, taskIndex: number) => (
+        <Task
+          key={taskField.id}
+          nestIndex={nestIndex}
+          control={control}
+          form={form}
+          taskField={taskField}
+          taskIndex={taskIndex}
+          removeTask={removeTask}
+        />
+      ))}
+
+      {/* Add Task Button */}
+      <Button
+        className="w-full flex gap-2 items-center"
+        onClick={() =>
+          appendTask({
+            id: Math.random().toString(36).substr(2, 9),
+            title: "",
+            description: "",
+            config: [
+              {
+                type: "",
+                characterLimit: undefined,
+                maxFiles: undefined,
+                maxFileSize: undefined,
+                allowedTypes: ["All"],
+              },
+            ],
+          })
+        }
+      >
+        <Plus className="h-4 w-4" />
+        Add Task
+      </Button>
+    </div>
+  );
+}
+
+function Task({
+  nestIndex,
+  control,
+  form,
+  taskField,
+  taskIndex,
+  removeTask,
+}: any) {
+  const {
+    fields: configFields,
+    append: appendConfig,
+    remove: removeConfig,
+  } = useFieldArray({
+    control,
+    name: `applicationFormDetail.${nestIndex}.task.${taskIndex}.config`,
+  });
+
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [resourceLink, setResourceLink] = useState("");
   const [isLinkInputVisible, setIsLinkInputVisible] = useState(false);
   const [addedLink, setAddedLink] = useState<string | null>(null);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(["All"]);
-
-const toggleFileType = (type: string) => {
-  if (type === "All") {
-    setSelectedTypes(["All"]);
-  } else {
-    setSelectedTypes((prevTypes) => {
-      if (prevTypes.includes(type)) {
-        const newTypes = prevTypes.filter((t) => t !== type);
-        return newTypes.length === 0 ? ["All"] : newTypes;
-      } else {
-        const newTypes = prevTypes.filter((t) => t !== "All");
-        return [...newTypes, type];
-      }
-    });
-  }
-};
-
-  const [submissionType, setSubmissionType] = useState<Array<{
-    id: string;
-    submissionType: string;
-    characterLimit?: number;
-    maxFiles?: number;
-    maxFileSize?: number;
-    allowedTypes?: string[];
-  }>>([]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setUploadedFile(e.target.files[0]);
     }
   };
-
+  
   const handleRemoveFile = () => {
     setUploadedFile(null);
   };
-
+  
   const handleAddLink = () => {
     setAddedLink(resourceLink);
-    setResourceLink("");
-    setIsLinkInputVisible(false);
   };
-
+  
   const handleRemoveLink = () => {
     setAddedLink(null);
   };
 
-  const addTask = () => {
-    setTasks([
-      ...tasks,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        title: "",
-        type: "",
-        description: "",
-        config: {},
-      },
-    ]);
-  };
+  return (
+    <Card key={taskField.id}>
+      <CardContent className="flex pl-0 items-start pt-6">
+        <div className="cursor-grab hover:bg-accent p-2 rounded-md mx-2">
+          <GripVertical className="h-4 w-4" />
+        </div>
+        <div className="grid w-full gap-6">
+          {/* Task Title */}
+          <FormField
+            control={control}
+            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.title`}
+            render={({ field }: any) => (
+              <FormItem>
+                <Label className="text-[#00A3FF]">Task 0{taskIndex+1}</Label>
+                <FormControl>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g., Share an Embarrassing Story"
+                      {...field}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive"
+                      onClick={() => removeTask(taskIndex)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-  const removeTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
+          {/* Task Description */}
+          <FormField
+            control={control}
+            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.description`}
+            render={({ field }: any) => (
+              <FormItem>
+                <Label>Description</Label>
+                <FormControl>
+                  <Textarea placeholder="Instructions or details" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-  const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks(tasks.map((task) => 
-      task.id === id ? { ...task, ...updates } : task
-    ));
-  };
-
-  const updateTaskConfig = (id: string, config: Partial<Task['config']>) => {
-    setTasks(tasks.map((task) => 
-      task.id === id ? { ...task, config: { ...task.config, ...config } } : task
-    ));
-  };
-
-  
-  const addSubmissionType = () => {
-    setSubmissionType([
-      ...submissionType,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        submissionType: "",
-      },
-    ]);
-  };
-
-
-  const handleDragStart = (e: React.DragEvent, taskId: string) => {
-    setDraggedTaskId(taskId);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent, targetId: string) => {
-    e.preventDefault();
-    if (!draggedTaskId || draggedTaskId === targetId) return;
-
-    const draggedIndex = tasks.findIndex(t => t.id === draggedTaskId);
-    const targetIndex = tasks.findIndex(t => t.id === targetId);
-
-    const newTasks = [...tasks];
-    const [draggedTask] = newTasks.splice(draggedIndex, 1);
-    newTasks.splice(targetIndex, 0, draggedTask);
-    setTasks(newTasks);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedTaskId(null);
-  };
-
-  const renderConfigFields = (task: Task) => {
-
-    switch (task.type) {
-      case "short":
-      case "long":
-        return (
-          <div className="grid w-1/2 gap-2">
-            <Label>Character Limit</Label>
-            <Input
-              type="number"
-              placeholder="Enter maximum characters"
-              value={task.config.characterLimit || ""}
-              onChange={(e) => updateTaskConfig(task.id, {
-                characterLimit: parseInt(e.target.value) || undefined
-              })}
-            />
-          </div>
-        );
-
-      case "image":
-      case "video":
-        return (
-          <div className="flex gap-1.5">
-            <div className="grid gap-2">
-              <Label>Max No. of Files</Label>
-              <Input
-                type="number"
-                placeholder="00"
-                value={task.config.maxFiles || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFiles: parseInt(e.target.value) || undefined
-                })}
+          {/* Config Fields */}
+          <div className="grid gap-3">
+            <Label>Submission Type</Label>
+            {configFields.map((configField: any, configIndex: number) => (
+              <Config
+                key={configField.id}
+                nestIndex={nestIndex}
+                taskIndex={taskIndex}
+                configIndex={configIndex}
+                control={control}
+                form={form}
+                removeConfig={removeConfig}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label>Max Size per File(MB)</Label>
-              <Input
-                type="number"
-                placeholder="15 MB"
-                value={task.config.maxFileSize || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFileSize: parseInt(e.target.value) || undefined
-                })}
-              />
-            </div>
+            ))}
+            <Button
+              className="flex gap-2 items-center"
+              variant="secondary"
+              onClick={() =>
+                appendConfig({
+                  type: "",
+                  characterLimit: undefined,
+                  maxFiles: undefined,
+                  maxFileSize: undefined,
+                  allowedTypes: ["All"],
+                })
+              }
+            >
+              <FolderPlus className="w-4 h-4" /> Add a Submission Type
+            </Button>
           </div>
-        );
 
-      case "file":
-        return (
+          {/* Resources Section */}
+<div className="grid gap-3">
+  <Label>Resources</Label>
+  {uploadedFile && (
+    <div className="flex items-center justify-between gap-2 mt-2 p-2 border rounded">
+      <div className="flex gap-2 items-center text-sm">
+        <FileIcon className="w-4 h-4" />
+        {uploadedFile.name}
+      </div>
+      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveFile} />
+    </div>
+  )}
+  {isLinkInputVisible && (
+    <div className="relative flex items-center gap-2">
+      <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
+      <Input
+        className="pl-8 text-sm"
+        placeholder="Enter URL here"
+        value={resourceLink}
+        onChange={(e) => setResourceLink(e.target.value)}
+      />
+      <Button
+        onClick={handleAddLink}
+        disabled={!resourceLink}
+        className="absolute right-2 top-1.5 h-7 rounded-full"
+      >
+        Add
+      </Button>
+    </div>
+  )}
+
+  {/* Display Added Link */}
+  {addedLink && (
+    <div className="flex items-center gap-2 p-2 border rounded">
+      <Link2Icon className="w-4 h-4" />
+      <span className="flex-1">{addedLink}</span>
+      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveLink} />
+    </div>
+  )}
+  <div className="flex gap-2.5">
+    <Button
+      variant='secondary'
+      className="flex flex-1 gap-2"
+      onClick={() => document.getElementById(`file-upload-${taskField.id}`)?.click()}
+    >
+      <FileIcon className="w-4 h-4"/> Upload Resource File
+    </Button>
+    <input
+      type="file"
+      id={`file-upload-${taskField.id}`}
+      style={{ display: "none" }}
+      onChange={handleFileUpload}
+    />
+    <Button
+      variant='secondary'
+      className="flex flex-1 gap-2"
+      onClick={() => setIsLinkInputVisible(true)}
+    >
+      <Link2Icon className="w-4 h-4"/> Attach Resource Link
+    </Button>
+  </div>
+</div>
+        </div>
+        
+
+      </CardContent>
+    </Card>
+  );
+}
+
+function Config({
+  nestIndex,
+  taskIndex,
+  configIndex,
+  control,
+  form,
+  removeConfig,
+}: any) {
+  const type = form.watch(
+    `applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.type`
+  );
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(["All"]);
+
+  const toggleFileType = (type: string) => {
+    if (type === "All") {
+      setSelectedTypes(["All"]);
+    } else {
+      setSelectedTypes((prevTypes) => {
+        if (prevTypes.includes(type)) {
+          const newTypes = prevTypes.filter((t) => t !== type);
+          return newTypes.length === 0 ? ["All"] : newTypes;
+        } else {
+          const newTypes = prevTypes.filter((t) => t !== "All");
+          return [...newTypes, type];
+        }
+      });
+    }
+  };
+
+  return (
+    <div className="flex gap-1 items-start">
+      <div className="flex flex-wrap w-full bg-secondary/60 p-3 rounded-md gap-1.5">
+        {/* Type Selection */}
+        <FormField
+          control={control}
+          name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.type`}
+          render={({ field }: any) => (
+            <FormItem className="flex flex-col flex-1 ">
+              <Label className="text-[#00A3FF] mt-2 mb-[3px]">Submission Type 0{configIndex+1}</Label>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short Answer</SelectItem>
+                    <SelectItem value="long">Long Text</SelectItem>
+                    <SelectItem value="image">Image</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="file">File</SelectItem>
+                    <SelectItem value="link">Link</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Conditional Config Fields based on type */}
+        {type === "short" || type === "long" ? (
+          <FormField
+            control={control}
+            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.characterLimit`}
+            render={({ field }: any) => (
+              <FormItem>
+                <Label>Character Limit</Label>
+                <FormControl>
+                  <Input type="number" placeholder="Enter maximum characters" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
+
+        {type === "image" || type === "video" ? (
           <>
-          <div className="flex gap-1.5">
-            <div className="grid gap-2">
-              <Label>Max No. of Files</Label>
-              <Input
-                type="number"
-                placeholder="00"
-                value={task.config.maxFiles || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFiles: parseInt(e.target.value) || undefined
-                })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Max Size per File(MB)</Label>
-              <Input
-                type="number"
-                placeholder="15 MB"
-                value={task.config.maxFileSize || ""}
-                onChange={(e) => updateTaskConfig(task.id, {
-                  maxFileSize: parseInt(e.target.value) || undefined
-                })}
-              />
-            </div>
-          </div>
-          <div className="grid gap-2 mt-1">
+            <FormField
+              control={control}
+              name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.maxFiles`}
+              render={({ field }: any) => (
+                <FormItem>
+                  <Label>Max No. of Files</Label>
+                  <FormControl>
+                    <Input type="number" placeholder="00" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.maxFileSize`}
+              render={({ field }: any) => (
+                <FormItem>
+                  <Label>Max Size per File (MB)</Label>
+                  <FormControl>
+                    <Input type="number" placeholder="15 MB" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        ) : null}
+
+        {type === "file" ? (
+          <>
+            <FormField
+              control={control}
+              name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.maxFiles`}
+              render={({ field }: any) => (
+                <FormItem>
+                  <Label>Max No. of Files</Label>
+                  <FormControl>
+                    <Input type="number" placeholder="00" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.maxFileSize`}
+              render={({ field }: any) => (
+                <FormItem>
+                  <Label>Max Size per File (MB)</Label>
+                  <FormControl>
+                    <Input type="number" placeholder="15 MB" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid gap-2 mt-1">
             <Label>Allowed File Types</Label> 
               <div className="flex flex-wrap gap-1">
               {["All", "DOC Formats", "PPT Formats", "PDF", "Excel Formats", "PSD", "EPF", "AI"].map((type) => (
@@ -313,190 +580,31 @@ const toggleFileType = (type: string) => {
               ))}
             </div>
           </div>
-        </>
-        );
+          </>
+        ) : null}
 
-        case "link":
-        return (
-          <div className="grid w-1/2 gap-2">
-            <Label>Max No. of Links</Label>
-            <Input
-              type="number"
-              placeholder="00"
-              value={task.config.characterLimit || ""}
-              onChange={(e) => updateTaskConfig(task.id, {
-                characterLimit: parseInt(e.target.value) || undefined
-              })}
-            />
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log("Form data:", data);
-    onNext(); true
-  };
-
-  return (
-    <div className="space-y-6 max-h-[80vh] overflow-y-auto p-4">
-      <div className="space-y-4">
-        {tasks.map((task) => (
-          <Card 
-            key={task.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, task.id)}
-            onDragOver={(e) => handleDragOver(e, task.id)}
-            onDragEnd={handleDragEnd}
-            className={cn(
-              "transition-opacity",
-              draggedTaskId === task.id ? "opacity-50" : ""
+        {type === "link" ? (
+          <FormField
+            control={control}
+            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.characterLimit`}
+            render={({ field }: any) => (
+              <FormItem>
+                <Label>Max No. of Links</Label>
+                <FormControl>
+                  <Input type="number" placeholder="00" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          >
-            <CardContent className="flex pl-0 items-start pt-6">
-            <div className="cursor-grab px-4" onMouseDown={(e) => e.preventDefault()} >
-              <GripVertical className="h-4 w-4" />
-            </div>
-              <div className="grid w-full gap-6">
-                <div className="flex justify-between items-end">
-                  <div className="flex items-center gap-6 flex-1">
-                    <div className="grid gap-3 flex-1">
-                      <Label>Task Title</Label>
-                      <Input 
-                        placeholder="e.g., Share an Embarrassing Story" 
-                        value={task.title}
-                        onChange={(e) => updateTask(task.id, { title: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  {(tasks.length > 1 && <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => removeTask(task.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>)}
-                </div>
-                <div className="grid gap-3">
-                  <Label>Description</Label>
-                  <Textarea 
-                    placeholder="Instructions or details"
-                    value={task.description}
-                    onChange={(e) => updateTask(task.id, { description: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <Label>Submission Type</Label>
-                  {submissionType.map((sub, id) => (
-                    <div className="flex gap-1 items-start">
-                  <div className="flex flex-wrap w-full bg-secondary p-3 gap-1.5">
-                    <div className="flex flex-col flex-1 gap-2">
-                      <Label className="text-[#00A3FF]">Submission Type 0{id+1}</Label>
-                      <Select value={task.type} onValueChange={(value) => updateTask(task.id, { type: value, config: {} })} >
-                        <SelectTrigger>
-                          <SelectValue className="" placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="short">Short Answer</SelectItem>
-                          <SelectItem value="long">Long Text</SelectItem>
-                          <SelectItem value="image">Image</SelectItem>
-                          <SelectItem value="video">Video</SelectItem>
-                          <SelectItem value="file">File</SelectItem>
-                          <SelectItem value="link">Link</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div >
-                    {task.type && renderConfigFields(task)}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className=""
-                    onClick={() => setSubmissionType(submissionType.filter((s) => s.id !== sub.id))}
-                  >
-                    <XIcon className="h-4 w-4" />
-                  </Button>
-                  </div>
-                  ))}
-                  <Button variant='secondary' className="flex flex-1 gap-2" onClick={addSubmissionType}>
-                      <FolderPlus className="w-4 h-4"/> Add a Submission Type
-                    </Button>
-                </div>
-                <div className="grid gap-3">
-                  <Label>Resources</Label>
-                  {uploadedFile && (
-                    <div className="flex items-center justify-between gap-2 mt-2 p-2 border rounded">
-                      <div className="flex gap-2 items-center text-sm">
-                        <FileIcon className="w-4 h-4" />
-                        {uploadedFile.name}
-                      </div>
-                      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveFile} />
-                    </div>
-                  )}
-                  {isLinkInputVisible && (
-                    <div className="relative flex items-center gap-2">
-                      <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
-                      <Input
-                        className="pl-8 text-sm"
-                        placeholder="Enter URL here"
-                        value={resourceLink}
-                        onChange={(e) => setResourceLink(e.target.value)}
-                      />
-                      <Button
-                        onClick={handleAddLink}
-                        disabled={!resourceLink}
-                        className="absolute right-2 top-1.5 h-7 rounded-full"
-                      >
-                        Add
-                      </Button>
-                    </div>
-                  )}
-          
-                  {/* Display Added Link */}
-                  {addedLink && (
-                    <div className="flex items-center gap-2 p-2 border rounded">
-                      <Link2Icon className="w-4 h-4" />
-                      <span className="flex-1">{addedLink}</span>
-                      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveLink} />
-                    </div>
-                  )}
-                  <div className="flex gap-2.5">
-                    <Button variant='secondary' className="flex flex-1 gap-2" onClick={() => document.getElementById(`file-upload-${task.id}`)?.click()}>
-                    <FileIcon className="w-4 h-4"/> Upload Resource File
-                    </Button>
-                    <input
-                      type="file"
-                      id={`file-upload-${task.id}`}
-                      style={{ display: "none" }}
-                      onChange={handleFileUpload}
-                    />
-                    <Button variant='secondary' className="flex flex-1 gap-2" onClick={() => setIsLinkInputVisible(true)}>
-                      <Link2Icon className="w-4 h-4"/> Attach Resource Link
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+          />
+        ) : null}
       </div>
-
-      <Button onClick={addTask} className="w-full">
-        <Plus className="mr-2 h-4 w-4" />
-        Add Task
-      </Button>
-
-      <div className="space-y-2">
-        <Label>Interview Scheduler (Calendly)</Label>
-        <Textarea placeholder="Paste Calendly embed code" />
-      </div>
-
-      <Button onClick={onNext} className="w-full">
-        Next: LITMUS Test
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => removeConfig(configIndex)}
+      >
+        <XIcon className="h-4 w-4" />
       </Button>
     </div>
   );

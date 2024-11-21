@@ -1,11 +1,11 @@
 "use client"
 
-import { loginUser } from "@/app/api/sign-up";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { AlertCircle } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -27,8 +27,8 @@ export default function LoginPage() {
   return (
     <div className="w-full">
       <div className="relative">
-        <img src="/assets/images/lit-banner.svg" alt="BANNER" className="w-full h-[200px] sm:h-[336px] object-cover" />
-        <img src="/assets/images/lit-logo.svg" alt="LIT" className="absolute top-7 left-7 w-8 sm:w-14" />
+        <Image src="/assets/images/lit-banner.svg" alt="BANNER" className="w-full h-[200px] sm:h-[336px] object-cover" />
+        <Image src="/assets/images/lit-logo.svg" alt="LIT" className="absolute top-7 left-7 w-8 sm:w-14" />
       </div>
           <div className="w-full px-6 mt-8 sm:mt-14 justify-center items-center">
           <div className='max-w-[840px] mx-auto'>

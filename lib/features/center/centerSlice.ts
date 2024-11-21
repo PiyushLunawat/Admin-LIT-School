@@ -18,7 +18,6 @@ const centerSlice = createSlice({
   initialState: {centers: []},
   reducers: {
     getCentresData : (state, action) => {
-        console.log("fff",action.payload)
         state.centers = action.payload
     }
   },

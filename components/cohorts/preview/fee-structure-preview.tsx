@@ -111,7 +111,7 @@ export function FeeStructurePreview() {
       {/* Dialog for Fee Structure Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-6">
-          <FeeStructureForm onNext={() => console.log("Navigating to collaborators")} />
+          {/* <FeeStructureForm onNext={() => console.log("Navigating to collaborators")} /> */}
           <FeePreviewForm onNext={() => console.log("Navigating to collaborators")} />
         </DialogContent>
       </Dialog>

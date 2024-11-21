@@ -10,6 +10,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -44,12 +55,10 @@ export default function CentresPage() {
   const dispatch = useDispatch()
   
   const centerData = useSelector((state: any) => state.center.centers)
-  console.log("faf", centerData)
 
   const fetchCentres = async () => {
     try {
       const centresData = await getCentres();
-      console.log("sss",centerData)
       setCentres(centresData.data);
       dispatch(getCentresData(centresData.data));
     } catch (error: unknown) {
@@ -137,11 +146,7 @@ export default function CentresPage() {
       console.error("Failed to update centre status:", error);
     }
   };
-  // {
-    
-  //   console.log("sss",centres)
 
-  // }
 
   return (
     <div className="p-6">
@@ -230,14 +235,28 @@ export default function CentresPage() {
                   <Button variant="ghost" size="sm" onClick={() => handleEditCentre(centre)}>
                     Edit
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleCenterStatus(centre._id, centre.status)}
-                    className={centre.status ? "text-destructive" : "text-[#2EB88A]"}
-                  >
+                  <AlertDialog>
+              <AlertDialogTrigger asChild>
+                 <Button variant="ghost" size="sm" className={centre.status ? "text-destructive" : "text-[#2EB88A]"}>
                     {centre.status ? "Disable" : "Enable"}
                   </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle> {centre.status ? "Disable" : "Enable"} Centre</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to  {centre.status ? "Disable" : "Enable"} this center?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction className={`${centre.status ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`} 
+                    onClick={() => toggleCenterStatus(centre._id, centre.status)}>
+                  {centre.status ? "Disable" : "Enable"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}

@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
+import { Calendar } from "lucide-react";
+import { add, format } from "date-fns";
 
 interface FeePreviewFormProps {
   onNext: () => void;
@@ -21,55 +23,84 @@ interface FeePreviewFormProps {
 
 export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
 
-  return (
-    <div className="max-h-[80vh] overflow-y-auto space-y-6 py-4">
-      <Tabs defaultValue="effort_excellence" className="space-y-4">
-        <TabsList variant="ghost">
-          <TabsTrigger variant="xs" value="effort_excellence">Effort Excellence (5%)</TabsTrigger>
-          <TabsTrigger variant="xs" value="strategic_scholar">Strategic Scholar (8%)</TabsTrigger>
-          <TabsTrigger variant="xs" value="innovative_initiator">Innovative Initiator (12%)</TabsTrigger>
-          <TabsTrigger variant="xs" value="creative_crusader">Creative Crusader (15%)</TabsTrigger>
-        </TabsList>
-        <TabsContent value="effort_excellence">
-        {Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => (
-          <Card key={semesterIndex} className="mb-4">
-            <Badge variant="outline" className="text-[#00A3FF] border-[#00A3FF] bg-[#00A3FF]/20 px-2 py-1 text-sm rounded-full m-4">
-              Semester {semesterIndex + 1}
-            </Badge>
-            <CardContent className="flex flex-col gap-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Instalment Date</TableHead>
-                    <TableHead>Scholarship %</TableHead>
-                    <TableHead>Scholarship Amount (₹)</TableHead>
-                    <TableHead>Amount Payable (₹)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {Array.from({ length: initialData?.cohortFeesDetail?.installmentsPerSemester || 0 }).map((_, index) => (
-                    <TableRow key={index}>
-                      <TableCell>22-Oct-2024</TableCell>
-                      <TableCell>5</TableCell>
-                      <TableCell>{((initialData?.baseFee*(0.05)/initialData?.cohortFeesDetail?.semesters)/initialData?.cohortFeesDetail?.installmentsPerSemester).toFixed(2)}</TableCell>
-                      <TableCell>{(((initialData?.baseFee)/(initialData?.cohortFeesDetail?.semesters))/initialData?.cohortFeesDetail?.installmentsPerSemester).toFixed(2) || "--"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+  const [newBaseFee, setNewBaseFee] = useState(initialData?.baseFee || 0);
 
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Total Instalment Amount:</span>
-                  <span>₹{((initialData?.baseFee)/(initialData?.cohortFeesDetail?.semesters)).toFixed(2) || "--"}</span>
+  useEffect(() => {
+    if (initialData?.isGSTIncluded === false) {
+      setNewBaseFee(initialData.baseFee * 1.18);
+    }
+  }, [initialData]);
+
+  const formatAmount = (value: number | undefined) =>
+    value !== undefined
+      ? new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Math.round(value))
+      : "--";
+  
+
+  const scholarshipSlabs = initialData?.litmusTestDetail?.[0].scholarshipSlabs || [];
+console.log("dsdv",scholarshipSlabs)
+
+  return (
+    <div className="max-h-[80vh] space-y-6 py-4">
+      <Tabs defaultValue={scholarshipSlabs[0]?.id || "default"} className="space-y-4">
+        <TabsList variant="ghost">
+          {scholarshipSlabs.map((slab: any) => (
+            <TabsTrigger key={slab.id} variant="xs" value={slab.id}>
+              {slab.name} ({slab.percentage}%)
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {scholarshipSlabs.map((slab: any) => (
+          <TabsContent key={slab.id} value={slab.id}>
+          {Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => (
+            <Card key={semesterIndex} className="mb-4">
+              <Badge variant="outline" className="text-[#00A3FF] border-[#00A3FF] bg-[#00A3FF]/20 px-2 py-1 text-sm rounded-full m-4">
+                Semester {semesterIndex + 1}
+              </Badge>
+              <CardContent className="flex flex-col gap-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Instalment Date</TableHead>
+                      <TableHead>Scholarship %</TableHead>
+                      <TableHead>Scholarship Amount (₹)</TableHead>
+                      <TableHead>Amount Payable (₹)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from({ length: initialData?.cohortFeesDetail?.installmentsPerSemester || 0 }).map((_, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <div className="flex gap-2 items-center">
+                            <Calendar className="w-4 h-4"/>
+                            {initialData?.startDate ? format(add(new Date(initialData.startDate), { months: (index+semesterIndex)*3 }), "dd/MM/yyyy") : "--"} 
+                          </div>
+                        </TableCell>
+                        <TableCell>{slab.percentage}</TableCell>
+                        <TableCell>{formatAmount((newBaseFee * (slab.percentage/100) / (initialData?.cohortFeesDetail?.semesters || 1) / (initialData?.cohortFeesDetail?.installmentsPerSemester || 1)))}</TableCell>
+                        <TableCell>{formatAmount((newBaseFee / (initialData?.cohortFeesDetail?.semesters || 1) / (initialData?.cohortFeesDetail?.installmentsPerSemester || 1)))}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Instalment Amount:</span>
+                    <span>₹{formatAmount(newBaseFee / (initialData?.cohortFeesDetail?.semesters || 1))}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Scholarship Amount (5%):</span>
+                    <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100) / (initialData?.cohortFeesDetail?.semesters || 1))}</span>
+                  </div>
+                  {semesterIndex === 0 && <div className="flex justify-between text-sm">
+                    <span>Token Fee Amount:</span>
+                    <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
+                  </div>}
                 </div>
-                <div className="flex justify-between">
-                  <span>Scholarship Amount ({5}%):</span>
-                  <span className="text-red-500">- ₹{(initialData?.baseFee*(0.05)/initialData?.cohortFeesDetail?.semesters).toFixed(2)}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>))}
+              </CardContent>
+            </Card>
+          ))}
 
           <Card className="mb-4">
             <Badge variant="outline" className="text-[#FF791F] border-[#FF791F] bg-[#FF791F]/20 px-2 py-1 text-sm rounded-full m-4">
@@ -78,20 +109,20 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{initialData?.baseFee}</span>
+                <span>₹{formatAmount(newBaseFee)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Total Scholarship Amount ({5}%):</span>
-                <span className="text-red-500">- ₹{initialData?.baseFee*(0.05)}</span>
+                <span>Total Scholarship Amount (5%):</span>
+                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Token Amount:</span>
-                <span>₹{initialData?.cohortFeesDetail?.tokenFee}</span>
+                <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
               </div>
 
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span>₹{initialData?.baseFee + initialData?.cohortFeesDetail?.tokenFee - initialData?.baseFee*(0.05)}</span>
+                <span>₹{formatAmount(newBaseFee - (initialData?.cohortFeesDetail?.tokenFee || 0) - newBaseFee * (slab.percentage/100))}</span>
               </div>
             </CardContent>
           </Card>
@@ -103,29 +134,29 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{initialData?.baseFee}</span>
+                <span>₹{formatAmount(newBaseFee)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
-                <span className="text-red-500">- ₹{initialData?.baseFee*(0.05)}</span>
+                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>One Shot Payment Discount ({initialData?.cohortFeesDetail?.oneShotDiscount}%):</span>
-                <span className="text-red-500">- ₹{initialData?.baseFee*(0.01)*initialData?.cohortFeesDetail?.oneShotDiscount}</span>
+                <span>One Shot Payment Discount ({formatAmount(initialData?.cohortFeesDetail?.oneShotDiscount)}%):</span>
+                <span className="text-red-500">- ₹{formatAmount(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Token Amount:</span>
-                <span>₹{initialData?.cohortFeesDetail?.tokenFee}</span>
+                <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
               </div>
 
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span>₹{initialData?.baseFee + initialData?.cohortFeesDetail?.tokenFee
-                  - initialData?.baseFee*(0.05) - initialData?.baseFee*(0.01)*initialData?.cohortFeesDetail?.oneShotDiscount}</span>
+                <span>₹{formatAmount(newBaseFee - (initialData?.cohortFeesDetail?.tokenFee || 0) - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
+        ))}
       </Tabs>
 
       <Button onClick={onNext} className="w-full">

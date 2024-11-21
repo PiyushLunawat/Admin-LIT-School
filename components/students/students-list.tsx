@@ -13,6 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Mail, UserMinus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getStudents } from "@/app/api/student";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 
@@ -40,57 +42,89 @@ export function StudentsList({
   selectedIds,
   onSelectedIdsChange,
 }: StudentsListProps) {
-  const router = useRouter();
+  const router = useRouter();const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // In a real application, this data would be fetched from an API
-  const students: Student[] = [
-    {
-      id: "1",
-      name: "John Doe",
-      applicationId: "APP001",
-      email: "john.doe@example.com",
-      phone: "+91 98765 43210",
-      program: "Creator Marketer",
-      cohort: "CM01JY",
-      applicationStatus: "Accepted",
-      enrollmentStatus: "Enrolled",
-      paymentStatus: "Token Paid",
-      scholarship: "5%",
-      lastActivity: "2024-03-20",
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      applicationId: "APP002",
-      email: "jane.smith@example.com",
-      phone: "+91 98765 43211",
-      program: "Creator Marketer",
-      cohort: "CM02JY",
-      applicationStatus: "Under Review",
-      enrollmentStatus: "Not Enrolled",
-      paymentStatus: "Pending",
-      scholarship: "-",
-      lastActivity: "2024-03-19",
-    },
-    {
-      id: "3",
-      name: "Mike Johnson",
-      applicationId: "APP003",
-      email: "mike.johnson@example.com",
-      phone: "+91 98765 43212",
-      program: "Digital Marketing",
-      cohort: "DM01JY",
-      applicationStatus: "Interview Scheduled",
-      enrollmentStatus: "Not Enrolled",
-      paymentStatus: "Pending",
-      scholarship: "-",
-      lastActivity: "2024-03-18",
-    },
-  ];
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await getStudents();
+        console.log("sgdgv",response)
+        setStudents(
+          response.data.map((student: any) => ({
+            id: student._id,
+            name: `${student.firstName || ''} ${student.lastName || ''}`.trim(),
+            applicationId: student.applicationId || "--",
+            email: student.email || "--",
+            phone: student.mobileNumber || "--",
+            program: student.program?.name || "--", // Ensure it's a string
+            cohort: student.cohort?.cohortId || "--",  // Ensure it's a string
+            applicationStatus: student.applicationDetails?.applicationStatus || "--",
+            enrollmentStatus: student.enrollmentStatus || "Not Enrolled",
+            paymentStatus: student.paymentStatus || "Pending",
+            scholarship: student.scholarship ? `${student.scholarship}%` : "--",
+            lastActivity: student.lastActivity || new Date().toISOString(),
+          }))
+        );        
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStudents();
+  }, []);
+  // const students: Student[] = [
+  //   {
+  //     id: "1",
+  //     name: "John Doe",
+  //     applicationId: "APP001",
+  //     email: "john.doe@example.com",
+  //     phone: "+91 98765 43210",
+  //     program: "Creator Marketer",
+  //     cohort: "CM01JY",
+  //     applicationStatus: "Accepted",
+  //     enrollmentStatus: "Enrolled",
+  //     paymentStatus: "Token Paid",
+  //     scholarship: "5%",
+  //     lastActivity: "2024-03-20",
+  //   },
+  //   {
+  //     id: "2",
+  //     name: "Jane Smith",
+  //     applicationId: "APP002",
+  //     email: "jane.smith@example.com",
+  //     phone: "+91 98765 43211",
+  //     program: "Creator Marketer",
+  //     cohort: "CM02JY",
+  //     applicationStatus: "Under Review",
+  //     enrollmentStatus: "Not Enrolled",
+  //     paymentStatus: "Pending",
+  //     scholarship: "-",
+  //     lastActivity: "2024-03-19",
+  //   },
+  //   {
+  //     id: "3",
+  //     name: "Mike Johnson",
+  //     applicationId: "APP003",
+  //     email: "mike.johnson@example.com",
+  //     phone: "+91 98765 43212",
+  //     program: "Digital Marketing",
+  //     cohort: "DM01JY",
+  //     applicationStatus: "Interview Scheduled",
+  //     enrollmentStatus: "Not Enrolled",
+  //     paymentStatus: "Pending",
+  //     scholarship: "-",
+  //     lastActivity: "2024-03-18",
+  //   },
+  // ];
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "accepted":
+        return "success";
+      case "initiated":
         return "success";
       case "under review":
         return "warning";
@@ -109,7 +143,7 @@ export function StudentsList({
       case "overdue":
         return "destructive";
       default:
-        return "default";
+        return "secondary";
     }
   };
 
@@ -177,17 +211,17 @@ export function StudentsList({
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(student.applicationStatus)}>
+                <Badge className="capitalize" variant={getStatusColor(student.applicationStatus)}>
                   {student.applicationStatus}
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(student.enrollmentStatus)}>
+                <Badge className="capitalize" variant={getStatusColor(student.enrollmentStatus)}>
                   {student.enrollmentStatus}
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(student.paymentStatus)}>
+                <Badge className="capitalize" variant={getStatusColor(student.paymentStatus)}>
                   {student.paymentStatus}
                 </Badge>
               </TableCell>

@@ -61,7 +61,7 @@ export function ContactDetailsSection({ data }: ContactDetailsSectionProps) {
           
           {/* Father's Details */}
           <div className="border rounded-lg p-4 space-y-4">
-            <h4 className="font-medium">Father's/Guardian's Details</h4>
+            <h4 className="font-medium">Father&apos;s/Guardian&apos;s Details</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Name</p>
@@ -81,7 +81,7 @@ export function ContactDetailsSection({ data }: ContactDetailsSectionProps) {
           {/* Mother's Details */}
           {data.parents.mother && (
             <div className="border rounded-lg p-4 space-y-4">
-              <h4 className="font-medium">Mother's Details</h4>
+              <h4 className="font-medium">Mother&apos;s Details</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Name</p>

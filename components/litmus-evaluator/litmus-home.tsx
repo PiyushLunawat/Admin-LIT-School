@@ -12,7 +12,7 @@ export function LitmusHome() {
       {/* Welcome Message */}
       <div>
         <h2 className="text-2xl font-bold">Welcome back, Sarah!</h2>
-        <p className="text-muted-foreground">Here's your evaluation overview for today</p>
+        <p className="text-muted-foreground">Here&apos;s your evaluation overview for today</p>
       </div>
 
       {/* Key Metrics */}

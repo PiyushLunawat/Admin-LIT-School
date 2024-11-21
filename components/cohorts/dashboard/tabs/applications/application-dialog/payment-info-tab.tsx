@@ -92,7 +92,8 @@ export function PaymentInformationTab({ studentId }: PaymentInformationTabProps)
               <span>Payment Progress</span>
               <span>{progressPercentage.toFixed(0)}%</span>
             </div>
-            <Progress value={progressPercentage} />
+            <Progress states={[ {value:(progressPercentage)} ]} />
+
           </div>
         </CardContent>
       </Card>

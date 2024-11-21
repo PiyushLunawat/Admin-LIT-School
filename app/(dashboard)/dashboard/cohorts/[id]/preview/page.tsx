@@ -14,20 +14,6 @@ interface PageProps {
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    const data = await getCohorts(); 
-    const cohortIds = data.data.map((cohort: any) => cohort._id); // Extract the _id values
-    
-    return cohortIds.map((id: any) => ({
-      id,
-    }));
-  } catch (error) {
-    console.error("Error fetching cohort IDs:", error);
-    return []; // Return an empty array if there’s an error to prevent build failure
-  }
-}
-
 export default function CohortPreviewPage({ params }: PageProps) {
   return (
     <div className="p-6 space-y-6">

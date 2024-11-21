@@ -159,7 +159,7 @@ export function ComposeMessage() {
           <CardContent>
             <div className="space-y-2">
               <p className="text-sm">
-                <code className="bg-muted px-1 rounded">{"{{name}}"}</code> - Student's name
+                <code className="bg-muted px-1 rounded">{"{{name}}"}</code> - Student&apos;s name
               </p>
               <p className="text-sm">
                 <code className="bg-muted px-1 rounded">{"{{amount}}"}</code> - Payment amount

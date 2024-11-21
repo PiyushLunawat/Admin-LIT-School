@@ -69,20 +69,30 @@ export default function CohortsPage() {
           <TabsTrigger value="archived">Archived Cohorts</TabsTrigger>
         </TabsList>
         <TabsContent value="active">
+          {activeCohorts.length !== 0 ? 
           <CohortGrid 
             cohorts={activeCohorts} 
             onEditCohort={handleEditCohort}
             onOpenDialog={handleOpenDialog}
             onStatusChange={fetchCohorts}
-          />
+          /> : 
+          <div className="w-full h-[calc(100vh-15rem)] flex items-center justify-center text-center text-muted-foreground border rounded-md">
+            <div >All your Cohorts will appear here  </div>
+          </div>
+          }
         </TabsContent>
         <TabsContent value="archived">
+        {archivedCohorts.length !== 0 ? 
           <CohortGrid 
             cohorts={archivedCohorts}
             onEditCohort={handleEditCohort}
             onOpenDialog={handleOpenDialog}
             onStatusChange={fetchCohorts}
-          />
+          /> : 
+          <div className="w-full h-[calc(100vh-15rem)] flex items-center justify-center text-center text-muted-foreground border rounded-md">
+            <div>All your cohorts will appear here</div>
+          </div>
+          }
         </TabsContent>
       </Tabs>
 
@@ -93,6 +103,7 @@ export default function CohortsPage() {
             onStepChange={(step) => setCurrentStep(step as StepId)}
             onComplete={handleComplete}
             editingCohort={editingCohort}
+            fetchCohorts={fetchCohorts}
           />
         </DialogContent>
       </Dialog>

@@ -105,7 +105,7 @@ export function StudentDetails({ studentId, onClose }: StudentDetailsProps) {
                 <span>Payment Progress</span>
                 <span>{student.paidAmount} / {student.totalFees}</span>
               </div>
-              <Progress value={calculateProgress(student.paidAmount, student.totalFees)} />
+              <Progress states={[ {value:(calculateProgress(student.paidAmount, student.totalFees))} ]} />
             </div>
           </div>
 

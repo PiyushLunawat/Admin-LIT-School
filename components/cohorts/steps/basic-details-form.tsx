@@ -9,7 +9,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import {
@@ -29,8 +28,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
 import { getPrograms } from "@/app/api/programs";
 import { getCentres } from "@/app/api/centres";
-import { getCohorts } from "@/app/api/cohorts";
+import { getCohorts, updateCohort } from "@/app/api/cohorts";
 import { createCohort } from "@/app/api/cohorts";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   programDetail: z.string().min(1, "Program is required"),
@@ -44,8 +44,8 @@ const formSchema = z.object({
   }),
   schedule: z.string().min(1, "Schedule is required"),
   timeSlot: z.string().min(1, "Time slot is required"),
-  totalSeats: z.string().min(1, "Number of seats is required"),
-  baseFee: z.string().min(1, "Base fee is required"),
+  totalSeats: z.coerce.number().min(1, "Number of seats is required"),
+  baseFee: z.coerce.number().min(1, "Base fee is required"),
   isGSTIncluded: z.boolean().default(true),
 });
 
@@ -82,10 +82,11 @@ interface Cohort {
 
 interface BasicDetailsFormProps {
   onNext: () => void;
+  onCohortCreated: (cohort: any) => void;
   initialData?: any;
 }
 
-export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps) {
+export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: BasicDetailsFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -123,6 +124,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
   }, []);
 
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+  const [programDuration, setProgramDuration] = useState(6);
   const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
   const [cohortId, setCohortId] = useState("");
 
@@ -143,8 +145,14 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
     }
   }, [selectedProgram, selectedCentre]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  useEffect(() => {
+    if (selectedProgram) {
+      const programData = (programs.find(program => program._id === selectedProgram))?.duration;
+      setProgramDuration(programData ?? 0);
+    }
+  }, [selectedProgram]);
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const dataWithCohortId = { 
       ...values, 
       cohortId, 
@@ -154,13 +162,21 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
       isGSTIncluded: values.isGSTIncluded
     };
     try {
-      await createCohort(dataWithCohortId);  // Call the API to create a cohort
-      console.log("Cohort created:", dataWithCohortId);
-      onNext();  // Proceed to the next step
+      if (initialData?._id) {
+        const createdCohort = await updateCohort(initialData._id, dataWithCohortId);
+        console.log("Cohort updated successfully");
+        onCohortCreated(createdCohort.data);
+        onNext();
+      } else {
+      const createdCohort = await createCohort(dataWithCohortId);  // Call the API to create a cohort
+      console.log("Cohort created:", createdCohort);
+      onCohortCreated(createdCohort.data); // Pass the created cohort data to the parent
+      }
+      onNext();
     } catch (error) {
       console.error("Failed to create cohort:", error);
     }
-    console.log("Form data:", dataWithCohortId);    // Log the form data
+    // console.log("Form data:", dataWithCohortId);    // Log the form data
   onNext();
   }
 
@@ -168,7 +184,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
 
   // Update end date when start date changes
   const updateEndDate = (startDate: Date) => {
-    const endDate = addMonths(startDate, 6); // 6 months duration
+    const endDate = addMonths(startDate, programDuration); // 6 months duration
     form.setValue("endDate", endDate);
   };
 
@@ -181,10 +197,10 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             name="programDetail"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Program</FormLabel>
+                <Label>Program</Label>
                 <Select onValueChange={(value) => {
     field.onChange(value); // Updates the form state
-    setSelectedProgram(value); // Updates the local state
+    setSelectedProgram(value);
   }}  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -207,7 +223,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             name="centerDetail"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Centre</FormLabel>
+                <Label>Centre</Label>
                 <Select onValueChange={(value) => {
     field.onChange(value); // Updates the form state
     setSelectedCentre(value); // Updates the local state
@@ -234,10 +250,10 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
           name="cohortId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cohort ID</FormLabel>
+              <Label>Cohort ID</Label>
               <FormControl>
                 {initialData ? 
-                  <Input {...field} /> : <Input value={cohortId} />
+                  <Input placeholder="CM00JY" {...field} /> : <Input value={cohortId} />
                 }
               </FormControl>
               <FormMessage />
@@ -251,7 +267,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             name="startDate"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-1">
-                <FormLabel>Start Date</FormLabel>
+                <Label>Start Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -293,48 +309,50 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="endDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1">
-                <FormLabel>End Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < (watchStartDate || new Date()) ||
-                        date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
+<FormField
+  control={form.control}
+  name="endDate"
+  render={({ field }) => (
+    <FormItem className="flex flex-col gap-1">
+      <Label>End Date</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-full pl-3 text-left font-normal",
+                !field.value && "text-muted-foreground"
+              )}
+            >
+              {field.value ? (
+                format(field.value, "PPP")
+              ) : (
+                <span>Pick a date</span>
+              )}
+              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={field.value}
+            onSelect={field.onChange}
+            disabled={(date) =>
+              date < (watchStartDate || new Date()) ||
+              date < new Date("1900-01-01")
+            }
+            fromDate={field.value || new Date()} // Default to selected date or today
+            initialFocus
           />
+        </PopoverContent>
+      </Popover>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -343,7 +361,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             name="schedule"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Schedule</FormLabel>
+                <Label>Schedule</Label>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -365,7 +383,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             name="timeSlot"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Time Slot</FormLabel>
+                <Label>Time Slot</Label>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -388,7 +406,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
           name="totalSeats"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Total Seats</FormLabel>
+              <Label>Total Seats</Label>
               <FormControl>
                 <Input type="number" placeholder="50" {...field} />
               </FormControl>
@@ -403,7 +421,7 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
             name="baseFee"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Base Fee</FormLabel>
+                <Label>Base Fee</Label>
                 <FormControl>
                   <Input type="number" placeholder="995000" {...field} />
                 </FormControl>
@@ -423,9 +441,9 @@ export function BasicDetailsForm({ onNext, initialData }: BasicDetailsFormProps)
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel className="text-sm font-normal !my-2">
+                <Label className="text-sm font-normal !my-2">
                   Include GST in base fee
-                </FormLabel>
+                </Label>
                 <FormMessage />
               </FormItem>
             )}

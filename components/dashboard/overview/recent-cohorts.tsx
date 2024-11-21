@@ -101,7 +101,9 @@ export function RecentCohorts() {
                 </span>
               </div>
               <Progress
-                value={(cohort.filled / cohort.seats) * 100}
+                states={[
+                  { value: ((cohort.filled / cohort.seats) * 100) } 
+                ]}
                 className="h-2"
               />
             </div>

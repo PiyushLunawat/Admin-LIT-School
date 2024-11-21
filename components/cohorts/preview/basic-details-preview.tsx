@@ -66,7 +66,7 @@ export function BasicDetailsPreview() {
       {/* Dialog for Edit Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-6">
-          <BasicDetailsForm onNext={() => console.log("Next clicked")} initialData={details} />
+          {/* <BasicDetailsForm onNext={() => console.log("Next clicked")} initialData={details} /> */}
         </DialogContent>
       </Dialog>
     </Card>
