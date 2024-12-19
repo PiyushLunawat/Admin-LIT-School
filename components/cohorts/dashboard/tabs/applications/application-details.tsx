@@ -16,6 +16,7 @@ import {
   Clock,
   EyeIcon,
   FileSignature,
+  Clock4,
 } from "lucide-react";
 import {
   Select,
@@ -33,7 +34,7 @@ import { log } from "console";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface ApplicationDetailsProps {
-  applicationId: string;
+  applicationId: any;
   onClose: () => void;
   onApplicationUpdate: () => void;
 }
@@ -41,6 +42,7 @@ interface ApplicationDetailsProps {
 export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate  }: ApplicationDetailsProps) {
 
   const [open, setOpen] = useState(false);
+  const [int, setInt] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false); // For ApplicationFeedback dialog
   const [application, setApplication] = useState<any>(null);
   const [status, setStatus] = useState(application?.applicationDetails?.applicationStatus || "under review");
@@ -73,7 +75,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
 
   async function fetchStudent() {
     try {
-      const student = await getCurrentStudents(applicationId);
+      const student = await getCurrentStudents(applicationId?._id);
       setApplication(student.data);
       console.log("student.data",student.data?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.tasks);
       
@@ -120,17 +122,45 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               <h4 className="font-medium">Current Status</h4>
               <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "")}>{application?.applicationDetails?.applicationStatus}</Badge>
             </div>
+            {!int ? 
             <Select value={application?.applicationDetails?.applicationStatus} onValueChange={handleStatusChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Change status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="initiated">Initiated</SelectItem>
                 <SelectItem value="under review">Under Review</SelectItem>
                 <SelectItem value="accepted">Accepted</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
                 <SelectItem value="on hold">Put On Hold</SelectItem>
               </SelectContent>
             </Select>
+              :
+            <>  
+            <div className="flex justify-between text-muted-foreground text-sm">
+              <div className="flex justify-center gap-3 items-center">
+                <div className="flex gap-1 items-center">
+                  <Clock4 className="w-4 h-4"/>12:45 PM
+                </div>
+                <div className="flex gap-1 items-center">
+                  <Calendar className="w-4 h-4"/>20/03/2024
+                </div>
+              </div>
+              <p className="text-xs">Interview concluded</p>
+            </div>
+            <Select value={application?.applicationDetails?.applicationStatus?.interview} onValueChange={handleStatusChange}>
+            <SelectTrigger>
+            <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+            <SelectItem value="under review">Reschedule Interview</SelectItem>
+            <SelectItem value="accepted">Complete</SelectItem>
+            </SelectContent>
+            </Select>
+            <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
+              <FileSignature className="w-4 h-4"/>Interview Feedback
+            </Button>
+           </>  }
           </div>
 
           <Separator />
@@ -169,9 +199,10 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <EyeIcon className="w-4 h-4 text-white"/> View
               </Button>}
             </div>
+            {(!int && application?.applicationDetails?.applicationStatus!=='initiated' ) && 
               <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
-              <FileSignature className="w-4 h-4"/>Review Submission
-              </Button>
+                <FileSignature className="w-4 h-4"/>Review Submission
+              </Button>}
              {application?.cohort?.applicationFormDetail?.[0]?.task.map((task: any, index: any) => (
               <div key={index} className="border rounded-lg p-4 space-y-2">
                 <div className="">

@@ -37,6 +37,7 @@ interface ApplicationsListProps {
   onApplicationSelect: (id: string) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
+  onApplicationUpdate: () => void;
 }
 
 export function ApplicationsList({
@@ -44,6 +45,7 @@ export function ApplicationsList({
   onApplicationSelect,
   selectedIds,
   onSelectedIdsChange,
+  onApplicationUpdate,
 }: ApplicationsListProps) {
   const [open, setOpen] = useState(false);
   const [applications, setApplications] = useState<any>([]);
@@ -60,6 +62,7 @@ export function ApplicationsList({
               student?.applicationDetails !== undefined &&
               student.cohort?._id === cohortId
           ))       
+        console.error("fetching students:", response.data);
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
@@ -113,6 +116,9 @@ export function ApplicationsList({
     setOpen(true); // Open the dialog
   };
 
+  const handleStatusUpdate = () => {
+    onApplicationUpdate();
+  };
 
   return (
     <div className="border rounded-lg">
@@ -210,7 +216,7 @@ export function ApplicationsList({
         </TabsContent>
 
         <TabsContent value="documents">
-          <DocumentsTab student={selectedStudentId} />
+          <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
         </TabsContent>
       </Tabs>
         </DialogContent>

@@ -280,9 +280,9 @@ export function LitmusTestForm({
             name="litmusTestDuration"
             render={({ field }) => (
               <FormItem>
-                <Label>LITMUS Test Duration</Label>
+                <Label>LITMUS Test Duration (days)</Label>
                 <FormControl>
-                  <Input placeholder="DD:HH:MM" {...field} />
+                  <Input placeholder="5 days" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

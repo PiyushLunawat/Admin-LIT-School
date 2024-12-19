@@ -17,12 +17,13 @@ import { useEffect, useState } from "react";
 import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getStudents } from "@/app/api/student";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "destructive" | "onhold" | "lemon" | "success" | "default";
 
 interface LitmusTestListProps {
   cohortId: string;
   onSubmissionSelect: (id: any) => void;
   selectedIds: string[];
+  onApplicationUpdate: () => void;
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
@@ -30,6 +31,7 @@ export function LitmusTestList({
   cohortId,
   onSubmissionSelect,
   selectedIds,
+  onApplicationUpdate,
   onSelectedIdsChange,
 }: LitmusTestListProps) {
   const [open, setOpen] = useState(false);
@@ -61,9 +63,9 @@ export function LitmusTestList({
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "secondary";
+        return "lemon";
       case "under review":
-        return "warning";
+        return "onhold";
       case "completed":
         return "success";
       default:
@@ -132,7 +134,7 @@ export function LitmusTestList({
                 {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.createdAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending")}>
+                <Badge className="capitalize" variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending")}>
                   {application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending"}
                 </Badge>
               </TableCell>
@@ -167,7 +169,7 @@ export function LitmusTestList({
       {/* Dialog to display "Hi" message */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl">
-          <ReviewComponent application={selectedStudentId}/>
+          <ReviewComponent application={selectedStudentId} onApplicationUpdate={onApplicationUpdate}/>
         </DialogContent>
       </Dialog>
     </div>

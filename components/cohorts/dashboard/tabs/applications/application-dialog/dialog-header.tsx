@@ -110,8 +110,8 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">LITMUS Status</p>
-                {student.litmusStatus ? <Badge variant={getStatusColor(student?.litmusStatus || "--")}>
-                  {student.litmusStatus}
+                {student?.litmusTestDetails[0]?.litmusTaskId?.status ? <Badge variant={getStatusColor(student?.litmusTestDetails[0]?.litmusTaskId?.status || "--")}>
+                  {student?.litmusTestDetails[0]?.litmusTaskId?.status}
                 </Badge>  : "--"}
               </div>
               <div>

@@ -207,7 +207,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Contact Name</Label>
               <Input
-                defaultValue={student?.applicationDetails?.studenDetails?.emergencyContact?.firstName}
+                defaultValue={student?.applicationDetails?.studenDetails?.emergencyContact?.firstName+' '+student?.applicationDetails?.studenDetails?.emergencyContact?.lastName}
                 readOnly={!isEditing}
               />
             </div>
@@ -239,14 +239,14 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Father&apos;s Name</Label>
               <Input
-                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.father?.firstName}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.father?.firstName+' '+student?.applicationDetails?.studenDetails?.parentInformation?.father?.lastName}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Mother&apos;s Name</Label>
               <Input
-                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.firstName}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.firstName+' '+student?.applicationDetails?.studenDetails?.parentInformation?.mother?.lastName}
                 readOnly={!isEditing}
               />
             </div>
@@ -261,6 +261,20 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
               <Label>Mother&apos;s Contact Number</Label>
               <Input
                 defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.contactNumber}
+                readOnly={!isEditing}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Father&apos;s Email</Label>
+              <Input
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.father?.email}
+                readOnly={!isEditing}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Mother&apos;s Email</Label>
+              <Input
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.email}
                 readOnly={!isEditing}
               />
             </div>
@@ -291,8 +305,8 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
           <div className="grid gap-4">
             <div className="">
               {student?.applicationDetails?.studenDetails?.financialInformation?.isFinanciallyIndependent === true ? 
-                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially dependent on Parents</Label> : 
-                <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially independent on Parents</Label>
+                <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially dependent on Parents</Label> : 
+                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially independent on Parents</Label>
               }
             </div>
             <div className="">

@@ -26,7 +26,7 @@ interface Task {
   title: string;
 }
 
-interface ApplicationFeedbackProps {
+interface InterviewFeedbackProps {
   name: string;
   email: string;
   phone: string;
@@ -38,7 +38,7 @@ interface ApplicationFeedbackProps {
   onUpdateStatus: (status: string, feedback: { [key: string]: string[] }) => void;
 }
 
-const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
+const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   name,
   email,
   phone,
@@ -63,7 +63,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
     async function fetchApplicationDetails() {
       try {
         const applicationDetails = await getStudentApplication(tasks);
-        console.log("Application Details:", applicationDetails.data.applicationTasks[0]?._id);
+        console.log("Application Details:", applicationDetails.data.applicationTasks[0]?.tasks);
         setTaskList(applicationDetails.data.applicationTasks[0]?.tasks || []);
         setFeedbackId(applicationDetails.data?.applicationTasks[0]?._id)
       } catch (error) {
@@ -153,11 +153,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
       else if (newStatus === "on hold") {
         // Filter out empty reasons
-        const validReasons = reasonItemValue
-        .split('\n') // Split the string into individual lines
-        .map((line) => line.trim().replace(/^•\s*/, "")) // Remove bullets and trim spaces
-        .filter((r) => r.trim() !== ""); // Filter out empty lines
-
+        const validReasons = reason.filter((r) => r.trim() !== "");
         console.log("Sending feedback:", {
           feedbackId,
           newStatus,
@@ -262,9 +258,25 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
           </Select>
         </div>
 
+        {/* Conditional Reason or Feedback */}
+        {(status === "on hold") && (
+          <div>
+            <Label className="text-lg ">Provide Reasons</Label>
+            <Textarea
+              id="reasonItem"
+              value={reasonItemValue}
+              className="px-3 text-base"
+              onChange={handleChangeForReasons}
+              onKeyDown={handleKeyDownForReasons}
+              placeholder="Type here..."
+              rows={3}
+              cols={40}
+            />
+          </div>
+        )}
 
-       
-          <>
+        {(status === "accepted" || status === "rejected") && (
+        <>
         <div className="space-y-4">
             <h3 className="text-lg font-semibold">Course Dive</h3>
             <div className='space-y-1'>
@@ -341,8 +353,6 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
             ))}
             </div>
 
-        {(status === "accepted" || status === "rejected") && (
-          <>
             <h4 className="font-medium !mt-4">Feedback</h4>
             <div key={taskList[index]?._id}>
               {/* Feedback input for each task */}
@@ -358,35 +368,19 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                       placeholder="Type here..."
                       rows={3}
                       cols={40}
-                      />
+                    />
                   </div>
               ))}
               </div>  
             </div>
-          </>
-        )}
+
           </div>
             {index < ques?.length - 1 && <Separator className="my-8" />}
         </>))}
-        </>  
 
-        {/* Conditional Reason or Feedback */}
-        {(status === "on hold") && (
-          <div>
-            <Label className="text-lg ">Provide Reasons</Label>
-            <Textarea
-              id="reasonItem"
-              value={reasonItemValue}
-              className="px-3 text-base"
-              onChange={handleChangeForReasons}
-              onKeyDown={handleKeyDownForReasons}
-              placeholder="Type here..."
-              rows={3}
-              cols={40}
-              />
-          </div>
+        </>  
         )}
-        
+
         <Button
           className="w-full mt-4"
           onClick={() => handleApplicationUpdate(tasks, status)}
@@ -398,4 +392,4 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   );
 };
 
-export default ApplicationFeedback;
+export default InterviewFeedback;

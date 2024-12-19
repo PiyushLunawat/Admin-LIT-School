@@ -6,18 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CircleCheckBig, Download, Eye, FlagIcon, Upload } from "lucide-react";
 import { updateDocumentStatus } from "@/app/api/student";
-import { Viewer, Worker } from "@react-pdf-viewer/core";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface DocumentsTabProps {
   student: any;
+  onUpdateStatus: () => void;
 }
 
-export function DocumentsTab({ student }: DocumentsTabProps) {
+export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   
   const [open, setOpen] = useState(false);
 
+  console.log("sdds",student);
+  
   const documents = [
       {
         id: "aadharDocument",
@@ -57,12 +59,10 @@ export function DocumentsTab({ student }: DocumentsTabProps) {
     ) => {
       try {
         const response = await updateDocumentStatus(studentId, docType, docId, "", status);
-        console.log("ress",response);        
-        alert(`Document status updated to "${status}" successfully.`);
-        // Optionally, refresh the document list or update the UI dynamically
+        console.log("ress",response);
+        onUpdateStatus();
       } catch (error) {
         console.error("Error updating document status:", error);
-        alert("Failed to update document status. Please try again.");
       }
     };
 

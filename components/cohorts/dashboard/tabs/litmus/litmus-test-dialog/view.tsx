@@ -24,7 +24,7 @@ interface Section {
 }
 
 
-export function ReviewComponent({ application, onApplicationUpdate }: ReviewComponentProps) {
+export function ViewComponent({ application, onApplicationUpdate }: ReviewComponentProps) {
 
   const [rating, setRating] = useState<number>(application?.litmusTestDetails[0]?.litmusTaskId?.performanceRating || 0);
   console.log("rea",(application?.litmusTestDetails[0]?.litmusTaskId?.results));
@@ -307,7 +307,7 @@ const feedbackData = sections.map((section) => {
             ))}
       </div>
 
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <h3 className="text-md font-medium">Criteria Evaluation</h3>
         {Task?.judgmentCriteria.map((criteria: any, cIndex: any) => (
           <div className="space-y-2 pl-3" key={cIndex}>
@@ -324,12 +324,12 @@ const feedbackData = sections.map((section) => {
           />
 
         </div>))}
-      </div>
+      </div> */}
       <SelectSeparator className="mt-8"/>
       </div>))}
 
       {/* Performance Rating Section */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <div className="flex justify-between items-center my-6">
           <h3 className="">Performance Rating</h3>
           <div className="flex space-x-1">
@@ -358,10 +358,10 @@ const feedbackData = sections.map((section) => {
         </div>
         </div>
       <SelectSeparator className="mt-8"/>
-      </div>
+      </div> */}
 
       {/* Strengths and Weaknesses Section */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
       <h3 className="">Feedback</h3>
 
       <div className="space-y-4">
@@ -383,14 +383,14 @@ const feedbackData = sections.map((section) => {
         </Card>
       ))}
       </div>
-    </div>
+    </div> */}
     
       {/* Publish Button */}
-      <div className="text-center">
+      {/* <div className="text-center">
         <Button className="w-full" onClick={handlePublish}>
           Publish Review
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }
