@@ -42,14 +42,14 @@ export function StudentsList({
   selectedIds,
   onSelectedIdsChange,
 }: StudentsListProps) {
-  const router = useRouter();const [students, setStudents] = useState<Student[]>([]);
+  const router = useRouter();
+  const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchStudents() {
       try {
         const response = await getStudents();
-        console.log("sgdgv",response)
         setStudents(
           response.data.map((student: any) => ({
             id: student._id,

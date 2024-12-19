@@ -58,3 +58,11 @@ export async function updateCohortStatus(id: string, status: string) {
   }
   return response.json();
 }
+
+export async function getCohortById(id: string) {
+  const response = await fetch(`${process.env.API_URL}/admin/cohort/${id}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch cohort details");
+  }
+  return response.json();
+}

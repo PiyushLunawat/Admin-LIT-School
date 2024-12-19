@@ -7,10 +7,10 @@ import { Calendar, Download, Mail, MessageSquare, Upload, UploadIcon } from "luc
 import { Progress } from "@/components/ui/progress";
 
 interface PaymentInformationTabProps {
-  studentId: string;
+  student: any;
 }
 
-export function PaymentInformationTab({ studentId }: PaymentInformationTabProps) {
+export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   // In a real application, this data would be fetched based on the studentId
   const payment = {
     totalAmount: "₹9,95,000",

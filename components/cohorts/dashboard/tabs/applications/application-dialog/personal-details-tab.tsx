@@ -15,54 +15,12 @@ import {
 import { CircleCheck, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
 
 interface PersonalDetailsTabProps {
-  studentId: string;
+  student: any;
 }
 
-export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
+export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
 
-  // In a real application, this data would be fetched based on the studentId
-  const student = {
-    name: "John Doe",
-    dob: "1998-05-15",
-    gender: "Male",
-    programofInterest: "",
-    cohort: "Creatorpreneur",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    currentStatus: "College Student",
-    linkedin: "linkedin.com/in/johndoe",
-    instagram: "instagram.com/johndoe",
-    streetAddress: "A-5, 5th Block",
-    city: "Banglore",
-    state: "Karnataka",
-    postalZipCode: "560011",
-    previousEducation: {
-      HighestLevelofEducation: "Bachloer's Degree",
-      FieldofStudy: "Designing",
-      NameofInstitution: "Crist",
-      YearofGraduation: "2024",
-      ExperienceType: "Freelancer",
-      ApxDuration: "3 Months",
-      financialDependency: "No",
-      financialAidHistory: "Yes",
-    },
-    emergencyContact: {
-      name: "Jane Doe",
-      relationship: "Mother",
-      phone: "+91 98765 43211",
-    },
-    parentalInfo: {
-      fatherName: "James Doe",
-      fatherOccupation: "Business Owner",
-      fatherContact: "9834339823",
-      motherName: "Jane Doe",
-      motherOccupation: "Teacher",
-      motherContact: "9834339823",
-      financialDependency: "No",
-      financialAidHistory: "Yes",
-    },
-  };
 
   return (
     <div className="space-y-6">
@@ -88,7 +46,7 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Full Name</Label>
               <Input
-                defaultValue={student.name}
+                defaultValue={(student?.firstName +' '+ student?.lastName) || '--'}
                 readOnly={!isEditing}
               />
             </div>
@@ -96,13 +54,13 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
               <Label>Date of Birth</Label>
               <Input
                 type="date"
-                defaultValue={student.dob}
+                defaultValue={student?.dateOfBirth}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Gender</Label>
-              <Select disabled={!isEditing} defaultValue={student.gender.toLowerCase()}>
+              <Select disabled={!isEditing} defaultValue={student?.gender?.toLowerCase()}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -115,29 +73,32 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
             </div>
             <div className="space-y-2">
               <Label>Current Status</Label>
-              <Select disabled={!isEditing} defaultValue={student.currentStatus.toLowerCase().replace(" ", "-")}>
+              <Select disabled={!isEditing} defaultValue={student?.currentStatus?.toLowerCase().replace(" ", "-")}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="college-student">College Student</SelectItem>
-                  <SelectItem value="working-professional">Working Professional</SelectItem>
-                  <SelectItem value="entrepreneur">Entrepreneur</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="Student">Student</SelectItem>
+                  <SelectItem value="CollegeGraduate">College Graduate</SelectItem>
+                  <SelectItem value="WorkingProfessional">Working Professional</SelectItem>
+                  <SelectItem value="Freelancer">Freelancer</SelectItem>
+                  <SelectItem value="BusinessOwner">Business Owner</SelectItem>
+                  <SelectItem value="Consultant">Consultant</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Program of Interest</Label>
               <Input
-                defaultValue={student.programofInterest}
+                defaultValue={student?.program?.name}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Cohort</Label>
               <Input
-                defaultValue={student.cohort}
+                defaultValue={new Date(student?.cohort?.startDate).toLocaleDateString() +' '+(student?.cohort.timeSlot)+', '+ student?.cohort?.centerDetail}
                 readOnly={!isEditing}
               />
             </div>
@@ -154,28 +115,28 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
               <Label>Email Address</Label>
               <Input
                 type="email"
-                defaultValue={student.email}
+                defaultValue={student?.email}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Phone Number</Label>
               <Input
-                defaultValue={student.phone}
+                defaultValue={student?.mobileNumber}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>LinkedIn Profile</Label>
               <Input
-                defaultValue={student.linkedin}
+                defaultValue={student?.linkedInUrl}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Instagram Profile</Label>
               <Input
-                defaultValue={student.instagram}
+                defaultValue={student?.instagramUrl}
                 readOnly={!isEditing}
               />
             </div>
@@ -193,42 +154,42 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Highest Level of Education Attained</Label>
               <Input
-                defaultValue={student.previousEducation.HighestLevelofEducation}
+                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.highestLevelOfEducation}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Field of Study</Label>
               <Input
-                defaultValue={student.previousEducation.FieldofStudy}
+                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.fieldOfStudy}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Name of Institution</Label>
               <Input
-                defaultValue={student.previousEducation.NameofInstitution}
+                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.nameOfInstitution}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Year of Graduation</Label>
               <Input
-                defaultValue={student.previousEducation.YearofGraduation}
+                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.yearOfGraduation}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Work Experience Type</Label>
               <Input
-                defaultValue={student.previousEducation.ExperienceType}
+                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.ExperienceType}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Apx. Duration of Work</Label>
               <Input
-                defaultValue={student.previousEducation.ApxDuration}
+                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.ApxDuration}
                 readOnly={!isEditing}
               />
             </div>
@@ -246,21 +207,21 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Contact Name</Label>
               <Input
-                defaultValue={student.emergencyContact.name}
+                defaultValue={student?.applicationDetails?.studenDetails?.emergencyContact?.firstName+' '+student?.applicationDetails?.studenDetails?.emergencyContact?.lastName}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Contact Number</Label>
               <Input
-                defaultValue={student.emergencyContact.phone}
+                defaultValue={student?.applicationDetails?.studenDetails?.emergencyContact?.contactNumber}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Relationship</Label>
               <Input
-                defaultValue={student.emergencyContact.relationship}
+                defaultValue={student?.applicationDetails?.studenDetails?.emergencyContact?.relationshipWithStudent}
                 readOnly={!isEditing}
               />
             </div>
@@ -278,42 +239,56 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Father&apos;s Name</Label>
               <Input
-                defaultValue={student.parentalInfo.fatherName}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.father?.firstName+' '+student?.applicationDetails?.studenDetails?.parentInformation?.father?.lastName}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Mother&apos;s Name</Label>
               <Input
-                defaultValue={student.parentalInfo.motherName}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.firstName+' '+student?.applicationDetails?.studenDetails?.parentInformation?.mother?.lastName}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Father&apos;s Contact Number</Label>
               <Input
-                defaultValue={student.parentalInfo.fatherContact}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.father?.contactNumber}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Mother&apos;s Contact Number</Label>
               <Input
-                defaultValue={student.parentalInfo.motherContact}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.contactNumber}
+                readOnly={!isEditing}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Father&apos;s Email</Label>
+              <Input
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.father?.email}
+                readOnly={!isEditing}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Mother&apos;s Email</Label>
+              <Input
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.email}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Father&apos;s Occupation</Label>
               <Input
-                defaultValue={student.parentalInfo.fatherOccupation}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.father?.occupation}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Mother&apos;s Occupation</Label>
               <Input
-                defaultValue={student.parentalInfo.motherOccupation}
+                defaultValue={student?.applicationDetails?.studenDetails?.parentInformation?.mother?.occupation}
                 readOnly={!isEditing}
               />
             </div>
@@ -329,13 +304,13 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
         <CardContent className="space-y-4">
           <div className="grid gap-4">
             <div className="">
-              {student.parentalInfo.financialDependency === "Yes" ? 
-                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially dependent on Parents</Label> : 
-                <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially independent on Parents</Label>
+              {student?.applicationDetails?.studenDetails?.financialInformation?.isFinanciallyIndependent === true ? 
+                <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially dependent on Parents</Label> : 
+                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially independent on Parents</Label>
               }
             </div>
             <div className="">
-              {student.parentalInfo.financialAidHistory === "Yes" ? 
+              {student?.applicationDetails?.studenDetails?.financialInformation?.hasAppliedForFinancialAid === true ? 
                 <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Has tried applying for financial aid earlier</Label> : 
                 <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Has not tried applying for any financial aid earlier</Label>
               }

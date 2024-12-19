@@ -15,6 +15,8 @@ import {
   ThumbsDown,
   Clock,
   EyeIcon,
+  FileSignature,
+  Clock4,
 } from "lucide-react";
 import {
   Select,
@@ -24,71 +26,88 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogTrigger, DialogContent,  } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SubmissionView from "./submission-view";
 import ApplicationFeedback from "./application-feedback";
+import { getCurrentStudents } from "@/app/api/student";
+import { log } from "console";
 
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface ApplicationDetailsProps {
-  applicationId: string;
+  applicationId: any;
   onClose: () => void;
+  onApplicationUpdate: () => void;
 }
 
-export function ApplicationDetails({ applicationId, onClose }: ApplicationDetailsProps) {
+export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate  }: ApplicationDetailsProps) {
 
   const [open, setOpen] = useState(false);
+  const [int, setInt] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false); // For ApplicationFeedback dialog
-  const [status, setStatus] = useState("Under Review");
-
-  // In a real application, this data would be fetched based on the applicationId
-  const application = {
-    id: applicationId,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    status: "under-review",
-    submissionDate: "2024-03-15",
-    tasks: [
-      {
-        title: "Share an Embarrassing Story",
-        type: "Long Text",
-        description: "Share an embarrassing or an adventurous story from your life in 500 words. How did this experience influence your perspective?",
-        resources: { filename: "Filename.pdf", link: "http://localhost:3000/dashboard/cohorts" },
-        submission: "Lorem ipsum dolor sit amet...",
-        wordLimit: "200w",
-
-      },
-      {
-        title: "Portfolio Submission",
-        type: "File",
-        description: "For Rapido (a bike taxi service), identify five influencers you believe would be a good fit for their social media campaigns. For each influencer, explain why you chose them and how they align with Rapido's brand perception and community goals.",
-        resources: { filename: "Filename.pdf", link: "http://localhost:3000/dashboard/cohorts" },
-        submission: "portfolio.pdf",
-        fileSize: "20mb",
-      },
-    ],
-    comments: [
-      {
-        author: "Sarah Admin",
-        text: "Good communication skills",
-        timestamp: "2024-03-16 10:30 AM",
-      },
-    ],
+  const [application, setApplication] = useState<any>(null);
+  const [status, setStatus] = useState(application?.applicationDetails?.applicationStatus || "under review");
+  const [cohorts, setCohorts] = useState<any[]>([]);
+ 
+  const getStatusColor = (status: string): BadgeVariant => {
+    switch (status.toLowerCase()) {
+      case "under review":
+        return "secondary";
+      case "accepted":
+        return "success";
+      case "rejected":
+        return "warning";
+      case "on hold":
+        return "onhold";
+      case "interview scheduled":
+        return "default";
+      case "interview rescheduled":
+        return "lemon";
+      case "update status":
+        return "lemon";
+      default:
+        return "default";
+    }
   };
+
+  useEffect(() => {
+    fetchStudent();
+  }, [applicationId]);
+
+  async function fetchStudent() {
+    try {
+      const student = await getCurrentStudents(applicationId?._id);
+      setApplication(student.data);
+      console.log("student.data",student.data?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.tasks);
+      
+      setStatus(student.data?.applicationDetails?.applicationStatus);
+    } catch (error) {
+      console.error("Failed to fetch student data:", error);
+    }
+  }
+
 
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
-    if (newStatus === "accepted" || newStatus === "on-hold") {
+    if (newStatus === "accepted" || newStatus === "on hold" || newStatus === "rejected" || newStatus === "under review") {
       setFeedbackOpen(true);
     }
   };
+
+  const handleStatusUpdate = (newStatus: string) => {
+    // Update application status locally and reload application data
+    setStatus(newStatus);
+    onApplicationUpdate();
+    fetchStudent();
+  };
+
 
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
         <div>
-          <h3 className="font-semibold">{application.name}</h3>
-          <p className="text-sm text-muted-foreground">{application.email}</p>
-          <p className="text-sm text-muted-foreground">{application.phone}</p>
+          <h3 className="font-semibold">{application?.firstName+" "+application?.lastName}</h3>
+          <p className="text-sm text-muted-foreground">{application?.email}</p>
+          <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
@@ -101,19 +120,47 @@ export function ApplicationDetails({ applicationId, onClose }: ApplicationDetail
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Current Status</h4>
-              <Badge>{application.status}</Badge>
+              <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "")}>{application?.applicationDetails?.applicationStatus}</Badge>
             </div>
-            <Select defaultValue={application.status} onValueChange={handleStatusChange}>
+            {!int ? 
+            <Select value={application?.applicationDetails?.applicationStatus} onValueChange={handleStatusChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Change status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="under-review">Under Review</SelectItem>
-                <SelectItem value="accepted">Accept</SelectItem>
-                <SelectItem value="rejected">Reject</SelectItem>
-                <SelectItem value="on-hold">Put On Hold</SelectItem>
+                <SelectItem value="initiated">Initiated</SelectItem>
+                <SelectItem value="under review">Under Review</SelectItem>
+                <SelectItem value="accepted">Accepted</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="on hold">Put On Hold</SelectItem>
               </SelectContent>
             </Select>
+              :
+            <>  
+            <div className="flex justify-between text-muted-foreground text-sm">
+              <div className="flex justify-center gap-3 items-center">
+                <div className="flex gap-1 items-center">
+                  <Clock4 className="w-4 h-4"/>12:45 PM
+                </div>
+                <div className="flex gap-1 items-center">
+                  <Calendar className="w-4 h-4"/>20/03/2024
+                </div>
+              </div>
+              <p className="text-xs">Interview concluded</p>
+            </div>
+            <Select value={application?.applicationDetails?.applicationStatus?.interview} onValueChange={handleStatusChange}>
+            <SelectTrigger>
+            <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+            <SelectItem value="under review">Reschedule Interview</SelectItem>
+            <SelectItem value="accepted">Complete</SelectItem>
+            </SelectContent>
+            </Select>
+            <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
+              <FileSignature className="w-4 h-4"/>Interview Feedback
+            </Button>
+           </>  }
           </div>
 
           <Separator />
@@ -147,48 +194,40 @@ export function ApplicationDetails({ applicationId, onClose }: ApplicationDetail
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h4 className="font-medium">Application Tasks</h4>
+              {status !== 'under review' && 
               <Button variant="ghost" className="flex gap-1 text-xs items-center text-muted-foreground" onClick={() => {setOpen(true);}}>
                 <EyeIcon className="w-4 h-4 text-white"/> View
-              </Button>
+              </Button>}
             </div>
-            {application.tasks.map((task, index) => (
-              <div key={index} className="border rounded-lg p-4 space-y-1">
-                  <h5 className="font-medium text-[#00A3FF]">{task.title}</h5>
-                <p className="text-muted-foreground text-sm">Submission Type: {task.type}</p>
-                {/* <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <ThumbsUp className="h-4 w-4 mr-2" />
-                    Good
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <ThumbsDown className="h-4 w-4 mr-2" />
-                    Needs Work
-                  </Button>
-                </div> */}
-              </div>
-            ))}
-          </div>
-
-          {/* <Separator />
-
-          
-          <div className="space-y-4">
-            <h4 className="font-medium">Comments</h4>
-            {application.comments.map((comment, index) => (
+            {(!int && application?.applicationDetails?.applicationStatus!=='initiated' ) && 
+              <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
+                <FileSignature className="w-4 h-4"/>Review Submission
+              </Button>}
+             {application?.cohort?.applicationFormDetail?.[0]?.task.map((task: any, index: any) => (
               <div key={index} className="border rounded-lg p-4 space-y-2">
-                <div className="flex justify-between">
-                  <p className="font-medium">{comment.author}</p>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4 mr-1" />
-                    {comment.timestamp}
-                  </div>
+                <div className="">
+                  <h5 className="font-medium text-[#00A3FF]">{task.title}</h5>
+                  <p className="text-muted-foreground text-sm capitalize">
+                    Submission Type:{" "}
+                    {task.config
+                      .map((configItem: any) => configItem.type)
+                      .join(", ")}
+                  </p>
                 </div>
-                <p className="text-sm">{comment.text}</p>
+                {(status === 'accepted' || status === 'rejected') && 
+                <div className="">
+                <h5 className="font-medium text-muted-foreground">Feedback</h5>
+                {application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
+                  <ul className="ml-4 sm:ml-6 space-y-2 list-disc">
+                    <li className="text-sm" key={i}>
+                      {item}
+                    </li>
+                  </ul>
+                ))}
+                </div>}
               </div>
-            ))}
-            <Textarea placeholder="Add a comment..." />
-            <Button className="w-full">Add Comment</Button>
-          </div> */}
+            ))} 
+          </div>
         </div>
       </ScrollArea>
 
@@ -196,33 +235,32 @@ export function ApplicationDetails({ applicationId, onClose }: ApplicationDetail
        <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">
           <ApplicationFeedback
-            name={application.name}
-            email={application.email}
-            phone={application.phone}
-            tasks={application.tasks}
+            name={application?.firstName}
+            email={application?.email}
+            phone={application?.mobileNumber}
+            tasks={application?._id}
+            initialStatus={status}
+            ques={application?.cohort?.applicationFormDetail?.[0]?.task} 
+            submission={application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]}
             onClose={() => setFeedbackOpen(false)}
-            onUpdateStatus={(newStatus, feedback) => {
-              // Handle feedback submission logic here
-              setFeedbackOpen(false);
-              setStatus(newStatus);
-            }}
+            onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />
         </DialogContent>
       </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-4xl py-2 px-6">  
+        <DialogContent className="max-w-4xl py-2 pb-6 px-6 ">  
           <div className="flex justify-between items-center pb-4 border-b border-gray-700">
             <div>
-              <h3 className="text-xl font-semibold">{application.name}</h3>
+              <h3 className="text-xl font-semibold">{application?.firstName+' '+application?.lastName}</h3>
               <div className="flex gap-4 h-5 items-center">
-                <p className="text-sm text-muted-foreground">{application.email}</p>
+                <p className="text-sm text-muted-foreground">{application?.email}</p>
                 <Separator orientation="vertical" />
-                <p className="text-sm text-muted-foreground">{application.phone}</p>
+                <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
               </div>
             </div>
           </div>
-          <SubmissionView tasks={application.tasks} />
+          <SubmissionView tasks={application?.cohort?.applicationFormDetail?.[0]?.task} submission={application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]}/>
         </DialogContent>
       </Dialog>
 

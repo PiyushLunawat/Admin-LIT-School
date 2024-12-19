@@ -18,7 +18,7 @@ export default async function StudentDetailsPage({ params }: PageProps) {
 
   return (
     <div className="h-full">
-      <StudentDetails student={student} />
+      <StudentDetails student={student.data} />
     </div>
   );
 }

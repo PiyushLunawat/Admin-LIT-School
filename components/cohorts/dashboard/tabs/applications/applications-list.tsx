@@ -13,12 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock4Icon, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentApplicationHeader } from "./application-dialog/dialog-header";
 import { PersonalDetailsTab } from "./application-dialog/personal-details-tab";
 import { PaymentInformationTab } from "./application-dialog/payment-info-tab";
 import { DocumentsTab } from "./application-dialog/document-tab";
+import { getStudents } from "@/app/api/student";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface Application {
@@ -26,7 +27,7 @@ interface Application {
   name: string;
   applicationId: string;
   submissionDate: string;
-  status: string;
+  applicationStatus: string;
   interviewDate?: string;
   interviewTime?: string;
 }
@@ -36,6 +37,7 @@ interface ApplicationsListProps {
   onApplicationSelect: (id: string) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
+  onApplicationUpdate: () => void;
 }
 
 export function ApplicationsList({
@@ -43,67 +45,34 @@ export function ApplicationsList({
   onApplicationSelect,
   selectedIds,
   onSelectedIdsChange,
+  onApplicationUpdate,
 }: ApplicationsListProps) {
   const [open, setOpen] = useState(false);
+  const [applications, setApplications] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
-  // Sample data, would be fetched based on cohortId in a real app
-  const applications: Application[] = [
-    {
-      id: "1",
-      name: "John Doe",
-      applicationId: "APP001",
-      submissionDate: "2024-03-15",
-      status: "Under Review",
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      applicationId: "APP002",
-      submissionDate: "2024-03-14",
-      status: "Interview Scheduled",
-      interviewDate: "2024-03-20",
-      interviewTime: "1:45 PM",
-    },
-    {
-      id: "3",
-      name: "Jane Smith",
-      applicationId: "APP002",
-      submissionDate: "2024-03-14",
-      status: "Update Status",
-      interviewDate: "2024-03-20",
-      interviewTime: "1:45 PM",
-    },
-    {
-      id: "4",
-      name: "Jane Smith",
-      applicationId: "APP002",
-      submissionDate: "2024-03-14",
-      status: "Interview Rescheduled",
-      interviewDate: "2024-03-20",
-      interviewTime: "1:45 PM",
-    },
-    {
-      id: "5",
-      name: "Mike Johnson",
-      applicationId: "APP003",
-      submissionDate: "2024-03-13",
-      status: "Accepted",
-    },
-    {
-      id: "6",
-      name: "Mike Johnson",
-      applicationId: "APP003",
-      submissionDate: "2024-03-13",
-      status: "Rejected",
-    },
-    {
-      id: "7",
-      name: "Mike Johnson",
-      applicationId: "APP003",
-      submissionDate: "2024-03-13",
-      status: "On Hold",
-    },
-  ];
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await getStudents();
+        setApplications(
+          response.data.filter(
+            (student: any) =>
+              student?.applicationDetails !== undefined &&
+              student.cohort?._id === cohortId
+          ))       
+        console.error("fetching students:", response.data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStudents();
+  }, []);
+
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -130,7 +99,7 @@ export function ApplicationsList({
     if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(applications.map((app) => app.id));
+      onSelectedIdsChange(applications.map((app: any) => app.id));
     }
   };
 
@@ -140,6 +109,15 @@ export function ApplicationsList({
     } else {
       onSelectedIdsChange([...selectedIds, id]);
     }
+  };
+
+  const handleEyeClick = (student: any) => {
+    setSelectedStudentId(student); // Set the selected student ID
+    setOpen(true); // Open the dialog
+  };
+
+  const handleStatusUpdate = () => {
+    onApplicationUpdate();
   };
 
   return (
@@ -162,11 +140,11 @@ export function ApplicationsList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {applications.map((application) => (
+          {applications.map((application: any) => (
             <TableRow
               key={application.id}
               className="cursor-pointer"
-              onClick={() => onApplicationSelect(application.id)}
+              onClick={() => onApplicationSelect(application)}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
@@ -174,14 +152,14 @@ export function ApplicationsList({
                   onCheckedChange={() => toggleSelectApplication(application.id)}
                 />
               </TableCell>
-              <TableCell className="font-medium">{application.name}</TableCell>
-              <TableCell>{application.applicationId}</TableCell>
+              <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
+              <TableCell className="!w-[32px] truncate">{application?.applicationDetails?._id || "--"}</TableCell>
               <TableCell>
-                {new Date(application.submissionDate).toLocaleDateString()}
+                {new Date(application?.applicationDetails?.createdAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(application.status)}>
-                  {application.status}
+                <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "--")}>
+                  {application?.applicationDetails?.applicationStatus || "--"}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -189,11 +167,11 @@ export function ApplicationsList({
                   <>
                     <div className="flex items-center text-xs">
                       <Clock4Icon className="h-3 w-3 mr-1" />
-                      {application.interviewTime}
+                      {application?.interviewTime}
                     </div>
                     <div className="flex items-center text-xs">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(application.interviewDate).toLocaleDateString()}
+                      {new Date(application?.lastActivity || new Date().toISOString()).toLocaleDateString() || "--"}
                     </div>
                   </>
                 ) : "--"}
@@ -204,7 +182,7 @@ export function ApplicationsList({
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setOpen(true);
+                    handleEyeClick(application);
                   }}
                 >
                   <Eye className="h-4 w-4" />
@@ -218,7 +196,9 @@ export function ApplicationsList({
       {/* Dialog to display "Hi" message */}
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
-          <StudentApplicationHeader studentId="1" />
+          {selectedStudentId && (
+            <StudentApplicationHeader student={selectedStudentId} />
+          )}
 
       <Tabs defaultValue="personal" className="space-y-6">
         <TabsList className="w-full">
@@ -228,15 +208,15 @@ export function ApplicationsList({
         </TabsList>
 
         <TabsContent value="personal">
-          <PersonalDetailsTab studentId="1" />
+          <PersonalDetailsTab student={selectedStudentId} />
         </TabsContent>
 
         <TabsContent value="payment">
-          <PaymentInformationTab studentId="1" />
+          <PaymentInformationTab student={selectedStudentId} />
         </TabsContent>
 
         <TabsContent value="documents">
-          <DocumentsTab studentId="1" />
+          <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
         </TabsContent>
       </Tabs>
         </DialogContent>
@@ -244,10 +224,3 @@ export function ApplicationsList({
     </div>
   );
 }
-
-
-
-
-// <Dialog open={open} onOpenChange={setOpen}>
-      
-//       </Dialog>

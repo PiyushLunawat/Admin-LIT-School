@@ -152,7 +152,7 @@ export function LitmusTestForm({
 
   });
 
-  const { control, handleSubmit, watch } = form;
+  const { control, handleSubmit, watch, setValue  } = form;
   
 
   const {
@@ -209,9 +209,11 @@ export function LitmusTestForm({
               control={control}
               removeTask={removeTask}
               form={form}
+              setValue={setValue} 
             />
           ))}
-          <Button type="button"
+          <Button 
+            type="button"
             onClick={() =>
               appendTask({
                 id: generateId(),
@@ -278,9 +280,9 @@ export function LitmusTestForm({
             name="litmusTestDuration"
             render={({ field }) => (
               <FormItem>
-                <Label>LITMUS Test Duration</Label>
+                <Label>LITMUS Test Duration (days)</Label>
                 <FormControl>
-                  <Input placeholder="DD:HH:MM" {...field} />
+                  <Input placeholder="5 days" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -325,12 +327,14 @@ function TaskItem({
   control,
   removeTask,
   form,
+  setValue,
 }: {
   task: any;
   taskIndex: number;
   control: any;
   removeTask: (index: number) => void;
   form: UseFormReturn<FormData>;
+  setValue: UseFormReturn<FormData>["setValue"];
 }) {
   const {
     fields: submissionTypeFields,
@@ -556,6 +560,7 @@ function TaskItem({
           {/* Resources Section */}
           <ResourcesSection
             control={control}
+            setValue={setValue}
             taskIndex={taskIndex}
             isLinkInputVisible={isLinkInputVisible}
             setIsLinkInputVisible={setIsLinkInputVisible}
@@ -709,7 +714,7 @@ function renderConfigFields(
       return (
         <FormField
           control={control}
-          name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.characterLimit`}
+          name={`litmusTasks.${taskIndex}.submissionTypes.${subIndex}.maxFiles`}
           render={({ field }) => (
             <FormItem className="w-1/2">
               <Label>Max No. of Links</Label>
@@ -729,6 +734,7 @@ function renderConfigFields(
 // Resources Section Component
 function ResourcesSection({
   control,
+  setValue,
   taskIndex,
   isLinkInputVisible,
   setIsLinkInputVisible,
@@ -736,15 +742,30 @@ function ResourcesSection({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [resourceLink, setResourceLink] = useState("");
   const [addedLink, setAddedLink] = useState<string | null>(null);
-
+  const [error, setError] = useState<string | null>(null);
+  
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setUploadedFile(e.target.files[0]);
+    const selectedFiles = e.target.files;
+
+    if (selectedFiles && selectedFiles.length > 0) {
+      const file = selectedFiles[0];
+
+      // Set file size limit (e.g., 15MB)
+      const MAX_FILE_SIZE_MB = 15;
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        setError(`File size exceeds ${MAX_FILE_SIZE_MB} MB limit.`);
+        return;
+      }
+
+      setUploadedFile(file);
+      setValue(`litmusTasks.${taskIndex}.resources.uploadedFile`, file); // Update form value
+      setError(null);
     }
   };
-  
+
   const handleRemoveFile = () => {
     setUploadedFile(null);
+    setValue(`litmusTasks.${taskIndex}.resources.uploadedFile`, null);
   };
   
   const handleAddLink = () => {
@@ -766,12 +787,7 @@ function ResourcesSection({
           </div>
           <XIcon
             className="w-4 h-4 cursor-pointer"
-            onClick={() =>
-              control.setValue(
-                `litmusTasks.${taskIndex}.resources.uploadedFile`,
-                null
-              )
-            }
+            onClick={handleRemoveFile}
           />
         </div>
       )}
@@ -842,14 +858,7 @@ function ResourcesSection({
           type="file"
           id={`file-upload-${taskIndex}`}
           style={{ display: "none" }}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            if (e.target.files && e.target.files.length > 0) {
-              control.setValue(
-                `litmusTasks.${taskIndex}.resources.uploadedFile`,
-                e.target.files[0]
-              );
-            }
-          }}
+          onChange={handleFileUpload}
         />
         <Button type="button"
           variant="secondary"

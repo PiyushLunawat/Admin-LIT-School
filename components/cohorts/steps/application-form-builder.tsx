@@ -208,6 +208,7 @@ function TaskList({ nestIndex, control, form }: any) {
 
       {/* Add Task Button */}
       <Button
+        type="button"
         className="w-full flex gap-2 items-center"
         onClick={() =>
           appendTask({
@@ -294,6 +295,7 @@ function Task({
                       {...field}
                     />
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
                       className="text-destructive"
@@ -338,6 +340,7 @@ function Task({
               />
             ))}
             <Button
+              type="button"
               className="flex gap-2 items-center"
               variant="secondary"
               onClick={() =>
@@ -366,7 +369,7 @@ function Task({
       <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveFile} />
     </div>
   )}
-  {isLinkInputVisible && (
+  {!addedLink ? (
     <div className="relative flex items-center gap-2">
       <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
       <Input
@@ -376,6 +379,7 @@ function Task({
         onChange={(e) => setResourceLink(e.target.value)}
       />
       <Button
+        type="button"
         onClick={handleAddLink}
         disabled={!resourceLink}
         className="absolute right-2 top-1.5 h-7 rounded-full"
@@ -383,10 +387,7 @@ function Task({
         Add
       </Button>
     </div>
-  )}
-
-  {/* Display Added Link */}
-  {addedLink && (
+  ) : (
     <div className="flex items-center gap-2 p-2 border rounded">
       <Link2Icon className="w-4 h-4" />
       <span className="flex-1">{addedLink}</span>
@@ -395,6 +396,7 @@ function Task({
   )}
   <div className="flex gap-2.5">
     <Button
+      type="button"
       variant='secondary'
       className="flex flex-1 gap-2"
       onClick={() => document.getElementById(`file-upload-${taskField.id}`)?.click()}
@@ -408,6 +410,7 @@ function Task({
       onChange={handleFileUpload}
     />
     <Button
+      type="button"
       variant='secondary'
       className="flex flex-1 gap-2"
       onClick={() => setIsLinkInputVisible(true)}
@@ -586,7 +589,7 @@ function Config({
         {type === "link" ? (
           <FormField
             control={control}
-            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.characterLimit`}
+            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.maxFiles`}
             render={({ field }: any) => (
               <FormItem>
                 <Label>Max No. of Links</Label>
@@ -600,6 +603,7 @@ function Config({
         ) : null}
       </div>
       <Button
+        type="button"
         variant="ghost"
         size="icon"
         onClick={() => removeConfig(configIndex)}

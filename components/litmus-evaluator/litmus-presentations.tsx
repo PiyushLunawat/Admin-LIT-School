@@ -57,7 +57,7 @@ export function LitmusPresentations() {
             </div>
             <div className="lg:col-span-1">
               <div className="sticky top-6">
-                <Card className="h-[calc(100vh-20rem)] overflow-hidden">
+                <Card className="h-[calc(100vh-7rem)] overflow-hidden">
                   {selectedPresentationId ? (
                     <PresentationDetails
                       presentationId={selectedPresentationId}

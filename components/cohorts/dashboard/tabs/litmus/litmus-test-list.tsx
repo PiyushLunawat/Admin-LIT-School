@@ -13,24 +13,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReviewComponent } from "./litmus-test-dialog/review";
+import { getStudents } from "@/app/api/student";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
-interface LitmusSubmission {
-  id: string;
-  applicantName: string;
-  submissionDate: string;
-  evaluationStatus: string;
-  presentationDate?: string;
-  evaluator?: string;
-  scholarshipAwarded?: string;
-}
+type BadgeVariant = "destructive" | "onhold" | "lemon" | "success" | "default";
 
 interface LitmusTestListProps {
   cohortId: string;
-  onSubmissionSelect: (id: string) => void;
+  onSubmissionSelect: (id: any) => void;
   selectedIds: string[];
+  onApplicationUpdate: () => void;
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
@@ -38,42 +31,41 @@ export function LitmusTestList({
   cohortId,
   onSubmissionSelect,
   selectedIds,
+  onApplicationUpdate,
   onSelectedIdsChange,
 }: LitmusTestListProps) {
   const [open, setOpen] = useState(false);
+  const [applications, setApplications] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
-  // Sample data, this would typically be fetched
-  const submissions: LitmusSubmission[] = [
-    {
-      id: "1",
-      applicantName: "John Doe",
-      submissionDate: "2024-03-15",
-      evaluationStatus: "Pending",
-    },
-    {
-      id: "2",
-      applicantName: "Jane Smith",
-      submissionDate: "2024-03-14",
-      evaluationStatus: "Under Review",
-      evaluator: "Sarah Admin",
-    },
-    {
-      id: "3",
-      applicantName: "Mike Johnson",
-      submissionDate: "2024-03-13",
-      evaluationStatus: "Completed",
-      evaluator: "Tom Evaluator",
-      presentationDate: "2024-03-20",
-      scholarshipAwarded: "Smart Mouth (5%)",
-    },
-  ];
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await getStudents();
+        setApplications(
+          response.data.filter(
+            (student: any) =>
+              student?.litmusTestDetails[0]?.litmusTaskId !== undefined &&
+              student.cohort?._id === cohortId
+          ))       
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStudents();
+  }, []);
+
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "secondary";
+        return "lemon";
       case "under review":
-        return "warning";
+        return "onhold";
       case "completed":
         return "success";
       default:
@@ -82,10 +74,10 @@ export function LitmusTestList({
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === submissions.length) {
+    if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(submissions.map((sub) => sub.id));
+      onSelectedIdsChange(applications.map((sub: any) => sub.id));
     }
   };
 
@@ -97,6 +89,12 @@ export function LitmusTestList({
     }
   };
 
+  const handleEyeClick = (student: any) => {
+    setSelectedStudentId(student);
+    setOpen(true); 
+  };
+
+
   return (
     <div className="border rounded-lg">
       <Table>
@@ -104,7 +102,7 @@ export function LitmusTestList({
           <TableRow>
             <TableHead className="w-12">
               <Checkbox
-                checked={selectedIds.length === submissions.length}
+                checked={selectedIds.length === applications.length}
                 onCheckedChange={toggleSelectAll}
               />
             </TableHead>
@@ -117,38 +115,38 @@ export function LitmusTestList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {submissions.map((submission) => (
+          {applications.map((application: any) => (
             <TableRow
-              key={submission.id}
+              key={application._id}
               className="cursor-pointer"
-              onClick={() => onSubmissionSelect(submission.id)}
+              onClick={() => onSubmissionSelect(application)}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
-                  checked={selectedIds.includes(submission.id)}
-                  onCheckedChange={() => toggleSelectSubmission(submission.id)}
+                  checked={selectedIds.includes(application.id)}
+                  onCheckedChange={() => toggleSelectSubmission(application.id)}
                 />
               </TableCell>
               <TableCell className="font-medium">
-                {submission.applicantName}
+                {`${application?.firstName || ''} ${application?.lastName || ''}`.trim()}
               </TableCell>
               <TableCell>
-                {new Date(submission.submissionDate).toLocaleDateString()}
+                {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.createdAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(submission.evaluationStatus)}>
-                  {submission.evaluationStatus}
+                <Badge className="capitalize" variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending")}>
+                  {application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending"}
                 </Badge>
               </TableCell>
-              <TableCell>{submission.evaluator || "-"}</TableCell>
+              <TableCell>{application?.cohort?.collaborators?.email || "--"}</TableCell>
               <TableCell>
-                {submission.presentationDate ? (
+                {application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate ? (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(submission.presentationDate).toLocaleDateString()}
+                    {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate).toLocaleDateString() || "--"}
                   </div>
                 ) : (
-                  "-"
+                  "--"
                 )}
               </TableCell>
               <TableCell>
@@ -157,7 +155,7 @@ export function LitmusTestList({
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setOpen(true);
+                    handleEyeClick(application)
                   }}
                 >
                   <Eye className="h-4 w-4" />
@@ -171,7 +169,7 @@ export function LitmusTestList({
       {/* Dialog to display "Hi" message */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl">
-          <ReviewComponent/>
+          <ReviewComponent application={selectedStudentId} onApplicationUpdate={onApplicationUpdate}/>
         </DialogContent>
       </Dialog>
     </div>

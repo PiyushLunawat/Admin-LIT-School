@@ -50,7 +50,7 @@ export function StudentDetails({ student }: StudentDetailsProps) {
         </TabsList>
 
         <TabsContent value="personal">
-          {/* <PersonalDetailsTab studentId={studentId} /> */}
+          <PersonalDetailsTab student={student} />
         </TabsContent>
 {/* 
         <TabsContent value="application">
@@ -66,7 +66,7 @@ export function StudentDetails({ student }: StudentDetailsProps) {
         </TabsContent> */}
 
         <TabsContent value="payment">
-          {/* <PaymentInformationTab studentId={studentId} /> */}
+          <PaymentInformationTab studentId={student} />
         </TabsContent>
 
         {/* <TabsContent value="communications">
@@ -78,11 +78,11 @@ export function StudentDetails({ student }: StudentDetailsProps) {
         </TabsContent> */}
 
         <TabsContent value="documents">
-          {/* <DocumentsTab studentId={studentId} /> */}
+          <DocumentsTab studentId={student} />
         </TabsContent>
 
         <TabsContent value="notes">
-          {/* <InternalNotesTab studentId={studentId} /> */}
+          <InternalNotesTab studentId={student} />
         </TabsContent>
       </Tabs>
     </div>

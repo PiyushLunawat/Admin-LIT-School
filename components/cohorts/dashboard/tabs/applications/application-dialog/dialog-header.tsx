@@ -13,39 +13,23 @@ import {
   Calendar,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { getCurrentStudents } from "@/app/api/student";
+import { useEffect, useState } from "react";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+
 interface StudentHeaderProps {
-  studentId: string;
+  student: any;
 }
 
-export function StudentApplicationHeader({ studentId }: StudentHeaderProps) {
-  // In a real application, this data would be fetched based on the studentId
-  const student = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    program: "Creator Marketer",
-    cohort: "CM01JY",
-    applicationId: "APP001",
-    applicationStatus: "Accepted",
-    interviewStatus: "Rejected",
-    litmusStatus: "",
-    scholarship: "",
-    enrollmentStatus: "",
-    paymentStatus: "",
-  };
+export function StudentApplicationHeader({ student }: StudentHeaderProps) {
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "accepted":
-        return "success";
       case "completed":
-        return "success";
       case "evaluated":
-        return "success";
       case "enrolled":
-        return "success";
       case "token paid":
         return "success";
       case "rejected":
@@ -55,21 +39,27 @@ export function StudentApplicationHeader({ studentId }: StudentHeaderProps) {
     }
   };
 
+
+  if (!student) {
+    return <p>Student data not available.</p>;
+  }
+
+
   return (
     <div>
         <div className="grid gap-3">
           {/* Profile Section */}
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src="/placeholder-avatar.jpg" alt={student.name} />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src="/placeholder-avatar.jpg" alt={(student.firstName + student?.lastName) || '--'} />
+              <AvatarFallback>{student.firstName[0]}{student.lastName[0]}</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <h2 className="text-base font-semibold">{student.name}</h2>
+              <h2 className="text-base font-semibold">{student.firstName} {student.lastName}</h2>
               <div className="flex gap-4 h-5 items-center">
                 <p className="text-sm text-muted-foreground">{student.email}</p>
                 <Separator orientation="vertical" />
-                <p className="text-sm text-muted-foreground">{student.phone}</p>
+                <p className="text-sm text-muted-foreground">{student.mobileNumber}</p>
               </div>
             </div>
           </div>
@@ -79,8 +69,8 @@ export function StudentApplicationHeader({ studentId }: StudentHeaderProps) {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-muted-foreground">Program & Cohort</p>
-                <p className="font-medium">{student.program}</p>
-                <p className="text-sm">{student.cohort}</p>
+                <p className="font-medium">{student.program.name}</p>
+                <p className="text-sm">{student.cohort.cohortId}</p>
               </div>
 
               {/* Action Buttons */}
@@ -108,25 +98,25 @@ export function StudentApplicationHeader({ studentId }: StudentHeaderProps) {
             <div className="flex justify-between items-center py-3 border-t">
               <div>
                 <p className="text-sm text-muted-foreground">Application Status</p>
-                <Badge variant={getStatusColor(student.applicationStatus)}>
-                  {student.applicationStatus}
+                <Badge className="capitalize" variant={getStatusColor(student?.applicationDetails?.applicationStatus || "--")}>
+                  {student.applicationDetails.applicationStatus || "--"}
                 </Badge>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Interview Status</p>
-                {student.interviewStatus ? <Badge variant={getStatusColor(student.interviewStatus)}>
+                {student.interviewStatus ? <Badge variant={getStatusColor(student?.interviewStatus || "--")}>
                   {student.interviewStatus}
                 </Badge> : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">LITMUS Status</p>
-                {student.litmusStatus ? <Badge variant={getStatusColor(student.litmusStatus)}>
-                  {student.litmusStatus}
+                {student?.litmusTestDetails[0]?.litmusTaskId?.status ? <Badge variant={getStatusColor(student?.litmusTestDetails[0]?.litmusTaskId?.status || "--")}>
+                  {student?.litmusTestDetails[0]?.litmusTaskId?.status}
                 </Badge>  : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
-                {student.scholarship ? <Badge variant="secondary">{student.scholarship}</Badge> : "--"}
+                {student.scholarship ? <Badge variant="secondary">{student?.scholarship}</Badge> : "--"}
               </div> 
               <div>
                 <p className="text-sm text-muted-foreground">Payment Status</p>
