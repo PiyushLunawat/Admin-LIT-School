@@ -196,6 +196,8 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
                       </TableBody>
                     </Table>
                     <div className="space-y-2">
+                      {totalScholarshipAmount !==0 &&
+                      <>
                       <div className="flex justify-between">
                         <span>Total Instalment Amount:</span>
                         <span>₹{formatAmount(totalInstallmentAmount)}</span>
@@ -203,6 +205,11 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
                       <div className="flex justify-between">
                         <span>Scholarship Amount ({slab.percentage}%):</span>
                         <span className="text-red-500">- ₹{formatAmount(totalScholarshipAmount)}</span>
+                      </div>
+                      </>}
+                      <div className="flex justify-between">
+                        <span>Total Amount Payable:</span>
+                        <span className="">₹{formatAmount(totalInstallmentAmount-totalScholarshipAmount)}</span>
                       </div>
                     </div>
                   </CardContent>
