@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 
 interface SendMessageProps {
@@ -13,6 +14,18 @@ interface SendMessageProps {
 }
 
 export function SendMessage({ type, recipient }:  SendMessageProps) {
+  const [message, setMessage] = useState("Subject: ");
+  
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputValue = e.target.value;
+
+    // Ensure "Subject: " remains at the start of the input
+    if (!inputValue.startsWith("Subject: ")) {
+      setMessage("Subject: ");
+    } else {
+      setMessage(inputValue);
+    }
+  };
 
     const currentDate = new Date();
     const currentTime = format(currentDate, "HH:mm"); 
@@ -41,15 +54,25 @@ export function SendMessage({ type, recipient }:  SendMessageProps) {
           <p className="border rounded-lg p-2 font-medium">{recipient}</p>
         </div>
 
-        <div className="">
-          <p className="text-sm text-muted-foreground mb-1">Subject</p>
-          <Input type="text" placeholder="Enter subject" />
-        </div>
+        {type === "email" ?
+        <>
+          <div className="">
+            <p className="text-sm text-muted-foreground mb-1">Subject</p>
+            <Input type="text" placeholder="Enter subject" />
+          </div>
 
-        <div className="">
-          <p className="text-sm text-muted-foreground mb-1">Message</p>
-          <Textarea placeholder="Type your message here" rows={4} />
-        </div>
+          <div className="">
+            <p className="text-sm text-muted-foreground mb-1">Message</p>
+            <Textarea placeholder="Type your message here" rows={4} />
+          </div>
+          </> : 
+          <div className="">
+            <p className="text-sm text-muted-foreground mb-1">Message</p>
+            <Textarea placeholder="Type your message here" rows={6} value={message}
+      onChange={handleChange}
+      />
+          </div>
+        }
       </div>
     </div>
   );

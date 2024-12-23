@@ -47,30 +47,18 @@ export default function LoginPage() {
   return (
     <div className="w-full">
       <div className="relative">
-        <img
-          src="/assets/images/lit-banner.svg"
-          alt="BANNER"
-          className="w-full h-[200px] sm:h-[336px] object-cover"
-        />
-        <img
-          src="/assets/images/lit-logo.svg"
-          alt="LIT"
-          className="absolute top-7 left-7 w-8 sm:w-14"
-        />
+        <img src="/assets/images/lit-banner.svg" alt="BANNER" className="w-full h-[200px] sm:h-[336px] object-cover"/>
+        <img src="/assets/images/lit-logo.svg" alt="LIT" className="absolute top-7 left-7 w-8 sm:w-14"/>
       </div>
       <div className="w-full px-6 mt-8 sm:mt-14 flex justify-center items-center">
         <div className="max-w-[840px] mx-auto">
           <div className="gap-4 sm:gap-6 flex flex-col text-center">
-            <h1 className="text-xl sm:text-3xl font-semibold">
-              Join the Education Revolution!
-            </h1>
-            <p className="text-sm sm:text-base font-semibold">
-              Access your dashboard by logging in
-            </p>
+            <h1 className="text-xl sm:text-3xl font-semibold"> Join the Education Revolution! </h1>
+            <p className="text-sm sm:text-base font-semibold"> Access your dashboard </p>
           </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-8">
-              {/* Email Field */}
+
               <FormField
                 name="email"
                 control={form.control}
@@ -85,7 +73,6 @@ export default function LoginPage() {
                 )}
               />
 
-              {/* Password Field */}
               <FormField
                 name="password"
                 control={form.control}
@@ -100,7 +87,6 @@ export default function LoginPage() {
                 )}
               />
 
-              {/* Submit Button */}
               <div className="flex justify-center items-center mt-6">
                 <Button type="submit" className="w-full">
                   Login

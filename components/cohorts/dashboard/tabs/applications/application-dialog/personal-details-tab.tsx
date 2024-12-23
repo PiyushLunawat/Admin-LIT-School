@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CircleCheck, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import { format } from "date-fns";
+import { getCentres } from "@/app/api/centres";
 
 interface PersonalDetailsTabProps {
   student: any;
@@ -20,7 +22,39 @@ interface PersonalDetailsTabProps {
 
 export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [centres, setCentres] = useState<any[]>([]);
+  const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // const cohortsData = await getCohorts();
+        // const programsData = await getPrograms();
+        // setPrograms(programsData.data);
+        const centresData = await getCentres();
+        setCentres(centresData.data);
+        console.log("e",centres);
+        
+        // const openCohorts = cohortsData.data.filter((cohort:Cohort) => cohort.status === "Open");
+        // setInterest(openCohorts);
+        // setCohorts(cohortsData.data);
+      } catch (error) {
+        console.error("Error fetching programs:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const getCenterName = (centerId: string) => {
+    console.log("e",centerId);
+    const center = centres.find((c) => c._id === centerId);
+    return center ? center.name : "--";
+  };
+
+  function formatDateToMonthYear(dateString: string): string {
+    const date = new Date(dateString);
+    return format(date, "MMMM, yyyy");
+  }
 
   return (
     <div className="space-y-6">
@@ -54,7 +88,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
               <Label>Date of Birth</Label>
               <Input
                 type="date"
-                defaultValue={student?.dateOfBirth}
+                defaultValue={student?.dateOfBirth ? format(new Date(student.dateOfBirth), "yyyy-MM-dd") : ""}
                 readOnly={!isEditing}
               />
             </div>
@@ -78,13 +112,13 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Student">Student</SelectItem>
-                  <SelectItem value="CollegeGraduate">College Graduate</SelectItem>
-                  <SelectItem value="WorkingProfessional">Working Professional</SelectItem>
+                <SelectItem value="Student">Student</SelectItem>
+                  <SelectItem value="Highschool Graduate">Highschool Graduate</SelectItem>
+                  <SelectItem value="College Graduate">College Graduate</SelectItem>
+                  <SelectItem value="Working Professional">Working Professional</SelectItem>
                   <SelectItem value="Freelancer">Freelancer</SelectItem>
-                  <SelectItem value="BusinessOwner">Business Owner</SelectItem>
+                  <SelectItem value="Business Owner">Business Owner</SelectItem>
                   <SelectItem value="Consultant">Consultant</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -98,7 +132,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Cohort</Label>
               <Input
-                defaultValue={new Date(student?.cohort?.startDate).toLocaleDateString() +' '+(student?.cohort.timeSlot)+', '+ student?.cohort?.centerDetail}
+                defaultValue={formatDateToMonthYear(student?.cohort?.startDate) +' '+(student?.cohort.timeSlot)+', '+ getCenterName(student?.cohort?.centerDetail)}
                 readOnly={!isEditing}
               />
             </div>
@@ -179,7 +213,9 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                 readOnly={!isEditing}
               />
             </div>
-            <div className="space-y-2">
+            {student?.applicationDetails?.studenDetails?.workExperience &&
+            <>
+              <div className="space-y-2">
               <Label>Work Experience Type</Label>
               <Input
                 defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.ExperienceType}
@@ -193,6 +229,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                 readOnly={!isEditing}
               />
             </div>
+            </>}
           </div>
         </CardContent>
       </Card>

@@ -18,6 +18,10 @@ export function LitmusTab({ cohortId }: LitmusTabProps) {
   const [application, setApplication] = useState<any>(null);  
   const [refreshKey, setRefreshKey] = useState(0); 
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
   const handleApplicationUpdate = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
   };
@@ -46,20 +50,27 @@ export function LitmusTab({ cohortId }: LitmusTabProps) {
         </Button>
       </div>
 
-      <LitmusTestFilters />
+      <LitmusTestFilters
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
+        selectedStatus={selectedStatus}
+        onSelectedStatusChange={setSelectedStatus}
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <LitmusTestList
             cohortId={cohortId}
             key={refreshKey} 
-            onSubmissionSelect={(id) => {
-              console.log("Selected submission:", id);
-              setSelectedSubmissionId(id);
-            }}
+            onSubmissionSelect={(id) => {setSelectedSubmissionId(id);}}
             selectedIds={selectedSubmissionIds}
             onSelectedIdsChange={setSelectedSubmissionIds}
             onApplicationUpdate={handleApplicationUpdate} 
+            searchTerm={searchTerm}
+            selectedStatus={selectedStatus}
+            sortBy={sortBy}
           />
         </div>
         <div className="lg:col-span-1">

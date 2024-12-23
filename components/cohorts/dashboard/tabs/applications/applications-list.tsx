@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock4Icon, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentApplicationHeader } from "./application-dialog/dialog-header";
 import { PersonalDetailsTab } from "./application-dialog/personal-details-tab";
@@ -38,6 +38,9 @@ interface ApplicationsListProps {
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
   onApplicationUpdate: () => void;
+  searchTerm: string;
+  selectedStatus: string;
+  sortBy: string;
 }
 
 export function ApplicationsList({
@@ -46,6 +49,9 @@ export function ApplicationsList({
   selectedIds,
   onSelectedIdsChange,
   onApplicationUpdate,
+  searchTerm,
+  selectedStatus,
+  sortBy,
 }: ApplicationsListProps) {
   const [open, setOpen] = useState(false);
   const [applications, setApplications] = useState<any>([]);
@@ -62,12 +68,6 @@ export function ApplicationsList({
               student?.applicationDetails !== undefined &&
               student.cohort?._id === cohortId
           )    
-          
-          mappedStudents.sort((a: any, b: any) => {
-            const dateA = new Date(a.applicationDetails?.updatedAt).getTime();
-            const dateB = new Date(b.applicationDetails?.updatedAt).getTime();
-            return dateB - dateA;
-          });
 
           setApplications(mappedStudents);
         console.error("fetching students:", response.data);
@@ -102,6 +102,73 @@ export function ApplicationsList({
         return "default";
     }
   };
+
+  const filteredAndSortedApplications = useMemo(() => {
+    // 1) Filter
+    let filtered = applications;
+
+    // a) Search filter by applicant name
+    if (searchTerm.trim()) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter((app: any) => {
+        const name = `${app.firstName ?? ""} ${app.lastName ?? ""}`.toLowerCase();
+        return name.includes(lowerSearch);
+      });
+    }
+
+    // b) Status filter
+    if (selectedStatus !== "all") {
+      filtered = filtered.filter((app: any) => {
+        const status = app.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
+        return status === selectedStatus;
+      });
+    }
+
+    // 2) Sort
+    switch (sortBy) {
+      case "newest":
+        filtered.sort((a: any, b: any) => {
+          const dateA = new Date(
+            a?.applicationDetails?.updatedAt
+          ).getTime();
+          const dateB = new Date(
+            b?.applicationDetails?.updatedAt
+          ).getTime();
+          return dateB - dateA; // newest first
+        });
+        break;
+
+      case "oldest":
+        filtered.sort((a: any, b: any) => {
+          const dateA = new Date(
+            a?.applicationDetails?.updatedAt
+          ).getTime();
+          const dateB = new Date(
+            b?.applicationDetails?.updatedAt
+          ).getTime();
+          return dateA - dateB; // oldest first
+        });
+        break;
+
+      case "name-asc":
+        filtered.sort((a: any, b: any) => {
+          const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
+          const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        break;
+
+      case "name-desc":
+        filtered.sort((a: any, b: any) => {
+          const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
+          const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
+          return nameB.localeCompare(nameA);
+        });
+        break;
+    }
+
+    return filtered;
+  }, [applications, searchTerm, selectedStatus, sortBy]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === applications.length) {
@@ -148,7 +215,7 @@ export function ApplicationsList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {applications.map((application: any) => (
+          {filteredAndSortedApplications.map((application: any) => (
             <TableRow
               key={application.id}
               className="cursor-pointer"

@@ -132,6 +132,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "")}>{application?.applicationDetails?.applicationStatus}</Badge>
             </div>
             {!int ? 
+            application?.applicationDetails?.applicationStatus!=='initiated' && 
             <Select value={application?.applicationDetails?.applicationStatus} onValueChange={handleStatusChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Change status" />
