@@ -565,7 +565,7 @@ function Config({
             <div className="grid gap-2 mt-1">
             <Label>Allowed File Types</Label> 
               <div className="flex flex-wrap gap-1">
-              {["All", "DOC Formats", "PPT Formats", "PDF", "Excel Formats", "PSD", "EPF", "AI"].map((type) => (
+              {["All", "DOC", "PPT", "PDF", "XLS", "PSD", "EPF", "AI"].map((type) => (
                 <div key={type} className="flex items-center">
                 <Checkbox id={type} className="hidden"
                   onClick={() => toggleFileType(type)}

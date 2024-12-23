@@ -1,70 +1,115 @@
-"use client"
+"use client";
 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { AlertCircle } from "lucide-react";
-import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { z } from "zod"
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
+
+// Validation schema using Yup
+const formSchema = z.object({
+  email: z.string().nonempty("Email is required").email("Invalid email address"),
+  password: z.string().nonempty("Password is required"),
+});
+
+type LoginFormValues = {
+  email: string;
+  password: string;
+};
 
 export default function LoginPage() {
   const router = useRouter();
-  const { toast } = useToast();
-  
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleLogin = async () => {
-    setErrorMessage(null); // Reset any previous errors
+  // Initialize React Hook Form
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-      router.push("/dashboard"); 
-   
+  const onSubmit = (data: LoginFormValues) => {
+    console.log("Form Data:", data);
+    router.push("/dashboard");
   };
-  
+
   return (
     <div className="w-full">
       <div className="relative">
-        <Image src="/assets/images/lit-banner.svg" alt="BANNER" className="w-full h-[200px] sm:h-[336px] object-cover" />
-        <Image src="/assets/images/lit-logo.svg" alt="LIT" className="absolute top-7 left-7 w-8 sm:w-14" />
+        <img
+          src="/assets/images/lit-banner.svg"
+          alt="BANNER"
+          className="w-full h-[200px] sm:h-[336px] object-cover"
+        />
+        <img
+          src="/assets/images/lit-logo.svg"
+          alt="LIT"
+          className="absolute top-7 left-7 w-8 sm:w-14"
+        />
       </div>
-          <div className="w-full px-6 mt-8 sm:mt-14 justify-center items-center">
-          <div className='max-w-[840px] mx-auto'>
-            <div className="gap-4 sm:gap-6 flex flex-col text-center">
-              <div className=" text-xl sm:text-3xl font-semibold ">Join the Education Revolution!</div>
-              <div className=" text-sm sm:text-base font-semibold ">Access your dashboard by verifying your contact number</div>
-            </div>
-            <div className="flex flex-col gap-4 mt-8">
-              <div className='flex-1 space-y-1'>
-                <Label htmlFor="email" className='text-sm font-normal pl-3'>Enter your Email</Label>
-                <Input id="email" type="email" placeholder="johndoe@gmail.com" 
-                value={email} className='items-center text-sm text-[#FF503D] font-normal pl-3' />
-                  <Label className=""><AlertCircle className='w-3 h-3'/>This Email does not exists.</Label> 
-              </div>
-
-              <div className='flex-1 space-y-1'>
-                <Label htmlFor="password" className='text-sm font-normal pl-3'>Enter your Password</Label>
-                <Input id="password" type="password" placeholder="******" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}/>
-                {/* <Label htmlFor="password-error" className='flex gap-1 items-center text-sm text-[#FF503D] font-normal pl-3'><AlertCircle className='w-3 h-3'/>Incorrect password.</Label> */}
-              </div>
-
-              {errorMessage && (
-                <div className="text-sm text-[#FF503D] flex items-center gap-1 pl-3 mt-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {errorMessage}
-                </div>
-               )}
-
-              <div className="flex gap-2 justify-between items-center mt-6">
-                <Button onClick={handleLogin} className='flex-1 space-y-1' >Login</Button>
-              </div>
+      <div className="w-full px-6 mt-8 sm:mt-14 flex justify-center items-center">
+        <div className="max-w-[840px] mx-auto">
+          <div className="gap-4 sm:gap-6 flex flex-col text-center">
+            <h1 className="text-xl sm:text-3xl font-semibold">
+              Join the Education Revolution!
+            </h1>
+            <p className="text-sm sm:text-base font-semibold">
+              Access your dashboard by logging in
+            </p>
           </div>
-            </div>
-          </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-8">
+              {/* Email Field */}
+              <FormField
+                name="email"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <Label>Email Address</Label>
+                    <FormControl>
+                      <Input placeholder="johndoe@gmail.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Password Field */}
+              <FormField
+                name="password"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <Label >Password</Label>
+                    <FormControl>
+                      <Input type="password" placeholder="******" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Submit Button */}
+              <div className="flex justify-center items-center mt-6">
+                <Button type="submit" className="w-full">
+                  Login
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }

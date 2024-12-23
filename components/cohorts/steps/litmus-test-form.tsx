@@ -22,6 +22,8 @@ import {
   FileIcon,
   Link2Icon,
   PlusIcon,
+  FileLineChart,
+  SmileIcon,
 } from "lucide-react";
 import { z } from "zod";
 import {
@@ -76,7 +78,7 @@ const formSchema = z.object({
       id: z.string(),
       name: z.string().nonempty("Slab name is required"),
       percentage: z.coerce.number().min(0, "Percentage cannot be negative"),
-      clearance: z.coerce.number().min(0, "Clearance cannot be negative"),
+      clearance: z.coerce.string().nonempty("Clearance is required"),
       description: z.string().optional(),
     })
   ),
@@ -262,7 +264,7 @@ export function LitmusTestForm({
                 id: generateId(),
                 name: "",
                 percentage: 0,
-                clearance: 0,
+                clearance: "",
                 description: "",
               })
             }
@@ -355,7 +357,7 @@ function TaskItem({
   });
 
   // Resource state
-  const [isLinkInputVisible, setIsLinkInputVisible] = React.useState(false);
+  const [isLinkInputVisible, setIsLinkInputVisible] = React.useState(!!task?.resources?.resourceLink);
 
   return (
     <Card key={task.id}>
@@ -564,6 +566,7 @@ function TaskItem({
             taskIndex={taskIndex}
             isLinkInputVisible={isLinkInputVisible}
             setIsLinkInputVisible={setIsLinkInputVisible}
+            link={task?.resources?.resourceLink || ""}
           />
         </div>
       </CardContent>
@@ -671,7 +674,7 @@ function renderConfigFields(
               defaultValue={["All"]} // Initialize with "All" selected
               render={({ field }) => (
                 <div className="flex flex-wrap gap-1">
-                  {["All", "DOC", "PPT", "PDF", "Excel", "PSD", "EPF", "AI"].map((type) => (
+                  {["All", "DOC", "PPT", "PDF", "XLS", "PSD", "EPF", "AI"].map((type) => (
                     <div key={type} className="flex items-center">
                       <Checkbox className="hidden"
                         id={`${type}-${taskIndex}-${subIndex}`}
@@ -738,10 +741,11 @@ function ResourcesSection({
   taskIndex,
   isLinkInputVisible,
   setIsLinkInputVisible,
+  link,
 }: any) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [resourceLink, setResourceLink] = useState("");
-  const [addedLink, setAddedLink] = useState<string | null>(null);
+  const [resourceLink, setResourceLink] = useState(link || "");
+  const [addedLink, setAddedLink] = useState<string | null>(link || null);
   const [error, setError] = useState<string | null>(null);
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -774,6 +778,7 @@ function ResourcesSection({
   
   const handleRemoveLink = () => {
     setAddedLink(null);
+    setResourceLink("");
   };
 
   return (
@@ -791,43 +796,55 @@ function ResourcesSection({
           />
         </div>
       )}
-      {isLinkInputVisible && (
-        <FormField
-          control={control}
-          name={`litmusTasks.${taskIndex}.resources.resourceLink`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <div className="relative flex items-center gap-2">
-                  <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
-                  <Input
-                    className="pl-8 text-sm"
-                    placeholder="Enter URL here"
-                    {...field}
-                  />
-                  {addedLink === null ? 
-                  <Button type="button"
-                    onClick={() => handleAddLink}
-                    disabled={!field.value}
-                    className="absolute right-2 top-1.5 h-7 rounded-full"
-                  >
-                    Add
-                  </Button> : 
-                  <Button type="button"
-                    onClick={() => handleRemoveLink}
-                    size={"icon"} variant={"ghost"}
-                    className="absolute right-2 top-1.5 h-7 w-7"
-                  >
-                    <XIcon className="w-4 h-4"/>
-                  </Button>}
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-      {resourceLink && !isLinkInputVisible && (
+     
+     {isLinkInputVisible && (
+  <FormField
+    control={control}
+    name={`litmusTasks.${taskIndex}.resources.resourceLink`}
+    render={({ field }) => (
+      <FormItem>
+        <FormControl>
+          <div className="relative flex items-center gap-2">
+            <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
+            <Input
+              className="pl-8 text-sm"
+              placeholder="Enter URL here"
+              {...field}
+              value={resourceLink}
+              onChange={(e) => {
+                setResourceLink(e.target.value);
+                field.onChange(e.target.value);
+              }}
+            />
+            {addedLink === null ? (
+              <Button
+                type="button"
+                onClick={() => handleAddLink()} // Properly invoking the function
+                disabled={!field.value}
+                className="absolute right-2 top-1.5 h-7 rounded-full"
+              >
+                Add
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => {handleRemoveLink();field.onChange("");}}
+                size={"icon"}
+                variant={"ghost"}
+                className="absolute right-2 top-1.5 h-7 w-7"
+              >
+                <XIcon className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+)}
+
+      {/* {resourceLink && (
         <div className="flex items-center gap-2 p-2 border rounded">
           <Link2Icon className="w-4 h-4" />
           <span className="flex-1">{resourceLink}</span>
@@ -841,7 +858,7 @@ function ResourcesSection({
             }
           />
         </div>
-      )}
+      )} */}
       <div className="flex gap-2.5">
         <Button type="button"
           variant="secondary"
@@ -863,6 +880,7 @@ function ResourcesSection({
         <Button type="button"
           variant="secondary"
           className="flex flex-1 gap-2"
+          disabled={resourceLink}
           onClick={() => setIsLinkInputVisible(true)}
         >
           <Link2Icon className="w-4 h-4" /> Attach Resource Link
@@ -934,18 +952,41 @@ function ScholarshipSlabItem({
               )}
             />
             <FormField
-              control={control}
-              name={`scholarshipSlabs.${slabIndex}.clearance`}
-              render={({ field }) => (
-                <FormItem className="w-1/2">
-                  <Label>LITMUS Challenge Clearance (%)</Label>
-                  <FormControl>
-                    <Input type="number" placeholder="10-30" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+  control={control}
+  name={`scholarshipSlabs.${slabIndex}.clearance`}
+  render={({ field }) => (
+    <FormItem className="w-1/2">
+      <Label>LITMUS Challenge Clearance (%)</Label>
+      <FormControl>
+        <div className="flex items-center gap-2">
+          {/* First Input */}
+          <Input
+            type="number"
+            placeholder="Start"
+            value={typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : ""}
+            onChange={(e) => {
+              const endValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : "";
+              field.onChange(`${e.target.value}-${endValue}`);
+            }}
+          />
+          <span>-</span>
+          {/* Second Input */}
+          <Input
+            type="number"
+            placeholder="End"
+            value={typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : ""}
+            onChange={(e) => {
+              const startValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : "";
+              field.onChange(`${startValue}-${e.target.value}`);
+            }}
+          />
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
           </div>
           <FormField
             control={control}

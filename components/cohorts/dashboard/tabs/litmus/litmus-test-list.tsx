@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client"; // Import Socket.IO client
 import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getStudents } from "@/app/api/student";
 
@@ -66,27 +65,6 @@ export function LitmusTestList({
     }
 
     fetchStudents();
-
-    // Connect to WebSocket server
-    const socket = io("http://localhost:3000"); // Replace with your server URL
-
-    // Listen for the "studentAdded" event
-    socket.on("studentAdded", (newStudent) => {
-      setApplications((prevApplications: any) => {
-        const updatedApplications = [newStudent, ...prevApplications];
-        updatedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a.litmusTestDetails[0]?.litmusTaskId?.updatedAt).getTime();
-          const dateB = new Date(b.litmusTestDetails[0]?.litmusTaskId?.updatedAt).getTime();
-          return dateB - dateA;
-        });
-        return updatedApplications;
-      });
-    });
-
-    // Cleanup on component unmount
-    return () => {
-      socket.disconnect();
-    };
   }, [cohortId]);
 
   const getStatusColor = (status: string): BadgeVariant => {

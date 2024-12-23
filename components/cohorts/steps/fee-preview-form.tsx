@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Calendar } from "lucide-react";
 import { add, format, differenceInDays } from "date-fns";
 
@@ -25,6 +25,16 @@ interface FeePreviewFormProps {
 export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
   const [newBaseFee, setNewBaseFee] = useState(initialData?.baseFee || 0);
   const [editableDates, setEditableDates] = useState<any>({});
+  const uniqueId = useId(); // Generate a unique ID
+
+  // Map scholarship slabs to unique IDs
+  const scholarshipSlabs =
+    initialData?.litmusTestDetail?.[0].scholarshipSlabs?.map((slab: any, index: number) => ({
+      ...slab,
+      id: `${uniqueId}-${index}`, // Append index to ensure unique IDs per slab
+    })) || [];
+    console.log("bebe",scholarshipSlabs);
+    
 
   useEffect(() => {
     if (initialData?.isGSTIncluded === false) {
@@ -114,7 +124,6 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
     };
   };
 
-  const scholarshipSlabs = initialData?.litmusTestDetail?.[0].scholarshipSlabs || [];
 
   const logInstallmentDetails = () => {
     const allInstallments = scholarshipSlabs.map((slab: any) => {
@@ -128,15 +137,21 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
     });
 
     const zeroScholarshipSlab = { percentage: 0, name: "0% Scholarship" };
-    const zeroScholarshipInstallments = {
+    // const zeroScholarshipInstallments = {
+    //   slabName: "0% Scholarship",
+    //   slabPercentage: 0,
+    //   installments: Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
+    //     return calculateInstallments(semesterIndex, zeroScholarshipSlab);
+    //   }),
+    // }
+
+    allInstallments.push({  
       slabName: "0% Scholarship",
       slabPercentage: 0,
       installments: Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
         return calculateInstallments(semesterIndex, zeroScholarshipSlab);
       }),
-    }
-
-    allInstallments.push({ zeroScholarshipInstallments });
+     });
     console.log("All Semester Installments:", allInstallments);
   };
 
@@ -177,7 +192,6 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
                           <TableRow key={index}>
                             <TableCell>
                               <div className="flex gap-2 items-center">
-                                <Calendar className="w-4 h-4" />
                                 <input
                                   type="date"
                                   value={installment.installmentDate}
@@ -195,7 +209,7 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
                         ))}
                       </TableBody>
                     </Table>
-                    <div className="space-y-2">
+                    <div className="space-y-2 text-sm">
                       {totalScholarshipAmount !==0 &&
                       <>
                       <div className="flex justify-between">
