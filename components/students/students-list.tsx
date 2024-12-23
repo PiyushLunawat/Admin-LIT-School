@@ -16,7 +16,7 @@ import { Eye, Mail, UserMinus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getStudents } from "@/app/api/student";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "default";
 
 interface Student {
   id: string;
@@ -50,88 +50,55 @@ export function StudentsList({
     async function fetchStudents() {
       try {
         const response = await getStudents();
-        setStudents(
-          response.data.map((student: any) => ({
-            id: student._id,
-            name: `${student.firstName || ''} ${student.lastName || ''}`.trim(),
-            applicationId: student.applicationId || "--",
-            email: student.email || "--",
-            phone: student.mobileNumber || "--",
-            program: student.program?.name || "--", // Ensure it's a string
-            cohort: student.cohort?.cohortId || "--",  // Ensure it's a string
-            applicationStatus: student.applicationDetails?.applicationStatus || "--",
-            enrollmentStatus: student.enrollmentStatus || "Not Enrolled",
-            paymentStatus: student.paymentStatus || "Pending",
-            scholarship: student.scholarship ? `${student.scholarship}%` : "--",
-            lastActivity: student.lastActivity || new Date().toISOString(),
-          }))
-        );        
+        const mappedStudents = response.data.map((student: any) => ({
+          id: student._id,
+          name: `${student.firstName || ''} ${student.lastName || ''}`.trim(),
+          applicationId: student.applicationId || "--",
+          email: student.email || "--",
+          phone: student.mobileNumber || "--",
+          program: student.program?.name || "--",
+          cohort: student.cohort?.cohortId || "--",
+          applicationStatus: student.applicationDetails?.applicationStatus || "--",
+          enrollmentStatus: student.litmusTestDetails[0]?.litmusTaskId?.status || "Not Enrolled",
+          paymentStatus: student.paymentStatus || "Pending",
+          scholarship: student.scholarship ? `${student.scholarship}%` : "--",
+          lastActivity: student.updatedAt || new Date().toISOString(),
+        }));
+  
+        // Sort the students by lastActivity in descending order
+        mappedStudents.sort((a: any, b: any) => {
+          const dateA = new Date(a.lastActivity).getTime();
+          const dateB = new Date(b.lastActivity).getTime();
+          return dateB - dateA;
+        });
+  
+        setStudents(mappedStudents);
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
         setLoading(false);
       }
     }
-
+  
     fetchStudents();
   }, []);
-  // const students: Student[] = [
-  //   {
-  //     id: "1",
-  //     name: "John Doe",
-  //     applicationId: "APP001",
-  //     email: "john.doe@example.com",
-  //     phone: "+91 98765 43210",
-  //     program: "Creator Marketer",
-  //     cohort: "CM01JY",
-  //     applicationStatus: "Accepted",
-  //     enrollmentStatus: "Enrolled",
-  //     paymentStatus: "Token Paid",
-  //     scholarship: "5%",
-  //     lastActivity: "2024-03-20",
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "Jane Smith",
-  //     applicationId: "APP002",
-  //     email: "jane.smith@example.com",
-  //     phone: "+91 98765 43211",
-  //     program: "Creator Marketer",
-  //     cohort: "CM02JY",
-  //     applicationStatus: "Under Review",
-  //     enrollmentStatus: "Not Enrolled",
-  //     paymentStatus: "Pending",
-  //     scholarship: "-",
-  //     lastActivity: "2024-03-19",
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "Mike Johnson",
-  //     applicationId: "APP003",
-  //     email: "mike.johnson@example.com",
-  //     phone: "+91 98765 43212",
-  //     program: "Digital Marketing",
-  //     cohort: "DM01JY",
-  //     applicationStatus: "Interview Scheduled",
-  //     enrollmentStatus: "Not Enrolled",
-  //     paymentStatus: "Pending",
-  //     scholarship: "-",
-  //     lastActivity: "2024-03-18",
-  //   },
-  // ];
-
+  
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
+      case "initiated":
+        return "default";
+      case "under review":
+        return "secondary";
+      case "on hold":
+        return "onhold";
       case "accepted":
         return "success";
-      case "initiated":
-        return "success";
-      case "under review":
-        return "warning";
       case "rejected":
         return "destructive";
-      case "enrolled":
+      case "completed":
         return "success";
+      case "not enrolled":
+        return "default";
       case "not enrolled":
         return "secondary";
       case "dropped":
@@ -168,6 +135,7 @@ export function StudentsList({
   };
 
   return (
+  <>
     <div className="border rounded-lg">
       <Table>
         <TableHeader>
@@ -251,5 +219,30 @@ export function StudentsList({
         </TableBody>
       </Table>
     </div>
+    {/* <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div> */}
+  </>
   );
 }

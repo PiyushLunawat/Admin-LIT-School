@@ -7,14 +7,22 @@ import { ApplicationsTab } from "@/components/cohorts/dashboard/tabs/application
 import { LitmusTab } from "@/components/cohorts/dashboard/tabs/litmus/litmus-tab";
 import { PaymentsTab } from "@/components/cohorts/dashboard/tabs/payments/payments-tab";
 import { CommunicationsTab } from "@/components/cohorts/dashboard/tabs/communications/communications-tab";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface CohortDashboardProps {
   cohortId: string;
 }
 
 export function CohortDashboard({ cohortId }: CohortDashboardProps) {
+  const router = useRouter();
+
   return (
     <div className="p-6 space-y-6">
+      <div className="flex gap-2 items-center cursor-pointer" onClick={()=>{router.push(`/dashboard/cohorts`);}}>
+        <ArrowLeft className="w-4 h-4"/>
+        Back to Cohorts 
+      </div>
       <CohortHeader cohortId={cohortId} />
       
       <Tabs defaultValue="overview" className="space-y-6">

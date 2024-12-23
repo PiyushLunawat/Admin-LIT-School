@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client"; // Import Socket.IO client
 import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getStudents } from "@/app/api/student";
 
@@ -43,12 +44,20 @@ export function LitmusTestList({
     async function fetchStudents() {
       try {
         const response = await getStudents();
-        setApplications(
+        const mappedStudents =
           response.data.filter(
             (student: any) =>
               student?.litmusTestDetails[0]?.litmusTaskId !== undefined &&
               student.cohort?._id === cohortId
-          ))       
+          );
+
+        mappedStudents.sort((a: any, b: any) => {
+          const dateA = new Date(a.litmusTestDetails[0]?.litmusTaskId?.updatedAt).getTime();
+          const dateB = new Date(b.litmusTestDetails[0]?.litmusTaskId?.updatedAt).getTime();
+          return dateB - dateA;
+        });
+
+        setApplications(mappedStudents);
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
@@ -57,8 +66,28 @@ export function LitmusTestList({
     }
 
     fetchStudents();
-  }, []);
 
+    // Connect to WebSocket server
+    const socket = io("http://localhost:3000"); // Replace with your server URL
+
+    // Listen for the "studentAdded" event
+    socket.on("studentAdded", (newStudent) => {
+      setApplications((prevApplications: any) => {
+        const updatedApplications = [newStudent, ...prevApplications];
+        updatedApplications.sort((a: any, b: any) => {
+          const dateA = new Date(a.litmusTestDetails[0]?.litmusTaskId?.updatedAt).getTime();
+          const dateB = new Date(b.litmusTestDetails[0]?.litmusTaskId?.updatedAt).getTime();
+          return dateB - dateA;
+        });
+        return updatedApplications;
+      });
+    });
+
+    // Cleanup on component unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, [cohortId]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -91,9 +120,8 @@ export function LitmusTestList({
 
   const handleEyeClick = (student: any) => {
     setSelectedStudentId(student);
-    setOpen(true); 
+    setOpen(true);
   };
-
 
   return (
     <div className="border rounded-lg">
@@ -128,17 +156,25 @@ export function LitmusTestList({
                 />
               </TableCell>
               <TableCell className="font-medium">
-                {`${application?.firstName || ''} ${application?.lastName || ''}`.trim()}
+                {`${application?.firstName || ""} ${application?.lastName || ""}`.trim()}
               </TableCell>
               <TableCell>
-                {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.createdAt).toLocaleDateString() || "--"}
+                {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
-                <Badge className="capitalize" variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending")}>
+                <Badge
+                  className="capitalize"
+                  variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending")}
+                >
                   {application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending"}
                 </Badge>
               </TableCell>
-              <TableCell>{application?.cohort?.collaborators?.email || "--"}</TableCell>
+              <TableCell>
+                {application?.cohort?.collaborators
+                  ?.filter((collaborator: any) => collaborator.role === "evaluator")
+                  .map((collaborator: any) => collaborator.email)
+                  .join(", ") || "--"}
+              </TableCell>
               <TableCell>
                 {application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate ? (
                   <div className="flex items-center text-sm">
@@ -153,9 +189,10 @@ export function LitmusTestList({
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="hover:bg-black"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleEyeClick(application)
+                    handleEyeClick(application);
                   }}
                 >
                   <Eye className="h-4 w-4" />
@@ -166,10 +203,9 @@ export function LitmusTestList({
         </TableBody>
       </Table>
 
-      {/* Dialog to display "Hi" message */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl">
-          <ReviewComponent application={selectedStudentId} onApplicationUpdate={onApplicationUpdate}/>
+          <ReviewComponent application={selectedStudentId} onApplicationUpdate={onApplicationUpdate} />
         </DialogContent>
       </Dialog>
     </div>

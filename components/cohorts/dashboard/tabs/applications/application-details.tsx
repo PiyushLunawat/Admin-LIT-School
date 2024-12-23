@@ -31,6 +31,8 @@ import SubmissionView from "./submission-view";
 import ApplicationFeedback from "./application-feedback";
 import { getCurrentStudents } from "@/app/api/student";
 import { log } from "console";
+import { PreviousMessage } from "../communications/communication-dialog/preview-message";
+import { SendMessage } from "./application-dialog/send-message";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface ApplicationDetailsProps {
@@ -42,11 +44,13 @@ interface ApplicationDetailsProps {
 export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate  }: ApplicationDetailsProps) {
 
   const [open, setOpen] = useState(false);
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState('');
+  const [recipient, setRecipient] = useState('');
   const [int, setInt] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false); // For ApplicationFeedback dialog
   const [application, setApplication] = useState<any>(null);
   const [status, setStatus] = useState(application?.applicationDetails?.applicationStatus || "under review");
-  const [cohorts, setCohorts] = useState<any[]>([]);
  
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -85,6 +89,11 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
     }
   }
 
+  const handleSendMessage = (type: string, recipient: string) => {
+    setSelectedMessage(type);
+    setRecipient(recipient)
+    setMessageOpen(true);
+  };
 
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
@@ -169,12 +178,12 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
           <div className="space-y-2">
             <h4 className="font-medium">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('email', application?.email)}>
                 <Mail className="h-4 w-4 mr-2" />
                 Send Email
               </Button>
-              <Button variant="outline" className="justify-start">
-                <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
+              <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('whatsapp', application?.mobileNumber)}>
+                <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2"/>
                 Send WhatsApp
               </Button>
               <Button variant="outline" className="justify-start">
@@ -261,6 +270,15 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
             </div>
           </div>
           <SubmissionView tasks={application?.cohort?.applicationFormDetail?.[0]?.task} submission={application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]}/>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
+        <DialogContent className="max-w-4xl">
+          <SendMessage
+            type={selectedMessage}
+            recipient={recipient}
+          />
         </DialogContent>
       </Dialog>
 

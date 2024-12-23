@@ -268,12 +268,12 @@ const feedbackData = sections.map((section) => {
         <div className="text-[#FFF552] text-md font-medium">
           Submission 0{index+1}
         </div>
-        {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0][index]?.task?.text?.map((textItem: string, id: number) => (
+        {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.text?.map((textItem: string, id: number) => (
               <div key={`text-${id}`} className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">
                 {textItem}
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0][index]?.task?.links?.map((linkItem: string, id: number) => (
+            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.links?.map((linkItem: string, id: number) => (
               <div key={`link-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <Link2Icon className="w-4 h-4" />
                 <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -281,7 +281,7 @@ const feedbackData = sections.map((section) => {
                 </a>
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0][index]?.task?.images?.map((imageItem: string, id: number) => (
+            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.images?.map((imageItem: string, id: number) => (
               <div key={`image-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <ImageIcon className="w-4 h-4" />
                 <a href={imageItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -289,7 +289,7 @@ const feedbackData = sections.map((section) => {
                 </a>
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0][index]?.task?.videos?.map((videoItem: string, id: number) => (
+            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.videos?.map((videoItem: string, id: number) => (
               <div key={`video-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <VideoIcon className="w-4 h-4" />
                 <a href={videoItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -297,7 +297,7 @@ const feedbackData = sections.map((section) => {
                 </a>
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0][index]?.task?.files?.map((fileItem: string, id: number) => (
+            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.files?.map((fileItem: string, id: number) => (
               <div key={`file-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <FileIcon className="w-4 h-4" />
                 <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">

@@ -25,17 +25,19 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
 
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">Why are you interested in joining The LIT School?</h4>
-              <div className="mt-2">
-                <div className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text1}</div> 
-              </div>
+            {submission?.courseDive?.text1 && 
+            <div className="mt-2">
+              <div className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text1}</div> 
+            </div>}
             </div>
             
 
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">What are your career goals or aspirations??</h4>
+              {submission?.courseDive?.text2 &&
               <div className="mt-2">
                 <div className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text2}</div> 
-              </div>
+              </div>}
             </div>
 
           </div>
@@ -68,6 +70,7 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
             </div> */}
 
             <div className="mt-4">
+            {submission && 
               <div className='flex justify-between items-center'>
                 <Badge variant="lemon"  className="px-3 py-2 text-sm bg-[#FFF552]/[0.2] border-[#FFF552]">
                   Submission
@@ -77,8 +80,8 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                       .map((configItem: any) => configItem?.type)
                       .join(", ")}
                 </div>
-              </div>
-              {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
+              </div>}
+            {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
               <div key={`text-${id}`} className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">
                 {textItem}
               </div>

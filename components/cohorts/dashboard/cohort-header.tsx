@@ -108,18 +108,32 @@ export function CohortHeader({ cohortId }: CohortHeaderProps) {
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Seats</p>
             <div className="flex justify-between text-sm">
-              <span>Filled</span>
+              <p className="">Seats Progress</p>
               <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
             </div>
             <Progress
               states={[
-                { value: ((cohort.registered - cohort.applicationfee) / cohort.filledSeats.length) * 100, color: '#2EB88A' },
-                { value: ((cohort.applicationfee - cohort.filled) / cohort.filledSeats.length) * 100, color: '#FBBF24' },
-                { value: (cohort.filled / cohort.filledSeats.length) * 100, color: '#EF4444' },
+                { value: cohort.filledSeats.length, widt: (cohort.filledSeats.length / cohort.totalSeats) * 100, color: '#2EB88A' },
+                { value: 3, widt: (3 / cohort.totalSeats) * 100, color: '#00A3FF' },
+                { value: 2, widt: (2 / cohort.totalSeats) * 100, color: '#FF791F' },
               ]}
             />
+              <div className="flex gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 bg-[#2EB88A] rounded-full"></div>
+                  <span className="text-xs text-muted-foreground">Admission Fee Paid</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 bg-[#00A3FF] rounded-full"></div>
+                  <span className="text-xs text-muted-foreground">Interview Cleared</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 bg-[#FF791F] rounded-full"></div>
+                  <span className="text-xs text-muted-foreground">Applied</span>
+                </div>
+              </div>
+
           </div>
         </div>
         <div className="pt-4">

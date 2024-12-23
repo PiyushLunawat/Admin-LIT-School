@@ -56,12 +56,20 @@ export function ApplicationsList({
     async function fetchStudents() {
       try {
         const response = await getStudents();
-        setApplications(
+        const mappedStudents =
           response.data.filter(
             (student: any) =>
               student?.applicationDetails !== undefined &&
               student.cohort?._id === cohortId
-          ))       
+          )    
+          
+          mappedStudents.sort((a: any, b: any) => {
+            const dateA = new Date(a.applicationDetails?.updatedAt).getTime();
+            const dateB = new Date(b.applicationDetails?.updatedAt).getTime();
+            return dateB - dateA;
+          });
+
+          setApplications(mappedStudents);
         console.error("fetching students:", response.data);
       } catch (error) {
         console.error("Error fetching students:", error);
@@ -153,9 +161,9 @@ export function ApplicationsList({
                 />
               </TableCell>
               <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
-              <TableCell className="!w-[32px] truncate">{application?.applicationDetails?._id || "--"}</TableCell>
+              <TableCell className="!w-[32px] truncate">{application?._id || "--"}</TableCell>
               <TableCell>
-                {new Date(application?.applicationDetails?.createdAt).toLocaleDateString() || "--"}
+                {new Date(application?.applicationDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
                 <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "--")}>
@@ -179,7 +187,7 @@ export function ApplicationsList({
               <TableCell>
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="icon" className="hover:bg-black"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleEyeClick(application);

@@ -410,7 +410,10 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                   <span>Seats Filled</span>
                   <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
                 </div>
-                <Progress states={[ {value:((cohort.filledSeats.length / cohort.totalSeats) * 100)} ]} />
+                <Progress 
+                  states={[
+                    { value: cohort.filledSeats.length, widt: (cohort.filledSeats.length / cohort.totalSeats) * 100, color: '#2EB88A' }
+                  ]} />
               </div>
             )}
           </CardContent>
@@ -454,8 +457,10 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                   <span>Seats Filled</span>
                   <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
                 </div>
-                <Progress states={[ {value:((cohort.filledSeats.length / cohort.totalSeats) * 100)} ]} />
-
+                <Progress
+                  states={[
+                    { value: cohort.filledSeats.length, widt: (cohort.filledSeats.length / cohort.totalSeats) * 100, color: '#2EB88A' }
+                  ]} />
               </div>
             )}
           </CardContent>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
-import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
 import { Label } from "@/components/ui/label";
 import {
   Select,
