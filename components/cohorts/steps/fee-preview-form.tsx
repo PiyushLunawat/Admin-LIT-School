@@ -29,7 +29,7 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
 
   // Map scholarship slabs to unique IDs
   const scholarshipSlabs =
-    initialData?.litmusTestDetail?.[0].scholarshipSlabs?.map((slab: any, index: number) => ({
+    initialData?.litmusTestDetail?.[0]?.scholarshipSlabs?.map((slab: any, index: number) => ({
       ...slab,
       id: `${uniqueId}-${index}`, // Append index to ensure unique IDs per slab
     })) || [];
