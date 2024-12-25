@@ -95,6 +95,11 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
     return centre ? centre.name : "Unknown Centre";
   };
 
+  const formatAmount = (value: number | undefined) =>
+      value !== undefined
+        ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
+        : "--";
+
   const getStatusColor = (status: CohortStatus): BadgeVariant => {
     switch (status) {
       case "Draft":
@@ -402,7 +407,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
               <p className="text-sm text-muted-foreground">
                 {new Date(cohort.startDate).toLocaleDateString()} - {new Date(cohort.endDate).toLocaleDateString()}
               </p>
-              <p className="text-sm font-medium">{cohort.baseFee}</p>
+              <p className="text-sm font-medium">₹{formatAmount(Number(cohort.baseFee))}</p>
             </div>
             {cohort.status !== "Draft" && (
               <div className="space-y-2">
@@ -449,7 +454,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
               <p className="text-sm text-muted-foreground">
                 {new Date(cohort.startDate).toLocaleDateString()} - {new Date(cohort.endDate).toLocaleDateString()}
               </p>
-              <p className="text-sm font-medium">{cohort.baseFee}</p>
+              <p className="text-sm font-medium">₹{formatAmount(Number(cohort.baseFee))}</p>
             </div>
             {cohort.status !== "Draft" && (
               <div className="space-y-2">

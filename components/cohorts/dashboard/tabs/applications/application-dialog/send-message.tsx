@@ -51,7 +51,7 @@ export function SendMessage({ type, recipient }:  SendMessageProps) {
       <div className="space-y-2">
         <div className="">
           <p className="text-sm text-muted-foreground mb-1">Recipient</p>
-          <p className="border rounded-lg p-2 font-medium">{recipient}</p>
+          <p className="border text-sm rounded-lg p-2 font-medium">{recipient}</p>
         </div>
 
         {type === "email" ?

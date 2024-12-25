@@ -242,14 +242,14 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Father&apos;s Name</Label>
               <Input
-                defaultValue={student?.studentDetails?.parentInformation?.father?.firstName}
+                defaultValue={student?.studentDetails?.parentInformation?.father?.firstName+' '+student?.studentDetails?.parentInformation?.father?.lastName}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Mother&apos;s Name</Label>
               <Input
-                defaultValue={student?.studentDetails?.parentInformation?.mother?.firstName}
+                defaultValue={student?.studentDetails?.parentInformation?.mother?.firstName+' '+student?.studentDetails?.parentInformation?.mother?.lastName}
                 readOnly={!isEditing}
               />
             </div>
@@ -263,7 +263,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Mother&apos;s Contact Number</Label>
               <Input
-                defaultValue={student?.studentDetails?.parentInformation?.mother?.firstName}
+                defaultValue={student?.studentDetails?.parentInformation?.mother?.contactNumber}
                 readOnly={!isEditing}
               />
             </div>

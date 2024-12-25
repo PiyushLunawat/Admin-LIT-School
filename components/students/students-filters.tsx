@@ -10,8 +10,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
+import { getCohorts } from "@/app/api/cohorts";
+import { useEffect, useState } from "react";
+import { getCentres } from "@/app/api/centres";
+import { getPrograms } from "@/app/api/programs";
 
 export function StudentsFilters() {
+  const [interest, setInterest] = useState<any[]>([]);  
+  const [programs, setPrograms] = useState<any[]>([]);  
+  const [centres, setCentres] = useState<any[]>([]);  
+  const [cohorts, setCohorts] = useState<any[]>([]);  
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const cohortsData = await getCohorts();
+        const programsData = await getPrograms();
+        setPrograms(programsData.data);
+        const centresData = await getCentres();
+        setCentres(centresData.data);
+        setInterest(programsData.data);
+        console.log("sg",programsData.data);
+        
+        setCohorts(cohortsData.data);
+      } catch (error) {
+        console.error("Error fetching programs:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       <div className="relative flex-1">
@@ -25,8 +53,11 @@ export function StudentsFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all-programs">All Programs</SelectItem>
-            <SelectItem value="creator-marketer">Creator Marketer</SelectItem>
-            <SelectItem value="digital-marketing">Digital Marketing</SelectItem>
+            {interest.map((int) => (
+              <SelectItem key={int.name} value={int.name}>
+                {(int.programDetail)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
