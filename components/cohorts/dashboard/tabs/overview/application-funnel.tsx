@@ -5,10 +5,10 @@ import { Bar } from "recharts";
 import { ResponsiveContainer, BarChart, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 interface ApplicationFunnelProps {
-  cohortId: string;
+  applications: any;
 }
 
-export function ApplicationFunnel({ cohortId }: ApplicationFunnelProps) {
+export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
   // In a real application, this data would be fetched based on the cohortId
   const funnelData = [
     { stage: "Applications", value: 156 },

@@ -10,76 +10,104 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
-import { getCohorts } from "@/app/api/cohorts";
-import { useEffect, useState } from "react";
-import { getCentres } from "@/app/api/centres";
-import { getPrograms } from "@/app/api/programs";
 
-export function StudentsFilters() {
-  const [interest, setInterest] = useState<any[]>([]);  
-  const [programs, setPrograms] = useState<any[]>([]);  
-  const [centres, setCentres] = useState<any[]>([]);  
-  const [cohorts, setCohorts] = useState<any[]>([]);  
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const cohortsData = await getCohorts();
-        const programsData = await getPrograms();
-        setPrograms(programsData.data);
-        const centresData = await getCentres();
-        setCentres(centresData.data);
-        setInterest(programsData.data);
-        console.log("sg",programsData.data);
-        
-        setCohorts(cohortsData.data);
-      } catch (error) {
-        console.error("Error fetching programs:", error);
-      }
-    }
-    fetchData();
-  }, []);
+interface StudentsFiltersProps {
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
 
-  
+  programs: any[];
+  selectedProgram: string;
+  onProgramChange: (value: string) => void;
+
+  cohorts: any[];
+  selectedCohort: string;
+  onCohortChange: (value: string) => void;
+
+  selectedAppStatus: string;
+  onAppStatusChange: (value: string) => void;
+
+  selectedPaymentStatus: string;
+  onPaymentStatusChange: (value: string) => void;
+}
+
+export function StudentsFilters({
+  searchQuery,
+  onSearchQueryChange,
+  programs,
+  selectedProgram,
+  onProgramChange,
+  cohorts,
+  selectedCohort,
+  onCohortChange,
+  selectedAppStatus,
+  onAppStatusChange,
+  selectedPaymentStatus,
+  onPaymentStatusChange,
+}: StudentsFiltersProps) {
+  // Reset all filters
+  const handleReset = () => {
+    onSearchQueryChange("");
+    onProgramChange("all-programs");
+    onCohortChange("all-cohorts");
+    onAppStatusChange("all-statuses");
+    onPaymentStatusChange("all-payments");
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-4">
+      {/* SEARCH BOX */}
       <div className="relative flex-1">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search students..." className="pl-8" />
+        <Input
+          placeholder="Search students..."
+          className="pl-8"
+          value={searchQuery}
+          onChange={(e) => onSearchQueryChange(e.target.value)}
+        />
       </div>
+
+      {/* FILTER DROPDOWNS */}
       <div className="flex flex-wrap gap-2">
-        <Select defaultValue="all-programs">
+
+        {/* Programs */}
+        <Select value={selectedProgram} onValueChange={onProgramChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Program" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all-programs">All Programs</SelectItem>
-            {interest.map((int) => (
-              <SelectItem key={int.name} value={int.name}>
-                {(int.programDetail)}
+            {programs.map((prog) => (
+              <SelectItem key={prog._id} value={prog.name}>
+                {prog.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <Select defaultValue="all-cohorts">
+        {/* Cohorts */}
+        <Select value={selectedCohort} onValueChange={onCohortChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Cohort" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all-cohorts">All Cohorts</SelectItem>
-            <SelectItem value="cm01jy">CM01JY</SelectItem>
-            <SelectItem value="cm02jy">CM02JY</SelectItem>
+            {cohorts.map((c) => (
+              <SelectItem key={c._id} value={c.cohortId}>
+                {c.cohortId}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
-        <Select defaultValue="all-statuses">
+        {/* Application Status */}
+        <Select value={selectedAppStatus} onValueChange={onAppStatusChange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder="Application Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all-statuses">All Statuses</SelectItem>
             <SelectItem value="applied">Applied</SelectItem>
-            <SelectItem value="under-review">Under Review</SelectItem>
+            <SelectItem value="under review">Under Review</SelectItem>
             <SelectItem value="accepted">Accepted</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
             <SelectItem value="enrolled">Enrolled</SelectItem>
@@ -87,20 +115,21 @@ export function StudentsFilters() {
           </SelectContent>
         </Select>
 
-        <Select defaultValue="all-payments">
+        {/* Payment Status */}
+        <Select value={selectedPaymentStatus} onValueChange={onPaymentStatusChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Payment Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all-payments">All Payment Status</SelectItem>
-            <SelectItem value="token-paid">Token Paid</SelectItem>
-            <SelectItem value="instalments-pending">Instalments Pending</SelectItem>
+            <SelectItem value="token paid">Token Paid</SelectItem>
+            <SelectItem value="instalments pending">Instalments Pending</SelectItem>
             <SelectItem value="overdue">Overdue</SelectItem>
             <SelectItem value="complete">Complete</SelectItem>
           </SelectContent>
         </Select>
 
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" onClick={handleReset}>
           <X className="h-4 w-4" />
         </Button>
       </div>

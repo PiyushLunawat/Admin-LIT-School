@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   UserMinus
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface MetricCardProps {
   title: string;
@@ -37,54 +38,104 @@ function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) 
 }
 
 interface MetricsGridProps {
-  cohortId: string;
+  applications: any[];
 }
 
-export function MetricsGrid({ cohortId }: MetricsGridProps) {
-  // In a real application, this data would be fetched based on the cohortId
+export function MetricsGrid({ applications }: MetricsGridProps) {
+  const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
+  const [underReviewCount, setUnderReviewCount] = useState(0);
+  const [interviewsScheduledCount, setInterviewsScheduledCount] = useState(0);
+  const [litmusTestsCount, setLitmusTestsCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [avgScholarshipsCount, setAvgScholarshipsCount] = useState(0);
+  const [paymentsCount, setPaymentsCount] = useState(0);
+  const [droppedCount, setDroppedCount] = useState(0);
+
+  useEffect(() => {
+    if (applications && Array.isArray(applications)) {
+      // Total Applications
+      setTotalApplicationsCount(applications.length);
+
+      // Under Review Count
+      const underReview = applications.filter(
+        (application) =>
+          application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+          "under review"
+      );
+      setUnderReviewCount(underReview.length);
+
+      // Interviews Scheduled Count
+      const interviewsScheduled = applications.filter(
+        (application) =>
+          application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+          "interviews scheduled"
+      );
+      setInterviewsScheduledCount(interviewsScheduled.length);
+
+      // Litmus Tests Count
+      const litmusTests = applications.filter(
+        (application) =>
+          application?.litmusTestDetails?.[0]?.litmusTaskId !== undefined
+      );
+      setLitmusTestsCount(litmusTests.length);
+
+      // Pending Count
+      const pending = applications.filter(
+        (application) =>
+          application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+          "initiated"
+      );
+      setPendingCount(pending.length);
+
+      console.log("Applications processed:", litmusTests.length);
+    } else {
+      console.log("Applications data is not an array or is undefined.");
+    }
+  }, [applications]);
+
   const metrics = [
     {
       title: "Total Applications",
-      value: "156",
+      value: (totalApplicationsCount || '--').toString(),
       icon: ClipboardList,
     },
     {
       title: "Under Review",
-      value: "23",
+      value: (underReviewCount || '--').toString(),
       icon: Users,
     },
     {
       title: "Interviews Scheduled",
-      value: "18",
+      value: (interviewsScheduledCount || '--').toString(),
       icon: Calendar,
     },
     {
       title: "LITMUS Tests",
-      value: "45",
+      value: (litmusTestsCount || '--').toString(),
       description: "Submitted",
       icon: GraduationCap,
     },
     {
       title: "Avg. Scholarships",
-      value: "12%",
+      value: `${(avgScholarshipsCount+'%' || '--').toString()}`,
       description: "₹5L Scholarship distributed",
       icon: Award,
     },
     {
       title: "Payments",
-      value: "₹24.5L",
+      value: `${('₹'+paymentsCount || '--').toString()}`,
       description: "₹5L Token Amount Collected",
       icon: CreditCard,
     },
     {
       title: "Pending Actions",
-      value: "8",
+      value: (pendingCount || '--').toString(),
       description: "Requires Attention",
       icon: AlertTriangle,
     },
     {
       title: "Dropped",
-      value: "3",
+      value: (droppedCount || '--').toString(),
       description: "Students",
       icon: UserMinus,
     },

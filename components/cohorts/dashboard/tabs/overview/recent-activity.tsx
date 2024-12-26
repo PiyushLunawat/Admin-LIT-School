@@ -19,10 +19,10 @@ interface Activity {
 }
 
 interface RecentActivityProps {
-  cohortId: string;
+  applications: any;
 }
 
-export function RecentActivity({ cohortId }: RecentActivityProps) {
+export function RecentActivity({ applications }: RecentActivityProps) {
   // In a real application, this data would be fetched based on the cohortId
   const activities: Activity[] = [
     {

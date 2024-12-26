@@ -128,9 +128,10 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
   const logInstallmentDetails = () => {
     const allInstallments = scholarshipSlabs.map((slab: any) => {
       return {
-        slabName: slab.name,
-        slabPercentage: slab.percentage,
-        installments: Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
+        scholarshipName: slab.name,
+        scholarshipPercentage: slab.percentage,
+        scholarshipClearance: slab.clearance,
+        scholarshipFeeDetails: Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
           return calculateInstallments(semesterIndex, slab);
         }),
       };
@@ -146,9 +147,10 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
     // }
 
     allInstallments.push({  
-      slabName: "0% Scholarship",
-      slabPercentage: 0,
-      installments: Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
+      scholarshipName: "No Scholarship",
+      scholarshipPercentage: 0,
+      scholarshipClearance: '0',
+      scholarshipFeeDetails: Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
         return calculateInstallments(semesterIndex, zeroScholarshipSlab);
       }),
      });
@@ -159,12 +161,72 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
     <div className="max-h-[80vh] space-y-6 py-4">
       <Tabs defaultValue={scholarshipSlabs[0]?.id || "default"} className="space-y-4">
         <TabsList variant="ghost">
+          <TabsTrigger variant="xs" value={'no-scholarship'}>No Scholarship(0%) </TabsTrigger>
           {scholarshipSlabs.map((slab: any) => (
             <TabsTrigger key={slab.id} variant="xs" value={slab.id}>
               {slab.name} ({slab.percentage}%)
             </TabsTrigger>
           ))}
         </TabsList>
+        <TabsContent value="no-scholarship">
+    {Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
+      const { totalInstallmentAmount, totalScholarshipAmount } = calculateSemesterSummary(semesterIndex, { percentage: 0 });
+
+      return (
+        <Card key={semesterIndex} className="mb-4">
+          <Badge
+            variant="outline"
+            className="text-[#00A3FF] border-[#00A3FF] bg-[#00A3FF]/20 px-2 py-1 text-sm rounded-full m-4"
+          >
+            Semester {semesterIndex + 1}
+          </Badge>
+          <CardContent className="flex flex-col gap-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Instalment Date</TableHead>
+                  <TableHead>Scholarship %</TableHead>
+                  <TableHead>Scholarship Amount (₹)</TableHead>
+                  <TableHead>Amount Payable (₹)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {calculateInstallments(semesterIndex, { percentage: 0 }).map((installment, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="date"
+                          value={installment.installmentDate}
+                          onChange={(e) =>
+                            handleDateChange(semesterIndex, index, e.target.value)
+                          }
+                          className="border rounded px-2 py-1 text-sm"
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
+                    <TableCell>{installment.scholarshipAmount ? formatAmount(installment.scholarshipAmount) : '--'}</TableCell>
+                    <TableCell>{formatAmount(installment.amountPayable)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Total Instalment Amount:</span>
+                <span>₹{formatAmount(totalInstallmentAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Total Amount Payable:</span>
+                <span>₹{formatAmount(totalInstallmentAmount)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    })}
+  </TabsContent>
         {scholarshipSlabs.map((slab: any) => (
           <TabsContent key={slab.id} value={slab.id}>
             {Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {

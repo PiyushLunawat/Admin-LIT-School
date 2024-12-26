@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 
 interface ApplicationTimelineProps {
-  cohortId: string;
+  applications: any;
 }
 
-export function ApplicationTimeline({ cohortId }: ApplicationTimelineProps) {
+export function ApplicationTimeline({ applications }: ApplicationTimelineProps) {
   // In a real application, this data would be fetched based on the cohortId
   const data = [
     { date: "Week 1", applications: 12 },

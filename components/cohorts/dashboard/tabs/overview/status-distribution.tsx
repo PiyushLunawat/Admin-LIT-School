@@ -1,19 +1,63 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 interface StatusDistributionProps {
-  cohortId: string;
+  applications: any;
 }
 
-export function StatusDistribution({ cohortId }: StatusDistributionProps) {
-  // In a real application, this data would be fetched based on the cohortId
+export function StatusDistribution({ applications }: StatusDistributionProps) {
+    const [underReviewCount, setUnderReviewCount] = useState(0);
+    const [acceptedCount, setAcceptedCount] = useState(0);
+    const [onHoldCount, setOnHoldCount] = useState(0);
+    const [rejectedCount, setRejectedCount] = useState(0);
+  
+    useEffect(() => {
+      if (applications && Array.isArray(applications)) {
+  
+        // Under Review Count
+        const underReview = applications.filter(
+          (application) =>
+            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "under review"
+        );
+        setUnderReviewCount(underReview.length);
+  
+        // Interviews Scheduled Count
+        const onhold = applications.filter(
+          (application) =>
+            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "on hold"
+        );
+        setOnHoldCount(onhold.length);
+  
+        const accepted = applications.filter(
+          (application) =>
+            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "accepted"
+        );
+        setAcceptedCount(accepted.length);
+
+        const rejected = applications.filter(
+          (application) =>
+            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "rejected"
+        );
+        setRejectedCount(rejected.length);
+
+  
+      } else {
+        console.log("Applications data is not an array or is undefined.");
+      }
+    }, [applications]);
+    
   const data = [
-    { name: "Under Review", value: 23, color: "hsl(var(--chart-1))" },
-    { name: "Shortlisted", value: 45, color: "hsl(var(--chart-2))" },
-    { name: "On Hold", value: 15, color: "hsl(var(--muted))" },
-    { name: "Rejected", value: 12, color: "hsl(var(--destructive))" },
+    { name: "Under Review", value: underReviewCount, color: "hsl(var(--chart-1))" },
+    { name: "Shortlisted", value: acceptedCount, color: "hsl(var(--chart-2))" },
+    { name: "On Hold", value: onHoldCount, color: "hsl(var(--muted))" },
+    { name: "Rejected", value: rejectedCount, color: "hsl(var(--destructive))" },
   ];
 
   return (
