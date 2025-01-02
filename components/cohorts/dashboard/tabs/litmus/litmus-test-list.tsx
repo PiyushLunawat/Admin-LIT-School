@@ -179,7 +179,15 @@ export function LitmusTestList({
   };
 
   return (
-    <div className="border rounded-lg">
+    loading ?
+    <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
+      <div >Loading... </div>
+    </div> :
+    applications.length === 0 ?
+    <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
+      <div >All your students will appear here</div>
+    </div> :
+      <div className="border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
