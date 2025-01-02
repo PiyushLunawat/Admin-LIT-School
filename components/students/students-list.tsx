@@ -9,12 +9,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Mail, UserMinus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getStudents } from "@/app/api/student";
+import { SendMessage } from "../cohorts/dashboard/tabs/applications/application-dialog/send-message";
+import { Dialog, DialogContent } from "../ui/dialog";
 
 type BadgeVariant =
   | "destructive"
@@ -65,6 +72,15 @@ export function StudentsList({
   const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState('');
+  const [recipient, setRecipient] = useState('');
+
+  const handleSendMessage = (type: string, recipient: string) => {
+    setSelectedMessage(type);
+    setRecipient(recipient)
+    setMessageOpen(true);
+  };
 
   // --- FETCH ALL STUDENTS ONCE ---
   useEffect(() => {
@@ -318,16 +334,25 @@ export function StudentsList({
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleSendMessage('email', student?.email)}>
                         <Mail className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                      >
-                        <UserMinus className="h-4 w-4" />
-                      </Button>
+                      <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-destructive">
+                          <UserMinus className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                        <div className="text-base font-medium mb-2">
+                          {`Are you sure you would like to drop ${student.name}`}
+                        </div>
+                        <div className="flex gap-2 ">
+                          <Button variant="outline" className="flex-1" >Cancel</Button>
+                          <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -336,7 +361,14 @@ export function StudentsList({
           </TableBody>
         </Table>
       </div>
-
+      <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
+        <DialogContent className="max-w-4xl">
+          <SendMessage
+            type={selectedMessage}
+            recipient={recipient}
+          />
+        </DialogContent>
+      </Dialog>
       {/* If you want pagination, you can add it here */}
       {/* <div className="flex items-center justify-end space-x-2 py-4">
         ...

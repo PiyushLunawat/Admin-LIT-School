@@ -19,7 +19,7 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex gap-2 items-center cursor-pointer" onClick={()=>{router.push(`/dashboard/cohorts`);}}>
+      <div className="flex gap-2 items-center cursor-pointer" onClick={() => router.back()}>
         <ArrowLeft className="w-4 h-4"/>
         Back to Cohorts 
       </div>

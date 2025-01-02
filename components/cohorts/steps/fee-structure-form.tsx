@@ -68,7 +68,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
             name="applicationFee"
             render={({ field }) => (
               <FormItem>
-                <Label>Application Fee</Label>
+                <Label>Application Fee (₹)</Label>
                 <FormControl>
                   <Input
                     type="number"
@@ -86,7 +86,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
             name="tokenFee"
             render={({ field }) => (
               <FormItem>
-                <Label>Token Fee</Label>
+                <Label>Token Fee (₹)</Label>
                 <FormControl>
                   <Input
                     type="number"

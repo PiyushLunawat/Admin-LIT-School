@@ -6,6 +6,11 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
   Calendar,
   Mail,
   MessageSquare,
@@ -119,10 +124,23 @@ export function PaymentDetails({ paymentId, onClose }: PaymentDetailsProps) {
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Receipt
               </Button>
-              <Button variant="outline" className="justify-start text-destructive">
-                <UserMinus className="h-4 w-4 mr-2" />
-                Mark as Dropped
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start text-destructive">
+                    <UserMinus className="h-4 w-4 mr-2" />
+                    Mark as Dropped
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                  <div className="text-base font-medium mb-2">
+                    {`Are you sure you would like to drop ${payment.studentName}`}
+                  </div>
+                  <div className="flex gap-2 ">
+                    <Button variant="outline" className="flex-1" >Cancel</Button>
+                    <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 

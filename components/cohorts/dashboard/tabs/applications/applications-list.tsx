@@ -99,7 +99,7 @@ export function ApplicationsList({
       case "update status":
         return "lemon";
       default:
-        return "default";
+        return "secondary";
     }
   };
 

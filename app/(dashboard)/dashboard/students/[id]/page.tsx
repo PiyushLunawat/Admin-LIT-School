@@ -11,14 +11,10 @@ interface PageProps {
 }
 
 export default async function StudentDetailsPage({ params }: PageProps) {
-  // const [student, setStudent] = useState<any>(null);
-  const student = await getCurrentStudents(params.id);
-
-
 
   return (
     <div className="h-full">
-      <StudentDetails student={student.data} />
+      <StudentDetails studentId={params.id} />
     </div>
   );
 }

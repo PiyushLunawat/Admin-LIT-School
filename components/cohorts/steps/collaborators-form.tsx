@@ -9,6 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
   Form,
   FormControl,
   FormField,
@@ -16,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Send, Trash2 } from "lucide-react";
 import { updateCohort } from "@/app/api/cohorts";
 
 
@@ -105,14 +110,22 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
                             {...field}
                           />
                           {fields.length > 1 && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive"
-                              onClick={() => remove(index)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                              <div className="text-base font-medium mb-2">
+                                {`Are you sure you would like to delete ${form.getValues(`collaborators.${index}.email`)}?`}
+                              </div>
+                              <div className="flex gap-2 justify-end">
+                                <Button variant="outline" >Cancel</Button>
+                                <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]" onClick={() => remove(index)}>Delete</Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                           )}
                         </div>
                       )}
@@ -155,14 +168,26 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
           ))}
         </div>
 
+        <div className="flex gap-2">
+        <Button
+          variant="outline"
+          type="button"
+          className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
+        >
+          <Send className="mr-2 h-4 w-4" />
+          Invite Collaborator
+        </Button>
         <Button
           onClick={() => append({ email: "", role: "" })}
           variant="outline"
+          type="button"
           className="w-full"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Collaborator
         </Button>
+        </div>
+
 
         <Button type="submit" className="w-full">
           Update Cohort

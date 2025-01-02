@@ -102,7 +102,7 @@ export function CreateCohortContent({
           <FeeStructureForm onNext={() => onStepChange("fee-preview")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
         </TabsContent>
         <TabsContent value="fee-preview">
-          <FeePreviewForm onNext={() => onStepChange("collaborators")} initialData={editingCohort} />
+          <FeePreviewForm onNext={() => onStepChange("collaborators")} onCohortCreated={handleCohortCreated}  initialData={editingCohort} />
         </TabsContent>
         <TabsContent value="collaborators">
           <CollaboratorsForm onComplete={onComplete} onCohortCreated={handleCohortCreated} initialData={editingCohort} />

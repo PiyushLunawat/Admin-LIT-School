@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,15 +13,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CircleCheck, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import { getCurrentStudents } from "@/app/api/student";
 
 interface PersonalDetailsTabProps {
-  student: any;
+  studentId: any;
 }
 
-export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
+export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [student, setStudent] = useState<any>(null);
 
-  console.log("asfsfv",student?.gender)
+  useEffect(() => {
+    if (studentId) {
+      fetchStudent();
+    }
+  }, [studentId]);
+
+  async function fetchStudent() {
+    try {
+      const application = await getCurrentStudents(studentId);
+      setStudent(application?.data || null);
+      console.log("asfsfv",student)
+    } catch (error) {
+      console.error("Failed to fetch student data:", error);
+    }
+  }
+
 
 
   return (
@@ -48,7 +65,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Full Name</Label>
               <Input
-                defaultValue={student?.firstName + ' ' + student?.lastName}
+                defaultValue={student?.firstName + ' ' + student?.firstName}
                 readOnly={!isEditing}
               />
             </div>
@@ -61,14 +78,14 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </div>
             <div className="space-y-2">
               <Label>Gender</Label>
-              <Select disabled={!isEditing} value={student?.gender}>
+              <Select disabled={!isEditing} defaultValue={student?.gender}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -309,7 +326,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="">
               {student?.studentDetails?.financialInformation?.isFinanciallyIndependent === false ? 
                 <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially dependent on Parents</Label> : 
-                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially Independent on Parents</Label>
+                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially Independent</Label>
               }
             </div>
             <div className="">

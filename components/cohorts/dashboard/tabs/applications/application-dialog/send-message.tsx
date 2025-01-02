@@ -34,7 +34,7 @@ export function SendMessage({ type, recipient }:  SendMessageProps) {
     <div className="space-y-4 ">
       <div className="flex items-center gap-2">
         {type === "email" ? <Mail className="w-6 h-6"/> : <img src="/assets/images/whatsapp-icon.svg" className="w-6 h-6"/>}
-        <h3 className="text-lg font-medium">{type}</h3>
+        <h3 className="text-lg font-medium capitalize">{type}</h3>
       </div>
 
       <div className="flex items-center space-x-4 text-sm">

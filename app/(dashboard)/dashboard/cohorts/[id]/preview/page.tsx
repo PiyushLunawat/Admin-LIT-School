@@ -15,14 +15,14 @@ interface PageProps {
 }
 
 export default function CohortPreviewPage({ params }: PageProps) {
+  const router = useRouter();
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col ">
-        <Button variant="ghost" className="w-fit flex">
-            <a href="/dashboard/cohorts" className=" flex">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Cohorts
-            </a>
+        <Button variant="ghost" className="w-fit flex" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Cohorts
         </Button>
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Cohort Preview</h1>

@@ -16,6 +16,11 @@ import {
   StarIcon,
   DownloadIcon,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Progress } from "@/components/ui/progress";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
@@ -135,7 +140,9 @@ export function PaymentDetails({ studentId, onClose }: PaymentDetailsProps) {
                 <span>Payment Progress</span>
                 <span>{progressPercentage.toFixed(0)}%</span>
               </div>
-              <Progress states={[ {value:(progressPercentage)} ]} />
+              <Progress states={[
+                { value: 0, widt: progressPercentage, color: '#2EB88A' }
+              ]} />
             </div>
           </div>
 
@@ -157,10 +164,23 @@ export function PaymentDetails({ studentId, onClose }: PaymentDetailsProps) {
                 <StarIcon className="h-4 w-4 mr-2" />
                 Award Scholarship
               </Button>
-              <Button variant="outline" className="justify-start text-destructive">
-                <UserMinus className="h-4 w-4 mr-2" />
-                Mark as Dropped
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start text-destructive">
+                    <UserMinus className="h-4 w-4 mr-2" />
+                    Mark as Dropped
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                  <div className="text-base font-medium mb-2">
+                    {`Are you sure you would like to drop ${payment.studentName}`}
+                  </div>
+                  <div className="flex gap-2 ">
+                    <Button variant="outline" className="flex-1" >Cancel</Button>
+                    <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 

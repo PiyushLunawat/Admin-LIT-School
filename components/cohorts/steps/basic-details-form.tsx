@@ -44,8 +44,8 @@ const formSchema = z.object({
   }),
   schedule: z.string().min(1, "Schedule is required"),
   timeSlot: z.string().min(1, "Time slot is required"),
-  totalSeats: z.coerce.number().min(1, "Number of seats is required"),
-  baseFee: z.coerce.number().min(1, "Base fee is required"),
+  totalSeats: z.coerce.number().min(1, "Minimum 1 seat is required"),
+  baseFee: z.coerce.number().min(1, "Minimum base fee is required"),
   isGSTIncluded: z.boolean().default(true),
 });
 
@@ -99,7 +99,7 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
       timeSlot: initialData?.timeSlot || "",
       totalSeats: initialData?.totalSeats || "",
       baseFee: initialData?.baseFee || "",
-      isGSTIncluded: initialData?.isGSTIncluded || true,
+      isGSTIncluded: initialData?.isGSTIncluded !== undefined ? initialData?.isGSTIncluded : true ,
     },
   });
 
@@ -123,10 +123,22 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
     fetchData();
   }, []);
 
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(initialData?.programDetail ?? null);
   const [programDuration, setProgramDuration] = useState(6);
-  const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
-  const [cohortId, setCohortId] = useState("");
+  const [selectedCentre, setSelectedCentre] = useState<string | null>(initialData?.centerDetail ?? null);
+  const [cohortId, setCohortId] = useState(initialData?.cohortId ?? "");
+
+  useEffect(() => {
+    form.setValue("programDetail", selectedProgram || "");
+  }, [selectedProgram]);
+
+  useEffect(() => {
+    form.setValue("centerDetail", selectedCentre || "");
+  }, [selectedCentre]);
+
+  useEffect(() => {
+    form.setValue("cohortId", cohortId || "");
+  }, [setCohortId]);
 
   const createCohortId = () => {
     const programData = programs.find(program => program._id === selectedProgram);
@@ -155,7 +167,7 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const dataWithCohortId = { 
       ...values, 
-      cohortId, 
+      cohortId: cohortId, 
       programDetail: selectedProgram, 
       centerDetail: selectedCentre,
       status: "Draft",
@@ -199,9 +211,9 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
               <FormItem>
                 <Label>Program</Label>
                 <Select onValueChange={(value) => {
-    field.onChange(value); // Updates the form state
-    setSelectedProgram(value);
-  }}  defaultValue={field.value}>
+                  field.onChange(value); // Updates the form state
+                  setSelectedProgram(value);
+                }}  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select program" />
@@ -252,9 +264,15 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
             <FormItem>
               <Label>Cohort ID</Label>
               <FormControl>
-                {initialData ? 
-                  <Input placeholder="CM00JY" {...field} /> : <Input value={cohortId} />
-                }
+              <Input
+          placeholder="CM00JY"
+          {...field}
+          value={field.value || cohortId} // Fallback to `cohortId` if `field.value` is empty
+          onChange={(e) => {
+            field.onChange(e.target.value); // Update form state
+            setCohortId(e.target.value);   // Update local state
+          }}
+        />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -423,7 +441,8 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
               <FormItem>
                 <Label>Base Fee</Label>
                 <FormControl>
-                  <Input type="number" placeholder="995000" {...field} />
+                  <Input type="number" placeholder="995000" {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

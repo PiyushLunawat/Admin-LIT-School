@@ -92,8 +92,9 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
               <span>Payment Progress</span>
               <span>{progressPercentage.toFixed(0)}%</span>
             </div>
-            <Progress states={[ {value:(progressPercentage)} ]} />
-
+            <Progress states={[
+              { value: 0, widt: progressPercentage, color: '#2EB88A' }
+            ]} />
           </div>
         </CardContent>
       </Card>
@@ -186,7 +187,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
       </Card>
 
       {/* Communication History */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Communication History</CardTitle>
         </CardHeader>
@@ -215,7 +216,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

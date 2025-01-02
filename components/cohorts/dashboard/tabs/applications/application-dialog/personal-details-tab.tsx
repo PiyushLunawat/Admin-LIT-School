@@ -25,6 +25,9 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const [centres, setCentres] = useState<any[]>([]);
   const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
 
+  console.log("bsvs",student);
+  
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -106,8 +109,8 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Current Status</Label>
-              <Select disabled={!isEditing} defaultValue={student?.currentStatus?.toLowerCase().replace(" ", "-")}>
+              <Label>Current Status {student?.qualification}</Label>
+              <Select disabled={!isEditing} value={student?.qualification}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -343,7 +346,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="">
               {student?.applicationDetails?.studenDetails?.financialInformation?.isFinanciallyIndependent === true ? 
                 <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially dependent on Parents</Label> : 
-                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially independent on Parents</Label>
+                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially independent</Label>
               }
             </div>
             <div className="">

@@ -34,6 +34,11 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
   Form,
   FormControl,
   FormField,
@@ -53,9 +58,9 @@ const formSchema = z.object({
         z.object({
           id: z.string(),
           type: z.string().nonempty("Submission type is required"),
-          characterLimit: z.coerce.number().optional(),
-          maxFiles: z.coerce.number().optional(),
-          maxFileSize: z.coerce.number().optional(),
+          characterLimit: z.coerce.number().min(1).optional(),
+          maxFiles: z.coerce.number().min(1).optional(),
+          maxFileSize: z.coerce.number().min(1).optional(),
           allowedTypes: z.array(z.string()).optional(),
         })
       ),
@@ -83,7 +88,7 @@ const formSchema = z.object({
     })
   ),
   litmusTestDuration: z.string().nonempty("Duration is required"),
-  litmusTestScheduler: z.string().optional(),
+  // litmusTestScheduler: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -107,7 +112,7 @@ export function LitmusTestForm({
           litmusTasks: litmusTestDetail.litmusTasks,
           scholarshipSlabs: litmusTestDetail.scholarshipSlabs,
           litmusTestDuration: litmusTestDetail.litmusTestDuration,
-          litmusTestScheduler: litmusTestDetail.litmusTestScheduler,
+          // litmusTestScheduler: litmusTestDetail.litmusTestScheduler,
         }
       : {
           litmusTasks:  [
@@ -149,7 +154,7 @@ export function LitmusTestForm({
             },
           ],
           litmusTestDuration: "",
-          litmusTestScheduler: "",
+          // litmusTestScheduler: "",
         },
 
   });
@@ -293,7 +298,7 @@ export function LitmusTestForm({
         </div>
 
         {/* LITMUS Test Scheduler */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <FormField
             control={control}
             name="litmusTestScheduler"
@@ -307,7 +312,7 @@ export function LitmusTestForm({
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
 
         <Button type="submit" className="w-full">
           Next: Fee Structure
@@ -382,14 +387,22 @@ function TaskItem({
               )}
             />
             {form.getValues("litmusTasks").length > 1 && (
-              <Button type="button"
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeTask(taskIndex)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="ghost" size="icon" className="text-destructive" >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                <div className="text-base font-medium mb-2">
+                  {`Are you sure you would like to delete ${form.getValues(`litmusTasks.${taskIndex}.title`)}?`}
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" >Cancel</Button>
+                  <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]" onClick={() => removeTask(taskIndex)}>Delete</Button>
+                </div>
+              </PopoverContent>
+            </Popover>
             )}
           </div>
 
@@ -927,14 +940,22 @@ function ScholarshipSlabItem({
               )}
             />
             {form.getValues("scholarshipSlabs").length > 1 && (
-              <Button type="button"
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeSlab(slabIndex)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="ghost" size="icon" className="text-destructive" >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                <div className="text-base font-medium mb-2">
+                  {`Are you sure you would like to delete ${form.getValues(`scholarshipSlabs.${slabIndex}.name`)}?`}
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" >Cancel</Button>
+                  <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]" onClick={() => removeSlab(slabIndex)}>Delete</Button>
+                </div>
+              </PopoverContent>
+            </Popover>
             )}
           </div>
           <div className="flex gap-1.5 items-center">

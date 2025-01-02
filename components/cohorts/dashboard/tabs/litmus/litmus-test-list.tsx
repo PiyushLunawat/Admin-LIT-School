@@ -11,6 +11,11 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
+import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
+import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
+import { DocumentsTab } from "../applications/application-dialog/document-tab";
 import { Calendar, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
@@ -169,6 +174,10 @@ export function LitmusTestList({
     setOpen(true);
   };
 
+  const handleStatusUpdate = () => {
+    onApplicationUpdate();
+  };
+
   return (
     <div className="border rounded-lg">
       <Table>
@@ -250,8 +259,30 @@ export function LitmusTestList({
       </Table>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-4xl">
-          <ReviewComponent application={selectedStudentId} onApplicationUpdate={onApplicationUpdate} />
+      <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+          {selectedStudentId && (
+            <StudentApplicationHeader student={selectedStudentId} />
+          )}
+
+      <Tabs defaultValue="personal" className="space-y-6">
+        <TabsList className="w-full">
+          <TabsTrigger value="personal">Personal Details</TabsTrigger>
+          <TabsTrigger value="payment">Payment</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="personal">
+          <PersonalDetailsTab student={selectedStudentId} />
+        </TabsContent>
+
+        <TabsContent value="payment">
+          <PaymentInformationTab student={selectedStudentId} />
+        </TabsContent>
+
+        <TabsContent value="documents">
+          <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
+        </TabsContent>
+      </Tabs>
         </DialogContent>
       </Dialog>
     </div>

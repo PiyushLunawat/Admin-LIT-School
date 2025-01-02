@@ -17,6 +17,11 @@ import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
   Form,
   FormControl,
   FormField,
@@ -38,17 +43,16 @@ const formSchema = z.object({
           config: z.array(
             z.object({
               type: z.string().nonempty("Task type is required"),
-              characterLimit: z.coerce.number().optional(),
-              maxFiles: z.coerce.number().optional(),
-              maxFileSize: z.coerce.number().optional(),
+              characterLimit: z.coerce.number().min(1).optional(),
+              maxFiles: z.coerce.number().min(1).optional(),
+              maxFileSize: z.coerce.number().min(1).optional(),
               allowedTypes: z.array(z.string()).optional(),
             })
           ),
           resourceLink: z.string().optional(), // Add this line
-          // Note: We cannot include `uploadedFile` directly
         })
       ),
-      calendlyEmbedCode: z.string().optional(),
+      // calendlyEmbedCode: z.string().optional(),
     })
   ),
 });
@@ -89,7 +93,7 @@ export function ApplicationFormBuilder({
                     resourceLink: "",
                   },
                 ],
-                calendlyEmbedCode: "",
+                // calendlyEmbedCode: "",
               },
             ],
     },
@@ -138,7 +142,7 @@ export function ApplicationFormBuilder({
             />
 
             {/* Calendly Embed Code */}
-            <FormField
+            {/* <FormField
               control={control}
               name={`applicationFormDetail.${applicationFormIndex}.calendlyEmbedCode`}
               render={({ field }) => (
@@ -150,7 +154,7 @@ export function ApplicationFormBuilder({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
           </div>
         ))}
 
@@ -294,15 +298,22 @@ function Task({
                       placeholder="e.g., Share an Embarrassing Story"
                       {...field}
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive"
-                      onClick={() => removeTask(taskIndex)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button type="button" variant="ghost" size="icon" className="text-destructive" >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                        <div className="text-base font-medium mb-2">
+                          {`Are you sure you would like to delete ${form.getValues(`applicationFormDetail.${nestIndex}.task.${taskIndex}.title`)}?`}
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                          <Button variant="outline" >Cancel</Button>
+                          <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]" onClick={() => removeTask(taskIndex)}>Delete</Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover> 
                   </div>
                 </FormControl>
                 <FormMessage />

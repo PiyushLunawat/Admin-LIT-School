@@ -25,6 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Dialog, DialogTrigger, DialogContent,  } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import SubmissionView from "./submission-view";
@@ -191,10 +196,23 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
-              <Button variant="outline" className="justify-start text-destructive">
-                <UserMinus className="h-4 w-4 mr-2" />
-                Mark as Dropped
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start text-destructive">
+                    <UserMinus className="h-4 w-4 mr-2" />
+                    Mark as Dropped
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                  <div className="text-base font-medium mb-2">
+                    {`Are you sure you would like to drop ${application?.firstName+" "+application?.lastName}`}
+                  </div>
+                  <div className="flex gap-2 ">
+                    <Button variant="outline" className="flex-1" >Cancel</Button>
+                    <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
