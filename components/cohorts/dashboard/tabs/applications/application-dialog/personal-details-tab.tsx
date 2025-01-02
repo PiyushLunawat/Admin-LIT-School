@@ -221,18 +221,36 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
               <div className="space-y-2">
               <Label>Work Experience Type</Label>
               <Input
-                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.ExperienceType}
+                defaultValue={student?.applicationDetails?.studenDetails?.workExperience?.experienceType}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
-              <Label>Apx. Duration of Work</Label>
+              <Label>Job Description</Label>
               <Input
-                defaultValue={student?.applicationDetails?.studenDetails?.previousEducation?.ApxDuration}
+                defaultValue={student?.applicationDetails?.studenDetails?.workExperience?.jobDescription}
                 readOnly={!isEditing}
               />
             </div>
+            {student?.applicationDetails?.studenDetails?.workExperience?.nameOfCompany &&
+            <div className="space-y-2">
+              <Label>Name of Company</Label>
+              <Input
+                defaultValue={student?.applicationDetails?.studenDetails?.workExperience?.nameOfCompany}
+                readOnly={!isEditing}
+              />
+            </div>}
+            {student?.applicationDetails?.studenDetails?.workExperience?.duration &&
+            <div className="space-y-2">
+              <Label>Apx Duration of Work</Label>
+              <Input
+                defaultValue={student?.applicationDetails?.studenDetails?.workExperience?.duration}
+                readOnly={!isEditing}
+              />
+            </div>}
             </>}
+
+
           </div>
         </CardContent>
       </Card>
