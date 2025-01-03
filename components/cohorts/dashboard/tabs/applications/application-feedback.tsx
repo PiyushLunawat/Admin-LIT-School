@@ -57,6 +57,18 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   const [feedbackId, setFeedbackId] = useState("");
   const [reasonItemValue, setReasonItemValue] = useState("• ");
 
+  useEffect(() => {
+    if (taskList && taskList.length > 0) {
+      // Build an object with each task’s _id => ["• "]
+      const initialFeedbacks: { [taskId: string]: string[] } = {};
+      taskList.forEach((task) => {
+        initialFeedbacks[task._id] = ["• "];
+      });
+      setFeedbacks(initialFeedbacks);
+    }
+  }, [taskList]);
+  
+
 
   useEffect(() => {
     async function fetchApplicationDetails() {
@@ -74,12 +86,26 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
   const handleStatusChange = (value: string) => {
     setStatus(value);
-    if (value !== "on hold" && value !== "rejected") {
-      setReasonItemValue("• ");
-    } else if (reason.length === 0) {
-      setReasonItemValue("• ");
+       if (value === "on hold") {
+      // If reason is effectively empty, initialize with a bullet
+      if (reasonItemValue.trim() === "" || reasonItemValue.trim() === "•") {
+        setReasonItemValue("• ");
+      }
+    } else if (value === "accepted" || value === "rejected") {
+      setFeedbacks((prevFeedbacks) => {
+        const newFeedbacks = { ...prevFeedbacks };
+        // For each task, if there is no feedback or it's empty, init with ["• "]
+        taskList.forEach((task) => {
+          const existing = newFeedbacks[task._id];
+          if (!existing || existing.length === 0) {
+            newFeedbacks[task._id] = ["• "];
+          }
+        });
+        return newFeedbacks;
+      });
     }
   };
+
 
   const formatInput = (value: string): string => {
     const lines = value.split('\n');
@@ -132,6 +158,27 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
     });
   };
   
+  const canUpdate = (): boolean => {
+    if (status === "under review") return true;
+
+    if (status === "on hold") {
+      // Make sure there's something beyond just "• " in reasonItemValue
+      const trimmed = reasonItemValue.replace(/•/g, "").trim();
+      return trimmed.length > 0;
+    }
+
+    if (status === "accepted" || status === "rejected") {
+      // Check if for each task, there's feedback that isn't purely bullet(s).
+      const allFeedback = Object.values(feedbacks).flat(); // Flatten all tasks
+      // If we find at least some text beyond "• ", we consider it valid
+      return allFeedback.some((fb) => {
+        const stripped = fb.replace(/•/g, "").trim();
+        return stripped.length > 0;
+      });
+    }
+    return true; // fallback
+  };
+
   async function handleApplicationUpdate(
     applicationId: string,
     newStatus: string
@@ -389,6 +436,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         <Button
           className="w-full mt-4"
           onClick={() => handleApplicationUpdate(tasks, status)}
+          disabled={!canUpdate()}
         >
           Update Status
         </Button>

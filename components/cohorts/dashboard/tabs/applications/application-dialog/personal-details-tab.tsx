@@ -49,7 +49,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   }, []);
 
   const getCenterName = (centerId: string) => {
-    console.log("e",centerId);
+    console.log("e",centerId,centres);
     const center = centres.find((c) => c._id === centerId);
     return center ? center.name : "--";
   };

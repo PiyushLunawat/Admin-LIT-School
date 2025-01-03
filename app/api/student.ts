@@ -144,10 +144,15 @@ export async function getStudents() {
     );
 
     if (!response.ok) {
-        throw new Error("Failed to update Litmus task status");
+      const errorDetails = await response.json().catch(() => null); // Handle cases where the response is not JSON
+      throw new Error(
+        `${
+          errorDetails ? `${errorDetails.message || JSON.stringify(errorDetails)}` : ""
+        }`
+      );
     }
-
-    return await response.json();
+  
+    return response;
 }
 
   
@@ -195,4 +200,29 @@ export async function getStudents() {
   
     return await response.json();
   }
+
+  export async function verifyTokenAmount(tokenId: string, comment: string, verificationStatus: string) {
+    try {
+      const response = await fetch(`${process.env.API_URL}/admin/verify-token-amount`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tokenId, comment, verificationStatus }),
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
+        throw new Error(
+          `Failed to verify token amount. ${
+            errorDetails ? `${errorDetails.message || JSON.stringify(errorDetails)}` : ""
+          }`
+        );
+      }
+  
+      return await response; // Parse and return the response JSON
+    } catch (error) {
+      console.error("Error in verifyTokenAmount:", error);
+      throw error;
+    }
+  }
+  
   

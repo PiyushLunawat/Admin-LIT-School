@@ -190,6 +190,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
           baseFee: installment.amountPayable,
           scholarshipAmount: installment.scholarshipAmount,
           amountPayable: installment.amountPayable * GSTAmount,
+          verificationStatus: "pending",
+          receiptUrls: [],
+          feedback: [],
         })),
       })),
       oneShotPaymentDetails: {
@@ -197,6 +200,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
         baseFee: newBaseFee,
         OneShotPaymentAmount: newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0),
         amountPayable: (newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0) - initialData?.cohortFeesDetail?.tokenFee)*GSTAmount,
+        verificationStatus: "pending",
+        receiptUrls: [],
+        feedback: [],
       }
     }));
 
@@ -213,6 +219,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
           baseFee: installment.amountPayable,
           scholarshipAmount: 0, // No scholarship for this case
           amountPayable: installment.amountPayable * GSTAmount,
+          verificationStatus: "pending",
+          receiptUrls: [],
+          feedback: [],
         })),
       })),
       oneShotPaymentDetails: {
@@ -220,6 +229,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
         baseFee: newBaseFee,
         OneShotPaymentAmount: newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0), // No scholarship discount
         amountPayable: (newBaseFee - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0) - initialData?.cohortFeesDetail?.tokenFee) * GSTAmount,
+        verificationStatus: "pending",
+        receiptUrls: [],
+        feedback: [],
       },
     });
 

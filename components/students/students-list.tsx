@@ -75,6 +75,7 @@ export function StudentsList({
   const [messageOpen, setMessageOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState('');
   const [recipient, setRecipient] = useState('');
+  const [sch, setSch] = useState<any>();
 
   const handleSendMessage = (type: string, recipient: string) => {
     setSelectedMessage(type);
@@ -89,6 +90,7 @@ export function StudentsList({
       try {
         const response = await getStudents();
         const mappedStudents = response.data.map((student: any) => ({
+    
           id: student._id,
           name: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
           applicationId: student.applicationId || "--",
@@ -102,7 +104,12 @@ export function StudentsList({
             student.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() ||
             "not enrolled",
           paymentStatus: student.paymentStatus?.toLowerCase() || "pending",
-          scholarship: student.scholarship ? `${student.scholarship}%` : "--",
+          scholarship: student?.litmusTestDetails[0]?.litmusTaskId?.scholarshipDetail ? 
+          `${getScholarshipDetail(
+                student.litmusTestDetails[0].litmusTaskId.scholarshipDetail,
+                student.cohort.feeStructureDetails
+              )}`
+          : "--",
           lastActivity: student.updatedAt || new Date().toISOString(),
         }));
 
@@ -124,6 +131,14 @@ export function StudentsList({
     fetchStudents();
   }, []);
 
+  function getScholarshipDetail(scholarshipId: string, feeStructure: any) {
+    const matchedScholarship = feeStructure?.find(
+      (scholarship: any) => scholarship._id === scholarshipId
+    );
+  
+    return matchedScholarship ? `${matchedScholarship.scholarshipName} (${matchedScholarship.scholarshipPercentage}%)}` : "--";
+  }  
+  
   // --- FILTERING LOGIC ---
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {

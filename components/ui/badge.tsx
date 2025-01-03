@@ -12,7 +12,7 @@ const badgeVariants = cva(
         secondary:
           "border-transparent bg-[#0A0A0A] text-secondary-foreground hover:bg-secondary/80",
         lemon:
-          "border-transparent bg-[#0A0A0A] text-[#FFF552] hover:bg-secondary/80",
+          "border-[#FFF552] bg-[#FFF552]/[0.2] text-[#FFF552] hover:bg-secondary/80",
         blue:
         "border-[#00A3FF] bg-[#00A3FF]/[0.2] text-[#00A3FF]",
         destructive:
