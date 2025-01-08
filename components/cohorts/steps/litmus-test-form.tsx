@@ -59,8 +59,8 @@ const formSchema = z.object({
           id: z.string(),
           type: z.string().nonempty("Submission type is required"),
           characterLimit: z.coerce.number().min(1).optional(),
-          maxFiles: z.coerce.number().min(1).optional(),
-          maxFileSize: z.coerce.number().min(1).optional(),
+          maxFiles: z.coerce.string().min(1).optional(),
+          maxFileSize: z.coerce.string().min(1).optional(),
           allowedTypes: z.array(z.string()).optional(),
         })
       ),
@@ -68,7 +68,7 @@ const formSchema = z.object({
         z.object({
           id: z.string(),
           name: z.string().nonempty("Criteria name is required"),
-          points: z.coerce.number().min(1, "Points must be at least 1"),
+          points: z.coerce.string().min(1, "Points must be at least 1"),
           description: z.string().optional(),
         })
       ),
@@ -82,7 +82,7 @@ const formSchema = z.object({
     z.object({
       id: z.string(),
       name: z.string().nonempty("Slab name is required"),
-      percentage: z.coerce.number().min(0, "Percentage cannot be negative"),
+      percentage: z.coerce.string().nonempty("Percentage is required"),
       clearance: z.coerce.string().nonempty("Clearance is required"),
       description: z.string().optional(),
     })
@@ -268,7 +268,7 @@ export function LitmusTestForm({
               appendSlab({
                 id: generateId(),
                 name: "",
-                percentage: 0,
+                percentage: "",
                 clearance: "",
                 description: "",
               })
@@ -289,7 +289,7 @@ export function LitmusTestForm({
               <FormItem>
                 <Label>LITMUS Test Duration (days)</Label>
                 <FormControl>
-                  <Input placeholder="5 days" {...field} />
+                  <Input type="number" min="1" placeholder="5 days" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -500,7 +500,7 @@ function TaskItem({
             {judgmentCriteriaFields.map((cri, criIndex) => (
               <div className="flex gap-1 items-start" key={cri.id}>
                 <div className="w-full bg-secondary/60 rounded-md p-3 gap-1.5">
-                  <div className="flex gap-1.5 items-center">
+                  <div className="flex gap-1.5 items-start">
                     <FormField
                       control={control}
                       name={`litmusTasks.${taskIndex}.judgmentCriteria.${criIndex}.name`}
@@ -526,7 +526,7 @@ function TaskItem({
                         <FormItem className="w-1/2">
                           <Label>Max Points</Label>
                           <FormControl>
-                            <Input type="number" placeholder="10" {...field} />
+                            <Input type="number" placeholder="10" min="1" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -563,7 +563,7 @@ function TaskItem({
                 appendJudgmentCriteria({
                   id: generateId(),
                   name: "",
-                  points: 0,
+                  points: "",
                   description: "",
                 })
               }
@@ -958,7 +958,7 @@ function ScholarshipSlabItem({
             </Popover>
             )}
           </div>
-          <div className="flex gap-1.5 items-center">
+          <div className="flex gap-1.5 items-start">
             <FormField
               control={control}
               name={`scholarshipSlabs.${slabIndex}.percentage`}
@@ -966,7 +966,7 @@ function ScholarshipSlabItem({
                 <FormItem className="w-1/2">
                   <Label>Scholarship Percentage</Label>
                   <FormControl>
-                    <Input type="number" placeholder="5" {...field} />
+                    <Input type="number" placeholder="5" min="0" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

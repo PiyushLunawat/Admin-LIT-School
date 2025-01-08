@@ -50,10 +50,10 @@ export function OverviewTab({ cohortId }: OverviewTabProps) {
         <StatusDistribution applications={applications} />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ApplicationTimeline applications={applications} />
         <RecentActivity applications={applications} />
-      </div>
+      </div> */}
       
       {/* <AlertsSection cohortId={cohortId} /> */}
     </div>

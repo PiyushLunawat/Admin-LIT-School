@@ -22,10 +22,10 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col">
-        <div className="flex gap-2 items-center cursor-pointer mb-1" onClick={() => router.back()}>
+        {/* <div className="flex gap-2 items-center cursor-pointer mb-1" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 " />
           Back to Students
-        </div>
+        </div> */}
         <h1 className="text-3xl font-bold">Student Details</h1>
       </div>
 

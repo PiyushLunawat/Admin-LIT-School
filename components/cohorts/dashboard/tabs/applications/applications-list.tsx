@@ -20,6 +20,7 @@ import { PersonalDetailsTab } from "./application-dialog/personal-details-tab";
 import { PaymentInformationTab } from "./application-dialog/payment-info-tab";
 import { DocumentsTab } from "./application-dialog/document-tab";
 import { getStudents } from "@/app/api/student";
+import { DateRange } from "react-day-picker";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface Application {
@@ -36,6 +37,7 @@ interface ApplicationsListProps {
   cohortId: string;
   onApplicationSelect: (id: string) => void;
   selectedIds: string[];
+  selectedDateRange: DateRange | undefined;
   onSelectedIdsChange: (ids: string[]) => void;
   onApplicationUpdate: () => void;
   searchTerm: string;
@@ -47,6 +49,7 @@ export function ApplicationsList({
   cohortId,
   onApplicationSelect,
   selectedIds,
+  selectedDateRange,
   onSelectedIdsChange,
   onApplicationUpdate,
   searchTerm,
@@ -57,6 +60,9 @@ export function ApplicationsList({
   const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
+  console.log("range",selectedDateRange);
+  
 
   useEffect(() => {
     async function fetchStudents() {
@@ -104,8 +110,15 @@ export function ApplicationsList({
   };
 
   const filteredAndSortedApplications = useMemo(() => {
+
+    const filteredApplications = applications.filter((app: any) => {
+      if (!selectedDateRange) return true;
+      const appDate = new Date(app.updatedAt);
+      const { from, to } = selectedDateRange;
+      return (!from || appDate >= from) && (!to || appDate <= to);
+    });
     // 1) Filter
-    let filtered = applications;
+    let filtered = filteredApplications;
 
     // a) Search filter by applicant name
     if (searchTerm.trim()) {
@@ -168,7 +181,7 @@ export function ApplicationsList({
     }
 
     return filtered;
-  }, [applications, searchTerm, selectedStatus, sortBy]);
+  }, [applications, searchTerm, selectedStatus, sortBy, selectedDateRange]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === applications.length) {

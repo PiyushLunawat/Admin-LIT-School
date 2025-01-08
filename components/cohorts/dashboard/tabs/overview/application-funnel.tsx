@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { Bar } from "recharts";
 import { ResponsiveContainer, BarChart, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
@@ -9,10 +10,62 @@ interface ApplicationFunnelProps {
 }
 
 export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
-  // In a real application, this data would be fetched based on the cohortId
+    const [appliedCount, setAppliedCount] = useState(0);
+    const [underReviewCount, setUnderReviewCount] = useState(0);
+    const [litmusCompleteCount, setLitmusCompleteCount] = useState(0);
+    const [interviewedCount, setInterviewedCount] = useState(0);
+    const [enrolledCount, setEnrolledCount] = useState(0);
+  
+    useEffect(() => {
+      if (applications && Array.isArray(applications)) {
+
+        // Applied Count
+        const applied = applications.filter(
+          (application) =>
+            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "initiated"
+        );
+        setUnderReviewCount(applied.length);
+  
+        // Under Review Count
+        const underReview = applications.filter(
+          (application) =>
+            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "under review"
+        );
+        setUnderReviewCount(underReview.length);
+  
+        // Interviews Scheduled Count
+        const onhold = applications.filter(
+          (application) =>
+            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "complete"
+        );
+        setInterviewedCount(onhold.length);
+  
+        // const accepted = applications.filter(
+        //   (application) =>
+        //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+        //     "accepted"
+        // );
+        // setAcceptedCount(accepted.length);
+
+        // const rejected = applications.filter(
+        //   (application) =>
+        //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+        //     "rejected"
+        // );
+        // setRejectedCount(rejected.length);
+
+  
+      } else {
+        console.log("Applications data is not an array or is undefined.");
+      }
+    }, [applications]);
+    
   const funnelData = [
     { stage: "Applications", value: 156 },
-    { stage: "Under Review", value: 98 },
+    { stage: "Under Review", value: underReviewCount },
     { stage: "Interviewed", value: 67 },
     { stage: "LITMUS Complete", value: 45 },
     { stage: "Enrolled", value: 25 },

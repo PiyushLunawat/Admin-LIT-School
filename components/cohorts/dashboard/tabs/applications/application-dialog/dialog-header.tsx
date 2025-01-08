@@ -28,6 +28,17 @@ interface StudentHeaderProps {
 }
 
 export function StudentApplicationHeader({ student }: StudentHeaderProps) {
+  const [sch, setSch] = useState<any>(null);
+
+  useEffect(() => {
+    if (student?.cohort?.feeStructureDetails && student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
+      const scholarship = student.cohort.feeStructureDetails.find(
+        (scholarship: any) =>
+          scholarship._id === student.litmusTestDetails[0].litmusTaskId.scholarshipDetail
+      );
+      setSch(scholarship);
+    }
+  }, [student]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -134,7 +145,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
-                {student.scholarship ? <Badge variant="secondary">{student?.scholarship}</Badge> : "--"}
+                {sch ? <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}</Badge> : "--"}
               </div> 
               <div>
                 <p className="text-sm text-muted-foreground">Payment Status</p>

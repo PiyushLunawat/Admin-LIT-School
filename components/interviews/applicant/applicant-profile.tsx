@@ -83,10 +83,10 @@ export function ApplicantProfile({ interviewId }: ApplicantProfileProps) {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => router.back()}>
+        {/* <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Interview
-        </Button>
+        </Button> */}
         <h1 className="text-3xl font-bold">Applicant Profile</h1>
       </div>
 

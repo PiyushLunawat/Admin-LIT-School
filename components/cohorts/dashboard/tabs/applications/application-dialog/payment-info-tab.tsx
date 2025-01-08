@@ -76,6 +76,15 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   const visibleSemesters = showAllSemesters
   ? sch?.scholarshipDetails
   : sch?.scholarshipDetails?.slice(0, 1); 
+
+  const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
+  const installments = sch?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+  const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
+  const totalAmount = tokenAmount + installmentTotal;
+
+  const isTokenPaid =
+    student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === "paid";
+  const paidAmount = isTokenPaid ? tokenAmount : 0;
   
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -102,15 +111,15 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="font-medium">{"--"}</p>
+              <p className="font-medium">{formatAmount(totalAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="font-medium">{"--"}</p>
+              <p className="font-medium">{formatAmount(paidAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <Badge variant="secondary">{sch?.scholarshipName || '--'+' '+(sch?.scholarshipPercentage)}%</Badge>
+              <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage)}%</Badge>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Token Status</p>
@@ -122,10 +131,10 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Payment Progress</span>
-              <span>{0.0.toFixed(0)}%</span>
+              <span>{(paidAmount/totalAmount*100).toFixed(0)}%</span>
             </div>
             <Progress states={[
-              { value: 0, widt: 0, color: '#2EB88A' }
+              { value: paidAmount, widt: (paidAmount/totalAmount*100), color: '#2EB88A' }
             ]} />
           </div>
         </CardContent>

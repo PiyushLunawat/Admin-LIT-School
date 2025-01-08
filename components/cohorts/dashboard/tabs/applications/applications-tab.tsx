@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Mail, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getCurrentStudents } from "@/app/api/student";
+import { DateRange } from "react-day-picker";
 
 interface ApplicationsTabProps {
   cohortId: string;
+  selectedDateRange: DateRange | undefined;
 }
 
-export function ApplicationsTab({ cohortId }: ApplicationsTabProps) {
+export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTabProps) {
   const [selectedApplicationId, setSelectedApplicationId] = useState("");
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [application, setApplication] = useState<any>(null);  
@@ -78,6 +80,7 @@ export function ApplicationsTab({ cohortId }: ApplicationsTabProps) {
           <ApplicationsList
             cohortId={cohortId}
             key={refreshKey} 
+            selectedDateRange={selectedDateRange}
             onApplicationSelect={(id) => {setSelectedApplicationId(id);}}
             selectedIds={selectedApplicationIds}
             onSelectedIdsChange={setSelectedApplicationIds}

@@ -7,12 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Download, Mail, MessageSquare } from "lucide-react";
 import { DateRangePicker } from "@/components/dashboard/overview/date-range-picker";
 import { getCohortById } from "@/app/api/cohorts";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { getPrograms } from "@/app/api/programs";
 import { getCentres } from "@/app/api/centres";
+import { getStudents } from "@/app/api/student";
+import { DateRange } from "react-day-picker";
 
 interface CohortHeaderProps {
   cohortId: string;
+  setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
 }
 
 interface Program {
@@ -32,8 +35,10 @@ interface Centre {
   status: boolean;
 }
 
-export function CohortHeader({ cohortId }: CohortHeaderProps) {
+export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
   const [cohort, setCohort] = useState<any>(null);
+  const [applied, setApplied] = useState(0);
+  const [intCleared, setIntCleared] = useState(0);
   const [programs, setPrograms] = useState<Program[]>([]);  
   const [centres, setCentres] = useState<Centre[]>([]);
 
@@ -44,6 +49,31 @@ export function CohortHeader({ cohortId }: CohortHeaderProps) {
         setPrograms(programsData.data);
         const centresData = await getCentres();
         setCentres(centresData.data);
+
+        const response = await getStudents();
+          const mappedStudents =
+            response.data.filter(
+              (student: any) =>
+                student?.applicationDetails !== undefined &&
+                student.cohort?._id === cohortId
+            )   
+            setApplied(
+              response.data.filter(
+                (student: any) => student?.applicationDetails?.applicationStatus === 'initiated'
+              ).length
+            );
+            
+            setIntCleared(
+              response.data.filter(
+                (student: any) => student?.applicationDetails?.applicationStatus === 'cleared'
+              ).length
+            );
+
+            console.log("csc",cohort.filledSeats.length,intCleared,response.data.filter(
+              (student: any) => student?.applicationDetails?.applicationStatus === 'initiated'
+            ).length);
+            
+        
       } catch (error) {
         console.error("Error fetching programs:", error);
       }
@@ -115,8 +145,8 @@ export function CohortHeader({ cohortId }: CohortHeaderProps) {
             <Progress
               states={[
                 { value: cohort.filledSeats.length, widt: (cohort.filledSeats.length / cohort.totalSeats) * 100, color: '#2EB88A' },
-                { value: 3, widt: (3 / cohort.totalSeats) * 100, color: '#00A3FF' },
-                { value: 2, widt: (2 / cohort.totalSeats) * 100, color: '#FF791F' },
+                { value: intCleared, widt: ((intCleared) / cohort.totalSeats) * 100, color: '#00A3FF' },
+                { value: applied, widt: ((applied-intCleared-cohort.filledSeats.length) / cohort.totalSeats) * 100, color: '#FF791F' },
               ]}
             />
               <div className="flex gap-3">
@@ -137,7 +167,7 @@ export function CohortHeader({ cohortId }: CohortHeaderProps) {
           </div>
         </div>
         <div className="pt-4">
-        <DateRangePicker />
+        <DateRangePicker setDateRange={setDateRange} />
         </div>
       </CardContent>
     </Card>

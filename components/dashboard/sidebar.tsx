@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LayoutDashboard, School, Building2, Users, ClipboardList, Calendar, GraduationCap, CreditCard, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 const routes = [
@@ -57,6 +57,7 @@ const routes = [
 ];
 
 export function Sidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -112,13 +113,9 @@ export function Sidebar() {
         variant="ghost"
         size="icon"
         className="absolute -right-4 top-6 rounded-full border bg-background"
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        onClick={() => router.back()}
       >
-        {isCollapsed ? (
-          <ChevronRight className="h-4 w-4" />
-        ) : (
-          <ChevronLeft className="h-4 w-4" />
-        )}
+        <ChevronLeft className="h-4 w-4" />
       </Button>
     </div>
   );

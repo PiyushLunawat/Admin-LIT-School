@@ -109,7 +109,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Current Status {student?.qualification}</Label>
+              <Label>Current Status</Label>
               <Select disabled={!isEditing} value={student?.qualification}>
                 <SelectTrigger>
                   <SelectValue />
@@ -166,14 +166,14 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>LinkedIn Profile</Label>
               <Input
-                defaultValue={student?.linkedInUrl}
+                defaultValue={student?.linkedInUrl || '--'}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Instagram Profile</Label>
               <Input
-                defaultValue={student?.instagramUrl}
+                defaultValue={student?.instagramUrl || '--'}
                 readOnly={!isEditing}
               />
             </div>

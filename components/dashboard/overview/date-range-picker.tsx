@@ -18,15 +18,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 
-export function DateRangePicker() {
+interface DateRangePickerProps {
+  setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
+}
+
+export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
   const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
+    from: undefined,
+    to: undefined,
   });
 
   const presets = [
+    { label: "Select Range", value: "all" },
     { label: "Today", value: "today", days: 0 },
     { label: "Yesterday", value: "yesterday", days: -1 },
     { label: "Last 7 days", value: "7days", days: -7 },
@@ -35,15 +40,27 @@ export function DateRangePicker() {
     { label: "Last year", value: "365days", days: -365 },
   ];
 
+  const handleDateChange = useCallback(
+    (range: DateRange | undefined) => {
+      setDate(range);
+      setDateRange(range);
+    },
+    [setDateRange]
+  );
+
   return (
     <div className="flex items-center gap-4">
       <Select
         onValueChange={(value) => {
-          const preset = presets.find((p) => p.value === value);
-          if (preset) {
-            const to = new Date();
-            const from = addDays(to, preset.days);
-            setDate({ from, to });
+          if (value === "all") {
+            handleDateChange(undefined); // No date range selected
+          } else {
+            const preset = presets.find((p) => p.value === value);
+            if (preset) {
+              const to = new Date();
+              const from = preset.days !== undefined ? addDays(to, preset.days) : undefined;
+              handleDateChange({ from, to });
+            }
           }
         }}
       >
@@ -89,7 +106,9 @@ export function DateRangePicker() {
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={setDate}
+            onSelect={(range) => {
+              handleDateChange(range);
+            }}
             numberOfMonths={2}
           />
         </PopoverContent>

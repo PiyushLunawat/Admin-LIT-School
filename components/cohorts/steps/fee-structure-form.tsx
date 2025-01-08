@@ -23,11 +23,11 @@ interface FeeStructureFormProps {
 
 // Define the Zod schema
 const formSchema = z.object({
-  applicationFee: z.coerce.number().min(1, "Application fee is required"),
-  tokenFee: z.coerce.number().min(1, "Token fee is required"),
-  semesters: z.coerce.number().min(1, "Number of semesters is required"),
-  installmentsPerSemester: z.coerce.number().min(1, "Installments per semester are required"),
-  oneShotDiscount: z.coerce.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100"),
+  applicationFee: z.coerce.string().min(1, "Application fee is required"),
+  tokenFee: z.coerce.string().min(1, "Token fee is required"),
+  semesters: z.coerce.string().min(1, "Number of semesters is required"),
+  installmentsPerSemester: z.coerce.string().min(1, "Installments per semester are required"),
+  oneShotDiscount: z.coerce.string().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100"),
 });
 
 export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeStructureFormProps) {
@@ -71,8 +71,8 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
                 <Label>Application Fee (₹)</Label>
                 <FormControl>
                   <Input
-                    type="number"
-                    placeholder="500"
+                    type="number" min="1"
+                    placeholder="₹500"
                     {...field}
                   />
                 </FormControl>
@@ -89,8 +89,8 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
                 <Label>Token Fee (₹)</Label>
                 <FormControl>
                   <Input
-                    type="number"
-                    placeholder="50000"
+                    type="number" min="1"
+                    placeholder="₹50,000"
                     {...field}
                   />
                 </FormControl>
@@ -109,7 +109,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
                 <Label>Number of Semesters</Label>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="number" min="1"
                     placeholder="3"
                     {...field}
                   />
@@ -127,7 +127,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
                 <Label>Installments per Semester</Label>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="number" min="1"
                     placeholder="3"
                     {...field}
                   />
@@ -146,8 +146,8 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
               <Label>One-Shot Payment Discount (%)</Label>
               <FormControl>
                 <Input
-                  type="number"
-                  placeholder="10"
+                  type="number" min="1"
+                  placeholder="10%"
                   {...field}
                 />
               </FormControl>

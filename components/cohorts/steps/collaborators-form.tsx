@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Plus, Send, Trash2 } from "lucide-react";
 import { updateCohort } from "@/app/api/cohorts";
+import { useEffect } from "react";
 
 
 interface CollaboratorsFormProps {
@@ -60,12 +61,21 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
     },
   });
 
+  
   let collaborators:Array<collaborator> =[]
-
+  
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "collaborators",
   });
+  
+  useEffect(() => {
+    // Ensure at least one collaborator exists
+    if (fields.length === 0) {
+      append({ email: "", role: "" });
+    }
+  }, [fields, append]); // Use `fields` instead of `collaborators`
+  
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {

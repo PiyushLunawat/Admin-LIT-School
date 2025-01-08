@@ -9,6 +9,8 @@ import { PaymentsTab } from "@/components/cohorts/dashboard/tabs/payments/paymen
 import { CommunicationsTab } from "@/components/cohorts/dashboard/tabs/communications/communications-tab";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { DateRange } from "react-day-picker";
+import { useState } from "react";
 
 interface CohortDashboardProps {
   cohortId: string;
@@ -16,14 +18,15 @@ interface CohortDashboardProps {
 
 export function CohortDashboard({ cohortId }: CohortDashboardProps) {
   const router = useRouter();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex gap-2 items-center cursor-pointer" onClick={() => router.back()}>
+      {/* <div className="flex gap-2 items-center cursor-pointer" onClick={() => router.back()}>
         <ArrowLeft className="w-4 h-4"/>
         Back to Cohorts 
-      </div>
-      <CohortHeader cohortId={cohortId} />
+      </div> */}
+      <CohortHeader cohortId={cohortId} setDateRange={setDateRange}/>
       
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="w-full">
@@ -31,7 +34,7 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
           <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="litmus">LITMUS Test</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
-          <TabsTrigger value="communication">Communication</TabsTrigger>
+          {/* <TabsTrigger value="communication">Communication</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="overview">
@@ -39,11 +42,11 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
         </TabsContent>
         
         <TabsContent value="applications">
-          <ApplicationsTab cohortId={cohortId} />
+          <ApplicationsTab cohortId={cohortId} selectedDateRange={dateRange} />
         </TabsContent>
         
         <TabsContent value="litmus">
-          <LitmusTab cohortId={cohortId} />
+          <LitmusTab cohortId={cohortId} selectedDateRange={dateRange}/>
         </TabsContent>
         
         <TabsContent value="payments">

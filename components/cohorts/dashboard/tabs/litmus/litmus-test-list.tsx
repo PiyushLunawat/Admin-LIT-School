@@ -21,6 +21,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getStudents } from "@/app/api/student";
+import { DateRange } from "react-day-picker";
 
 type BadgeVariant = "destructive" | "onhold" | "lemon" | "success" | "default";
 
@@ -29,6 +30,7 @@ interface LitmusTestListProps {
   onSubmissionSelect: (id: any) => void;
   selectedIds: string[];
   onApplicationUpdate: () => void;
+  selectedDateRange: DateRange | undefined;
   onSelectedIdsChange: (ids: string[]) => void;
   searchTerm: string;
   selectedStatus: string;
@@ -40,6 +42,7 @@ export function LitmusTestList({
   onSubmissionSelect,
   selectedIds,
   onApplicationUpdate,
+  selectedDateRange,
   onSelectedIdsChange,
   searchTerm,
   selectedStatus,
@@ -87,7 +90,13 @@ export function LitmusTestList({
 
   const filteredAndSortedApplications = useMemo(() => {
     // 1) Filter
-    let filtered = applications;
+    const filteredApplications = applications.filter((app: any) => {
+      if (!selectedDateRange) return true;
+      const appDate = new Date(app.updatedAt);
+      const { from, to } = selectedDateRange;
+      return (!from || appDate >= from) && (!to || appDate <= to);
+    });
+    let filtered = filteredApplications;
 
     // a) Search filter by applicant name
     if (searchTerm.trim()) {
@@ -151,7 +160,7 @@ export function LitmusTestList({
     }
 
     return filtered;
-  }, [applications, searchTerm, selectedStatus, sortBy]);
+  }, [applications, searchTerm, selectedStatus, sortBy, selectedDateRange]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === applications.length) {

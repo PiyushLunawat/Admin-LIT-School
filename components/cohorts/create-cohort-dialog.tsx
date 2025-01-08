@@ -88,7 +88,7 @@ export function CreateCohortDialog({ open, onOpenChange, editingCohort: initialE
             <FeeStructureForm onNext={() => setCurrentStep("fee-preview")} onCohortCreated={handleCohortCreated} initialData={editingCohort}/>
           </TabsContent>
           <TabsContent value="fee-preview">
-            <FeePreviewForm onNext={() => setCurrentStep("collaborators")} initialData={editingCohort}/>
+            <FeePreviewForm onNext={() => setCurrentStep("collaborators")} onCohortCreated={handleCohortCreated} initialData={editingCohort}/>
           </TabsContent>
           <TabsContent value="collaborators">
             <CollaboratorsForm onComplete={() => onOpenChange(false)} onCohortCreated={handleCohortCreated} initialData={editingCohort} />

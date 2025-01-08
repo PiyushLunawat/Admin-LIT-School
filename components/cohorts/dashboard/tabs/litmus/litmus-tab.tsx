@@ -7,12 +7,14 @@ import { LitmusTestDetails } from "./litmus-test-details";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { DateRange } from "react-day-picker";
 
 interface LitmusTabProps {
   cohortId: string;
+  selectedDateRange: DateRange | undefined;
 }
 
-export function LitmusTab({ cohortId }: LitmusTabProps) {
+export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<any>(null);
   const [selectedSubmissionIds, setSelectedSubmissionIds] = useState<string[]>([]);
   const [application, setApplication] = useState<any>(null);  
@@ -65,6 +67,7 @@ export function LitmusTab({ cohortId }: LitmusTabProps) {
             cohortId={cohortId}
             key={refreshKey} 
             onSubmissionSelect={(id) => {setSelectedSubmissionId(id);}}
+            selectedDateRange={selectedDateRange}
             selectedIds={selectedSubmissionIds}
             onSelectedIdsChange={setSelectedSubmissionIds}
             onApplicationUpdate={handleApplicationUpdate} 
