@@ -316,13 +316,13 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">Why are you interested in joining The LIT School?</h4>
               <div className="mt-2">
-                <div className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text1}</div> 
+                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text1}</div> 
               </div>
             </div>
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">What are your career goals or aspirations??</h4>
               <div className="mt-2">
-                <div className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text2}</div> 
+                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text2}</div> 
               </div>
             </div>
           </div>
@@ -349,12 +349,12 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                 </div>
               </div>
               {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
-              <div key={`text-${id}`} className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">
+              <div key={`text-${id}`} className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
                 {textItem}
               </div>
             ))}
             {submission?.tasks[index]?.task?.links?.map((linkItem: string, id: number) => (
-              <div key={`link-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
+              <div key={`link-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
                 <Link2Icon className="w-4 h-4" />
                 <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
                   {linkItem}
@@ -362,7 +362,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
               </div>
             ))}
             {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
-              <div key={`image-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
+              <div key={`image-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
                 <ImageIcon className="w-4 h-4" />
                 <a href={imageItem} target="_blank" rel="noopener noreferrer" className="text-white">
                   {imageItem.split('/').pop()}
@@ -370,7 +370,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
               </div>
             ))}
             {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
-              <div key={`video-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
+              <div key={`video-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
                 <VideoIcon className="w-4 h-4" />
                 <a href={videoItem} target="_blank" rel="noopener noreferrer" className="text-white">
                   {videoItem.split('/').pop()}
@@ -378,7 +378,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
               </div>
             ))}
             {submission?.tasks[index]?.task?.files?.map((fileItem: string, id: number) => (
-              <div key={`file-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
+              <div key={`file-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
                 <FileIcon className="w-4 h-4" />
                 <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
                   {fileItem.split('/').pop()}

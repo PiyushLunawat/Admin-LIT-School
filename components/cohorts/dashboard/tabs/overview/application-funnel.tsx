@@ -22,10 +22,10 @@ export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
         // Applied Count
         const applied = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-            "initiated"
+            application?.applicationDetails?.applicationStatus?.toLowerCase() !==
+            undefined
         );
-        setUnderReviewCount(applied.length);
+        setAppliedCount(applied.length);
   
         // Under Review Count
         const underReview = applications.filter(
@@ -42,13 +42,20 @@ export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
             "complete"
         );
         setInterviewedCount(onhold.length);
+
+        const litmus = applications.filter(
+          (application) =>
+          (application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== "pending" &&
+          application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== undefined)
+        );
+        setLitmusCompleteCount(litmus.length);
   
-        // const accepted = applications.filter(
-        //   (application) =>
-        //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-        //     "accepted"
-        // );
-        // setAcceptedCount(accepted.length);
+        const enrolled = applications.filter(
+          (application) =>
+            application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() ===
+            "completed"
+        );
+        setEnrolledCount(enrolled.length);
 
         // const rejected = applications.filter(
         //   (application) =>
@@ -64,11 +71,11 @@ export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
     }, [applications]);
     
   const funnelData = [
-    { stage: "Applications", value: 156 },
+    { stage: "Applications", value: appliedCount },
     { stage: "Under Review", value: underReviewCount },
-    { stage: "Interviewed", value: 67 },
-    { stage: "LITMUS Complete", value: 45 },
-    { stage: "Enrolled", value: 25 },
+    { stage: "Interviewed", value: interviewedCount },
+    { stage: "LITMUS Complete", value: litmusCompleteCount },
+    { stage: "Enrolled", value: enrolledCount },
   ];
 
 

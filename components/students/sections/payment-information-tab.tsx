@@ -3,63 +3,123 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Download, Mail, MessageSquare, Upload } from "lucide-react";
+import { Calendar, CircleCheckBig, Download, Eye, FlagIcon, Mail, MessageSquare, Upload, UploadIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
+import { getCurrentStudents, verifyTokenAmount } from "@/app/api/student";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
 
 interface PaymentInformationTabProps {
   studentId: string;
 }
 
 export function PaymentInformationTab({ studentId }: PaymentInformationTabProps) {
-  // In a real application, this data would be fetched based on the studentId
-  const payment = {
-    totalAmount: "₹9,95,000",
-    paidAmount: "₹4,97,500",
-    scholarship: "Smart Mouth (5%)",
-    scholarshipAmount: "₹49,750",
-    tokenAmount: "₹50,000",
-    tokenPaid: true,
-    instalments: [
-      {
-        number: 1,
-        amount: "₹1,65,833",
-        dueDate: "2024-02-15",
-        status: "Paid",
-        paidDate: "2024-02-14",
-        receipt: "receipt-001.pdf",
-      },
-      {
-        number: 2,
-        amount: "₹1,65,833",
-        dueDate: "2024-03-15",
-        status: "Paid",
-        paidDate: "2024-03-13",
-        receipt: "receipt-002.pdf",
-      },
-      {
-        number: 3,
-        amount: "₹1,65,833",
-        dueDate: "2024-04-15",
-        status: "Pending",
-      },
-    ],
-    communications: [
-      {
-        type: "Reminder",
-        date: "2024-03-20",
-        message: "Payment reminder for 3rd instalment",
-      },
-    ],
+  const [isEditing, setIsEditing] = useState(false);
+    const [student, setStudent] = useState<any>(null);
+  
+    useEffect(() => {
+      if (studentId) {
+        fetchStudent();
+      }
+    }, [studentId]);
+  
+    async function fetchStudent() {
+      try {
+        const application = await getCurrentStudents(studentId);
+        setStudent(application?.data || null);
+        console.log("asfsfv",application?.data)
+      } catch (error) {
+        console.error("Failed to fetch student data:", error);
+      }
+    }
+const [sch, setSch] = useState<any>();
+  const [open, setOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [showAllSemesters, setShowAllSemesters] = useState(false);
+
+  const handleView = (url: string) => {
+    setImageUrl(url);
+    setOpen(true);
   };
 
-  const progressPercentage = 
-    (payment.instalments.filter(i => i.status === "Paid").length / 
-    payment.instalments.length) * 100;
+  const handleDownload = (url: string) => {
+    const link = document.createElement("a");
+      link.href = url;
+      link.download = "Receipt.pdf"; // Default filename for the download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
+
+  async function handleVerify(tokenId: any, comment: string, verificationStatus: string) {
+    try {
+  
+      if (!tokenId) {
+        console.error("Token Fee ID is not available");
+        return;
+      }  
+      const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
+      console.log("Token verification response:", response);
+    } catch (error) {
+      console.error("Error verifying token amount:", error);
+    }
+  }
+  
+
+  console.log("dd",student);
+
+  useEffect(() => {
+    if (!student?.cohort?.feeStructureDetails) return;
+
+    const scholarshipId = student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail;
+
+    const matchedScholarship = student.cohort.feeStructureDetails.find(
+      (scholarship: any) => scholarship._id === scholarshipId
+    );
+    const fallbackScholarship = student.cohort.feeStructureDetails.find(
+      (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
+    );
+
+    setSch(matchedScholarship || fallbackScholarship);
+  }, [student]);
+
+  const formatAmount = (value: number | undefined) =>
+    value !== undefined
+      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
+      : "--";
+  
+  const visibleSemesters = showAllSemesters
+  ? sch?.scholarshipDetails
+  : sch?.scholarshipDetails?.slice(0, 1); 
+
+  const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
+  const installments = sch?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+  const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
+  const totalAmount = tokenAmount + installmentTotal;
+
+  const isTokenPaid =
+    student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === "paid";
+  const paidAmount = isTokenPaid ? tokenAmount : 0;
+  
+  const getStatusColor = (status: string): BadgeVariant => {
+    switch (status.toLowerCase()) {
+      case "flagged":
+        return "warning";
+      case "pending":
+        return "lemon";
+      case "paid":
+        return "success";
+      default:
+        return "default";
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Payment Overview */}
-      {/* <Card>
+      {/* Payment Schedule */}
+      <Card>
         <CardHeader>
           <CardTitle>Payment Overview</CardTitle>
         </CardHeader>
@@ -67,112 +127,153 @@ export function PaymentInformationTab({ studentId }: PaymentInformationTabProps)
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="font-medium">{payment.totalAmount}</p>
+              <p className="font-medium">{formatAmount(totalAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="font-medium">{payment.paidAmount}</p>
+              <p className="font-medium">{formatAmount(paidAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <Badge variant="secondary">{payment.scholarship}</Badge>
+              <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage)}%</Badge>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Token Status</p>
-              <Badge variant={payment.tokenPaid ? "success" : "destructive"}>
-                {payment.tokenPaid ? "Paid" : "Pending"}
+              <Badge variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
+                {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
               </Badge>
             </div>
           </div>
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Payment Progress</span>
-              <span>{progressPercentage.toFixed(0)}%</span>
+              <span>{(paidAmount/totalAmount*100).toFixed(0)}%</span>
             </div>
             <Progress states={[
-                  { value:(progressPercentage) } 
-                ]} />
+              { value: paidAmount, widt: (paidAmount/totalAmount*100), color: '#2EB88A' }
+            ]} />
           </div>
         </CardContent>
-      </Card> */}
+      </Card>
 
       {/* Payment Schedule */}
       <Card>
-      <CardHeader>
-          <CardTitle>Payment Overview</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="font-medium">{payment.totalAmount}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="font-medium">{payment.paidAmount}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Scholarship</p>
-              <Badge variant="secondary">{payment.scholarship}</Badge>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Token Status</p>
-              <Badge variant={payment.tokenPaid ? "success" : "destructive"}>
-                {payment.tokenPaid ? "Paid" : "Pending"}
-              </Badge>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <div className="flex justify-between text-sm">
-              <span>Payment Progress</span>
-              <span>{progressPercentage.toFixed(0)}%</span>
-            </div>
-            <Progress states={[
-                  { value:(progressPercentage) } 
-                ]} />
-          </div>
-        </CardContent>
-
         <CardHeader>
           <CardTitle>Payment Schedule</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {payment.instalments.map((instalment, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-2">
+            <div className="border rounded-lg p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-medium">Instalment {instalment.number}</h4>
+                  <h4 className="font-medium">Token Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: {instalment.amount}
+                    Amount: {formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}
+                    {student?.cousrseEnrolled?.length > 0 && (
+                      <>
+                        {" • Uploaded on "}
+                        {new Date(
+                          student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.updatedAt
+                        ).toLocaleDateString()}
+                      </>
+                    )}
                   </p>
                 </div>
-                <Badge
-                  variant={instalment.status === "Paid" ? "success" : "secondary"}
-                >
-                  {instalment.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
+                    {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
+                  </Badge>
+                  {student?.cousrseEnrolled?.length > 0 && 
+                  <Button variant="ghost" size="sm" onClick={() => handleView(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.receiptUrl[0])}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View
+                  </Button>}
+                </div>
+                
               </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4 mr-2" />
-                Due: {new Date(instalment.dueDate).toLocaleDateString()}
-              </div>
-              {instalment.paidDate && (
+              {/* <div className="flex justify-between items-center">
+                {payment.tokenPaid !== "Paid" && <Button variant="outline" size="sm" className="">
+                  <UploadIcon className="h-4 w-4 mr-2" />
+                  Upload Receipt
+                </Button>}
+              </div>  */}
+              {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'pending' &&
+                <div className="flex gap-4 mt-4">
+                  <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
+                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "Upload again", "flagged")}>
+                      <FlagIcon className="w-4 h-4"/> Flag Document
+                  </Button>
+                  <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
+                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "Token Fee is verfied", "paid")}>
+                      <CircleCheckBig className="w-4 h-4"/> Mark as Verified
+                  </Button>
+                </div>
+              }
+              {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && 
+              <>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Paid: {new Date(instalment.paidDate).toLocaleDateString()}
+                  Paid: {new Date(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.updatedAt).toLocaleDateString()}
                 </div>
-              )}
-              {instalment.receipt && (
-                <Button variant="outline" size="sm" className="w-full mt-2">
+                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.receiptUrl[0])}>
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
                 </Button>
-              )}
+              </>
+              }
+            </div>
+
+            {visibleSemesters?.map((semesterObj: any, semesterIndex: number) => (
+            <div key={semesterIndex}>
+              <Badge variant="blue" className="mb-3">
+                Semester {semesterObj.semester}
+              </Badge>
+
+              <div className="space-y-4">
+                {semesterObj.installments?.map((instalment: any, iIndex: number) => (
+                  <div key={iIndex} className="border rounded-lg p-4 space-y-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium">Instalment {iIndex + 1}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Amount: {formatAmount(instalment.amountPayable)}
+                        </p>
+                      </div>
+                      <Badge variant="secondary">Pending</Badge>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Due:{" "}
+                        {instalment.installmentDate
+                          ? new Date(instalment.installmentDate).toLocaleDateString()
+                          : "--"}
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <UploadIcon className="h-4 w-4 mr-2" />
+                        Upload Receipt
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
-        </CardContent>
 
-        <CardHeader>
+          {/* Show More / Show Less button, only if more than 1 semester */}
+          {sch?.scholarshipDetails?.length > 1 && (
+            <Button
+              variant="outline" className="w-full"
+              onClick={() => setShowAllSemesters(!showAllSemesters)}
+            >
+              {showAllSemesters ? "Show Less" : "Show More"}
+            </Button>
+          )}
+
+        </CardContent>
+      </Card>
+
+        {/* <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
@@ -190,8 +291,8 @@ export function PaymentInformationTab({ studentId }: PaymentInformationTabProps)
               Upload Receipt
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </CardContent> 
+      </Card>*/}
 
       {/* Communication History */}
       {/* <Card>
@@ -237,6 +338,19 @@ export function PaymentInformationTab({ studentId }: PaymentInformationTabProps)
           </div>
         </CardContent>
       </Card> */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt="Receipt"
+              className="mx-auto h-[50vh] object-contain"
+            />
+          ) : (
+            <p className="text-center text-muted-foreground">No receipt found.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

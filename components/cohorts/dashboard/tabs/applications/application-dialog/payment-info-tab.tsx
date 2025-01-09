@@ -80,6 +80,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
   const installments = sch?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
+  const scholarshipAmount = installments.reduce((sum: number, installment: any) => sum + (installment.scholarshipAmount || 0), 0);
   const totalAmount = tokenAmount + installmentTotal;
 
   const isTokenPaid =
@@ -111,15 +112,18 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="font-medium">{formatAmount(totalAmount) || "--"}</p>
+              <p className="text-sm font-semibold">₹ {formatAmount(totalAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="font-medium">{formatAmount(paidAmount) || "--"}</p>
+              <p className="text-sm font-semibold">₹ {formatAmount(paidAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage)}%</Badge>
+              <p className="flex gap-1 text-sm item-center font-semibold">
+                ₹ {formatAmount(scholarshipAmount)}
+                <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage)}%</Badge>
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Token Status</p>
@@ -131,7 +135,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Payment Progress</span>
-              <span>{(paidAmount/totalAmount*100).toFixed(0)}%</span>
+              <span>{(paidAmount/totalAmount*100).toFixed(2)}%</span>
             </div>
             <Progress states={[
               { value: paidAmount, widt: (paidAmount/totalAmount*100), color: '#2EB88A' }

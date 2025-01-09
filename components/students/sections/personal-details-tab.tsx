@@ -39,8 +39,6 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
     }
   }
 
-
-
   return (
     <div className="space-y-6">
       {/* Basic Information */}
@@ -64,15 +62,17 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Full Name</Label>
-              <Input disabled
-                defaultValue={student?.firstName + ' ' + student?.lastName}
+              <Input disabled={!isEditing}
+                defaultValue={student ? `${student.firstName} ${student.lastName}` : ""}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Date of Birth</Label>
               <Input disabled={!isEditing}
-                defaultValue={new Date(student?.dateOfBirth).toLocaleDateString()}
+                defaultValue={student?.dateOfBirth
+                  ? new Date(student.dateOfBirth).toLocaleDateString()
+                  : ""}
                 readOnly={!isEditing}
               />
             </div>
@@ -147,14 +147,14 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>LinkedIn Profile</Label>
               <Input disabled={!isEditing}
-                defaultValue={student?.linkedInUrl}
+                defaultValue={student?.linkedInUrl || '--'}
                 readOnly={!isEditing}
               />
             </div>
             <div className="space-y-2">
               <Label>Instagram Profile</Label>
               <Input disabled={!isEditing}
-                defaultValue={student?.instagramUrl}
+                defaultValue={student?.instagramUrl || '--'}
                 readOnly={!isEditing}
               />
             </div>
@@ -244,7 +244,7 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Contact Name</Label>
               <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.emergencyContact?.firstName+' '+student?.studentDetails?.emergencyContact?.lastName}
+                defaultValue={student ? `${student?.studentDetails?.emergencyContact?.firstName} ${student?.studentDetails?.emergencyContact?.lastName}` : ""}
                 readOnly={!isEditing}
               />
             </div>
@@ -273,62 +273,90 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
+            {student?.studentDetails?.parentInformation?.father?.firstName &&
             <div className="space-y-2">
               <Label>Father&apos;s Name</Label>
               <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.father?.firstName+' '+student?.studentDetails?.parentInformation?.father?.lastName}
+                defaultValue={student ? `${student?.studentDetails?.parentInformation?.father?.firstName} ${student?.studentDetails?.parentInformation?.father?.lastName}` : ""}
                 readOnly={!isEditing}
               />
-            </div>
-            <div className="space-y-2">
-              <Label>Mother&apos;s Name</Label>
-              <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.mother?.firstName+' '+student?.studentDetails?.parentInformation?.mother?.lastName}
-                readOnly={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Father&apos;s Contact Number</Label>
-              <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.father?.contactNumber}
-                readOnly={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Mother&apos;s Contact Number</Label>
-              <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.mother?.contactNumber}
-                readOnly={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Father&apos;s Email</Label>
-              <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.father?.email}
-                readOnly={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Mother&apos;s Email</Label>
-              <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.mother?.email}
-                readOnly={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Father&apos;s Occupation</Label>
-              <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.father?.occupation}
-                readOnly={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Mother&apos;s Occupation</Label>
-              <Input disabled={!isEditing}
-                defaultValue={student?.studentDetails?.parentInformation?.mother?.occupation}
-                readOnly={!isEditing}
-              />
-            </div>
+            </div>}
+            {student?.studentDetails?.parentInformation?.mother?.firstName && (
+              <div className="space-y-2">
+                <Label>Mother&apos;s Name</Label>
+                <Input
+                  disabled={!isEditing}
+                  defaultValue={student ? `${student?.studentDetails?.parentInformation?.mother?.firstName} ${student?.studentDetails?.parentInformation?.mother?.lastName}` : ""}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+
+            {student?.studentDetails?.parentInformation?.father?.contactNumber && (
+              <div className="space-y-2">
+                <Label>Father&apos;s Contact Number</Label>
+                <Input
+                  disabled={!isEditing}
+                  defaultValue={student?.studentDetails?.parentInformation?.father?.contactNumber}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+
+            {student?.studentDetails?.parentInformation?.mother?.contactNumber && (
+              <div className="space-y-2">
+                <Label>Mother&apos;s Contact Number</Label>
+                <Input
+                  disabled={!isEditing}
+                  defaultValue={student?.studentDetails?.parentInformation?.mother?.contactNumber}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+
+            {student?.studentDetails?.parentInformation?.father?.email && (
+              <div className="space-y-2">
+                <Label>Father&apos;s Email</Label>
+                <Input
+                  disabled={!isEditing}
+                  defaultValue={student?.studentDetails?.parentInformation?.father?.email}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+
+            {student?.studentDetails?.parentInformation?.mother?.email && (
+              <div className="space-y-2">
+                <Label>Mother&apos;s Email</Label>
+                <Input
+                  disabled={!isEditing}
+                  defaultValue={student?.studentDetails?.parentInformation?.mother?.email}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+
+            {student?.studentDetails?.parentInformation?.father?.occupation && (
+              <div className="space-y-2">
+                <Label>Father&apos;s Occupation</Label>
+                <Input
+                  disabled={!isEditing}
+                  defaultValue={student?.studentDetails?.parentInformation?.father?.occupation}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+
+            {student?.studentDetails?.parentInformation?.mother?.occupation && (
+              <div className="space-y-2">
+                <Label>Mother&apos;s Occupation</Label>
+                <Input
+                  disabled={!isEditing}
+                  defaultValue={student?.studentDetails?.parentInformation?.mother?.occupation}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
