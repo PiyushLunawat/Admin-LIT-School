@@ -184,14 +184,14 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
           <div className="space-y-2">
             <h4 className="font-medium">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('email', application?.email)}>
+              {/* <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('email', application?.email)}>
                 <Mail className="h-4 w-4 mr-2" />
                 Send Email
               </Button>
               <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('whatsapp', application?.mobileNumber)}>
                 <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2"/>
                 Send WhatsApp
-              </Button>
+              </Button> */}
               <Button variant="outline" className="justify-start">
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview

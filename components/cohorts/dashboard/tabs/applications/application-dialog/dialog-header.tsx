@@ -91,14 +91,14 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start">
+              {/* <Button variant="outline" className="justify-start">
                 <Mail className="h-4 w-4 mr-2" />
                 Send Email
               </Button>
               <Button variant="outline" className="justify-start">
                 <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
                 Send WhatsApp
-              </Button>
+              </Button> */}
               <Button variant="outline" className="justify-start">
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview

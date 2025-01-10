@@ -8,12 +8,14 @@ import { PaymentDetails } from "./payment-details";
 import { Button } from "@/components/ui/button";
 import { Mail, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { DateRange } from "react-day-picker";
 
 interface PaymentsTabProps {
   cohortId: string;
+  selectedDateRange: DateRange | undefined;
 }
 
-export function PaymentsTab({ cohortId }: PaymentsTabProps) {
+export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
 

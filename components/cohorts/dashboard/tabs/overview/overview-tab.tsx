@@ -8,12 +8,14 @@ import { RecentActivity } from "./recent-activity";
 import { AlertsSection } from "./alerts-section";
 import { useEffect, useState } from "react";
 import { getStudents } from "@/app/api/student";
+import { DateRange } from "react-day-picker";
 
 interface OverviewTabProps {
   cohortId: string;
+  selectedDateRange: DateRange | undefined;
 }
 
-export function OverviewTab({ cohortId }: OverviewTabProps) {
+export function OverviewTab({ cohortId, selectedDateRange }: OverviewTabProps) {
     const [applications, setApplications] = useState<any>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -27,9 +29,15 @@ export function OverviewTab({ cohortId }: OverviewTabProps) {
               (student: any) =>
                 student?.applicationDetails !== undefined &&
                 student.cohort?._id === cohortId
-            )    
+            )
+            const filteredApplications = mappedStudents.filter((app: any) => {
+              if (!selectedDateRange) return true;
+              const appDate = new Date(app.updatedAt);
+              const { from, to } = selectedDateRange;
+              return (!from || appDate >= from) && (!to || appDate <= to);
+            });
   
-            setApplications(mappedStudents);
+            setApplications(filteredApplications);
           console.log("fetching students:", response.data);
         } catch (error) {
           console.error("Error fetching students:", error);
@@ -39,7 +47,7 @@ export function OverviewTab({ cohortId }: OverviewTabProps) {
       }
   
       fetchStudents();
-    }, []);
+    }, [selectedDateRange]);
   
   return (
     <div className="space-y-6">

@@ -45,8 +45,8 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
   const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
   const [underReviewCount, setUnderReviewCount] = useState(0);
   const [interviewsScheduledCount, setInterviewsScheduledCount] = useState(0);
+  const [admissionFeeCount, setAdmissionFeeCount] = useState(0);
   const [litmusTestsCount, setLitmusTestsCount] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
   const [avgScholarshipsCount, setAvgScholarshipsCount] = useState(0);
   const [paymentsCount, setPaymentsCount] = useState(0);
   const [droppedCount, setDroppedCount] = useState(0);
@@ -72,6 +72,13 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       );
       setInterviewsScheduledCount(interviewsScheduled.length);
 
+      // Admission Fee Count
+      const admissionFee = applications.filter(
+        (application) =>
+          application?.cousrseEnrolled?.[application.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid'
+      );
+      setAdmissionFeeCount(admissionFee.length);
+
       // Litmus Tests Count
       const litmusTests = applications.filter(
         (application) =>
@@ -79,13 +86,6 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       );
       setLitmusTestsCount(litmusTests.length);
 
-      // Pending Count
-      const pending = applications.filter(
-        (application) =>
-          application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-          "initiated"
-      );
-      setPendingCount(pending.length);
 
       console.log("Applications processed:", litmusTests.length);
     } else {
@@ -110,6 +110,11 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       icon: Calendar,
     },
     {
+      title: "Aadmission Fee Paid",
+      value: (admissionFeeCount || '--').toString(),
+      icon: AlertTriangle,
+    },
+    {
       title: "LITMUS Tests",
       value: (litmusTestsCount || '--').toString(),
       description: "Submitted",
@@ -126,12 +131,6 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       value: `${('₹'+paymentsCount || '--').toString()}`,
       description: "₹5L Token Amount Collected",
       icon: CreditCard,
-    },
-    {
-      title: "Pending Actions",
-      value: (pendingCount || '--').toString(),
-      description: "Requires Attention",
-      icon: AlertTriangle,
     },
     {
       title: "Dropped",

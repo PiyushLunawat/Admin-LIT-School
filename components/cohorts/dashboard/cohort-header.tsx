@@ -51,20 +51,20 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
         setCentres(centresData.data);
 
         const response = await getStudents();
-          const mappedStudents =
-            response.data.filter(
-              (student: any) =>
-                student?.applicationDetails !== undefined &&
-                student.cohort?._id === cohortId
-            )   
+        const mappedStudents =
+        response.data.filter(
+          (student: any) =>
+            student?.applicationDetails !== undefined &&
+            student.cohort?._id === cohortId
+        )    
             setApplied(
-              response.data.filter(
-                (student: any) => student?.applicationDetails?.applicationStatus === 'initiated'
+              mappedStudents.filter(
+                (student: any) => student?.applicationDetails?.applicationFeeDetail?.status === 'paid'
               ).length
             );
             
             setIntCleared(
-              response.data.filter(
+              mappedStudents.filter(
                 (student: any) => student?.applicationDetails?.applicationStatus === 'cleared'
               ).length
             );

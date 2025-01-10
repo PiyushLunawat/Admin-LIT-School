@@ -97,6 +97,7 @@ const [sch, setSch] = useState<any>();
   const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
   const installments = sch?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
+  const scholarshipAmount = installments.reduce((sum: number, installment: any) => sum + (installment.scholarshipAmount || 0), 0);
   const totalAmount = tokenAmount + installmentTotal;
 
   const isTokenPaid =
@@ -112,7 +113,7 @@ const [sch, setSch] = useState<any>();
       case "paid":
         return "success";
       default:
-        return "default";
+        return "secondary";
     }
   };
 
@@ -127,15 +128,24 @@ const [sch, setSch] = useState<any>();
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="font-medium">{formatAmount(totalAmount) || "--"}</p>
+              <p className="text-sm font-semibold">₹ {formatAmount(totalAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="font-medium">{formatAmount(paidAmount) || "--"}</p>
+              <p className="text-sm font-semibold">{paidAmount ? <>₹ {formatAmount(paidAmount)}</> : "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage)}%</Badge>
+              <p className="flex gap-1 text-sm items-center font-semibold">
+                {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
+                  <>
+                    ₹ {formatAmount(scholarshipAmount)}{' '}
+                    <Badge variant="secondary">
+                      {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
+                    </Badge>
+                  </>
+                ) : ( '--' )}
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Token Status</p>
@@ -147,7 +157,7 @@ const [sch, setSch] = useState<any>();
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Payment Progress</span>
-              <span>{(paidAmount/totalAmount*100).toFixed(0)}%</span>
+              <span>{(paidAmount/totalAmount*100).toFixed(2)}%</span>
             </div>
             <Progress states={[
               { value: paidAmount, widt: (paidAmount/totalAmount*100), color: '#2EB88A' }
@@ -238,7 +248,7 @@ const [sch, setSch] = useState<any>();
                           Amount: {formatAmount(instalment.amountPayable)}
                         </p>
                       </div>
-                      <Badge variant="secondary">Pending</Badge>
+                      {/* <Badge variant="secondary">Pending</Badge> */}
                     </div>
 
                     <div className="flex justify-between items-center">
@@ -249,10 +259,10 @@ const [sch, setSch] = useState<any>();
                           ? new Date(instalment.installmentDate).toLocaleDateString()
                           : "--"}
                       </div>
-                      <Button variant="outline" size="sm">
+                      {/* <Button variant="outline" size="sm">
                         <UploadIcon className="h-4 w-4 mr-2" />
                         Upload Receipt
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 ))}

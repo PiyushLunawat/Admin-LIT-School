@@ -96,7 +96,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
       case "paid":
         return "success";
       default:
-        return "default";
+        return "secondary";
     }
   };
 
@@ -116,13 +116,19 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="text-sm font-semibold">₹ {formatAmount(paidAmount) || "--"}</p>
+              <p className="text-sm font-semibold">{paidAmount ? <>₹ {formatAmount(paidAmount)}</> : "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <p className="flex gap-1 text-sm item-center font-semibold">
-                ₹ {formatAmount(scholarshipAmount)}
-                <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage)}%</Badge>
+              <p className="flex gap-1 text-sm items-center font-semibold">
+                {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
+                  <>
+                    ₹ {formatAmount(scholarshipAmount)}{' '}
+                    <Badge variant="secondary">
+                      {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
+                    </Badge>
+                  </>
+                ) : ( '--' )}
               </p>
             </div>
             <div>
@@ -226,7 +232,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                           Amount: {formatAmount(instalment.amountPayable)}
                         </p>
                       </div>
-                      <Badge variant="secondary">Pending</Badge>
+                      {/* <Badge variant="secondary">Pending</Badge> */}
                     </div>
 
                     <div className="flex justify-between items-center">
@@ -237,10 +243,10 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                           ? new Date(instalment.installmentDate).toLocaleDateString()
                           : "--"}
                       </div>
-                      <Button variant="outline" size="sm">
+                      {/* <Button variant="outline" size="sm">
                         <UploadIcon className="h-4 w-4 mr-2" />
                         Upload Receipt
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 ))}

@@ -61,9 +61,6 @@ export function ApplicationsList({
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
-  console.log("range",selectedDateRange);
-  
-
   useEffect(() => {
     async function fetchStudents() {
       try {

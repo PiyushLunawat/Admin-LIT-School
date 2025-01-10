@@ -38,7 +38,7 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
         </TabsList>
 
         <TabsContent value="overview">
-          <OverviewTab cohortId={cohortId} />
+          <OverviewTab cohortId={cohortId} selectedDateRange={dateRange} />
         </TabsContent>
         
         <TabsContent value="applications">
@@ -49,8 +49,8 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
           <LitmusTab cohortId={cohortId} selectedDateRange={dateRange}/>
         </TabsContent>
         
-        <TabsContent value="payments">
-          <PaymentsTab cohortId={cohortId} />
+        <TabsContent value="payments" >
+          <PaymentsTab cohortId={cohortId} selectedDateRange={dateRange} />
         </TabsContent>
         
         <TabsContent value="communication">
