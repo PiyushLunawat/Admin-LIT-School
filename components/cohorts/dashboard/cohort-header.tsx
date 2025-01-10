@@ -39,6 +39,7 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
   const [cohort, setCohort] = useState<any>(null);
   const [applied, setApplied] = useState(0);
   const [intCleared, setIntCleared] = useState(0);
+  const [feePaid, setFeePaid] = useState(0);
   const [programs, setPrograms] = useState<Program[]>([]);  
   const [centres, setCentres] = useState<Centre[]>([]);
 
@@ -66,6 +67,12 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
             setIntCleared(
               mappedStudents.filter(
                 (student: any) => student?.applicationDetails?.applicationStatus === 'cleared'
+              ).length
+            );
+
+            setFeePaid(
+              mappedStudents.filter(
+                (student: any) => student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid'
               ).length
             );
 
@@ -140,13 +147,13 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <p className="">Seats Progress</p>
-              <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
+              <span>{feePaid}/{cohort.totalSeats}</span>
             </div>
             <Progress
               states={[
-                { value: cohort.filledSeats.length, widt: (cohort.filledSeats.length / cohort.totalSeats) * 100, color: '#2EB88A' },
+                { value: feePaid, widt: (feePaid / cohort.totalSeats) * 100, color: '#2EB88A' },
                 { value: intCleared, widt: ((intCleared) / cohort.totalSeats) * 100, color: '#00A3FF' },
-                { value: applied, widt: ((applied-intCleared-cohort.filledSeats.length) / cohort.totalSeats) * 100, color: '#FF791F' },
+                { value: applied, widt: ((applied-intCleared-feePaid) / cohort.totalSeats) * 100, color: '#FF791F' },
               ]}
             />
               <div className="flex gap-3">
