@@ -47,8 +47,10 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
   const [interviewsScheduledCount, setInterviewsScheduledCount] = useState(0);
   const [admissionFeeCount, setAdmissionFeeCount] = useState(0);
   const [litmusTestsCount, setLitmusTestsCount] = useState(0);
-  const [avgScholarshipsCount, setAvgScholarshipsCount] = useState(0);
+  const [avgScholarshipsPercentage, setAvgScholarshipsPercentage] = useState(0);
+  const [totalScholarshipsAmount, setTotalScholarshipsAmount] = useState(0);
   const [paymentsCount, setPaymentsCount] = useState(0);
+  const [totalTokenAmountPaid, setTotalTokenAmountPaid] = useState(0);
   const [droppedCount, setDroppedCount] = useState(0);
 
   useEffect(() => {
@@ -85,9 +87,42 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
           application?.litmusTestDetails?.[0]?.litmusTaskId !== undefined
       );
       setLitmusTestsCount(litmusTests.length);
-
-
-      console.log("Applications processed:", litmusTests.length);
+      
+      // Total Scholarship and Average Scholarships Percentage
+      let totalScholarship = 0;
+      let scholarshipCount = 0;
+      let totalPercentage = 0;
+      let percentageCount = 0;
+  
+      applications.forEach((application) => {
+        const scholarships = application.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+        scholarships.forEach((installment: any) => {
+          if (installment?.scholarshipAmount) {
+            totalScholarship += installment.scholarshipAmount;
+            scholarshipCount += 1;
+          }
+        });
+        const percentage = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+        if (percentage) {
+          totalPercentage += application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+          percentageCount += 1;
+        }
+      });
+  
+      setTotalScholarshipsAmount(totalScholarship);
+      setAvgScholarshipsPercentage((totalPercentage / percentageCount));
+  
+      // Total Token Amount Paid
+      const tokensPaid = applications.reduce((sum, application) => {
+        const tokenAmount = application?.cohort?.cohortFeesDetail?.tokenFee || 0;
+        const lastEnrollment = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+        if (lastEnrollment?.tokenFeeDetails?.verificationStatus === 'paid') {
+          return sum + (tokenAmount || 0);
+        }
+        return sum;
+      }, 0);
+  
+      setTotalTokenAmountPaid(tokensPaid);
     } else {
       console.log("Applications data is not an array or is undefined.");
     }
@@ -122,14 +157,14 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
     },
     {
       title: "Avg. Scholarships",
-      value: `${(avgScholarshipsCount+'%' || '--').toString()}`,
-      description: "₹5L Scholarship distributed",
+      value: `${(avgScholarshipsPercentage +'%' || '--').toString()}`,
+      description: `${(totalScholarshipsAmount/100000+'L' || '--').toLocaleString()} Scholarship distributed`,
       icon: Award,
     },
     {
       title: "Payments",
       value: `${('₹'+paymentsCount || '--').toString()}`,
-      description: "₹5L Token Amount Collected",
+      description: `${(totalTokenAmountPaid/100000+'L' || '--').toString()} Admission Fee Collected`,
       icon: CreditCard,
     },
     {

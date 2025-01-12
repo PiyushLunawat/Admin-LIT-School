@@ -31,12 +31,6 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
     }
   }, [initialData]);
 
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-  
-
   const scholarshipSlabs = initialData?.litmusTestDetail?.[0].scholarshipSlabs || [];
 console.log("dsdv",scholarshipSlabs)
 
@@ -77,8 +71,8 @@ console.log("dsdv",scholarshipSlabs)
                           </div>
                         </TableCell>
                         <TableCell>{slab.percentage}</TableCell>
-                        <TableCell>{formatAmount((newBaseFee * (slab.percentage/100) / (initialData?.cohortFeesDetail?.semesters || 1) / (initialData?.cohortFeesDetail?.installmentsPerSemester || 1)))}</TableCell>
-                        <TableCell>{formatAmount((newBaseFee / (initialData?.cohortFeesDetail?.semesters || 1) / (initialData?.cohortFeesDetail?.installmentsPerSemester || 1)))}</TableCell>
+                        <TableCell>{((newBaseFee * (slab.percentage/100) / (initialData?.cohortFeesDetail?.semesters || 1) / (initialData?.cohortFeesDetail?.installmentsPerSemester || 1))).toLocaleString()}</TableCell>
+                        <TableCell>{((newBaseFee / (initialData?.cohortFeesDetail?.semesters || 1) / (initialData?.cohortFeesDetail?.installmentsPerSemester || 1))).toLocaleString()}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -87,15 +81,15 @@ console.log("dsdv",scholarshipSlabs)
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Total Instalment Amount:</span>
-                    <span>₹{formatAmount(newBaseFee / (initialData?.cohortFeesDetail?.semesters || 1))}</span>
+                    <span>₹{(newBaseFee / (initialData?.cohortFeesDetail?.semesters || 1)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Scholarship Amount (5%):</span>
-                    <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100) / (initialData?.cohortFeesDetail?.semesters || 1))}</span>
+                    <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100) / (initialData?.cohortFeesDetail?.semesters || 1)).toLocaleString()}</span>
                   </div>
                   {semesterIndex === 0 && <div className="flex justify-between text-sm">
                     <span>Token Fee Amount:</span>
-                    <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
+                    <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
                   </div>}
                 </div>
               </CardContent>
@@ -109,20 +103,20 @@ console.log("dsdv",scholarshipSlabs)
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{formatAmount(newBaseFee)}</span>
+                <span>₹{(newBaseFee).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
-                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
+                <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Token Amount:</span>
-                <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
+                <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
               </div>
 
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span>₹{formatAmount(newBaseFee - (initialData?.cohortFeesDetail?.tokenFee || 0) - newBaseFee * (slab.percentage/100))}</span>
+                <span>₹{(newBaseFee - (initialData?.cohortFeesDetail?.tokenFee || 0) - newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>
@@ -134,24 +128,24 @@ console.log("dsdv",scholarshipSlabs)
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{formatAmount(newBaseFee)}</span>
+                <span>₹{(newBaseFee).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
-                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
+                <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>One Shot Payment Discount ({formatAmount(initialData?.cohortFeesDetail?.oneShotDiscount)}%):</span>
-                <span className="text-red-500">- ₹{formatAmount(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
+                <span>One Shot Payment Discount ({(initialData?.cohortFeesDetail?.oneShotDiscount).toLocaleString()}%):</span>
+                <span className="text-red-500">- ₹{(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Token Amount:</span>
-                <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
+                <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
               </div>
 
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span>₹{formatAmount(newBaseFee - (initialData?.cohortFeesDetail?.tokenFee || 0) - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
+                <span>₹{(newBaseFee - (initialData?.cohortFeesDetail?.tokenFee || 0) - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0)).toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>

@@ -84,12 +84,7 @@ const [sch, setSch] = useState<any>();
 
     setSch(matchedScholarship || fallbackScholarship);
   }, [student]);
-
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-  
+ 
   const visibleSemesters = showAllSemesters
   ? sch?.scholarshipDetails
   : sch?.scholarshipDetails?.slice(0, 1); 
@@ -128,18 +123,18 @@ const [sch, setSch] = useState<any>();
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="text-sm font-semibold">₹ {formatAmount(totalAmount) || "--"}</p>
+              <p className="text-sm font-semibold">₹ {(totalAmount).toLocaleString() || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="text-sm font-semibold">{paidAmount ? <>₹ {formatAmount(paidAmount)}</> : "--"}</p>
+              <p className="text-sm font-semibold">{paidAmount ? <>₹ {(paidAmount).toLocaleString()}</> : "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
               <p className="flex gap-1 text-sm items-center font-semibold">
                 {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
                   <>
-                    ₹ {formatAmount(scholarshipAmount)}{' '}
+                    ₹ {(scholarshipAmount).toLocaleString()}{' '}
                     <Badge variant="secondary">
                       {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
                     </Badge>
@@ -177,7 +172,7 @@ const [sch, setSch] = useState<any>();
                 <div>
                   <h4 className="font-medium">Token Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: {formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}
+                    Amount: {(student?.cohort?.cohortFeesDetail?.tokenFee).toLocaleString()}
                     {student?.cousrseEnrolled?.length > 0 && (
                       <>
                         {" • Uploaded on "}
@@ -245,7 +240,7 @@ const [sch, setSch] = useState<any>();
                       <div>
                         <h4 className="font-medium">Instalment {iIndex + 1}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Amount: {formatAmount(instalment.amountPayable)}
+                          Amount: {(instalment.amountPayable).toLocaleString()}
                         </p>
                       </div>
                       {/* <Badge variant="secondary">Pending</Badge> */}

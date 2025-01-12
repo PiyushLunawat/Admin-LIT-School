@@ -133,23 +133,27 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Interview Status</p>
-                {student.interviewStatus ? <Badge variant={getStatusColor(student?.interviewStatus || "--")}>
+                {student.interviewStatus ? 
+                <Badge className="capitalize" variant={getStatusColor(student?.interviewStatus || "--")}>
                   {student.interviewStatus}
                 </Badge> : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">LITMUS Status</p>
-                {student?.litmusTestDetails[0]?.litmusTaskId?.status ? <Badge variant={getStatusColor(student?.litmusTestDetails[0]?.litmusTaskId?.status || "--")}>
+                {student?.litmusTestDetails[0]?.litmusTaskId?.status ? 
+                <Badge className="capitalize" variant={getStatusColor(student?.litmusTestDetails[0]?.litmusTaskId?.status || "--")}>
                   {student?.litmusTestDetails[0]?.litmusTaskId?.status}
                 </Badge>  : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
-                {sch ? <Badge variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}</Badge> : "--"}
+                {sch ? 
+                <Badge className="capitalize" variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}</Badge> : "--"}
               </div> 
               <div>
                 <p className="text-sm text-muted-foreground">Payment Status</p>
-                {student.paymentStatus ? <Badge variant={getStatusColor(student.paymentStatus)}>
+                {student.paymentStatus ? 
+                <Badge className="capitalize" variant={getStatusColor(student.paymentStatus)}>
                   {student.paymentStatus}
                 </Badge> : "--"}
               </div>

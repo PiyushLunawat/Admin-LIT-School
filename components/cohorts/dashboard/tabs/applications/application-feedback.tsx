@@ -330,7 +330,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
           <Separator className="my-8" />
 
         {ques.map((task: any, index: any) => (<>
-          <div key={index} className="space-y-1">
+          <div key={index} className="space-y-3">
             <h3 className="text-lg font-semibold">Task 0{index + 1}</h3>
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">{task?.title}</h4>
@@ -339,7 +339,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
             <div className="mt-4">
               <div className='flex justify-between items-center'>
-                <Badge variant="lemon"  className="px-3 py-2 text-sm bg-[#FFF552]/[0.2] border-[#FFF552]">
+                <Badge variant="lemon"  className="px-3 py-2 text-sm ">
                   Submission
                 </Badge>
                 <div className="text-muted-foreground text-sm mt-2">
@@ -418,7 +418,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
         {/* Conditional Reason or Feedback */}
         {(status === "on hold") && (
-          <div>
+          <div className="space-y-1">
             <Label className="text-lg ">Provide Reasons</Label>
             <Textarea
               id="reasonItem"

@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getStudents } from "@/app/api/student";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface PaymentRecord {
@@ -27,19 +29,24 @@ interface PaymentRecord {
 }
 
 interface PaymentsListProps {
-  cohortId: string;
+  applications: any[];
   onStudentSelect: (id: string) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
 export function PaymentsList({
-  cohortId,
+  applications,
   onStudentSelect,
   selectedIds,
   onSelectedIdsChange,
 }: PaymentsListProps) {
-  // In a real application, this data would be fetched based on the cohortId
+ 
+   const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  
+      
   const payments: PaymentRecord[] = [
     {
       id: "1",
@@ -75,7 +82,7 @@ export function PaymentsList({
   ];
 
   const getStatusColor = (status: PaymentRecord["status"]): BadgeVariant => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "on time":
         return "success";
       case "overdue":
@@ -123,34 +130,36 @@ export function PaymentsList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {payments.map((payment) => (
+          {applications?.map((application: any) => (
             <TableRow 
-              key={payment.id}
+              key={application.id}
               className="cursor-pointer"
-              onClick={() => onStudentSelect(payment.id)}
+              onClick={() => onStudentSelect(application.id)}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
-                  checked={selectedIds.includes(payment.id)}
-                  onCheckedChange={() => toggleSelectPayment(payment.id)}
+                  checked={selectedIds.includes(application.id)}
+                  onCheckedChange={() => toggleSelectPayment(application.id)}
                 />
               </TableCell>
-              <TableCell className="font-medium">{payment.studentName}</TableCell>
-              <TableCell>{payment.paymentPlan}</TableCell>
+              <TableCell className="font-medium">
+                {`${application?.firstName || ""} ${application?.lastName || ""}`.trim()}
+              </TableCell>
+              <TableCell className="capitalize">{application?.cousrseEnrolled[application.cousrseEnrolled.length-1]?.feeSetup?.installmentType}</TableCell>
               <TableCell>
-                {payment.instalmentsPaid}/{payment.totalInstalments} Instalments
+                {application.instalmentsPaid}/{application.totalInstalments} Instalments
               </TableCell>
               <TableCell>
-                {payment.nextDueDate ? (
+                {application.nextDueDate ? (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(payment.nextDueDate).toLocaleDateString()}
+                    {new Date(application.nextDueDate).toLocaleDateString()}
                   </div>
                 ) : "--"}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(payment.status)}>
-                  {payment.status}
+                <Badge variant={getStatusColor(application.status)}>
+                  {application.status}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -160,7 +169,7 @@ export function PaymentsList({
                     size="icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onStudentSelect(payment.id);
+                      onStudentSelect(application.id);
                     }}
                   >
                     <Eye className="h-4 w-4" />
@@ -170,7 +179,7 @@ export function PaymentsList({
                     size="icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log("Send reminder to:", payment.id);
+                      console.log("Send reminder to:", application.id);
                     }}
                   >
                     <Mail className="h-4 w-4" />

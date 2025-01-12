@@ -76,12 +76,6 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
     }
   }, [initialData]);
 
-  // Utility to format amounts with commas
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-
   // Handle date changes in the <input type="date">
   const handleDateChange = (semesterIndex: number, installmentIndex: number, newDate: string) => {
     setEditableDates((prev) => ({
@@ -299,8 +293,8 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                                                                           </div>
                                                                         </TableCell>
                                                                         <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
-                                                                        <TableCell>{installment.scholarshipAmount ? formatAmount(installment.scholarshipAmount) : '--'}</TableCell>
-                                                                        <TableCell>{formatAmount(installment.amountPayable)}</TableCell>
+                                                                        <TableCell>{installment.scholarshipAmount ? (installment.scholarshipAmount).toLocaleString() : '--'}</TableCell>
+                                                                        <TableCell>{(installment.amountPayable).toLocaleString()}</TableCell>
                                                                       </TableRow>
                                                                     ))}
                                                                   </TableBody>
@@ -308,11 +302,11 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                                                                 <div className="space-y-2 text-sm">
                                                                   <div className="flex justify-between">
                                                                     <span>Total Instalment Amount:</span>
-                                                                    <span>₹{formatAmount(totalInstallmentAmount)}</span>
+                                                                    <span>₹{(totalInstallmentAmount).toLocaleString()}</span>
                                                                   </div>
                                                                   <div className="flex justify-between">
                                                                     <span>Total Amount Payable:</span>
-                                                                    <span className="font-bold">₹{formatAmount(totalInstallmentAmount)}</span>
+                                                                    <span className="font-bold">₹{(totalInstallmentAmount).toLocaleString()}</span>
                                                                   </div>
                                                                 </div>
                                                               </CardContent>
@@ -331,16 +325,16 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
             <>
               <div className="flex justify-between text-sm">
                 <span>Amount:</span>
-                <span>₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
+                <span>₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
               </div>
                <div className="flex justify-between text-sm">
                 <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                <span>₹{formatAmount((initialData?.cohortFeesDetail?.tokenFee)*0.18)}</span>
+                <span>₹{((initialData?.cohortFeesDetail?.tokenFee)*0.18).toLocaleString()}</span>
               </div>
             </>}
               <div className="flex justify-between text-sm">
                 <span>Total Amount Payable:</span>
-                <span className="font-bold">₹{formatAmount((initialData?.cohortFeesDetail?.tokenFee)*GSTAmount)}</span>
+                <span className="font-bold">₹{((initialData?.cohortFeesDetail?.tokenFee)*GSTAmount).toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>
@@ -381,9 +375,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                               </div>
                             </TableCell>
                             <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
-                            <TableCell>{installment.scholarshipAmount ? formatAmount(installment.scholarshipAmount) : '--'}</TableCell>
-                            <TableCell>{formatAmount(installment.amountPayable)}</TableCell>
-                            <TableCell>{formatAmount(installment.amountPayable*GSTAmount)}</TableCell>
+                            <TableCell>{installment.scholarshipAmount ? (installment.scholarshipAmount).toLocaleString() : '--'}</TableCell>
+                            <TableCell>{(installment.amountPayable).toLocaleString()}</TableCell>
+                            <TableCell>{(installment.amountPayable*GSTAmount).toLocaleString()}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -393,20 +387,20 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                       <>
                       <div className="flex justify-between">
                         <span>Total Instalment Amount:</span>
-                        <span>₹{formatAmount(totalInstallmentAmount)}</span>
+                        <span>₹{(totalInstallmentAmount).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                        <span>₹{formatAmount((totalInstallmentAmount*0.18))}</span>
+                        <span>₹{((totalInstallmentAmount*0.18)).toLocaleString()}</span>
                       </div>
                       {totalScholarshipAmount !==0 && <div className="flex justify-between">
                         <span>Scholarship Amount ({slab.percentage}%):</span>
-                        <span className="text-red-500">- ₹{formatAmount(totalScholarshipAmount*GSTAmount)}</span>
+                        <span className="text-red-500">- ₹{(totalScholarshipAmount*GSTAmount).toLocaleString()}</span>
                       </div>}
                       </>}
                       <div className="flex justify-between">
                         <span>Total Amount Payable:</span>
-                        <span className="font-bold">₹{formatAmount(totalpayableAmount-totalScholarshipAmount)}</span>
+                        <span className="font-bold">₹{(totalpayableAmount-totalScholarshipAmount).toLocaleString()}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -420,23 +414,23 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{formatAmount(newBaseFee)}</span>
+                <span>₹{(newBaseFee).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
-                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
+                <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Admission Fee:</span>
-                <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
+                <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
               </div>
               {!isGST && <div className="flex justify-between text-sm">
                 <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                <span>₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100) - initialData?.cohortFeesDetail?.tokenFee)*0.18)}</span>
+                <span>₹{((newBaseFee - newBaseFee * (slab.percentage/100) - initialData?.cohortFeesDetail?.tokenFee)*0.18).toLocaleString()}</span>
               </div>}
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span className="font-bold">₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100) - initialData?.cohortFeesDetail?.tokenFee)*GSTAmount)}</span>
+                <span className="font-bold">₹{((newBaseFee - newBaseFee * (slab.percentage/100) - initialData?.cohortFeesDetail?.tokenFee)*GSTAmount).toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>
@@ -448,28 +442,28 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{formatAmount(newBaseFee)}</span>
+                <span>₹{(newBaseFee).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
-                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
+                <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>One Shot Payment Discount ({formatAmount(initialData?.cohortFeesDetail?.oneShotDiscount)}%):</span>
-                <span className="text-red-500">- ₹{formatAmount(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
+                <span>One Shot Payment Discount ({(initialData?.cohortFeesDetail?.oneShotDiscount).toLocaleString()}%):</span>
+                <span className="text-red-500">- ₹{(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Admission Fee:</span>
-                <span className="text-red-500">- ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
+                <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
               </div>
               {!isGST && <div className="flex justify-between text-sm">
                 <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                <span>₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0) - initialData?.cohortFeesDetail?.tokenFee)*0.18)}</span>
+                <span>₹{((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0) - initialData?.cohortFeesDetail?.tokenFee)*0.18).toLocaleString()}</span>
               </div>}
 
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span className="font-bold">₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0) - initialData?.cohortFeesDetail?.tokenFee)*GSTAmount)}</span>
+                <span className="font-bold">₹{((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0) - initialData?.cohortFeesDetail?.tokenFee)*GSTAmount).toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>

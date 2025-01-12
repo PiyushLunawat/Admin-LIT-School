@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PaymentsSummary } from "./payments-summary";
 import { PaymentsList } from "./payments-list";
 import { PaymentsFilters } from "./payments-filters";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
+import { getStudents } from "@/app/api/student";
 
 interface PaymentsTabProps {
   cohortId: string;
@@ -16,8 +17,41 @@ interface PaymentsTabProps {
 }
 
 export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
+
+  const [applications, setApplications] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await getStudents();
+        const mappedStudents =
+          response.data.filter(
+            (student: any) =>
+              student?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed' &&
+              student.cohort?._id === cohortId
+          )
+          const filteredApplications = mappedStudents.filter((app: any) => {
+            if (!selectedDateRange) return true;
+            const appDate = new Date(app.updatedAt);
+            const { from, to } = selectedDateRange;
+            return (!from || appDate >= from) && (!to || appDate <= to);
+          });
+
+          setApplications(filteredApplications);
+        console.log("fetching students:", response.data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStudents();
+  }, [selectedDateRange]);
+
 
   const handleBulkReminder = () => {
     console.log("Sending payment reminders to:", selectedStudentIds);
@@ -51,14 +85,14 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         </div>
       </div>
 
-      <PaymentsSummary cohortId={cohortId} />
+      <PaymentsSummary applications={applications} cohortId={cohortId} />
       
       <PaymentsFilters />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <PaymentsList
-            cohortId={cohortId}
+            applications={applications}
             onStudentSelect={(id) => {
               console.log("Selected student:", id);
               setSelectedStudentId(id);

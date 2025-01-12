@@ -1,40 +1,189 @@
 "use client";
 
+import { getCohortById } from "@/app/api/cohorts";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CreditCard, Clock, AlertTriangle, Award } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface PaymentsSummaryProps {
   cohortId: string;
+  applications: any[];
 }
 
-export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
-  // In a real application, this data would be fetched based on the cohortId
-  const summary = {
-    totalExpected: "₹49,75,000",
-    totalReceived: "₹32,33,750",
-    outstanding: "₹17,41,250",
-    scholarshipsAwarded: "₹2,98,500",
-    collectionProgress: 65,
-    instalmentBreakdown: [
-      [
-        { label: "Instalment 1", total: "₹16,58,333", received: "₹16,58,333", status: "complete" },
-        { label: "Instalment 2", total: "₹16,58,333", received: "₹12,43,750", status: "pending" },
-        { label: "Instalment 3", total: "₹16,58,333", received: "₹3,31,667", status: "pending" },
-      ],
-      [
-        { label: "Instalment 4", total: "₹16,58,333", received: "₹16,58,333", status: "complete" },
-        { label: "Instalment 5", total: "₹16,58,333", received: "₹12,43,750", status: "partial" },
-        { label: "Instalment 6", total: "₹16,58,333", received: "₹3,31,667", status: "pending" },
-      ],
-      [
-        { label: "Instalment 7", total: "₹16,58,333", received: "₹16,58,333", status: "complete" },
-        { label: "Instalment 8", total: "₹16,58,333", received: "₹12,43,750", status: "partial" },
-        { label: "Instalment 9", total: "₹16,58,333", received: "₹3,31,667", status: "pending" },
-      ],
-    ],
+export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps) {
+
+  const [cohort, setCohort] = useState<any>(null);
+  const [totalOneShotCount, setTotalOneShotCount] = useState(0);
+  const [totalOneShotPaidCount, setTotalOneShotPaidCount] = useState(0);
+  const [totalOneShotAmountCount, setTotalOneShotAmountCount] = useState(0);
+  const [totalOneShotAmountPaidCount, setTotalOneShotAmountPaidCount] = useState(0);
+  const [totalInstallmentAmountCount, setTotalInstallmentAmountCount] = useState(0);
+  const [totalInstallmentAmountPaidCount, setTotalInstallmentAmountPaidCount] = useState(0);
+  const [totalExpectedCount, setTotalExpectedCount] = useState(0);
+  const [totalReceivedCount, setTotalReceivedCount] = useState(0);
+  const [totalStudentCount, setTotalStudentCount] = useState(0);
+  const [avgScholarshipsPercentage, setAvgScholarshipsPercentage] = useState<number | string>('--');
+  const [totalScholarshipsAmount, setTotalScholarshipsAmount] = useState<number | string>('--');
+  
+  useEffect(() => {
+    async function fetchCohort() {
+      try {
+        const cohortData = await getCohortById(cohortId);
+        setCohort(cohortData.data);
+      } catch (error) {
+        console.error("Failed to fetch cohort:", error);
+      }
+    }
+    fetchCohort();
+  }, [cohortId]);
+  
+  const [instalmentBreakdown, setInstalmentBreakdown] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (applications && Array.isArray(applications) && cohort) {
+      let oneShot = 0;
+      let oneShotPaid = 0;
+      let oneShotAmount = 0;
+      let oneShotAmountPaid = 0;
+      let installmentAmount = 0;
+      let installmentAmountPaid = 0;
+      let totalScholarship = 0;
+      let scholarshipCount = 0;
+      let totalPercentage = 0;
+      let percentageCount = 0;
+
+      // Initialize installment breakdown based on cohort
+      const breakdown: any[] = [];
+      for (let sem = 1; sem <= cohort.cohortFeesDetail.semesters; sem++) {
+        const semesterBreakdown = [];
+        for (let inst = 1; inst <= cohort.cohortFeesDetail.installmentsPerSemester; inst++) {
+          semesterBreakdown.push({
+            label: `Instalment ${inst}`,
+            total: 0,
+            received: 0,
+            status: "pending",
+          });
+        }
+        breakdown.push({
+          semester: sem,
+          installments: semesterBreakdown,
+        });
+      }
+
+      applications.forEach((application) => {
+        const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+
+        if (!lastEnrolled) return;
+
+        // One-Shot Payment Processing
+        if (lastEnrolled.feeSetup.installmentType === 'one-shot-payment') {
+          oneShot += 1;
+          const oneShotDetails = lastEnrolled.semesterFeeDetails?.oneShotPaymentDetails;
+          if (oneShotDetails) {
+            oneShotAmount += oneShotDetails.amountPayable;
+            if (oneShotDetails.verificationStatus === 'paid') {
+              oneShotPaid += 1;
+              oneShotAmountPaid += oneShotDetails.amountPayable;
+            }
+          }
+        }
+
+        // Installments Processing
+        if (lastEnrolled.feeSetup.installmentType === 'installments') {
+          lastEnrolled?.semesterFeeDetails?.scholarshipDetails.forEach((semesterDetail: any, semIndex: any) => {
+            const semesterNumber = semesterDetail.semester;
+            const installments = semesterDetail.installments;
+            installments.forEach((installment: any, instIndex: any) => {
+              if (breakdown[semIndex] && breakdown[semIndex].installments[instIndex]) {
+                breakdown[semIndex].installments[instIndex].total += installment.amountPayable;
+                if (installment.verificationStatus === 'paid') {
+                  breakdown[semIndex].installments[instIndex].received += installment.amountPayable;
+                }
+              }
+            });
+          });
+
+          // Calculate total installments expected and received
+          lastEnrolled?.semesterFeeDetails?.scholarshipDetails.forEach((semesterDetail: any) => {
+            const installments = semesterDetail.installments;
+            installments.forEach((installment: any) => {
+              installmentAmount += installment.amountPayable;
+              if (installment.verificationStatus === 'paid') {
+                installmentAmountPaid += installment.amountPayable;
+              }
+
+              // Scholarships
+              if (semesterDetail.scholarshipDetails) {
+                semesterDetail.scholarshipDetails.forEach((scholarship: any) => {
+                  scholarship.installments.forEach((install: any) => {
+                    if (install.scholarshipAmount) {
+                      totalScholarship += install.scholarshipAmount;
+                      scholarshipCount += 1;
+                    }
+                  });
+                });
+              }
+
+              // Scholarship Percentage
+              if (semesterDetail.scholarshipPercentage !== undefined) {
+                totalPercentage += semesterDetail.scholarshipPercentage;
+                percentageCount += 1;
+              }
+            });
+          });
+        }
+
+        const scholarships = application.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+         scholarships.forEach((installment: any) => {
+           if (installment?.scholarshipAmount) {
+             totalScholarship += installment.scholarshipAmount;
+             scholarshipCount += 1;
+           }
+         });
+         const percentage = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+         if (percentage) {
+           totalPercentage += application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+           percentageCount += 1;
+         }        
+      });
+      
+
+      // Update One-Shot Metrics
+      setTotalOneShotCount(oneShot);
+      setTotalOneShotPaidCount(oneShotPaid);
+      setTotalOneShotAmountCount(oneShotAmount);
+      setTotalOneShotAmountPaidCount(oneShotAmountPaid);
+
+      // Update Installment Metrics
+      setTotalInstallmentAmountCount(installmentAmount);
+      setTotalInstallmentAmountPaidCount(installmentAmountPaid);
+
+      // Update Expected and Received Counts
+      setTotalExpectedCount(oneShotAmount + installmentAmount);
+      setTotalReceivedCount(oneShotAmountPaid + installmentAmountPaid);
+
+      // Update Scholarships Metrics
+      setTotalStudentCount(percentageCount)
+      setTotalScholarshipsAmount(totalScholarship);
+      setAvgScholarshipsPercentage((totalPercentage / percentageCount));
+
+
+      // Update Installment Breakdown
+      setInstalmentBreakdown(breakdown);
+
+    } else {
+      console.log("Applications data is not an array, is undefined, or cohort data is missing.");
+    }
+  }, [applications, cohort]);
+
+  const determineStatus = (received: number, total: number) => {
+    if (received >= total) return "complete";
+    if (received > 0 && received < total) return "partial";
+    return "pending";
   };
+
 
   return (
   <>
@@ -45,10 +194,10 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
           <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary.totalExpected}</div>
-          <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" />
+          <div className="text-2xl font-bold">₹{totalExpectedCount.toLocaleString()}</div>
+          {/* <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" /> */}
           <p className="text-xs text-muted-foreground mt-2">
-            {summary.collectionProgress}% collected
+            {((totalReceivedCount / totalExpectedCount) * 100).toFixed(2)}% collected
           </p>
         </CardContent>
       </Card>
@@ -59,7 +208,7 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary.totalReceived}</div>
+          <div className="text-2xl font-bold">₹{totalReceivedCount.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground mt-2">
             Last payment received 2 days ago
           </p>
@@ -72,7 +221,7 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
           <AlertTriangle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary.outstanding}</div>
+          <div className="text-2xl font-bold">₹{totalExpectedCount.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground mt-2">
             8 payments overdue
           </p>
@@ -85,9 +234,9 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
           <Award className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary.scholarshipsAwarded}</div>
+          <div className="text-2xl font-bold">₹{totalScholarshipsAmount.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground mt-2">
-            12 scholarships awarded at an avg of 12%
+            {totalStudentCount} scholarships awarded at an avg of {avgScholarshipsPercentage}%
           </p>
         </CardContent>
       </Card>
@@ -97,38 +246,40 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
         <CardHeader>
           <CardTitle>Instalment Breakdown</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {summary.instalmentBreakdown.map((semester, semesterIndex) => (
-      <div key={semesterIndex} className="space-y-2">
-        <Badge variant="blue" className="py-1">Semester {semesterIndex + 1}</Badge>
-        <Card className="md:col-span-1 lg:col-span-1">
-          <CardContent className="pt-4">
-            <div className="space-y-4">
-              {semester.map((instalment, instalmentIndex) => (
-                <div key={instalmentIndex} className="space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium">{instalment.label}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {instalment.received} / {instalment.total}
-                    </span>
+        <CardContent className="flex gap-4 ">
+          {instalmentBreakdown.map((semester, semesterIndex) => (
+            <div key={semesterIndex} className="space-y-2 flex-1">
+              <Badge variant="blue" className="py-1">Semester {semester.semester}</Badge>
+              <Card className="md:col-span-1 lg:col-span-1">
+                <CardContent className="pt-4">
+                  <div className="space-y-4">
+                    {semester.installments.map((instalment: any, instalmentIndex: number) => (
+                      <div key={instalmentIndex} className="space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-sm font-medium">{instalment.label}</span>
+                          <span className="text-sm text-muted-foreground">
+                            ₹{instalment.received.toLocaleString()} / ₹{instalment.total.toLocaleString()}
+                          </span>
+                        </div>
+                        <Progress states={[
+                          {
+                          value: instalment.received,
+                          widt: (instalment.received / instalment.total) * 100 || 0,
+                          color:
+                            instalment.received >= instalment.total
+                              ? "#2EB88A"
+                              : instalment.received > 0
+                              ? "#2EB88A"
+                              : "#2EB88A"
+                          }
+                        ]}  />
+                      </div>
+                    ))}
                   </div>
-                  <Progress states={[ {value:((parseInt(instalment.received.replace(/[^0-9]/g, "")) /
-                      parseInt(instalment.total.replace(/[^0-9]/g, ""))) * 100)} ]}
-                    className={`${
-                      instalment.status === "complete"
-                        ? "bg-success"
-                        : instalment.status === "partial"
-                        ? "bg-warning"
-                        : "bg-danger"
-                    }`}
-                  />
-                </div>
-              ))}
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      </div>  
-      ))}
+          ))}
         </CardContent>
       </Card>
 
@@ -141,13 +292,15 @@ export function PaymentsSummary({ cohortId }: PaymentsSummaryProps) {
               <div className="flex items-center">
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">2/3 Students</span>
+                    <span className="text-sm font-medium">{totalOneShotPaidCount}/{totalOneShotCount} Students</span>
                     <span className="text-sm text-muted-foreground">
-                      18,34,455 / 20,00,000
+                      {totalOneShotAmountPaidCount.toLocaleString()} / {totalOneShotAmountCount.toLocaleString()}
                     </span>
                   </div>
-
-                  <Progress states={[ {value:(666/700)} ]} />
+                  <Progress 
+                  states={[
+                    { value: totalOneShotAmountPaidCount, widt: (totalOneShotAmountPaidCount / totalOneShotAmountCount) * 100, color: '#2EB88A' }
+                  ]} />
                 </div>
               </div>
           </div>

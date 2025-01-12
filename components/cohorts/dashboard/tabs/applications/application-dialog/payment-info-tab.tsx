@@ -38,7 +38,6 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
 
   async function handleVerify(tokenId: any, comment: string, verificationStatus: string) {
     try {
-  
       if (!tokenId) {
         console.error("Token Fee ID is not available");
         return;
@@ -68,11 +67,6 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
     setSch(matchedScholarship || fallbackScholarship);
   }, [student]);
 
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-  
   const visibleSemesters = showAllSemesters
   ? sch?.scholarshipDetails
   : sch?.scholarshipDetails?.slice(0, 1); 
@@ -112,18 +106,18 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="text-sm font-semibold">₹ {formatAmount(totalAmount) || "--"}</p>
+              <p className="text-sm font-semibold">₹ {(totalAmount).toLocaleString() || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="text-sm font-semibold">{paidAmount ? <>₹ {formatAmount(paidAmount)}</> : "--"}</p>
+              <p className="text-sm font-semibold">{paidAmount ? <>₹ {(paidAmount).toLocaleString()}</> : "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
               <p className="flex gap-1 text-sm items-center font-semibold">
                 {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
                   <>
-                    ₹ {formatAmount(scholarshipAmount)}{' '}
+                    ₹ {(scholarshipAmount).toLocaleString()}{' '}
                     <Badge variant="secondary">
                       {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
                     </Badge>
@@ -132,8 +126,8 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Token Status</p>
-              <Badge variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
+              <p className="text-sm text-muted-foreground">Admission Fee Status</p>
+              <Badge className="capitalize" variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
                 {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
               </Badge>
             </div>
@@ -161,7 +155,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                 <div>
                   <h4 className="font-medium">Token Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: {formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}
+                    Amount: {(student?.cohort?.cohortFeesDetail?.tokenFee).toLocaleString()}
                     {student?.cousrseEnrolled?.length > 0 && (
                       <>
                         {" • Uploaded on "}
@@ -173,7 +167,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
+                  <Badge className="capitalize" variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
                     {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
                   </Badge>
                   {student?.cousrseEnrolled?.length > 0 && 
@@ -218,7 +212,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
 
             {visibleSemesters?.map((semesterObj: any, semesterIndex: number) => (
             <div key={semesterIndex}>
-              <Badge variant="blue" className="mb-3">
+              <Badge variant="blue" className="capitalize mb-3">
                 Semester {semesterObj.semester}
               </Badge>
 
@@ -229,7 +223,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                       <div>
                         <h4 className="font-medium">Instalment {iIndex + 1}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Amount: {formatAmount(instalment.amountPayable)}
+                          Amount: {(instalment.amountPayable).toLocaleString()}
                         </p>
                       </div>
                       {/* <Badge variant="secondary">Pending</Badge> */}

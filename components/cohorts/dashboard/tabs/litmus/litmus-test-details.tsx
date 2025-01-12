@@ -54,6 +54,17 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [status, setStatus] = useState(application?.litmusTestDetails[0]?.litmusTaskId?.status);
   const [cohorts, setCohorts] = useState<any[]>([]);  
+  const [sch, setSch] = useState<any>(null);
+
+  useEffect(() => {
+    if (application?.cohort?.feeStructureDetails && application?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
+      const scholarship = application.cohort.feeStructureDetails.find(
+        (scholarship: any) =>
+          scholarship._id === application.litmusTestDetails[0].litmusTaskId.scholarshipDetail
+      );
+      setSch(scholarship);
+    }
+  }, [application]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -132,8 +143,15 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 Download Files
               </Button>
               <Button variant="outline" className="justify-start">
-                <Star className="h-4 w-4 mr-2" />
-                Award Scholarship
+                {sch ? 
+                <div className="flex gap-2 items-center">
+                  <Star className="h-4 w-4" />
+                  {sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}
+                </div> :
+                <div className="flex gap-2 items-center">
+                  <Star className="h-4 w-4" />
+                  Award Scholarship
+                </div>}
               </Button>
               <Popover>
                 <PopoverTrigger asChild>
