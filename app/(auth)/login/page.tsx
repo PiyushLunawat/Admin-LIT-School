@@ -12,9 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
+import Cookies from 'js-cookie';
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
+import { loginAdmin } from "@/app/api/auth";
+import { useState } from "react";
 
 // Validation schema using Yup
 const formSchema = z.object({
@@ -29,6 +34,9 @@ type LoginFormValues = {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Initialize React Hook Form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,11 +47,25 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log("Form Data:", data);
-    router.push("/dashboard");
-  };
 
+  const handleSubmit = async (data: LoginFormValues) => {
+    setLoading(true);
+    try {
+      const loginData = await loginAdmin(data.email, data.password);
+      Cookies.set('admin-token', loginData.token,  { expires: 1 });
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Login error:", error.message);
+      setErrorMessage(error.message || "An unexpected error occurred.");
+      toast({
+        title: "Login failed",
+        description: error.message || "An unexpected error occurred.",
+        variant: "warning",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="w-full">
       <div className="relative">
@@ -57,7 +79,7 @@ export default function LoginPage() {
             <p className="text-sm sm:text-base font-semibold"> Access your dashboard </p>
           </div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-8">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-2 mt-8">
 
               <FormField
                 name="email"
@@ -87,8 +109,12 @@ export default function LoginPage() {
                 )}
               />
 
-              <div className="flex justify-center items-center mt-6">
-                <Button type="submit" className="w-full">
+              {errorMessage && (
+                <div className="text-red-500 text-sm">{errorMessage}</div>
+              )}
+
+              <div className="flex justify-center items-center mt-4">
+                <Button type="submit" className="w-full" disabled={loading}>
                   Login
                 </Button>
               </div>

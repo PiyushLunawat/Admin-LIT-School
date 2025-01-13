@@ -43,7 +43,7 @@ export function ActivityLogTab({ studentId }: ActivityLogTabProps) {
     {
       id: "4",
       type: "payment",
-      description: "Token fee payment received",
+      description: "Admission fee payment received",
       timestamp: "2024-03-18 03:30 PM",
       actor: "Finance Team",
     },

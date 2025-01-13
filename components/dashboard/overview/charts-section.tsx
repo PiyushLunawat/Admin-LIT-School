@@ -16,6 +16,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { ScholarshipDistribution } from "./scholarship-distribution";
 
 export function ChartsSection() {
   // Application funnel data
@@ -90,6 +91,9 @@ export function ChartsSection() {
           </div>
         </CardContent>
       </Card>
+
+      <ScholarshipDistribution />
+      
     </div>
   );
 }

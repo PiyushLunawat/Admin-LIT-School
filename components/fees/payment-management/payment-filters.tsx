@@ -38,7 +38,7 @@ export function PaymentFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="token">Token Fee</SelectItem>
+            <SelectItem value="token">Admission Fee</SelectItem>
             <SelectItem value="instalment">Instalment</SelectItem>
             <SelectItem value="one-shot">One-Shot Payment</SelectItem>
           </SelectContent>

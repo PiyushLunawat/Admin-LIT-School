@@ -9,8 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Dispatch, SetStateAction } from "react";
+import { DateRange } from "react-day-picker";
 
-export function DashboardHeader() {
+interface CohortHeaderProps {
+  setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
+}
+
+export function DashboardHeader({ setDateRange }: CohortHeaderProps){
+
   return (
     <div className="space-y-4 mb-6">
       <div>
@@ -46,7 +53,7 @@ export function DashboardHeader() {
         </div>
       </div>
 
-      <DateRangePicker />
+      <DateRangePicker setDateRange={setDateRange}/>
     </div>
   );
 }

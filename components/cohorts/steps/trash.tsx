@@ -88,7 +88,7 @@ console.log("dsdv",scholarshipSlabs)
                     <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100) / (initialData?.cohortFeesDetail?.semesters || 1)).toLocaleString()}</span>
                   </div>
                   {semesterIndex === 0 && <div className="flex justify-between text-sm">
-                    <span>Token Fee Amount:</span>
+                    <span>Admission Fee Amount:</span>
                     <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
                   </div>}
                 </div>

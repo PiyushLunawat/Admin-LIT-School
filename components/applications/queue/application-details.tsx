@@ -27,6 +27,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
+import { useState } from "react";
 
 interface ApplicationDetailsProps {
   applicationId: string;
@@ -34,6 +37,7 @@ interface ApplicationDetailsProps {
 }
 
 export function ApplicationDetails({ applicationId, onClose }: ApplicationDetailsProps) {
+
   const application = {
     id: applicationId,
     name: "John Doe",

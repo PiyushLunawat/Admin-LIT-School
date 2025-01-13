@@ -39,6 +39,7 @@ import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getCurrentStudents } from "@/app/api/student";
 import { Card } from "@/components/ui/card";
 import { ViewComponent } from "./litmus-test-dialog/view";
+import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
@@ -55,6 +56,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
   const [status, setStatus] = useState(application?.litmusTestDetails[0]?.litmusTaskId?.status);
   const [cohorts, setCohorts] = useState<any[]>([]);  
   const [sch, setSch] = useState<any>(null);
+  const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
 
   useEffect(() => {
     if (application?.cohort?.feeStructureDetails && application?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
@@ -153,23 +155,10 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                   Award Scholarship
                 </div>}
               </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-destructive">
-                    <UserMinus className="h-4 w-4 mr-2" />
-                    Mark as Dropped
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
-                  <div className="text-base font-medium mb-2">
-                    {`Are you sure you would like to drop ${application?.firstName+" "+application?.lastName}`}
-                  </div>
-                  <div className="flex gap-2 ">
-                    <Button variant="outline" className="flex-1" >Cancel</Button>
-                    <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+              <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                <UserMinus className="h-4 w-4 mr-2" />
+                Mark as Dropped
+              </Button>
             </div>
           </div>
 
@@ -273,6 +262,12 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
       <Dialog open={vopen} onOpenChange={setVopen}>
         <DialogContent className="max-w-4xl">
           <ViewComponent application={application} onApplicationUpdate={onApplicationUpdate}/>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+        <DialogContent className="max-w-4xl py-4 px-6">
+          <MarkedAsDialog student={application}/>
         </DialogContent>
       </Dialog>
 

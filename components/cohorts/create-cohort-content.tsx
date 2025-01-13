@@ -54,7 +54,6 @@ export function CreateCohortContent({
   const handleCohortCreated = (cohort: Cohort) => {
     setEditingCohort(cohort); 
     fetchCohorts();
-    console.log("111",editingCohort)
   };
 
   const steps: Step[] = [

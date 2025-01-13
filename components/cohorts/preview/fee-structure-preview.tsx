@@ -10,6 +10,15 @@ import { useState } from "react";
 import { FeeStructureForm } from "../steps/fee-structure-form";
 
 export function FeeStructurePreview() {
+
+  const [editingCohort, setEditingCohort] = useState<any | null>(null);
+
+  const handleCohortCreated = (cohort: any) => {
+    setEditingCohort(cohort); 
+    // fetchCohorts();
+    console.log("111",editingCohort)
+  };
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const feeDetails = {
     applicationFee: "₹500",
@@ -41,7 +50,7 @@ export function FeeStructurePreview() {
             <p className="font-medium">{feeDetails.applicationFee}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">Token Fee</p>
+            <p className="text-sm text-muted-foreground">Admission Fee</p>
             <p className="font-medium">{feeDetails.tokenFee}</p>
           </div>
           <div className="space-y-1">
@@ -112,7 +121,7 @@ export function FeeStructurePreview() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-6">
           {/* <FeeStructureForm onNext={() => console.log("Navigating to collaborators")} /> */}
-          <FeePreviewForm onNext={() => console.log("Navigating to collaborators")} />
+          <FeePreviewForm onNext={() => console.log("Navigating to collaborators")} onCohortCreated={handleCohortCreated}/>
         </DialogContent>
       </Dialog>
     </Card>

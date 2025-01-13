@@ -57,7 +57,7 @@ const [sch, setSch] = useState<any>();
     try {
   
       if (!tokenId) {
-        console.error("Token Fee ID is not available");
+        console.error("Admission Fee ID is not available");
         return;
       }  
       const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
@@ -172,7 +172,7 @@ const [sch, setSch] = useState<any>();
                 <div>
                   <h4 className="font-medium">Token Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: {(student?.cohort?.cohortFeesDetail?.tokenFee).toLocaleString()}
+                    Amount: {(student?.cohort?.cohortFeesDetail?.tokenFee || '--').toLocaleString()}
                     {student?.cousrseEnrolled?.length > 0 && (
                       <>
                         {" • Uploaded on "}
@@ -208,7 +208,7 @@ const [sch, setSch] = useState<any>();
                       <FlagIcon className="w-4 h-4"/> Flag Document
                   </Button>
                   <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "Token Fee is verfied", "paid")}>
+                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}>
                       <CircleCheckBig className="w-4 h-4"/> Mark as Verified
                   </Button>
                 </div>

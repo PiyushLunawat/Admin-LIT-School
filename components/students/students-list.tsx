@@ -22,6 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getStudents } from "@/app/api/student";
 import { SendMessage } from "../cohorts/dashboard/tabs/applications/application-dialog/send-message";
 import { Dialog, DialogContent } from "../ui/dialog";
+import { MarkedAsDialog } from "./sections/drop-dialog";
 
 type BadgeVariant =
   | "destructive"
@@ -75,7 +76,7 @@ export function StudentsList({
   const [messageOpen, setMessageOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState('');
   const [recipient, setRecipient] = useState('');
-  const [sch, setSch] = useState<any>();
+  const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
 
   const handleSendMessage = (type: string, recipient: string) => {
     setSelectedMessage(type);
@@ -136,7 +137,7 @@ export function StudentsList({
       (scholarship: any) => scholarship._id === scholarshipId
     );
   
-    return matchedScholarship ? `${matchedScholarship.scholarshipName} (${matchedScholarship.scholarshipPercentage}%)}` : "--";
+    return matchedScholarship ? `${matchedScholarship.scholarshipName} (${matchedScholarship.scholarshipPercentage}%)` : "--";
   }  
   
   // --- FILTERING LOGIC ---
@@ -349,25 +350,18 @@ export function StudentsList({
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleSendMessage('email', student?.email)}>
+                      {/* <Button variant="ghost" size="icon" onClick={() => handleSendMessage('email', student?.email)}>
                         <Mail className="h-4 w-4" />
+                      </Button> */}
+                      <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                        <UserMinus className="h-4 w-4 mr-2" />
+                        Mark as Dropped
                       </Button>
-                      <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-destructive">
-                          <UserMinus className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
-                        <div className="text-base font-medium mb-2">
-                          {`Are you sure you would like to drop ${student.name}`}
-                        </div>
-                        <div className="flex gap-2 ">
-                          <Button variant="outline" className="flex-1" >Cancel</Button>
-                          <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                      <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+        <DialogContent className="max-w-4xl py-4 px-6">
+          <MarkedAsDialog student={student}/>
+        </DialogContent>
+      </Dialog>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -384,6 +378,8 @@ export function StudentsList({
           />
         </DialogContent>
       </Dialog>
+
+      
       {/* If you want pagination, you can add it here */}
       {/* <div className="flex items-center justify-end space-x-2 py-4">
         ...

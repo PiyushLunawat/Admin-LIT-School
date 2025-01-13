@@ -4,47 +4,64 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Users, MessageSquare, PlayCircle } from "lucide-react";
+import { Calendar, Users, MessageSquare, PlayCircle, LayoutDashboard } from "lucide-react";
+import { getCohorts } from "@/app/api/cohorts";
+import { useEffect, useState } from "react";
+import { getPrograms } from "@/app/api/programs";
+import { getCentres } from "@/app/api/centres";
+import { useRouter } from "next/navigation";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+type CohortStatus = "Draft" | "Open" | "Full" | "Closed" | "Archived" | (string & {});
+
+interface Cohort {
+  _id: string;
+  cohortId: string;
+  programDetail: string;
+  centerDetail: string;
+  startDate: string;
+  endDate: string;
+  schedule: string;
+  totalSeats: number;
+  filledSeats: [];
+  status: CohortStatus;
+  baseFee: string;
+  collaborators: [];
+}
 
 export function RecentCohorts() {
-  const cohorts = [
-    {
-      id: "CM01JY",
-      program: "Creator Marketer",
-      centre: "Jayanagar",
-      startDate: "2024-09-01",
-      endDate: "2025-02-28",
-      schedule: "M-W-F Morning",
-      seats: 50,
-      filled: 32,
-      status: "Open",
-    },
-    {
-      id: "CM02JY",
-      program: "Creator Marketer",
-      centre: "Jayanagar",
-      startDate: "2024-10-01",
-      endDate: "2025-03-31",
-      schedule: "T-T-S Morning",
-      seats: 50,
-      filled: 50,
-      status: "Full",
-    },
-    {
-      id: "CM03JY",
-      program: "Creator Marketer",
-      centre: "Jayanagar",
-      startDate: "2024-08-01",
-      endDate: "2025-01-31",
-      schedule: "M-W-F Evening",
-      seats: 50,
-      filled: 45,
-      status: "Open",
-    },
-  ];
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [programs, setPrograms] = useState<any[]>([]);  
+  const [centres, setCentres] = useState<any[]>([]);
+  const router = useRouter();
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const cohortsData = await getCohorts();
+        setCohorts(cohortsData.data);
+        const programsData = await getPrograms();
+        setPrograms(programsData.data);
+        const centresData = await getCentres();
+        setCentres(centresData.data);
+      } catch (error) {
+        console.error("Error fetching filter data:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const getProgramName = (programId: string) => {
+    const program = programs.find((p) => p._id === programId);
+    return program ? program.name : "Unknown Program";
+  };
+
+  const getCentreName = (centreId: string) => {
+    const centre = centres.find((c) => c._id === centreId);
+    return centre ? centre.name : "Unknown Centre";
+  };
+
+  
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "open":
@@ -64,15 +81,15 @@ export function RecentCohorts() {
         <CardTitle>Recent Cohorts</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {cohorts.map((cohort) => (
+        {cohorts.slice().reverse().slice(0, 3).map((cohort) => (
           <div
-            key={cohort.id}
+            key={cohort._id}
             className="flex flex-col space-y-4 p-4 border rounded-lg"
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-semibold">{cohort.program}</h3>
-                <p className="text-sm text-muted-foreground">{cohort.centre}</p>
+                <h3 className="font-semibold">{getProgramName(cohort?.programDetail)}</h3>
+                <p className="text-sm text-muted-foreground">{getCentreName(cohort.centerDetail)}</p>
               </div>
               <Badge variant={getStatusColor(cohort.status)}>
                 {cohort.status}
@@ -87,8 +104,7 @@ export function RecentCohorts() {
               <div className="space-y-1">
                 <p className="text-muted-foreground">Duration</p>
                 <p>
-                  {new Date(cohort.startDate).toLocaleDateString()} -{" "}
-                  {new Date(cohort.endDate).toLocaleDateString()}
+                  {new Date(cohort.startDate).toLocaleDateString()} - {new Date(cohort.endDate).toLocaleDateString()}
                 </p>
               </div>
             </div>
@@ -97,20 +113,20 @@ export function RecentCohorts() {
               <div className="flex justify-between text-sm">
                 <span>Seats Filled</span>
                 <span>
-                  {cohort.filled}/{cohort.seats}
+                  {cohort.filledSeats.length}/{cohort.totalSeats}
                 </span>
               </div>
               <Progress
                 states={[
-                  { value: ((cohort.filled / cohort.seats) * 100) } 
+                  { value: cohort.filledSeats.length, widt:((cohort.filledSeats.length / cohort.filledSeats.length) * 100), color:'#2EB88A' } 
                 ]}
                 className="h-2"
               />
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1">
-                <PlayCircle className="h-4 w-4 mr-2" />
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => router.push(`/dashboard/cohorts/${cohort._id}`)}>
+                <LayoutDashboard className="h-4 w-4 mr-2" />
                 View Dashboard
               </Button>
               <Button variant="ghost" size="sm">

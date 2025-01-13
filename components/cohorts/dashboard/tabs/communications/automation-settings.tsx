@@ -113,7 +113,7 @@ export function AutomationSettings({ cohortId }: AutomationSettingsProps) {
         },
         {
           id: "token-fee-overdue",
-          label: "Token Fee Overdue",
+          label: "Admission Fee Overdue",
           description: "Send notification for overdue payments",
           enabled: true,
           template: "status-update",

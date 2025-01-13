@@ -33,11 +33,13 @@ import {
 import { Dialog, DialogTrigger, DialogContent,  } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import SubmissionView from "./submission-view";
-import ApplicationFeedback from "./application-feedback";
+import ApplicationFeedback from "./application-dialog/application-feedback";
 import { getCurrentStudents } from "@/app/api/student";
 import { log } from "console";
 import { PreviousMessage } from "../communications/communication-dialog/preview-message";
 import { SendMessage } from "./application-dialog/send-message";
+import InterviewFeedback from "./application-dialog/interview-feedback";
+import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface ApplicationDetailsProps {
@@ -52,9 +54,11 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
   const [messageOpen, setMessageOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState('');
   const [recipient, setRecipient] = useState('');
-  const [int, setInt] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false); // For ApplicationFeedback dialog
+  const [interview, setInterview] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
   const [application, setApplication] = useState<any>(null);
+  const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
   const [status, setStatus] = useState(application?.applicationDetails?.applicationStatus || "under review");
  
   const getStatusColor = (status: string): BadgeVariant => {
@@ -86,8 +90,12 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
     try {
       const student = await getCurrentStudents(applicationId?._id);
       setApplication(student.data);
-      console.log("student.data",student.data?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.tasks);
+      console.log("student.data",student.data?.applicationDetails?.applicationStatus);
       
+      if(student.data?.applicationDetails?.applicationStatus === 'accepted' || student.data?.applicationDetails?.applicationStatus === 'rejected')
+        setInterview(true)
+      else setInterview(false)
+
       setStatus(student.data?.applicationDetails?.applicationStatus);
     } catch (error) {
       console.error("Failed to fetch student data:", error);
@@ -104,6 +112,13 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
     setStatus(newStatus);
     if (newStatus === "accepted" || newStatus === "on hold" || newStatus === "rejected" || newStatus === "under review") {
       setFeedbackOpen(true);
+    }
+  };
+
+  const handleInterviewStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
+    if (newStatus === "accepted" || newStatus === "on hold" || newStatus === "rejected" || newStatus === "under review") {
+      setInterviewFeedbackOpen(true);
     }
   };
 
@@ -136,46 +151,48 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               <h4 className="font-medium">Current Status</h4>
               <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "")}>{application?.applicationDetails?.applicationStatus}</Badge>
             </div>
-            {!int ? 
-            application?.applicationDetails?.applicationStatus!=='initiated' && 
-            <Select value={application?.applicationDetails?.applicationStatus} onValueChange={handleStatusChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Change status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="initiated">Initiated</SelectItem>
-                <SelectItem value="under review">Under Review</SelectItem>
-                <SelectItem value="accepted">Accepted</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="on hold">Put On Hold</SelectItem>
-              </SelectContent>
-            </Select>
-              :
+            {interview ? 
             <>  
-            <div className="flex justify-between text-muted-foreground text-sm">
-              <div className="flex justify-center gap-3 items-center">
-                <div className="flex gap-1 items-center">
-                  <Clock4 className="w-4 h-4"/>12:45 PM
+              <div className="flex justify-between text-muted-foreground text-sm">
+                <div className="flex justify-center gap-3 items-center">
+                  <div className="flex gap-1 items-center">
+                    <Clock4 className="w-4 h-4"/>12:45 PM
+                  </div>
+                  <div className="flex gap-1 items-center">
+                    <Calendar className="w-4 h-4"/>20/03/2024
+                  </div>
                 </div>
-                <div className="flex gap-1 items-center">
-                  <Calendar className="w-4 h-4"/>20/03/2024
-                </div>
+                <p className="text-xs">Interview concluded</p>
               </div>
-              <p className="text-xs">Interview concluded</p>
-            </div>
-            <Select value={application?.applicationDetails?.applicationStatus?.interview} onValueChange={handleStatusChange}>
-            <SelectTrigger>
-            <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-            <SelectItem value="under review">Reschedule Interview</SelectItem>
-            <SelectItem value="accepted">Complete</SelectItem>
-            </SelectContent>
-            </Select>
-            <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
-              <FileSignature className="w-4 h-4"/>Interview Feedback
-            </Button>
-           </>  }
+              <Select value={application?.applicationDetails?.applicationStatus?.interview} onValueChange={handleInterviewStatusChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="concluded">Reschedule Interview</SelectItem>
+                  <SelectItem value="accepted">Complete</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
+                <FileSignature className="w-4 h-4"/>Interview Feedback
+              </Button>
+            </> : 
+            (application?.applicationDetails?.applicationStatus!=='initiated' && 
+              <Select value={application?.applicationDetails?.applicationStatus} onValueChange={handleStatusChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Change status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="initiated">Initiated</SelectItem>
+                  <SelectItem value="under review">Under Review</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="on hold">Put On Hold</SelectItem>
+                </SelectContent>
+              </Select>
+            )
+          }
           </div>
 
           <Separator />
@@ -196,23 +213,10 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-destructive">
-                    <UserMinus className="h-4 w-4 mr-2" />
-                    Mark as Dropped
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
-                  <div className="text-base font-medium mb-2">
-                    {`Are you sure you would like to drop ${application?.firstName+" "+application?.lastName}`}
-                  </div>
-                  <div className="flex gap-2 ">
-                    <Button variant="outline" className="flex-1" >Cancel</Button>
-                    <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+              <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                <UserMinus className="h-4 w-4 mr-2" />
+                Mark as Dropped
+              </Button>
             </div>
           </div>
 
@@ -227,7 +231,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <EyeIcon className="w-4 h-4 text-white"/> View
               </Button>}
             </div>
-            {(!int && application?.applicationDetails?.applicationStatus!=='initiated' ) && 
+            {(!interview && application?.applicationDetails?.applicationStatus!=='initiated' ) && 
               <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
                 <FileSignature className="w-4 h-4"/>Review Submission
               </Button>}
@@ -255,6 +259,22 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 </div>}
               </div>
             ))} 
+            {status === 'on hold' && 
+              <div className="border rounded-lg p-4 space-y-2">
+                <h5 className="font-medium ">Application On Hold</h5>
+                <div className="">
+                  <h5 className="font-medium text-sm text-muted-foreground">Reason:</h5>
+                  {application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback.map((item: any, i: any) => (
+                    <ul className="ml-4 sm:ml-6 space-y-2 list-disc">
+                      <li className="text-sm" key={i}>
+                        {item}
+                      </li>
+                    </ul>
+                  ))}
+                </div>
+                <h5 className="font-medium text-xs text-muted-foreground">Updated by Admin</h5>
+              </div>
+            }
           </div>
         </div>
       </ScrollArea>
@@ -263,6 +283,22 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
        <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">
           <ApplicationFeedback
+            name={application?.firstName}
+            email={application?.email}
+            phone={application?.mobileNumber}
+            tasks={application?._id}
+            initialStatus={status}
+            ques={application?.cohort?.applicationFormDetail?.[0]?.task} 
+            submission={application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]}
+            onClose={() => setFeedbackOpen(false)}
+            onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={interviewFeedbackOpen} onOpenChange={setInterviewFeedbackOpen}>
+        <DialogContent className="max-w-4xl py-4 px-6">
+          <InterviewFeedback
             name={application?.firstName}
             email={application?.email}
             phone={application?.mobileNumber}
@@ -298,6 +334,12 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
             type={selectedMessage}
             recipient={recipient}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+        <DialogContent className="max-w-4xl py-4 px-6">
+          <MarkedAsDialog student={application}/>
         </DialogContent>
       </Dialog>
 

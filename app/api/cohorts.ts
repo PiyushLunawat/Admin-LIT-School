@@ -46,6 +46,19 @@ export async function updateCohort(id: string, data: any) {
   return response.json();
 }
 
+// Update cohort details by ID
+export async function inviteCollaborators(id: string, data: any) {
+  const response = await fetch(`${process.env.API_URL}/admin/cohort/${id}?isInviting=true`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update cohort");
+  }
+  return response.json();
+}
+
 // Update cohort status by ID
 export async function updateCohortStatus(id: string, status: string) {
   const response = await fetch(`${process.env.API_URL}/admin/cohort/status/${id}`, {

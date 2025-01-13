@@ -9,14 +9,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Cookies from 'js-cookie';
 import { useRouter } from "next/navigation";
 
 export function UserButton() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Add any logout logic here if needed, e.g., clearing tokens
-    router.push("/login"); // Navigate to /login
+    Cookies.remove('admin-token');
+    router.push("/login");
   };
 
   return (

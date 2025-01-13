@@ -73,7 +73,7 @@ export function TemplatesTab({ cohortId }: TemplatesTabProps) {
       date: "2024-03-18 11:45 AM",
       time: "1:45 PM",
       recipients: "John Doe",
-      subject: "Token Fee Pending",
+      subject: "Admission Fee Pending",
       type: "Email",
     },
     {

@@ -33,7 +33,8 @@ interface CollaboratorsFormProps {
 }
 interface collaborator{
   email:string,
-  role:string
+  role:string,
+  isInvited:boolean
 }
 
 const roles = [
@@ -49,6 +50,7 @@ const formSchema = z.object({
     z.object({
       email: z.string().email("Invalid email address"),
       role: z.string().nonempty("Role is required"),
+      isInvited: z.boolean().optional(),
     })
   ),
 });
@@ -57,7 +59,7 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      collaborators: initialData?.collaborators || [{ email: "", role: "" }],
+      collaborators: initialData?.collaborators || [{ email: "", role: "", isInvited: false }],
     },
   });
 
@@ -72,7 +74,7 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
   useEffect(() => {
     // Ensure at least one collaborator exists
     if (fields.length === 0) {
-      append({ email: "", role: "" });
+      append({ email: "", role: "", isInvited: false });
     }
   }, [fields, append]); // Use `fields` instead of `collaborators`
   
@@ -80,12 +82,20 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       if (initialData?._id) {
-        console.log("Collaborators data to send:", data.collaborators);
-
-        // Ensure that collaborators data is an array and correctly structured
+        
         if (Array.isArray(data.collaborators) && data.collaborators.length > 0) {
-          const createdCohort = await updateCohort(initialData._id, {collaborators : data.collaborators} );
-          console.log("Cohort updated successfully:", createdCohort.data);
+          // Include isInvited field in the update
+          const collaboratorsToUpdate = data.collaborators.map((collaborator) => ({
+            email: collaborator.email,
+            role: collaborator.role,
+            isInvited: collaborator.isInvited ?? false,
+          }));
+          
+          console.log("Collaborators data to send:", collaboratorsToUpdate);
+          const createdCohort = await updateCohort(initialData._id, {
+            collaborators: collaboratorsToUpdate,
+          });
+  
           onCohortCreated(createdCohort.data); 
           onComplete(); // Proceed to the next step
         } else {
@@ -99,6 +109,36 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
     }
   };
 
+  const handleInvite = async () => {
+    try {
+      const data = form.getValues(); // Get current form data
+  
+      if (initialData?._id) {
+        if (Array.isArray(data.collaborators) && data.collaborators.length > 0) {
+          // Update collaborators to set isInvited to true for all
+          const collaboratorsToUpdate = data.collaborators.map((collaborator) => ({
+            email: collaborator.email,
+            role: collaborator.role,
+            isInvited: true, 
+          }));
+    
+          const updatedCohort = await updateCohort(initialData._id, {
+            collaborators: collaboratorsToUpdate,
+          });
+  
+          onCohortCreated(updatedCohort.data);
+          console.log("Collaborators invited successfully.");
+        } else {
+          console.error("Collaborators data is not formatted as an array or is empty:", data.collaborators);
+        }
+      } else {
+        console.error("Cohort ID is missing. Unable to invite collaborators.");
+      }
+    } catch (error) {
+      console.error("Failed to invite collaborators:", error);
+    }
+  };
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="max-h-[80vh] space-y-6 py-4">
@@ -183,12 +223,13 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
           variant="outline"
           type="button"
           className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
+          onClick={() => handleInvite()}
         >
           <Send className="mr-2 h-4 w-4" />
           Invite Collaborator
         </Button>
         <Button
-          onClick={() => append({ email: "", role: "" })}
+          onClick={() => append({ email: "", role: "", isInvited: false })}
           variant="outline"
           type="button"
           className="w-full"

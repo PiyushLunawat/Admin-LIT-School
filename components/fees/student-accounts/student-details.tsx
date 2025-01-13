@@ -40,7 +40,7 @@ export function StudentDetails({ studentId, onClose }: StudentDetailsProps) {
     status: "Current",
     paymentSchedule: [
       {
-        type: "Token Fee",
+        type: "Admission Fee",
         amount: "₹50,000",
         dueDate: "2024-01-15",
         status: "Paid",

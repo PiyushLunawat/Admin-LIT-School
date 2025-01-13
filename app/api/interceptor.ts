@@ -8,7 +8,9 @@ export const RegisterInterceptor = () => {
             // console.log('Request Intercepted:', { url, config });
 
             // Get token from cookies
-            const token = Cookies.get('user-token');
+            
+            const token = Cookies.get('admin-token');
+            console.log("tokennnnnn",token);
 
             // Ensure config.headers exists
             config.headers = {

@@ -20,6 +20,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { getCurrentStudents } from "@/app/api/student";
 import { useEffect, useState } from "react";
+import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 
@@ -29,6 +31,7 @@ interface StudentHeaderProps {
 
 export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   const [sch, setSch] = useState<any>(null);
+  const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
 
   useEffect(() => {
     if (student?.cohort?.feeStructureDetails && student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
@@ -103,23 +106,10 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-destructive">
+              <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                     <UserMinus className="h-4 w-4 mr-2" />
                     Mark as Dropped
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
-                  <div className="text-base font-medium mb-2">
-                    {`Are you sure you would like to drop ${student.firstName + student?.lastName}`}
-                  </div>
-                  <div className="flex gap-2 ">
-                    <Button variant="outline" className="flex-1" >Cancel</Button>
-                    <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
             </div>
           </div>
           
@@ -162,6 +152,12 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
             
           </div>
         </div>
+
+        <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+        <DialogContent className="max-w-4xl py-4 px-6">
+          <MarkedAsDialog student={student}/>
+        </DialogContent>
+      </Dialog>
       </div>
   );
 }

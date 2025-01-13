@@ -161,10 +161,11 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
         <CardHeader>
           <CardTitle>Upload New Document</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Input type="file" />
-            <Button className="w-full">
+        <CardContent className="flex gap-4">
+          <Input className="w-full !border-b border-none " placeholder="Document Name"/>
+          <div className="flex gap-2">
+            <Input type="file" className="w-fit"/>
+            <Button className="">
               <Upload className="h-4 w-4 mr-2" />
               Upload Document
             </Button>

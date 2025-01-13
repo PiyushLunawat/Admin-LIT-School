@@ -48,7 +48,7 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   onClose,
   onUpdateStatus,
 }) => {
-  const [status, setStatus] = useState<string>(initialStatus);
+  const [status, setStatus] = useState<string>(initialStatus || 'concluded');
   const [feedbacks, setFeedbacks] = useState<{
     [taskId: string]: string[];
   }>({});
@@ -117,53 +117,10 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
     const { value } = e.target;
     setReasonItemValue(formatInput(value));
   };
-
-  const handleFeedbackKeyDownForFeedback = (taskId: string, idx: number, e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      
-      setFeedbacks(prevFeedbacks => {
-        
-        const taskFeedback = prevFeedbacks[taskId] || [];
-        const updatedValue = formatInput((taskFeedback[idx] || "") + '\n• ');
-        console.log("11",updatedValue);
-        const newTaskFeedback = [...taskFeedback];
-        newTaskFeedback[idx] = updatedValue;
-        return { ...prevFeedbacks, [taskId]: newTaskFeedback };
-      });
-    }
-  };
-
-  const handleFeedbackChangeForFeedback = (taskId: string, idx: number, e: ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = e.target;
-    setFeedbacks(prevFeedbacks => {
-      const taskFeedback = prevFeedbacks[taskId] || [];
-      const newTaskFeedback = [...taskFeedback];
-      newTaskFeedback[idx] = formatInput(value);
-      console.log("2",formatInput(newTaskFeedback[0]));
-
-      return { ...prevFeedbacks, [taskId]: [formatInput(newTaskFeedback[0])] };
-    });
-  };
   
   const canUpdate = (): boolean => {
-    if (status === "under review") return true;
-
-    if (status === "on hold") {
-      // Make sure there's something beyond just "• " in reasonItemValue
       const trimmed = reasonItemValue.replace(/•/g, "").trim();
       return trimmed.length > 0;
-    }
-
-    if (status === "accepted" || status === "rejected") {
-      // Check if for each task, there's feedback that isn't purely bullet(s).
-      const allFeedback = Object.values(feedbacks).flat(); // Flatten all tasks
-      // If we find at least some text beyond "• ", we consider it valid
-      return allFeedback.some((fb) => {
-        const stripped = fb.replace(/•/g, "").trim();
-        return stripped.length > 0;
-      });
-    }
     return true; // fallback
   };
 
@@ -172,13 +129,6 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
     newStatus: string
   ) {
     try {
-      if (newStatus === "under review") {
-        const res = await updateStudentApplicationStatus( applicationId, newStatus,);
-        console.log( `Feedback for application ${applicationId} submitted successfully`, res);
-      }
-
-      else if (newStatus === "on hold") {
-        // Filter out empty reasons
         const validReasons = reason.filter((r) => r.trim() !== "");
         console.log("Sending feedback:", {
           feedbackId,
@@ -189,54 +139,7 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
         const feedback = { feedbackData: validReasons };
         const res = await updateStudentTaskFeedback( applicationId, feedbackId, newStatus, feedback, );
         console.log( `Feedback for application ${applicationId} submitted successfully`, res );
-      }
-      
-      else if (newStatus === "rejected" || newStatus === "accepted") {
-        // Prepare an array of task feedback
-        console.log("cons",feedbacks)
-        const feedbackData = Object.keys(feedbacks).map((taskId) => {
-          // Flatten all lines from all entries
-          const lines = feedbacks[taskId]
-            .flatMap(entry => entry.split('\n'))            // split each entry by new line
-            .map(line => line.replace(/^•\s*/, '').trim())  // remove bullet and trim
-            .filter(line => line.length > 0);               // remove empty lines if any
-        
-          return {
-            taskId,
-            feedback: lines,
-          };
-        });
-        
-        console.log("Transformed Feedback:", feedbackData);
-      
-
-        console.log("Accepted feedback:", {
-          applicationId,
-          feedbackId,
-          newStatus,
-          feedbackData,
-        });
-
-        // Send feedback data to backend
-        const res = await updateStudentTaskFeedbackAccep(
-          applicationId,
-          feedbackId,
-          newStatus,
-          { feedbackData }
-        );
-        console.log(
-          `Feedback for application ${applicationId} submitted successfully`,
-          res
-        );
-      }
-
-      // // Update application status
-      // const result = await updateStudentApplicationStatus(
-      //   applicationId,
-      //   newStatus
-      // );
-      // console.log("Application status updated successfully:", result);
-
+    
       onUpdateStatus(newStatus, feedbacks);
       onClose();
     } catch (error) {
@@ -263,18 +166,15 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="under review">Under Review</SelectItem>
-              <SelectItem value="on hold">On Hold</SelectItem>
+              <SelectItem value="concluded">Interview Concluded</SelectItem>
               <SelectItem value="accepted">Accepted</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        {/* Conditional Reason or Feedback */}
-        {(status === "on hold") && (
           <div>
-            <Label className="text-lg ">Provide Reasons</Label>
+            <Label className="text-lg ">Feedback</Label>
             <Textarea
               id="reasonItem"
               value={reasonItemValue}
@@ -286,120 +186,13 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
               cols={40}
             />
           </div>
-        )}
-
-        {(status === "accepted" || status === "rejected") && (
-        <>
-        <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Course Dive</h3>
-            <div className='space-y-1'>
-              <h4 className="font-medium text-[#00A3FF]">Why are you interested in joining The LIT School?</h4>
-              <div className="mt-2">
-                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text1}</div> 
-              </div>
-            </div>
-            <div className='space-y-1'>
-              <h4 className="font-medium text-[#00A3FF]">What are your career goals or aspirations??</h4>
-              <div className="mt-2">
-                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text2}</div> 
-              </div>
-            </div>
-          </div>
-
-          <Separator className="my-8" />
-
-        {ques.map((task: any, index: any) => (<>
-          <div key={index} className="space-y-1">
-            <h3 className="text-lg font-semibold">Task 0{index + 1}</h3>
-            <div className='space-y-1'>
-              <h4 className="font-medium text-[#00A3FF]">{task?.title}</h4>
-              <p className="text-sm text-muted-foreground">{task?.description}</p>
-            </div>
-
-            <div className="mt-4">
-              <div className='flex justify-between items-center'>
-                <Badge variant="lemon"  className="px-3 py-2 text-sm bg-[#FFF552]/[0.2] border-[#FFF552]">
-                  Submission
-                </Badge>
-                <div className="text-muted-foreground text-sm mt-2">
-                  Type: {task?.config
-                      .map((configItem: any) => configItem?.type)
-                      .join(", ")}
-                </div>
-              </div>
-              {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
-              <div key={`text-${id}`} className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
-                {textItem}
-              </div>
-            ))}
-            {submission?.tasks[index]?.task?.links?.map((linkItem: string, id: number) => (
-              <div key={`link-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <Link2Icon className="w-4 h-4" />
-                <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {linkItem}
-                </a>
-              </div>
-            ))}
-            {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
-              <div key={`image-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <ImageIcon className="w-4 h-4" />
-                <a href={imageItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {imageItem.split('/').pop()}
-                </a>
-              </div>
-            ))}
-            {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
-              <div key={`video-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <VideoIcon className="w-4 h-4" />
-                <a href={videoItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {videoItem.split('/').pop()}
-                </a>
-              </div>
-            ))}
-            {submission?.tasks[index]?.task?.files?.map((fileItem: string, id: number) => (
-              <div key={`file-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <FileIcon className="w-4 h-4" />
-                <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {fileItem.split('/').pop()}
-                </a>
-              </div>
-            ))}
-            </div>
-
-            <h4 className="font-medium !mt-4">Feedback</h4>
-            <div key={taskList[index]?._id}>
-              {/* Feedback input for each task */}
-              <div className="w-full grid border rounded-md ">
-              {(feedbacks[taskList[index]?._id] || [""]).map((feedbackItem, idx) => (
-                <div key={idx} className="flex items-center space-x-2 mb-2 w-full">
-                    <Textarea
-                      id="feedbackItem"
-                      value={feedbackItem}
-                      className="px-3 text-base w-full"
-                      onChange={(e) => handleFeedbackChangeForFeedback(taskList[index]?._id, idx, e)}
-                      onKeyDown={(e) => handleFeedbackKeyDownForFeedback(taskList[index]?._id, idx, e)}
-                      placeholder="Type here..."
-                      rows={3}
-                      cols={40}
-                    />
-                  </div>
-              ))}
-              </div>  
-            </div>
-
-          </div>
-            {index < ques?.length - 1 && <Separator className="my-8" />}
-        </>))}
-
-        </>  
-        )}
 
         <Button
           className="w-full mt-4"
           onClick={() => handleApplicationUpdate(tasks, status)}
           disabled={!canUpdate()}
         >
-          Update Status
+          Update Interview Status
         </Button>
       </div>
     </div>

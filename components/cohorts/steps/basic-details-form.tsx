@@ -111,9 +111,9 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
     async function fetchData() {
       try {
         const programsData = await getPrograms();
-        setPrograms(programsData.data);
+        setPrograms(programsData.data.filter((program: any) => program.status === true));
         const centresData = await getCentres();
-        setCentres(centresData.data);
+        setCentres(centresData.data.filter((centre: any) => centre.status === true));
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
       } catch (error) {
@@ -188,8 +188,6 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
     } catch (error) {
       console.error("Failed to create cohort:", error);
     }
-    // console.log("Form data:", dataWithCohortId);    // Log the form data
-  onNext();
   }
 
   const watchStartDate = form.watch("startDate");

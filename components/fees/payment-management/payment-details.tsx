@@ -54,7 +54,7 @@ export function PaymentDetails({ paymentId, onClose }: PaymentDetailsProps) {
       {
         date: "2024-02-15",
         amount: "₹50,000",
-        type: "Token Fee",
+        type: "Admission Fee",
         status: "Completed",
       },
     ],

@@ -46,7 +46,7 @@ export function RecentActivity({ applications }: RecentActivityProps) {
     {
       id: "4",
       type: "payment",
-      description: "Token fee received from Emily Brown",
+      description: "Admission fee received from Emily Brown",
       timestamp: "5 hours ago"
     },
     {

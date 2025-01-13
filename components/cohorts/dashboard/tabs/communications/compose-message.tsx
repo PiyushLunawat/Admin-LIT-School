@@ -54,7 +54,7 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
       <SelectItem value="all">All Students</SelectItem>
       <SelectItem value="applicants">All Applicants</SelectItem>
       <SelectItem value="payment-pending">Payment Pending</SelectItem>
-      <SelectItem value="token-fee-pending">Token Fee Pending</SelectItem>
+      <SelectItem value="token-fee-pending">Admission Fee Pending</SelectItem>
       <SelectItem value="interview-scheduled">Interview Scheduled</SelectItem>
       <SelectItem value="presentation-scheduled">Presentation Scheduled</SelectItem>
     </SelectContent>
@@ -83,7 +83,7 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
                   <SelectItem value="application-status">Application Status Update</SelectItem>
                   <SelectItem value="payment-pending">Payment Pending</SelectItem>
                   <SelectItem value="interview-reminder">Interview Reminder</SelectItem>
-                  <SelectItem value="token-fee-pending">Token Fee Pending</SelectItem>
+                  <SelectItem value="token-fee-pending">Admission Fee Pending</SelectItem>
                   <SelectItem value="announcement">General Announcement</SelectItem>
                 </SelectContent>
               </Select>
