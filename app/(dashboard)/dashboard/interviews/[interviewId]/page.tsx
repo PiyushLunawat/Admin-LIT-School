@@ -15,6 +15,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function InterviewDetailsPage({ params }: PageProps) {
-  return <InterviewDetails interviewId={params.id} />;
+export default async function InterviewDetailsPage({ params }: { params: Promise<{ interviewId: string}> }) {
+  const interviewId = (await params).interviewId;
+  return <InterviewDetails interviewId={interviewId} />;
 }

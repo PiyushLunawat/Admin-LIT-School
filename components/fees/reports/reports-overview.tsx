@@ -32,7 +32,7 @@ export function ReportsOverview({ dateRange }: ReportsOverviewProps) {
         <CardContent>
           <div className="text-2xl font-bold">{summary.totalExpected}</div>
 
-          <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" />
+          {/* <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" /> */}
           <p className="text-xs text-muted-foreground mt-2">
             {summary.collectionProgress}% collected
           </p>

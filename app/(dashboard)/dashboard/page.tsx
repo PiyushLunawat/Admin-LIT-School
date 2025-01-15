@@ -16,7 +16,7 @@ export default function DashboardPage() {
       <DashboardHeader setDateRange={setDateRange}/>
       <MetricsGrid selectedDateRange={dateRange}/>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartsSection />
+        <ChartsSection selectedDateRange={dateRange}/>
         <div className="space-y-6">
           <RecentCohorts />
         </div>

@@ -353,7 +353,7 @@ export function StudentsList({
                       {/* <Button variant="ghost" size="icon" onClick={() => handleSendMessage('email', student?.email)}>
                         <Mail className="h-4 w-4" />
                       </Button> */}
-                      <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                      <Button variant="ghost" size="icon" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                         <UserMinus className="h-4 w-4 mr-2" />
                         Mark as Dropped
                       </Button>
