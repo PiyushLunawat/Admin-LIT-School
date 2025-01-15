@@ -17,15 +17,111 @@ import {
   Legend,
 } from "recharts";
 import { ScholarshipDistribution } from "./scholarship-distribution";
+import { DateRange } from "react-day-picker";
+import { useEffect, useState } from "react";
+import { getStudents } from "@/app/api/student";
 
-export function ChartsSection() {
-  // Application funnel data
+
+interface ChartsSectionProps {
+  selectedDateRange: DateRange | undefined;
+}
+export function ChartsSection({ selectedDateRange }: ChartsSectionProps) {
+  const [applications, setApplications] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [appliedCount, setAppliedCount] = useState(0);
+  const [underReviewCount, setUnderReviewCount] = useState(0);
+  const [litmusCompleteCount, setLitmusCompleteCount] = useState(0);
+  const [interviewedCount, setInterviewedCount] = useState(0);
+  const [enrolledCount, setEnrolledCount] = useState(0);
+
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await getStudents();
+        const mappedStudents =
+          response.data.filter(
+            (student: any) =>
+              student?.applicationDetails !== undefined
+          )
+          const filteredApplications = mappedStudents.filter((app: any) => {
+            if (!selectedDateRange) return true;
+            const appDate = new Date(app.updatedAt);
+            const { from, to } = selectedDateRange;
+            return (!from || appDate >= from) && (!to || appDate <= to);
+          });
+
+          setApplications(filteredApplications);
+        console.log("fetching students:", response.data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStudents();
+  }, [selectedDateRange]);
+    
+      useEffect(() => {
+        if (applications && Array.isArray(applications)) {
+  
+          // Applied Count
+          const applied = applications.filter(
+            (application) =>
+              application?.applicationDetails?.applicationStatus?.toLowerCase() !==
+              undefined
+          );
+          setAppliedCount(applied.length);
+    
+          // Under Review Count
+          const underReview = applications.filter(
+            (application) =>
+              application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+              "under review"
+          );
+          setUnderReviewCount(underReview.length);
+    
+          // Interviews Scheduled Count
+          const onhold = applications.filter(
+            (application) =>
+              application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+              "complete"
+          );
+          setInterviewedCount(onhold.length);
+  
+          const litmus = applications.filter(
+            (application) =>
+            (application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== "pending" &&
+            application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== undefined)
+          );
+          setLitmusCompleteCount(litmus.length);
+    
+          const enrolled = applications.filter(
+            (application) =>
+              application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() ===
+              "completed"
+          );
+          setEnrolledCount(enrolled.length);
+  
+          // const rejected = applications.filter(
+          //   (application) =>
+          //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+          //     "rejected"
+          // );
+          // setRejectedCount(rejected.length);
+  
+    
+        } else {
+          console.log("Applications data is not an array or is undefined.");
+        }
+      }, [applications]);
+
   const funnelData = [
-    { stage: "Applications", value: 156 },
-    { stage: "Under Review", value: 98 },
-    { stage: "Interviewed", value: 67 },
-    { stage: "LITMUS Complete", value: 45 },
-    { stage: "Enrolled", value: 25 },
+    { stage: "Applications", value: appliedCount },
+    { stage: "Under Review", value: underReviewCount },
+    { stage: "Interviewed", value: interviewedCount },
+    { stage: "LITMUS Complete", value: litmusCompleteCount },
+    { stage: "Enrolled", value: enrolledCount },
   ];
 
 

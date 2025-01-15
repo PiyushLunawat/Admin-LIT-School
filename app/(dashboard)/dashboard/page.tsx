@@ -14,7 +14,7 @@ export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6">
       <DashboardHeader setDateRange={setDateRange}/>
-      <MetricsGrid />
+      <MetricsGrid selectedDateRange={dateRange}/>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartsSection />
         <div className="space-y-6">

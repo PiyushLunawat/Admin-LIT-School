@@ -118,7 +118,7 @@ export function RecentCohorts() {
               </div>
               <Progress
                 states={[
-                  { value: cohort.filledSeats.length, widt:((cohort.filledSeats.length / cohort.filledSeats.length) * 100), color:'#2EB88A' } 
+                  { value: cohort.filledSeats.length, widt:((cohort.filledSeats.length / cohort.totalSeats) * 100), color:'#2EB88A' } 
                 ]}
                 className="h-2"
               />
