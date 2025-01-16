@@ -73,7 +73,6 @@ export function ApplicationsList({
           )    
 
           setApplications(mappedStudents);
-        console.error("fetching students:", response.data);
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
@@ -235,7 +234,7 @@ export function ApplicationsList({
         <TableBody>
           {filteredAndSortedApplications.map((application: any) => (
             <TableRow
-              key={application.id}
+              key={application._id}
               className="cursor-pointer"
               onClick={() => onApplicationSelect(application)}
             >

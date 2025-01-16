@@ -46,41 +46,6 @@ export function PaymentsList({
     const [loading, setLoading] = useState<boolean>(true);
     const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   
-      
-  const payments: PaymentRecord[] = [
-    {
-      id: "1",
-      studentName: "John Doe",
-      paymentPlan: "Instalments",
-      tokenPaid: true,
-      instalmentsPaid: 2,
-      totalInstalments: 6,
-      nextDueDate: "2024-04-15",
-      status: "On Time",
-      scholarship: "Smart Mouth (5%)",
-    },
-    {
-      id: "2",
-      studentName: "Jane Smith",
-      paymentPlan: "One-Shot",
-      tokenPaid: true,
-      instalmentsPaid: 1,
-      totalInstalments: 1,
-      status: "Complete",
-    },
-    {
-      id: "3",
-      studentName: "Mike Johnson",
-      paymentPlan: "Instalments",
-      tokenPaid: true,
-      instalmentsPaid: 1,
-      totalInstalments: 6,
-      nextDueDate: "2024-03-30",
-      status: "Overdue",
-      scholarship: "Smart Ass (8%)",
-    },
-  ];
-
   const getStatusColor = (status: PaymentRecord["status"]): BadgeVariant => {
     switch (status?.toLowerCase()) {
       case "on time":
@@ -95,10 +60,10 @@ export function PaymentsList({
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === payments.length) {
+    if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(payments.map(payment => payment.id));
+      onSelectedIdsChange(applications.map(payment => payment.id));
     }
   };
 
@@ -117,7 +82,7 @@ export function PaymentsList({
           <TableRow>
             <TableHead className="w-12">
               <Checkbox
-                checked={selectedIds.length === payments.length}
+                checked={selectedIds.length === applications.length}
                 onCheckedChange={toggleSelectAll}
               />
             </TableHead>
@@ -132,7 +97,7 @@ export function PaymentsList({
         <TableBody>
           {applications?.map((application: any) => (
             <TableRow 
-              key={application.id}
+              key={application._id}
               className="cursor-pointer"
               onClick={() => onStudentSelect(application.id)}
             >

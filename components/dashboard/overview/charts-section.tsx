@@ -24,8 +24,11 @@ import { getStudents } from "@/app/api/student";
 
 interface ChartsSectionProps {
   selectedDateRange: DateRange | undefined;
+  searchQuery: string;
+  selectedProgram: string;
+  selectedCohort: string;
 }
-export function ChartsSection({ selectedDateRange }: ChartsSectionProps) {
+export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram, selectedCohort }: ChartsSectionProps) {
   const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [appliedCount, setAppliedCount] = useState(0);
@@ -34,33 +37,72 @@ export function ChartsSection({ selectedDateRange }: ChartsSectionProps) {
   const [interviewedCount, setInterviewedCount] = useState(0);
   const [enrolledCount, setEnrolledCount] = useState(0);
 
-  useEffect(() => {
-    async function fetchStudents() {
-      try {
-        const response = await getStudents();
-        const mappedStudents =
-          response.data.filter(
-            (student: any) =>
-              student?.applicationDetails !== undefined
-          )
-          const filteredApplications = mappedStudents.filter((app: any) => {
-            if (!selectedDateRange) return true;
-            const appDate = new Date(app.updatedAt);
-            const { from, to } = selectedDateRange;
-            return (!from || appDate >= from) && (!to || appDate <= to);
+    useEffect(() => {
+      async function fetchAndFilterStudents() {
+        setLoading(true);
+        try {
+          // 1) Fetch All Students
+          const response = await getStudents();
+  
+          // 2) Filter Out Students with No Application Details
+          const validStudents = response.data.filter(
+            (student: any) => student?.applicationDetails !== undefined
+          );
+  
+          // 3) Filter Based on Date Range, Search Query, Program, Cohort
+          const filteredApplications = validStudents.filter((app: any) => {
+            // --- Date Range Check ---
+            if (selectedDateRange) {
+              const appDate = new Date(app.updatedAt);
+              const { from, to } = selectedDateRange;
+              if ((from && appDate < from) || (to && appDate > to)) {
+                return false;
+              }
+            }
+  
+            // --- Search Query (by Name, Email, etc.) ---
+            if (searchQuery) {
+              const lowerSearch = searchQuery.toLowerCase();
+              // Adjust fields as needed (name, email, phone, etc.)
+              const matchesSearch =
+                ((app.firstName+' '+app.lastName) || "").toLowerCase().includes(lowerSearch) ||
+                (app.program.name || "").toLowerCase().includes(lowerSearch) ||
+                (app.program.name || "").toLowerCase().includes(lowerSearch);;
+  
+              if (!matchesSearch) return false;
+            }
+  
+            // --- Program Check ---
+            if (selectedProgram !== "all-programs") {
+              // Suppose 'app.program' is how you store it
+              if ((app.program.name || "").toLowerCase() !== selectedProgram.toLowerCase()) {
+                return false;
+              }
+            }
+  
+            // --- Cohort Check ---
+            if (selectedCohort !== "all-cohorts") {
+              // Suppose 'app.cohort' is how you store it
+              if ((app.program.name || "").toLowerCase() !== selectedCohort.toLowerCase()) {
+                return false;
+              }
+            }
+  
+            return true;
           });
-
+  
+          // 4) Set Final Filtered Applications
           setApplications(filteredApplications);
-        console.log("fetching students:", response.data);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-      } finally {
-        setLoading(false);
+          console.log("Students Fetched & Filtered:", filteredApplications);
+        } catch (error) {
+          console.error("Error fetching students:", error);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
-
-    fetchStudents();
-  }, [selectedDateRange]);
+  
+      fetchAndFilterStudents();
+    }, [selectedDateRange, searchQuery, selectedProgram, selectedCohort]);
     
       useEffect(() => {
         if (applications && Array.isArray(applications)) {

@@ -22,6 +22,7 @@ import { getCurrentStudents } from "@/app/api/student";
 import { useEffect, useState } from "react";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 
@@ -31,7 +32,23 @@ interface StudentHeaderProps {
 
 export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   const [sch, setSch] = useState<any>(null);
-  const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
+  const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
+  const [interviewOpen, setInterviewOpen] = useState(false);
+
+  const colorClasses = [
+    'text-emerald-600 bg-emerald-600/20 border-emerald-600',
+    'text-[#3698FB] bg-[#3698FB]/20 border-[#3698FB]',
+    'text-[#FA69E5] bg-[#FA69E5]/20 border-[#FA69E5]',
+    'text-orange-600 bg-orange-600/20 border-orange-600'
+  ];
+  
+  const getColor = (slabName: string): string => {
+    const index = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+      (slab: any) => slab.name === slabName
+    );
+    
+    return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
+  };
 
   useEffect(() => {
     if (student?.cohort?.feeStructureDetails && student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
@@ -102,7 +119,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
                 <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
                 Send WhatsApp
               </Button> */}
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start" onClick={() => setInterviewOpen(true)}>
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
@@ -138,7 +155,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
                 {sch ? 
-                <Badge className="capitalize" variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}</Badge> : "--"}
+                <Badge className={`capitalize ${getColor(sch?.scholarshipName)}`} variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}</Badge> : "--"}
               </div> 
               <div>
                 <p className="text-sm text-muted-foreground">Payment Status</p>
@@ -153,6 +170,11 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
           </div>
         </div>
 
+        <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+          <DialogContent className="max-w-2xl">
+            <SchedulePresentation student={student} interviewr={['interviewer', 'evaluator']}/>
+          </DialogContent>
+        </Dialog>
         <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">
           <MarkedAsDialog student={student}/>

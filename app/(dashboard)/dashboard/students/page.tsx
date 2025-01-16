@@ -13,10 +13,8 @@ import { Mail, Download } from "lucide-react";
 export default function StudentsPage() {
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
 
-  // --- FILTER STATES ---  
-  // Search text
+  // --- FILTER STATES ---
   const [searchQuery, setSearchQuery] = useState("");
-  // Program, Cohort, Application Status, Payment Status
   const [selectedProgram, setSelectedProgram] = useState("all-programs");
   const [selectedCohort, setSelectedCohort] = useState("all-cohorts");
   const [selectedAppStatus, setSelectedAppStatus] = useState("all-statuses");

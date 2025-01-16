@@ -40,6 +40,7 @@ import { PreviousMessage } from "../communications/communication-dialog/preview-
 import { SendMessage } from "./application-dialog/send-message";
 import InterviewFeedback from "./application-dialog/interview-feedback";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
+import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface ApplicationDetailsProps {
@@ -56,6 +57,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
   const [recipient, setRecipient] = useState('');
   const [interview, setInterview] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [interviewOpen, setInterviewOpen] = useState(false);
   const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
   const [application, setApplication] = useState<any>(null);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
@@ -209,7 +211,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2"/>
                 Send WhatsApp
               </Button> */}
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start" onClick={() => setInterviewOpen(true)}>
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
@@ -250,7 +252,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <div className="">
                 <h5 className="font-medium text-muted-foreground">Feedback</h5>
                 {application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
-                  <ul className="ml-4 sm:ml-6 space-y-2 list-disc">
+                  <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                     <li className="text-sm" key={i}>
                       {item}
                     </li>
@@ -265,7 +267,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <div className="">
                   <h5 className="font-medium text-sm text-muted-foreground">Reason:</h5>
                   {application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback.map((item: any, i: any) => (
-                    <ul className="ml-4 sm:ml-6 space-y-2 list-disc">
+                    <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                       <li className="text-sm" key={i}>
                         {item}
                       </li>
@@ -293,6 +295,12 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
             onClose={() => setFeedbackOpen(false)}
             onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+        <DialogContent className="max-w-2xl">
+          <SchedulePresentation student={application} interviewr={['interviewer']}/>
         </DialogContent>
       </Dialog>
 

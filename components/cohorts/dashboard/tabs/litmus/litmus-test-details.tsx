@@ -40,6 +40,8 @@ import { getCurrentStudents } from "@/app/api/student";
 import { Card } from "@/components/ui/card";
 import { ViewComponent } from "./litmus-test-dialog/view";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
+import { AwardScholarship } from "@/components/common-dialog/award-scholarship";
+import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
@@ -52,11 +54,23 @@ interface LitmusTestDetailsProps {
 export function LitmusTestDetails({ application, onClose, onApplicationUpdate }: LitmusTestDetailsProps) {
   const [open, setOpen] = useState(false);
   const [vopen, setVopen] = useState(false);
+  const [schOpen, setSchOpen] = useState(false);
+  const [interviewOpen, setInterviewOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [status, setStatus] = useState(application?.litmusTestDetails[0]?.litmusTaskId?.status);
   const [cohorts, setCohorts] = useState<any[]>([]);  
   const [sch, setSch] = useState<any>(null);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
+
+  const colorClasses = ['text-emerald-600', 'text-[#3698FB]', 'text-[#FA69E5]', 'text-orange-600'];
+
+  const getColor = (slabName: string): string => {
+    const index = application?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+      (slab: any) => slab.name === slabName
+    );
+    
+    return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
+  };
 
   useEffect(() => {
     if (application?.cohort?.feeStructureDetails && application?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
@@ -80,7 +94,6 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
         return "default";
     }
   };
-
 
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
@@ -136,25 +149,28 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
           <div className="space-y-2">
             <h4 className="font-medium">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start " onClick={() => setInterviewOpen(true)}>
                 <Calendar className="h-4 w-4 mr-2" />
-                Schedule Presenta...
+                <span className="truncate w-[170px]">Schedule Presentation</span>
               </Button>
               <Button variant="outline" className="justify-start">
                 <Download className="h-4 w-4 mr-2" />
                 Download Files
               </Button>
-              <Button variant="outline" className="justify-start">
                 {sch ? 
-                <div className="flex gap-2 items-center">
-                  <Star className="h-4 w-4" />
-                  {sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}
-                </div> :
-                <div className="flex gap-2 items-center">
-                  <Star className="h-4 w-4" />
-                  Award Scholarship
-                </div>}
-              </Button>
+                  <Button variant="outline" className={`justify-start ${getColor(sch?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
+                    <div className="flex gap-2 items-center">
+                      <span className="text-lg pb-[2px]">★ </span> {sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}
+                    </div> 
+                  </Button>
+                    :
+                  <Button variant="outline" className="justify-start">
+                    <div className="flex gap-2 items-center">
+                      <Star className="h-4 w-4" />
+                      Award Scholarship
+                    </div>
+                  </Button>
+                }
               <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                 <UserMinus className="h-4 w-4 mr-2" />
                 Mark as Dropped
@@ -244,7 +260,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
             <h4 className="font-medium">Performance Rating</h4>
             <div className="flex space-x-1 bg-[#262626] p-2 rounded-lg justify-center mx-auto">
             {[...Array(5)].map((_, index) => (
-              <span className={`text-2xl transition-colors ${
+              <span key={index} className={`text-2xl transition-colors ${
               index < application?.litmusTestDetails[0]?.litmusTaskId?.performanceRating ? 'text-[#F8E000]' : 'text-[#A3A3A366]'}`}>
                 ★
               </span>
@@ -262,6 +278,18 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
       <Dialog open={vopen} onOpenChange={setVopen}>
         <DialogContent className="max-w-4xl">
           <ViewComponent application={application} onApplicationUpdate={onApplicationUpdate}/>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+        <DialogContent className="max-w-2xl">
+          <SchedulePresentation student={application} interviewr={['evaluator']}/>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={schOpen} onOpenChange={setSchOpen}>
+        <DialogContent className="max-w-5xl">
+          <AwardScholarship student={application} />
         </DialogContent>
       </Dialog>
 

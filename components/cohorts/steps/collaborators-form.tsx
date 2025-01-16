@@ -200,7 +200,7 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
                               <SelectItem
                                 key={role.value}
                                 value={role.value}
-                                disabled={role.value !== "evaluator" &&
+                                disabled={(role.value === "collector") &&
                                   fields.some(f => f.role === role.value && f.id !== collaborator.id)}
                               >
                                 {role.label}

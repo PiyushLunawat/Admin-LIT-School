@@ -76,7 +76,7 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
               ).length
             );
 
-            console.log("csc",cohort.filledSeats.length,intCleared,response.data.filter(
+            console.log("csc",cohort?.filledSeats.length,intCleared,response.data.filter(
               (student: any) => student?.applicationDetails?.applicationStatus === 'initiated'
             ).length);
             

@@ -355,7 +355,6 @@ export function StudentsList({
                       </Button> */}
                       <Button variant="ghost" size="icon" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                         <UserMinus className="h-4 w-4 mr-2" />
-                        Mark as Dropped
                       </Button>
                       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">

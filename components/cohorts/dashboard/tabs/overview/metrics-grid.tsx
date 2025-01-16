@@ -157,14 +157,14 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
     },
     {
       title: "Avg. Scholarships",
-      value: `${(avgScholarshipsPercentage +'%' || '--').toString()}`,
-      description: `${(totalScholarshipsAmount/100000+'L' || '--').toLocaleString()} Scholarship distributed`,
+      value: `${(avgScholarshipsPercentage ? (avgScholarshipsPercentage +'%') : '--').toString()}`,
+      description: `${(totalScholarshipsAmount ? (totalScholarshipsAmount/100000+'L') : '-').toLocaleString()} Scholarship distributed`,
       icon: Award,
     },
     {
       title: "Payments",
-      value: `${('₹'+paymentsCount || '--').toString()}`,
-      description: `${(totalTokenAmountPaid/100000+'L' || '--').toString()} Admission Fee Collected`,
+      value: `${(paymentsCount ? ('₹'+paymentsCount) : '--').toString()}`,
+      description: `${(totalTokenAmountPaid ? (totalTokenAmountPaid/100000+'L') : '--').toString()} Admission Fee Collected`,
       icon: CreditCard,
     },
     {

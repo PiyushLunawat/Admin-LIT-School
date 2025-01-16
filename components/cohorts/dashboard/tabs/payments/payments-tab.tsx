@@ -10,6 +10,7 @@ import { Mail, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
+import { getCohortById } from "@/app/api/cohorts";
 
 interface PaymentsTabProps {
   cohortId: string;
@@ -17,31 +18,96 @@ interface PaymentsTabProps {
 }
 
 export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
-
-  const [applications, setApplications] = useState<any>([]);
+  const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [scholarship, setScholarship] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
 
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState("all");
+  const [selectedPaymentPlan, setSelectedPaymentPlan] = useState("all");
+  const [selectedScholarship, setSelectedScholarship] = useState("all");
+
+  // Fetch scholarships based on cohortId
   useEffect(() => {
-    async function fetchStudents() {
+    async function fetchScholarships() {
+      try {
+        const cohortsData = await getCohortById(cohortId);
+        const scholarships = cohortsData.data?.litmusTestDetail[0]?.scholarshipSlabs || [];
+        setScholarship(scholarships);
+      } catch (error) {
+        console.error("Error fetching scholarship data:", error);
+      }
+    }
+    fetchScholarships();
+  }, [cohortId]);
+
+  // Fetch and filter students
+  useEffect(() => {
+    async function fetchAndFilterStudents() {
+      setLoading(true);
       try {
         const response = await getStudents();
-        const mappedStudents =
-          response.data.filter(
-            (student: any) =>
-              student?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed' &&
-              student.cohort?._id === cohortId
-          )
-          const filteredApplications = mappedStudents.filter((app: any) => {
-            if (!selectedDateRange) return true;
+        const mappedStudents: any[] = response.data.filter(
+          (student: any) =>
+            student?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed' &&
+            student.cohort?._id === cohortId
+        );
+
+        const filteredApplications = mappedStudents.filter((app: any) => {
+          // --- Date Range Check ---
+          if (selectedDateRange) {
             const appDate = new Date(app.updatedAt);
             const { from, to } = selectedDateRange;
-            return (!from || appDate >= from) && (!to || appDate <= to);
-          });
+            if ((from && appDate < from) || (to && appDate > to)) {
+              return false;
+            }
+          }
 
-          setApplications(filteredApplications);
-        console.log("fetching students:", response.data);
+          // --- Search Query (Name, Email, Phone) ---
+          if (searchQuery) {
+            const lowerSearch = searchQuery.toLowerCase();
+            const matchesSearch =
+              ((app.firstName+' '+app.lastName) || "").toLowerCase().includes(lowerSearch) ||
+              (app.email || "").toLowerCase().includes(lowerSearch) ||
+              (app.phone || "").toLowerCase().includes(lowerSearch);
+            if (!matchesSearch) return false;
+          }
+
+          // --- Payment Status Check ---
+          if (selectedPaymentStatus !== "all") {
+            if ((app.status || "").toLowerCase() !== selectedPaymentStatus.toLowerCase()) {
+              return false;
+            }
+          }
+
+          // --- Payment Plan Check ---
+          if (selectedPaymentPlan !== "all") {
+            const lastCourse = app.cousrseEnrolled?.[app.cousrseEnrolled.length - 1];
+            const installmentType = lastCourse?.feeSetup?.installmentType || "";
+            
+            if (installmentType.toLowerCase() !== selectedPaymentPlan.toLowerCase()) {
+              return false;
+            }
+          }
+
+          // --- Scholarship Check ---
+          if (selectedScholarship !== "all") {
+            const scholarships = app.cousrseEnrolled?.[app.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipName;
+            console.log("installmentType",scholarships,selectedScholarship);
+            
+            if (scholarships?.toLowerCase() !== selectedScholarship.toLowerCase()) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
+        setApplications(filteredApplications);
+        console.log("Fetched & Filtered Students:", filteredApplications);
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
@@ -49,9 +115,15 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
       }
     }
 
-    fetchStudents();
-  }, [selectedDateRange]);
-
+    fetchAndFilterStudents();
+  }, [
+    selectedDateRange,
+    searchQuery,
+    selectedPaymentStatus,
+    selectedPaymentPlan,
+    selectedScholarship,
+    cohortId,
+  ]);
 
   const handleBulkReminder = () => {
     console.log("Sending payment reminders to:", selectedStudentIds);
@@ -63,6 +135,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Header and Action Buttons */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Payments</h2>
         <div className="flex gap-2">
@@ -85,10 +158,23 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         </div>
       </div>
 
+      {/* Payments Summary */}
       <PaymentsSummary applications={applications} cohortId={cohortId} />
-      
-      <PaymentsFilters />
 
+      {/* Payments Filters */}
+      <PaymentsFilters
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        scholarship={scholarship}
+        selectedScholarship={selectedScholarship}
+        onScholarshipChange={setSelectedScholarship}
+        selectedPaymentStatus={selectedPaymentStatus}
+        onPaymentStatusChange={setSelectedPaymentStatus}
+        selectedPaymentPlan={selectedPaymentPlan}
+        onPaymentPlanChange={setSelectedPaymentPlan}
+      />
+
+      {/* Payments List and Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <PaymentsList
