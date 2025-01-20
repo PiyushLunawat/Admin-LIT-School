@@ -139,14 +139,14 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Payments</h2>
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleBulkReminder}
             disabled={selectedStudentIds.length === 0}
           >
             <Mail className="h-4 w-4 mr-2" />
             Send Reminders
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={handleBulkExport}

@@ -107,6 +107,24 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
   const [centres, setCentres] = useState<Centre[]>([]);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
 
+  // Format a number into Indian currency format
+function formatIndianCurrency(value: string | number): string {
+  if (!value) return "";
+  const numStr = value.toString();
+  const lastThreeDigits = numStr.slice(-3); // Last 3 digits
+  const otherDigits = numStr.slice(0, -3); // Digits before last 3
+  const formattedOtherDigits = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ","); // Add commas in groups of 2
+  return otherDigits
+    ? `${formattedOtherDigits},${lastThreeDigits}`
+    : lastThreeDigits; // Combine both parts
+}
+
+// Remove formatting to get raw value
+function removeFormatting(value: string): string {
+  return value.replace(/,/g, ""); // Remove commas
+}
+
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -439,8 +457,15 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
               <FormItem>
                 <Label>Base Fee</Label>
                 <FormControl>
-                  <Input type="number" placeholder="995000" {...field} 
-                  />
+                <Input
+          type="text" // Change input type to text to handle formatted value
+          placeholder="995000"
+          value={formatIndianCurrency(field.value)} // Format the value on render
+          onChange={(e) => {
+            const rawValue = removeFormatting(e.target.value); // Remove formatting for raw input
+            field.onChange(rawValue); // Update the field with unformatted value
+          }}
+        />
                 </FormControl>
                 <FormMessage />
               </FormItem>

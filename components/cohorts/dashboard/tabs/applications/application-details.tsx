@@ -183,11 +183,10 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
             (application?.applicationDetails?.applicationStatus!=='initiated' && 
               <Select value={application?.applicationDetails?.applicationStatus} onValueChange={handleStatusChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Change status" />
+                  <SelectValue className="capitalize" placeholder="Change status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="initiated">Initiated</SelectItem>
-                  <SelectItem value="under review">Under Review</SelectItem>
+                  <SelectItem className="capitalize" value={application?.applicationDetails?.applicationStatus}>{application?.applicationDetails?.applicationStatus}</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
                   <SelectItem value="on hold">Put On Hold</SelectItem>
@@ -233,7 +232,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <EyeIcon className="w-4 h-4 text-white"/> View
               </Button>}
             </div>
-            {(!interview && application?.applicationDetails?.applicationStatus!=='initiated' ) && 
+            {(interview && application?.applicationDetails?.applicationStatus==='under review' ) && 
               <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
                 <FileSignature className="w-4 h-4"/>Review Submission
               </Button>}

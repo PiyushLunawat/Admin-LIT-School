@@ -203,10 +203,8 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
         </CardContent>
       </Card>
 
-     
-
       {/* Applications Trend */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Applications Trend</CardTitle>
         </CardHeader>
@@ -228,7 +226,7 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
             </ResponsiveContainer>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <ScholarshipDistribution />
       

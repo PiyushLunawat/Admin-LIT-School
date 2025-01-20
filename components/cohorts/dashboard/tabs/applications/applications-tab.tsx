@@ -48,14 +48,14 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Applications</h2>
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleBulkEmail}
             disabled={selectedApplicationIds.length === 0}
           >
             <Mail className="h-4 w-4 mr-2" />
             Bulk Email
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={handleBulkExport}
@@ -92,7 +92,7 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
         </div>
         <div className="lg:col-span-1">
           <div className="sticky top-6">
-            <Card className="h-[calc(100vh-7rem)] overflow-hidden">
+            <Card className="max-h-[calc(100vh-7rem)]  overflow-y-auto">
               {selectedApplicationId ? (
                 <ApplicationDetails
                   applicationId={selectedApplicationId}

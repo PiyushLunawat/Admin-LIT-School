@@ -110,7 +110,7 @@ console.log("dsdv",scholarshipSlabs)
                 <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Token Amount:</span>
+                <span>Admission Fee Amount:</span>
                 <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
               </div>
 
@@ -139,7 +139,7 @@ console.log("dsdv",scholarshipSlabs)
                 <span className="text-red-500">- ₹{(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Token Amount:</span>
+                <span>Admission Fee Amount:</span>
                 <span className="text-red-500">- ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
               </div>
 

@@ -61,14 +61,14 @@ export default function StudentsPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Students</h1>
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleBulkEmail}
             disabled={selectedStudentIds.length === 0}
           >
             <Mail className="h-4 w-4 mr-2" />
             Bulk Email
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={handleBulkExport}

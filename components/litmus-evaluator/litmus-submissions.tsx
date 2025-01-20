@@ -25,14 +25,14 @@ export function LitmusSubmissions() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">LITMUS Test Submissions</h2>
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleBulkEmail}
             disabled={selectedSubmissionIds.length === 0}
           >
             <Mail className="h-4 w-4 mr-2" />
             Bulk Email
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={handleBulkExport}

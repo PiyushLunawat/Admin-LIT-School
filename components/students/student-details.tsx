@@ -10,6 +10,7 @@ import { PaymentInformationTab } from "@/components/students/sections/payment-in
 import { DocumentsTab } from "@/components/students/sections/documents-tab";
 import { InternalNotesTab } from "@/components/students/sections/internal-notes-tab";
 import { getCurrentStudents } from "@/app/api/student";
+import { Skeleton } from "../ui/skeleton";
 
 interface StudentDetailsProps {
   studentId: string;
@@ -18,15 +19,17 @@ interface StudentDetailsProps {
 export function StudentDetails({ studentId }: StudentDetailsProps) {
   const router = useRouter();
   const [currentTab, setCurrentTab] = useState("personal");
- 
+  const [studentName, setStudentName] = useState<string>("");
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col">
-        {/* <div className="flex gap-2 items-center cursor-pointer mb-1" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4 " />
-          Back to Students
-        </div> */}
-        <h1 className="text-3xl font-bold">Student Details</h1>
+        <div className="mb-1" >
+          Student Details
+        </div>
+        {studentName ?
+          <h1 className="text-3xl font-bold">{studentName}</h1> : 
+          <Skeleton className="h-9 w-[200px]" />}
       </div>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
@@ -38,7 +41,7 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
         </TabsList>
 
         <TabsContent value="personal">
-          <PersonalDetailsTab studentId={studentId} />
+          <PersonalDetailsTab studentId={studentId} setStudentName={setStudentName} />
         </TabsContent>
 
         <TabsContent value="payment">

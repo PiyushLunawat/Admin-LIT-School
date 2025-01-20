@@ -7,7 +7,9 @@ export function ScholarshipDistribution() {
   const data = [
     { name: "Smart Mouth (5%)", value: 15, amount: 248750, color: "hsl(var(--chart-1))" },
     { name: "Smart Ass (8%)", value: 12, amount: 318400, color: "hsl(var(--chart-2))" },
-    { name: "Wise Ass (10%)", value: 8, amount: 298500, color: "hsl(var(--chart-3))" },
+    { name: "Wise Asss (10%)", value: 8, amount: 298500, color: "hsl(var(--chart-3))" },
+    { name: "Wise Assss (10%)", value: 8, amount: 298500, color: "hsl(var(--chart-4))" },
+    { name: "Wise Asssss (10%)", value: 8, amount: 298500, color: "hsl(var(--chart-5))" },
   ];
 
   const totalStudents = data.reduce((acc, curr) => acc + curr.value, 0);

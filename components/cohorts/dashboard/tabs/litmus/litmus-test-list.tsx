@@ -52,6 +52,7 @@ export function LitmusTestList({
   const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchStudents() {
@@ -166,7 +167,7 @@ export function LitmusTestList({
     if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(applications.map((sub: any) => sub.id));
+      onSelectedIdsChange(applications.map((sub: any) => sub._id));
     }
   };
 
@@ -218,13 +219,16 @@ export function LitmusTestList({
           {filteredAndSortedApplications.map((application: any) => (
             <TableRow
               key={application._id}
-              className="cursor-pointer"
-              onClick={() => onSubmissionSelect(application)}
+              className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
+              onClick={() => {
+                onSubmissionSelect(application)
+                setSelectedRowId(application._id);
+              }}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
-                  checked={selectedIds.includes(application.id)}
-                  onCheckedChange={() => toggleSelectSubmission(application.id)}
+                  checked={selectedIds.includes(application._id)}
+                  onCheckedChange={() => toggleSelectSubmission(application._id)}
                 />
               </TableCell>
               <TableCell className="font-medium">

@@ -9,7 +9,9 @@ import {
   Award,
   CreditCard,
   AlertTriangle,
-  UserMinus
+  UserMinus,
+  Banknote,
+  Wallet
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -25,7 +27,7 @@ function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) 
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className="h-5 w-5 text-muted-foreground" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
@@ -128,6 +130,14 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
     }
   }, [applications]);
 
+  function KLsystem(amount: number): string {
+    if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
+    } else {
+      return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
+    }
+  }
+
   const metrics = [
     {
       title: "Total Applications",
@@ -145,9 +155,9 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       icon: Calendar,
     },
     {
-      title: "Aadmission Fee Paid",
+      title: "Admission Fee Paid",
       value: (admissionFeeCount || '--').toString(),
-      icon: AlertTriangle,
+      icon: Banknote,
     },
     {
       title: "LITMUS Tests",
@@ -158,14 +168,14 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
     {
       title: "Avg. Scholarships",
       value: `${(avgScholarshipsPercentage ? (avgScholarshipsPercentage +'%') : '--').toString()}`,
-      description: `${(totalScholarshipsAmount ? (totalScholarshipsAmount/100000+'L') : '-').toLocaleString()} Scholarship distributed`,
+      description: `${(totalScholarshipsAmount ? (KLsystem(totalScholarshipsAmount)) : '-').toLocaleString()} Scholarship distributed`,
       icon: Award,
     },
     {
       title: "Payments",
       value: `${(paymentsCount ? ('₹'+paymentsCount) : '--').toString()}`,
-      description: `${(totalTokenAmountPaid ? (totalTokenAmountPaid/100000+'L') : '--').toString()} Admission Fee Collected`,
-      icon: CreditCard,
+      description: `${(totalTokenAmountPaid ? (KLsystem(totalTokenAmountPaid)) : '--').toString()} Admission Fee Collected`,
+      icon: Wallet,
     },
     {
       title: "Dropped",

@@ -63,7 +63,7 @@ export function PaymentsList({
     if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(applications.map(payment => payment.id));
+      onSelectedIdsChange(applications.map(payment => payment._id));
     }
   };
 
@@ -103,8 +103,8 @@ export function PaymentsList({
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
-                  checked={selectedIds.includes(application.id)}
-                  onCheckedChange={() => toggleSelectPayment(application.id)}
+                  checked={selectedIds.includes(application._id)}
+                  onCheckedChange={() => toggleSelectPayment(application._id)}
                 />
               </TableCell>
               <TableCell className="font-medium">

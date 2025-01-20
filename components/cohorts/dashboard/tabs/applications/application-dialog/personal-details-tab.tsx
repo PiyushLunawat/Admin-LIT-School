@@ -216,7 +216,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                 readOnly={!isEditing}
               />
             </div>
-            {student?.applicationDetails?.studenDetails?.workExperience &&
+            {student?.applicationDetails?.studenDetails?.workExperience?.isExperienced &&
             <>
               <div className="space-y-2">
               <Label>Work Experience Type</Label>

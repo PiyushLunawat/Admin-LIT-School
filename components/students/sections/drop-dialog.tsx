@@ -18,6 +18,8 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
     return <p>Student data not available.</p>;
   }
 
+  const firstNameInitial = student?.firstName?.[0] || "-";
+  const lastNameInitial = student?.lastName?.[0] || "-";
 
   return (
     <div>
@@ -30,7 +32,7 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
             <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
                 <AvatarImage src="/placeholder-avatar.jpg" alt={(student.firstName + student?.lastName) || '--'} />
-                <AvatarFallback>{student.firstName[0]}{student.lastName[0]}</AvatarFallback>
+                <AvatarFallback>{firstNameInitial}{lastNameInitial}</AvatarFallback>
                 </Avatar>
                 <div className="space-y-1">
                 <h2 className="text-base font-semibold">{student.firstName} {student.lastName}</h2>

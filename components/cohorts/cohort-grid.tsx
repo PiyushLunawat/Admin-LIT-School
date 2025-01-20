@@ -297,13 +297,6 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
               <RotateCcw className="h-4 w-4 mr-2" />
               Reopen
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => handleAction(cohort.cohortId, "download")}
-            >
-              <Download className="h-4 w-4" />
-            </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
@@ -343,13 +336,6 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
               <RotateCcw className="h-4 w-4 mr-2" />
               Reopen
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => handleAction(cohort.cohortId, "download")}
-            >
-              <Download className="h-4 w-4" />
-            </Button>
           </div>
         );
 
@@ -384,7 +370,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {cohorts.map((cohort) => (
         <Card key={cohort.cohortId} className="flex flex-col h-[371px]">
-          <CardHeader className="space-y-1 bg-[#64748B33] rounded-t-lg">
+          <CardHeader className="space-y-1 bg-[#64748B33] rounded-t-lg cursor-pointer" onClick={() => handleAction(cohort._id, "dashboard")}>
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-muted-foreground">{cohort.cohortId}</p>
@@ -393,7 +379,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
               <Badge variant={getStatusColor(cohort.status)}>{cohort.status}</Badge>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 space-y-4 mt-4">
+          <CardContent className="flex-1 space-y-4 mt-4 cursor-pointer" onClick={() => handleAction(cohort._id, "dashboard")}>
             <div className="space-y-1">
               <p className="text-sm font-medium">{getCentreName(cohort.centerDetail)}</p>
               <p className="text-sm text-muted-foreground">{cohort.schedule}</p>

@@ -8,8 +8,11 @@ import StoreProvider from './StoreProvider'
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'LIT School Admin Portal',
+  title: 'Admin Portal',
   description: 'Administrative dashboard for LIT School management',
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

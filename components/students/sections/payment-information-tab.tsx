@@ -143,7 +143,7 @@ const [sch, setSch] = useState<any>();
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Token Status</p>
+              <p className="text-sm text-muted-foreground">Admission Fee Status</p>
               <Badge variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
                 {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
               </Badge>
@@ -170,7 +170,7 @@ const [sch, setSch] = useState<any>();
             <div className="border rounded-lg p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-medium">Token Amount</h4>
+                  <h4 className="font-medium">Admission Fee Amount</h4>
                   <p className="text-sm text-muted-foreground">
                     Amount: {(student?.cohort?.cohortFeesDetail?.tokenFee || '--').toLocaleString()}
                     {student?.cousrseEnrolled?.length > 0 && (

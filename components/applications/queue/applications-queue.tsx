@@ -25,14 +25,14 @@ export function ApplicationsQueue() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Applications Queue</h2>
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleBulkEmail}
             disabled={selectedApplicationIds.length === 0}
           >
             <Mail className="h-4 w-4 mr-2" />
             Bulk Email
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={handleBulkExport}

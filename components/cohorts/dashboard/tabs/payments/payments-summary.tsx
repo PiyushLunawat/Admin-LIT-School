@@ -78,28 +78,28 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         if (!lastEnrolled) return;
 
         // One-Shot Payment Processing
-        if (lastEnrolled.feeSetup.installmentType === 'one-shot-payment') {
+        if (lastEnrolled?.feeSetup?.installmentType === 'one-shot-payment') {
           oneShot += 1;
-          const oneShotDetails = lastEnrolled.semesterFeeDetails?.oneShotPaymentDetails;
+          const oneShotDetails = lastEnrolled?.semesterFeeDetails?.oneShotPaymentDetails;
           if (oneShotDetails) {
-            oneShotAmount += oneShotDetails.amountPayable;
-            if (oneShotDetails.verificationStatus === 'paid') {
+            oneShotAmount += oneShotDetails?.amountPayable;
+            if (oneShotDetails?.verificationStatus === 'paid') {
               oneShotPaid += 1;
-              oneShotAmountPaid += oneShotDetails.amountPayable;
+              oneShotAmountPaid += oneShotDetails?.amountPayable;
             }
           }
         }
 
         // Installments Processing
-        if (lastEnrolled.feeSetup.installmentType === 'installments') {
+        if (lastEnrolled?.feeSetup?.installmentType === 'installments') {
           lastEnrolled?.semesterFeeDetails?.scholarshipDetails.forEach((semesterDetail: any, semIndex: any) => {
-            const semesterNumber = semesterDetail.semester;
-            const installments = semesterDetail.installments;
+            const semesterNumber = semesterDetail?.semester;
+            const installments = semesterDetail?.installments;
             installments.forEach((installment: any, instIndex: any) => {
-              if (breakdown[semIndex] && breakdown[semIndex].installments[instIndex]) {
-                breakdown[semIndex].installments[instIndex].total += installment.amountPayable;
-                if (installment.verificationStatus === 'paid') {
-                  breakdown[semIndex].installments[instIndex].received += installment.amountPayable;
+              if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
+                breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
+                if (installment?.verificationStatus === 'paid') {
+                  breakdown[semIndex].installments[instIndex].received += installment?.amountPayable;
                 }
               }
             });
@@ -107,19 +107,19 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
           // Calculate total installments expected and received
           lastEnrolled?.semesterFeeDetails?.scholarshipDetails.forEach((semesterDetail: any) => {
-            const installments = semesterDetail.installments;
+            const installments = semesterDetail?.installments;
             installments.forEach((installment: any) => {
-              installmentAmount += installment.amountPayable;
-              if (installment.verificationStatus === 'paid') {
-                installmentAmountPaid += installment.amountPayable;
+              installmentAmount += installment?.amountPayable;
+              if (installment?.verificationStatus === 'paid') {
+                installmentAmountPaid += installment?.amountPayable;
               }
 
               // Scholarships
-              if (semesterDetail.scholarshipDetails) {
+              if (semesterDetail?.scholarshipDetails) {
                 semesterDetail.scholarshipDetails.forEach((scholarship: any) => {
-                  scholarship.installments.forEach((install: any) => {
+                  scholarship?.installments.forEach((install: any) => {
                     if (install.scholarshipAmount) {
-                      totalScholarship += install.scholarshipAmount;
+                      totalScholarship += install?.scholarshipAmount;
                       scholarshipCount += 1;
                     }
                   });
@@ -127,18 +127,18 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
               }
 
               // Scholarship Percentage
-              if (semesterDetail.scholarshipPercentage !== undefined) {
-                totalPercentage += semesterDetail.scholarshipPercentage;
+              if (semesterDetail?.scholarshipPercentage !== undefined) {
+                totalPercentage += semesterDetail?.scholarshipPercentage;
                 percentageCount += 1;
               }
             });
           });
         }
 
-        const scholarships = application.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+        const scholarships = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
          scholarships.forEach((installment: any) => {
            if (installment?.scholarshipAmount) {
-             totalScholarship += installment.scholarshipAmount;
+             totalScholarship += installment?.scholarshipAmount;
              scholarshipCount += 1;
            }
          });

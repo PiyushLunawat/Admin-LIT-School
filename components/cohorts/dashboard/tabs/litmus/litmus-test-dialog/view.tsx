@@ -74,22 +74,30 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
 
 
   useEffect(() => {
+    let changed = false;
     const updatedFeedbackInputs = { ...feedbackInputs };
+  
     sections.forEach((section) => {
       if (section.data && section.data.length > 0) {
-        // Convert existing data lines to bullet format
         const bulletLines = section.data.map((line) => `• ${line}`).join("\n");
-        updatedFeedbackInputs[section.title] = bulletLines;
+        if (updatedFeedbackInputs[section.title] !== bulletLines) {
+          updatedFeedbackInputs[section.title] = bulletLines;
+          changed = true;
+        }
       } else {
-        // If no data, ensure at least one bullet
         if (!updatedFeedbackInputs[section.title].startsWith("• ")) {
           updatedFeedbackInputs[section.title] = "• ";
+          changed = true;
         }
       }
     });
-    setFeedbackInputs(updatedFeedbackInputs);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sections]);
+  
+    // Only update if something actually changed
+    if (changed) {
+      setFeedbackInputs(updatedFeedbackInputs);
+    }
+  }, [sections, feedbackInputs]);
+  
 
 
   const formatInput = (value: string): string => {
@@ -225,7 +233,7 @@ const feedbackData = sections.map((section) => {
 
       {/* Task Section */}
       {application?.cohort?.litmusTestDetail[0]?.litmusTasks.map((Task: any, index: any) => (
-      <div className="space-y-6 ">
+      <div key={index} className="space-y-6 ">
       <div>
         <Badge variant='blue' className="px-3 mt-4 text-md font-semibold -mb-2">
           Task 0{index+1}

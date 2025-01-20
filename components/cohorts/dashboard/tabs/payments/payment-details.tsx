@@ -133,7 +133,7 @@ export function PaymentDetails({ studentId, onClose }: PaymentDetailsProps) {
                 <p className="font-medium">{payment.scholarship}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Token Status</p>
+                <p className="text-sm text-muted-foreground">Admission Fee Status</p>
                 <span className="text-base mr-2">{payment.tokenAmount}</span><Badge variant={payment.tokenPaid ? "success" : "destructive"}>
                   {payment.tokenPaid ? "Paid" : "Pending"}
                 </Badge>

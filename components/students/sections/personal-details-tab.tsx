@@ -17,9 +17,10 @@ import { getCurrentStudents } from "@/app/api/student";
 
 interface PersonalDetailsTabProps {
   studentId: any;
+  setStudentName: (name: string) => void;
 }
 
-export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
+export function PersonalDetailsTab({ studentId, setStudentName }: PersonalDetailsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [student, setStudent] = useState<any>(null);
 
@@ -33,6 +34,10 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
     try {
       const application = await getCurrentStudents(studentId);
       setStudent(application?.data || null);
+      if (application?.data) {
+        const fullName = `${application?.data.firstName} ${application?.data.lastName}`;
+        setStudentName(fullName);
+      }
       console.log("asfsfv",application?.data)
     } catch (error) {
       console.error("Failed to fetch student data:", error);
@@ -62,7 +67,7 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Full Name</Label>
-              <Input disabled={!isEditing}
+              <Input disabled
                 defaultValue={student ? `${student.firstName} ${student.lastName}` : ""}
                 readOnly={!isEditing}
               />
@@ -197,7 +202,7 @@ export function PersonalDetailsTab({ studentId }: PersonalDetailsTabProps) {
                 readOnly={!isEditing}
               />
             </div>
-            {student?.applicationDetails?.studenDetails?.workExperience &&
+            {student?.applicationDetails?.studenDetails?.workExperience?.isExperienced &&
             <>
               <div className="space-y-2">
               <Label>Work Experience Type</Label>

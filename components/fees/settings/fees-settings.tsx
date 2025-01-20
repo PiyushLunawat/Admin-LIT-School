@@ -107,7 +107,7 @@ export function FeesSettings() {
         <CardContent className="space-y-6">
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label>Default Token Amount (%)</Label>
+              <Label>Default Admission Fee Amount (%)</Label>
               <Input type="number" placeholder="5" />
             </div>
             <div className="grid gap-2">

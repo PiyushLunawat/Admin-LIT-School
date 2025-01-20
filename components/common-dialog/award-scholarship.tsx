@@ -112,8 +112,8 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
         <Separator />
 
         <div className="flex gap-6 mt-4">
-            <div className="w-full space-y-4">
-                <div className="flex flex-col items-start space-y-2">
+            <div className="space-y-4 w-full flex flex-col h-full">
+                <div className="flex flex-col items-start space-y-2 flex-grow">
                     <h4 className="font-medium">Select Scholarship Slab</h4>
                     <div className="w-full grid grid-cols sm:grid-cols-2 gap-3">
                         {student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.map((slab: any, index: number) => ( 
@@ -134,12 +134,12 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
                         ))}
                     </div>
                 </div>
-                <Button className="w-full">
+                <Button className="w-full pt-auto">
                     Update Status
                 </Button>
             </div>
 
-            <div className="max-w-[336px] space-y-4">
+            <div className="max-w-[336px] w-full space-y-4">
                 {/* Scholarship Assignment */}
                 <div className="space-y-2">
                     <h4 className="font-medium">Performance Rating</h4>
@@ -157,7 +157,7 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
 
                 {/* Tasks Evaluation */}
                 <div className="space-y-4">
-                  <Card className="h-[calc(100vh-23rem)] overflow-y-auto">
+                  <Card className="max-h-[calc(100vh-23rem)] h-full overflow-y-auto">
                     {student?.cohort?.litmusTestDetail[0]?.litmusTasks.map((task: any, taskIndex: any) => (
                     <div key={taskIndex} className="border-b mx-2 py-4 px-2 space-y-2">
                         <div className="grid">

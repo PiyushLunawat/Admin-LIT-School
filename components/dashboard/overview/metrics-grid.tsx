@@ -68,6 +68,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
   const [interviewsScheduledCount, setInterviewsScheduledCount] = useState(0);
   const [admissionFeeCount, setAdmissionFeeCount] = useState(0);
   const [litmusTestsCount, setLitmusTestsCount] = useState(0);
+  const [reviewedCount, setReviewedCount] = useState(0);
   const [avgScholarshipsPercentage, setAvgScholarshipsPercentage] = useState(0);
   const [totalScholarshipsAmount, setTotalScholarshipsAmount] = useState(0);
   const [paymentsCount, setPaymentsCount] = useState(0);
@@ -175,6 +176,13 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
                 application?.litmusTestDetails?.[0]?.litmusTaskId !== undefined
             );
             setLitmusTestsCount(litmusTests.length);
+
+            // Reviewed Count
+            const reviewed = applications.filter(
+              (application) =>
+                application?.litmusTestDetails?.[0]?.litmusTaskId !== undefined
+            );
+            setLitmusTestsCount(reviewed.length);
             
             // Total Scholarship and Average Scholarships Percentage
             let totalScholarship = 0;

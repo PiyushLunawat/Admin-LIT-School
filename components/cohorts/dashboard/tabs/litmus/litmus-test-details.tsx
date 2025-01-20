@@ -109,6 +109,53 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
     // fetchStudent();
   };
 
+  function handleDownloadAll() {
+    // Safety checks
+    const tasks = application?.litmusTestDetails?.[0]?.litmusTaskId?.litmustasks[0] || [];
+    if (!Array.isArray(tasks)) return;
+  
+    // Collect all file URLs
+    const urls: string[] = [];
+  
+    tasks.forEach((taskObj, index) => {
+      const task = taskObj?.task;
+      if (!task) return;
+    
+      // Here you have access to task.files, task.images, task.videos, etc.
+      // console.log(`Task #${index} files:`, task.files);
+      // console.log(`Task #${index} images:`, task.images);
+      // console.log(`Task #${index} videos:`, task.videos);
+
+      urls.push(...(task.files || []));
+      urls.push(...(task.images || []));
+      urls.push(...(task.videos || []));
+    });
+  
+    // Download each URL
+    urls.forEach((url) => {
+      // Derive a filename from the URL (optional)
+    console.log(`URL:`, url);
+
+      const fileName = url.split("/").pop() || "download";
+  
+      // Create an invisible <a> element
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName; 
+      link.style.display = "none";
+  
+      // Add it to the document so we can click it
+      document.body.appendChild(link);
+  
+      // Programmatically click the link to trigger download
+      link.click();
+  
+      // Remove it after the download starts
+      document.body.removeChild(link);
+    });
+  }
+  
+
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
@@ -131,6 +178,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
               <h4 className="font-medium">Evaluation Status</h4>
               <Badge className="capitalize" variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending")}>{application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending"}</Badge>
             </div>
+            {application?.litmusTestDetails[0]?.litmusTaskId?.status !== 'completed' &&
             <Select value={application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending"}>
               <SelectTrigger>
                 <SelectValue placeholder="Change status" />
@@ -140,7 +188,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <SelectItem value="under review">Under Review</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
-            </Select>
+            </Select>}
           </div>
 
           <Separator />
@@ -153,7 +201,8 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <Calendar className="h-4 w-4 mr-2" />
                 <span className="truncate w-[170px]">Schedule Presentation</span>
               </Button>
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start" onClick={handleDownloadAll}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Download Files
               </Button>

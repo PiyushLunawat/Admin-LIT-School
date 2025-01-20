@@ -11,7 +11,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock4Icon, Eye } from "lucide-react";
+import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -60,6 +60,7 @@ export function ApplicationsList({
   const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchStudents() {
@@ -86,6 +87,8 @@ export function ApplicationsList({
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
+      case "initiated":
+        return "default";
       case "under review":
         return "secondary";
       case "accepted":
@@ -183,7 +186,7 @@ export function ApplicationsList({
     if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(applications.map((app: any) => app.id));
+      onSelectedIdsChange(applications.map((app: any) => app._id));
     }
   };
 
@@ -235,13 +238,16 @@ export function ApplicationsList({
           {filteredAndSortedApplications.map((application: any) => (
             <TableRow
               key={application._id}
-              className="cursor-pointer"
-              onClick={() => onApplicationSelect(application)}
+              className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
+              onClick={() => {
+                onApplicationSelect(application)
+                setSelectedRowId(application._id);
+              }}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
-                  checked={selectedIds.includes(application.id)}
-                  onCheckedChange={() => toggleSelectApplication(application.id)}
+                  checked={selectedIds.includes(application._id)}
+                  onCheckedChange={() => toggleSelectApplication(application._id)}
                 />
               </TableCell>
               <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
@@ -249,10 +255,16 @@ export function ApplicationsList({
               <TableCell>
                 {new Date(application?.applicationDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
-              <TableCell>
+              <TableCell className="space-y-1">
                 <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "--")}>
                   {application?.applicationDetails?.applicationStatus || "--"}
                 </Badge>
+                {(application?.applicationDetails?.applicationStatus === 'under review' &&
+                  application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback !== undefined
+                ) &&
+                <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
+                  <CheckCircle className="w-3 h-3"/> Application Revised
+                </Badge>}
               </TableCell>
               <TableCell>
                 {application.interviewDate ? (

@@ -78,7 +78,7 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
         </div>
         <div className="lg:col-span-1">
           <div className="sticky top-6">
-            <Card className="h-[calc(100vh-7rem)] overflow-hidden">
+            <Card className="max-h-[calc(100vh-7rem)] overflow-y-auto">
               {selectedSubmissionId ? (
                 <LitmusTestDetails
                   application={selectedSubmissionId}

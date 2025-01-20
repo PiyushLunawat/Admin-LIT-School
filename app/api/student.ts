@@ -224,5 +224,27 @@ export async function getStudents() {
       throw error;
     }
   }
+
+  export default async function internalNotes(studentId: string) {
+    try{
+      const response = await fetch(`${process.env.API_URL}/students/${studentId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ }),
+      });
   
+      if (!response.ok) {
+        const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
+        throw new Error(
+          `Failed to verify token amount. ${
+            errorDetails ? `${errorDetails.message || JSON.stringify(errorDetails)}` : ""
+          }`
+        );
+      }
   
+      return await response; // Parse and return the response JSON
+    } catch (error) {
+      console.error("Error in Internal Notes:", error);
+      throw error;
+    }
+  }
