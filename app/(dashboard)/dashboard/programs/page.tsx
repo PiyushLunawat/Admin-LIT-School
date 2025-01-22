@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus } from "lucide-react";
+import { Plus, SquarePen } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -242,13 +242,13 @@ export default function ProgramsPage() {
             {programs.map((program) => (
               <TableRow key={program._id}>
                 <TableCell>{program.name}</TableCell>
-                <TableCell>{program.description}</TableCell>
+                <TableCell className="max-w-[500px]">{program.description}</TableCell>
                 <TableCell>{program.duration} months</TableCell>
                 <TableCell>{program.prefix}</TableCell>
                 <TableCell>{program.status ? "Active" : "Inactive"}</TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm" onClick={() => handleEditProgram(program)}>
-                    Edit
+                <TableCell className="flex justify-start items-center">
+                  <Button variant="ghost" size="icon" onClick={() => handleEditProgram(program)}>
+                    <SquarePen className="w-4 h-4"/>
                   </Button>
                   <AlertDialog>
               <AlertDialogTrigger asChild>

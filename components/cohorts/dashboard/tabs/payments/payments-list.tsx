@@ -14,8 +14,14 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getStudents } from "@/app/api/student";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DocumentsTab } from "../applications/application-dialog/document-tab";
+import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
+import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
+import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
 interface PaymentRecord {
   id: string;
   studentName: string;
@@ -23,15 +29,16 @@ interface PaymentRecord {
   tokenPaid: boolean;
   instalmentsPaid: number;
   totalInstalments: number;
-  nextDueDate?: string;
-  status: "On Time" | "Overdue" | "Complete";
+  dueDate?: string;
+  status: string;
   scholarship?: string;
 }
 
 interface PaymentsListProps {
   applications: any[];
-  onStudentSelect: (id: string) => void;
+  onStudentSelect: (id: any) => void;
   selectedIds: string[];
+  onApplicationUpdate: () => void;
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
@@ -39,21 +46,23 @@ export function PaymentsList({
   applications,
   onStudentSelect,
   selectedIds,
-  onSelectedIdsChange,
+  onApplicationUpdate,
+  onSelectedIdsChange, 
 }: PaymentsListProps) {
  
-   const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   
   const getStatusColor = (status: PaymentRecord["status"]): BadgeVariant => {
     switch (status?.toLowerCase()) {
-      case "on time":
+      case "paid":
         return "success";
       case "overdue":
         return "warning";
-      case "complete":
-        return "secondary";
+      case "verification pending":
+        return "lemon";
       default:
         return "default";
     }
@@ -75,6 +84,15 @@ export function PaymentsList({
     }
   };
 
+  const handleEyeClick = (student: any) => {
+    setSelectedStudentId(student);
+    setOpen(true);
+  };
+
+  const handleStatusUpdate = () => {
+    onApplicationUpdate();
+  };
+
   return (
     <div className="border rounded-lg">
       <Table>
@@ -89,17 +107,88 @@ export function PaymentsList({
             <TableHead>Student</TableHead>
             <TableHead>Plan</TableHead>
             <TableHead>Progress</TableHead>
-            <TableHead>Next Due</TableHead>
+            <TableHead>Due Date</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {applications?.map((application: any) => (
+          {applications?.map((application: any) => {
+           
+            let paidCount = 0;
+            let notPaidCount = 0;
+            let dueDate = "--";
+            let paymentStatus = "pending";
+            const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+
+            
+            if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
+              const oneShotDetails = lastEnrolled?.oneShotPayment;
+              if (oneShotDetails) {
+                if (oneShotDetails?.verificationStatus === 'paid') {
+                  paidCount += 1;
+                } else{
+                  notPaidCount +=1;
+                }
+
+                dueDate = new Date(oneShotDetails?.installmentDate).toLocaleDateString();
+
+                if (new Date(oneShotDetails?.installmentDate) < new Date()) {
+                  paymentStatus = "overdue";
+                } else {
+                  paymentStatus = oneShotDetails?.verificationStatus ;
+                }
+
+              }
+            }
+            if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
+
+              let earliestUnpaid= lastEnrolled?.installmentDetails[0]?.installments[0];
+              let allPaid = true;
+
+              outer: for (const semesterDetail of lastEnrolled?.installmentDetails || []) {
+                for (const installment of semesterDetail.installments || []) {
+                  if (installment.verificationStatus !== "paid") {
+                    allPaid = false;
+                    earliestUnpaid = installment;
+                    break outer;
+                  }
+                }
+              }
+              
+              console.log("datatata",new Date(earliestUnpaid.installmentDate).toLocaleDateString());
+              if (allPaid) {
+                paymentStatus = "Complete";
+                dueDate = "--";
+              } else if (new Date(earliestUnpaid.installmentDate) < new Date()) {
+
+                dueDate = new Date(earliestUnpaid.installmentDate).toLocaleDateString();
+                paymentStatus = "overdue";
+              } else {
+                dueDate = new Date(earliestUnpaid.installmentDate).toLocaleDateString();
+                paymentStatus = earliestUnpaid.verificationStatus;
+              }
+
+              lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+                const installments = semesterDetail?.installments;
+                installments.forEach((installment: any) => {
+                  if (installment?.verificationStatus === 'paid') {
+                    paidCount += 1;
+                  } else {
+                    notPaidCount += 1;
+                  }    
+                });
+              });
+            }
+
+            return(
             <TableRow 
               key={application._id}
-              className="cursor-pointer"
-              onClick={() => onStudentSelect(application.id)}
+              className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`} 
+              onClick={() => {
+                onStudentSelect(application)
+                setSelectedRowId(application._id);
+              }}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
@@ -112,49 +201,65 @@ export function PaymentsList({
               </TableCell>
               <TableCell className="capitalize">{application?.cousrseEnrolled[application.cousrseEnrolled.length-1]?.feeSetup?.installmentType}</TableCell>
               <TableCell>
-                {application.instalmentsPaid}/{application.totalInstalments} Instalments
+                {paidCount}/{(paidCount + notPaidCount)} Instalments
               </TableCell>
               <TableCell>
-                {application.nextDueDate ? (
+                {dueDate ? (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(application.nextDueDate).toLocaleDateString()}
+                    {dueDate}
                   </div>
                 ) : "--"}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusColor(application.status)}>
-                  {application.status}
+                <Badge className="capitalize" variant={getStatusColor(paymentStatus)}>
+                  {paymentStatus}
                 </Badge>
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onStudentSelect(application.id);
-                    }}
-                  >
+                  <Button variant="ghost" size="icon"
+                    onClick={(e) => { e.stopPropagation(); handleEyeClick(application); }}>
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log("Send reminder to:", application.id);
-                    }}
-                  >
+                  {/* <Button variant="ghost" size="icon"
+                    onClick={(e) => { e.stopPropagation(); console.log("Send reminder to:", application.id); }} >
                     <Mail className="h-4 w-4" />
-                  </Button>
+                  </Button> */}
                 </div>
               </TableCell>
             </TableRow>
-          ))}
+          )})}
         </TableBody>
       </Table>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+          {selectedStudentId && (
+            <StudentApplicationHeader student={selectedStudentId} />
+          )}
+
+      <Tabs defaultValue="personal" className="space-y-6">
+        <TabsList className="w-full">
+          <TabsTrigger value="personal">Personal Details</TabsTrigger>
+          <TabsTrigger value="payment">Payment</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="personal">
+          <PersonalDetailsTab student={selectedStudentId} />
+        </TabsContent>
+
+        <TabsContent value="payment">
+          <PaymentInformationTab student={selectedStudentId} />
+        </TabsContent>
+
+        <TabsContent value="documents">
+          <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
+        </TabsContent>
+      </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

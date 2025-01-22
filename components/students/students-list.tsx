@@ -32,21 +32,6 @@ type BadgeVariant =
   | "onhold"
   | "default";
 
-interface Student {
-  id: string;
-  name: string;
-  applicationId: string;
-  email: string;
-  phone: string;
-  program: string;
-  cohort: string;
-  applicationStatus: string;
-  enrollmentStatus: string;
-  paymentStatus: string;
-  scholarship: string;
-  lastActivity: string;
-}
-
 interface StudentsListProps {
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
@@ -71,10 +56,11 @@ export function StudentsList({
   selectedPaymentStatus,
 }: StudentsListProps) {
   const router = useRouter();
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [messageOpen, setMessageOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState<any>();
   const [recipient, setRecipient] = useState('');
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
 
@@ -91,36 +77,18 @@ export function StudentsList({
       try {
         const response = await getStudents();
         const mappedStudents = response.data.map((student: any) => ({
-    
-          id: student._id,
-          name: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
-          applicationId: student.applicationId || "--",
-          email: student.email || "--",
-          phone: student.mobileNumber || "--",
-          program: student.program?.name || "--",
-          cohort: student.cohort?.cohortId || "--",
-          applicationStatus:
-            student.applicationDetails?.applicationStatus?.toLowerCase() || "--",
-          enrollmentStatus:
-            student.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() ||
-            "not enrolled",
-          paymentStatus: student.paymentStatus?.toLowerCase() || "pending",
-          scholarship: student?.litmusTestDetails[0]?.litmusTaskId?.scholarshipDetail ? 
-          `${getScholarshipDetail(
-                student.litmusTestDetails[0].litmusTaskId.scholarshipDetail,
-                student.cohort.feeStructureDetails
-              )}`
-          : "--",
-          lastActivity: student.updatedAt || new Date().toISOString(),
+          ...student,
+          litmusTestDetails: student.litmusTestDetails || [], // Add default value
         }));
-
+        
         // Sort the students by lastActivity (descending)
+        let sorted = mappedStudents
         mappedStudents.sort((a: any, b: any) => {
-          const dateA = new Date(a.lastActivity).getTime();
-          const dateB = new Date(b.lastActivity).getTime();
+          const dateA = new Date(a?.updatedAt).getTime();
+          const dateB = new Date(b?.updatedAt).getTime();
           return dateB - dateA;
         });
-
+        
         setStudents(mappedStudents);
       } catch (error) {
         console.error("Error fetching students:", error);
@@ -128,17 +96,8 @@ export function StudentsList({
         setLoading(false);
       }
     }
-
     fetchStudents();
   }, []);
-
-  function getScholarshipDetail(scholarshipId: string, feeStructure: any) {
-    const matchedScholarship = feeStructure?.find(
-      (scholarship: any) => scholarship._id === scholarshipId
-    );
-  
-    return matchedScholarship ? `${matchedScholarship.scholarshipName} (${matchedScholarship.scholarshipPercentage}%)` : "--";
-  }  
   
   // --- FILTERING LOGIC ---
   const filteredStudents = useMemo(() => {
@@ -146,9 +105,9 @@ export function StudentsList({
       // 1) Search check: by name OR email OR phone
       const lowerSearch = searchQuery.toLowerCase();
       const matchesSearch =
-        student.name.toLowerCase().includes(lowerSearch) ||
-        student.email.toLowerCase().includes(lowerSearch) ||
-        student.phone.toLowerCase().includes(lowerSearch);
+        (student?.firstName+' '+student?.lastName).toLowerCase().includes(lowerSearch) ||
+        student?.email.toLowerCase().includes(lowerSearch) ||
+        student?.mobileNumber.toLowerCase().includes(lowerSearch);
 
       if (!matchesSearch) {
         return false;
@@ -156,14 +115,14 @@ export function StudentsList({
 
       // 2) Program check
       if (selectedProgram !== "all-programs") {
-        if (student.program.toLowerCase() !== selectedProgram.toLowerCase()) {
+        if (student?.program?.name.toLowerCase() !== selectedProgram.toLowerCase()) {
           return false;
         }
       }
 
       // 3) Cohort check
       if (selectedCohort !== "all-cohorts") {
-        if (student.cohort.toLowerCase() !== selectedCohort.toLowerCase()) {
+        if (student?.cohort?.cohortId.toLowerCase() !== selectedCohort.toLowerCase()) {
           return false;
         }
       }
@@ -171,14 +130,14 @@ export function StudentsList({
       // 4) Application Status check
       if (selectedAppStatus !== "all-statuses") {
         // e.g. "under review" vs. "accepted"
-        if (student.applicationStatus !== selectedAppStatus) {
+        if (student?.applicationDetails?.applicationStatus !== selectedAppStatus) {
           return false;
         }
       }
 
       // 5) Payment Status check
       if (selectedPaymentStatus !== "all-payments") {
-        if (student.paymentStatus !== selectedPaymentStatus) {
+        if (student?.paymentStatus !== selectedPaymentStatus) {
           return false;
         }
       }
@@ -246,6 +205,11 @@ export function StudentsList({
     router.push(`/dashboard/students/${studentId}`);
   };
 
+  const handleDrop = (student: any) => {
+    setMarkedAsDialogOpen(true);
+    setSelectedStudent(student)
+  }
+
   if (loading) {
     return <div className="p-4">Loading students...</div>;
   }
@@ -286,85 +250,107 @@ export function StudentsList({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredStudents.map((student) => (
-                <TableRow key={student.id}>
+              filteredStudents.map((student: any) => {
+                
+                const colorClasses = [
+                  'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
+                  'text-[#3698FB] !bg-[#3698FB]/20 border-[#3698FB]',
+                  'text-[#FA69E5] !bg-[#FA69E5]/20 border-[#FA69E5]',
+                  'text-orange-600 !bg-orange-600/20 border-orange-600'
+                ];
+
+                const getColor = (slabName: string): string => {
+                  const indx = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+                    (slab: any) => slab.name === slabName
+                  );
+                  return indx !== -1 ? colorClasses[indx % colorClasses.length] : 'text-default';
+                };
+  
+                return(
+                <TableRow key={student?._id}>
                   <TableCell>
                     <Checkbox
-                      checked={selectedIds.includes(student.id)}
-                      onCheckedChange={() => toggleSelectStudent(student.id)}
+                      checked={selectedIds.includes(student?._id)}
+                      onCheckedChange={() => toggleSelectStudent(student?._id)}
                     />
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{student.name}</p>
+                      <p className="font-medium">{`${student?.firstName || ""} ${student?.lastName || ""}`.trim()}</p>
                       <p className="text-sm text-muted-foreground">
-                        {student.email}
+                        {student?.email}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {student.phone}
+                        {student?.mobileNumber}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{student.program}</p>
+                      <p className="font-medium">{student?.program?.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {student.cohort}
+                        {student?.cohort?.cohortId}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge
                       className="capitalize"
-                      variant={getStatusColor(student.applicationStatus)}
+                      variant={getStatusColor(student?.applicationDetails?.applicationStatus)}
                     >
-                      {student.applicationStatus}
+                      {student?.applicationDetails?.applicationStatus?.toLowerCase() || "--"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge
                       className="capitalize"
-                      variant={getStatusColor(student.enrollmentStatus)}
+                      variant={getStatusColor(student?.litmusTestDetails?.[0]?.litmusTaskId?.status || '')}
                     >
-                      {student.enrollmentStatus}
+                      {student?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() || "not enrolled"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge
                       className="capitalize"
-                      variant={getStatusColor(student.paymentStatus)}
+                      variant={getStatusColor(student?.paymentStatus)}
                     >
-                      {student.paymentStatus}
+                      {student?.paymentStatus?.toLowerCase() || "pending"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{student.scholarship}</TableCell>
                   <TableCell>
-                    {new Date(student.lastActivity).toLocaleDateString()}
+                    {student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipName ? 
+                    <Badge className={`capitalize ${getColor(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipName)}`} variant="secondary">
+                      {student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipName+' ('+student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipPercentage+'%)'}
+                    </Badge> : 
+                    '--'}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(student?.updatedAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleViewDetails(student.id)}
+                        onClick={() => handleViewDetails(student._id)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       {/* <Button variant="ghost" size="icon" onClick={() => handleSendMessage('email', student?.email)}>
                         <Mail className="h-4 w-4" />
                       </Button> */}
-                      <Button variant="ghost" size="icon" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                      <Button variant="ghost" size="icon" className="justify-start text-destructive" onClick={()=>handleDrop(student)}>
                         <UserMinus className="h-4 w-4 mr-2" />
                       </Button>
                       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
-        <DialogContent className="max-w-4xl py-4 px-6">
-          <MarkedAsDialog student={student}/>
-        </DialogContent>
-      </Dialog>
+                        <DialogContent className="max-w-4xl py-4 px-6">
+                          <MarkedAsDialog student={selectedStudent}/>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
+              )})
             )}
           </TableBody>
         </Table>

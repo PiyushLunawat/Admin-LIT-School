@@ -27,6 +27,7 @@ export function StudentHeader({ studentId }: StudentHeaderProps) {
   // In a real application, this data would be fetched based on the studentId
   const student = {
     name: "John Doe",
+    profileUrl: "",
     email: "john.doe@example.com",
     phone: "+91 98765 43210",
     program: "Creator Marketer",
@@ -64,8 +65,8 @@ export function StudentHeader({ studentId }: StudentHeaderProps) {
           {/* Profile Section */}
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage src="/placeholder-avatar.jpg" alt={student.name} />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={student?.profileUrl} className="object-cover" />
+              <AvatarFallback>{student?.name?.[0] || "-"}{student?.name?.[0] || "-"}</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
               <h2 className="text-2xl font-bold">{student.name}</h2>

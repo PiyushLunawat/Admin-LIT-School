@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus } from "lucide-react";
+import { Plus, SquarePen } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -231,9 +231,9 @@ export default function CentresPage() {
                 <TableCell>{centre.location}</TableCell>
                 <TableCell>{centre.suffix}</TableCell>
                 <TableCell>{centre.status ? "Active" : "Inactive"}</TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm" onClick={() => handleEditCentre(centre)}>
-                    Edit
+                <TableCell className="flex justify-start items-center">
+                  <Button variant="ghost" size="icon" onClick={() => handleEditCentre(centre)}>
+                    <SquarePen className="w-4 h-4"/>
                   </Button>
                   <AlertDialog>
               <AlertDialogTrigger asChild>

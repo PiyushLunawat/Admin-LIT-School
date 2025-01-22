@@ -15,6 +15,7 @@ interface PaymentsSummaryProps {
 export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps) {
 
   const [cohort, setCohort] = useState<any>(null);
+  const [tokenAmountCount, setTokenAmountCount] = useState(0);
   const [totalOneShotCount, setTotalOneShotCount] = useState(0);
   const [totalOneShotPaidCount, setTotalOneShotPaidCount] = useState(0);
   const [totalOneShotAmountCount, setTotalOneShotAmountCount] = useState(0);
@@ -43,6 +44,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
   useEffect(() => {
     if (applications && Array.isArray(applications) && cohort) {
+      let tokenPaid = 0;
       let oneShot = 0;
       let oneShotPaid = 0;
       let oneShotAmount = 0;
@@ -77,10 +79,17 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
         if (!lastEnrolled) return;
 
+          const tokenAmount = application?.cohort?.cohortFeesDetail?.tokenFee || 0;
+          const lastEnrollment = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+          if (lastEnrollment?.tokenFeeDetails?.verificationStatus === 'paid') {
+             tokenPaid += (tokenAmount || 0);
+          }
+    
+
         // One-Shot Payment Processing
-        if (lastEnrolled?.feeSetup?.installmentType === 'one-shot-payment') {
+        if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
           oneShot += 1;
-          const oneShotDetails = lastEnrolled?.semesterFeeDetails?.oneShotPaymentDetails;
+          const oneShotDetails = lastEnrolled?.oneShotPayment;
           if (oneShotDetails) {
             oneShotAmount += oneShotDetails?.amountPayable;
             if (oneShotDetails?.verificationStatus === 'paid') {
@@ -91,8 +100,8 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         }
 
         // Installments Processing
-        if (lastEnrolled?.feeSetup?.installmentType === 'installments') {
-          lastEnrolled?.semesterFeeDetails?.scholarshipDetails.forEach((semesterDetail: any, semIndex: any) => {
+        if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
+          lastEnrolled?.installmentDetails.forEach((semesterDetail: any, semIndex: any) => {
             const semesterNumber = semesterDetail?.semester;
             const installments = semesterDetail?.installments;
             installments.forEach((installment: any, instIndex: any) => {
@@ -106,7 +115,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           });
 
           // Calculate total installments expected and received
-          lastEnrolled?.semesterFeeDetails?.scholarshipDetails.forEach((semesterDetail: any) => {
+          lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
             const installments = semesterDetail?.installments;
             installments.forEach((installment: any) => {
               installmentAmount += installment?.amountPayable;
@@ -135,7 +144,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           });
         }
 
-        const scholarships = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+        const scholarships = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.installmentDetails?.flatMap((semester: any) => semester.installments) || [];
          scholarships.forEach((installment: any) => {
            if (installment?.scholarshipAmount) {
              totalScholarship += installment?.scholarshipAmount;
@@ -149,6 +158,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
          }        
       });
       
+      setTokenAmountCount(tokenPaid);
 
       // Update One-Shot Metrics
       setTotalOneShotCount(oneShot);
@@ -161,8 +171,8 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
       setTotalInstallmentAmountPaidCount(installmentAmountPaid);
 
       // Update Expected and Received Counts
-      setTotalExpectedCount(oneShotAmount + installmentAmount);
-      setTotalReceivedCount(oneShotAmountPaid + installmentAmountPaid);
+      setTotalExpectedCount(oneShotAmount + installmentAmount + tokenPaid);
+      setTotalReceivedCount(oneShotAmountPaid + installmentAmountPaid + tokenPaid);
 
       // Update Scholarships Metrics
       setTotalStudentCount(percentageCount)
@@ -184,6 +194,18 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
     return "pending";
   };
 
+  const formatAmount = (value: number | undefined) =>
+    value !== undefined
+      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
+      : "--";
+
+  function KLsystem(amount: number): string {
+    if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
+    } else {
+      return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
+    }
+  }
 
   return (
   <>
@@ -194,7 +216,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">₹{totalExpectedCount.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount)}</div>
           {/* <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" /> */}
           <p className="text-xs text-muted-foreground mt-2">
             {((totalReceivedCount / totalExpectedCount) * 100).toFixed(2)}% collected
@@ -208,9 +230,9 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">₹{totalReceivedCount.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₹{formatAmount(totalReceivedCount)}</div>
           <p className="text-xs text-muted-foreground mt-2">
-            Last payment received 2 days ago
+            {KLsystem(tokenAmountCount)} Admission Fee Collected
           </p>
         </CardContent>
       </Card>
@@ -221,7 +243,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           <AlertTriangle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">₹{totalExpectedCount.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount-totalReceivedCount)}</div>
           <p className="text-xs text-muted-foreground mt-2">
             8 payments overdue
           </p>
@@ -234,9 +256,9 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           <Award className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">₹{totalScholarshipsAmount.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₹{formatAmount(Number(totalScholarshipsAmount))}</div>
           <p className="text-xs text-muted-foreground mt-2">
-            {totalStudentCount} scholarships awarded at an avg of {avgScholarshipsPercentage}%
+            {totalStudentCount} scholarships awarded at an avg of {Number(avgScholarshipsPercentage).toFixed(2)}%
           </p>
         </CardContent>
       </Card>
@@ -258,7 +280,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
                         <div className="flex justify-between">
                           <span className="text-sm font-medium">{instalment.label}</span>
                           <span className="text-sm text-muted-foreground">
-                            ₹{instalment.received.toLocaleString()} / ₹{instalment.total.toLocaleString()}
+                            ₹{formatAmount(instalment.received)} / ₹{formatAmount(instalment.total)}
                           </span>
                         </div>
                         <Progress states={[
@@ -294,7 +316,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium">{totalOneShotPaidCount}/{totalOneShotCount} Students</span>
                     <span className="text-sm text-muted-foreground">
-                      {totalOneShotAmountPaidCount.toLocaleString()} / {totalOneShotAmountCount.toLocaleString()}
+                      {formatAmount(totalOneShotAmountPaidCount)} / {formatAmount(totalOneShotAmountCount)}
                     </span>
                   </div>
                   <Progress 

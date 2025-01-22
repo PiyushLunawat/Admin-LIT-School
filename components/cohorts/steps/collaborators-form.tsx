@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Plus, Send, Trash2 } from "lucide-react";
-import { updateCohort } from "@/app/api/cohorts";
+import { inviteCollaborators, updateCohort } from "@/app/api/cohorts";
 import { useEffect } from "react";
 
 
@@ -111,33 +111,22 @@ export function CollaboratorsForm({ onComplete, onCohortCreated, initialData }: 
 
   const handleInvite = async () => {
     try {
-      const data = form.getValues(); // Get current form data
   
       if (initialData?._id) {
-        if (Array.isArray(data.collaborators) && data.collaborators.length > 0) {
-          // Update collaborators to set isInvited to true for all
-          const collaboratorsToUpdate = data.collaborators.map((collaborator) => ({
-            email: collaborator.email,
-            role: collaborator.role,
-            isInvited: true, 
-          }));
-    
-          const updatedCohort = await updateCohort(initialData._id, {
-            collaborators: collaboratorsToUpdate,
-          });
-  
-          onCohortCreated(updatedCohort.data);
+       
+          const response = await inviteCollaborators(initialData._id);
+          // onCohortCreated(response.data);
           console.log("Collaborators invited successfully.");
-        } else {
-          console.error("Collaborators data is not formatted as an array or is empty:", data.collaborators);
-        }
+          alert("Collaborators invited successfully!");
       } else {
         console.error("Cohort ID is missing. Unable to invite collaborators.");
       }
     } catch (error) {
       console.error("Failed to invite collaborators:", error);
+      alert("Failed to invite collaborators. Please try again.");
     }
   };
+  
   
   return (
     <Form {...form}>

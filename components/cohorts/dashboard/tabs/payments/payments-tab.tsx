@@ -21,14 +21,19 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [scholarship, setScholarship] = useState<any[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0); 
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState("all");
   const [selectedPaymentPlan, setSelectedPaymentPlan] = useState("all");
   const [selectedScholarship, setSelectedScholarship] = useState("all");
+
+  const handleApplicationUpdate = () => {
+    setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
+  };
 
   // Fetch scholarships based on cohortId
   useEffect(() => {
@@ -179,21 +184,19 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         <div className="lg:col-span-2">
           <PaymentsList
             applications={applications}
-            onStudentSelect={(id) => {
-              console.log("Selected student:", id);
-              setSelectedStudentId(id);
-            }}
+            onStudentSelect={(id) => { setSelectedStudent(id); }}
             selectedIds={selectedStudentIds}
             onSelectedIdsChange={setSelectedStudentIds}
+            onApplicationUpdate={handleApplicationUpdate} 
           />
         </div>
         <div className="lg:col-span-1">
           <div className="sticky top-6">
             <Card className="h-[calc(100vh-7rem)] overflow-hidden">
-              {selectedStudentId ? (
+              {selectedStudent? (
                 <PaymentDetails
-                  studentId={selectedStudentId}
-                  onClose={() => setSelectedStudentId(null)}
+                  student={selectedStudent}
+                  onClose={() => setSelectedStudent(null)}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center p-6 text-muted-foreground">

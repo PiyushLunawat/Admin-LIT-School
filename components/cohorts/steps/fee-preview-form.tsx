@@ -84,9 +84,11 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
     }));
   };
 
-  /**
-   * Core logic: calculates installments for a given semester & scholarship slab.
-   */
+  const formatAmount = (value: number | undefined) =>
+    value !== undefined
+      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
+      : "--";
+
   const calculateInstallments = (semesterIndex: number, slab: any) => {
     const totalSemesters = initialData?.cohortFeesDetail?.semesters || 0;
     const installmentsPerSemester = initialData?.cohortFeesDetail?.installmentsPerSemester || 0;
@@ -123,11 +125,6 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
       };
     });
 
-    /**
-     * Deduct scholarship from the last semester’s installments (backwards).
-     * Because your existing code does:
-     *   if (semesterIndex === totalSemesters - 1) { ... }
-     */
     if (semesterIndex === totalSemesters - 1) {
       for (let i = semesterInstallments.length - 1; i >= 0 && scholarshipAmount > 0; i--) {
         const installment = semesterInstallments[i];
@@ -228,9 +225,6 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
         feedback: [],
       },
     });
-
-    console.log("logs",feeStructureDetails);
-    // Send to API
   
       const updated = await updateCohort(initialData._id, {
         feeStructureDetails: feeStructureDetails,
@@ -255,65 +249,65 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
             </TabsTrigger>
           ))}
         </TabsList>
-                                                      <TabsContent value="no-scholarship">
-                                                        {Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
-                                                          const { totalInstallmentAmount, totalScholarshipAmount } = calculateSemesterSummary(semesterIndex, { percentage: 0 });
+        <TabsContent value="no-scholarship">
+          {Array.from({ length: initialData?.cohortFeesDetail?.semesters || 0 }).map((_, semesterIndex) => {
+            const { totalInstallmentAmount, totalScholarshipAmount } = calculateSemesterSummary(semesterIndex, { percentage: 0 });
 
-                                                          return (
-                                                            <Card key={semesterIndex} className="mb-4">
-                                                              <Badge
-                                                                variant="outline"
-                                                                className="text-[#00A3FF] border-[#00A3FF] bg-[#00A3FF]/20 px-2 py-1 text-sm rounded-full m-4"
-                                                              >
-                                                                Semester {semesterIndex + 1}
-                                                              </Badge>
-                                                              <CardContent className="flex flex-col gap-4">
-                                                                <Table>
-                                                                  <TableHeader>
-                                                                    <TableRow>
-                                                                      <TableHead>Instalment Date</TableHead>
-                                                                      <TableHead>Scholarship %</TableHead>
-                                                                      <TableHead>Scholarship Amount (₹)</TableHead>
-                                                                      <TableHead>Amount Payable (₹)</TableHead>
-                                                                    </TableRow>
-                                                                  </TableHeader>
-                                                                  <TableBody>
-                                                                    {calculateInstallments(semesterIndex, { percentage: 0 }).map((installment, index) => (
-                                                                      <TableRow key={index}>
-                                                                        <TableCell>
-                                                                          <div className="flex gap-2 items-center">
-                                                                            <input
-                                                                              type="date"
-                                                                              value={installment.installmentDate}
-                                                                              onChange={(e) =>
-                                                                                handleDateChange(semesterIndex, index, e.target.value)
-                                                                              }
-                                                                              className="border rounded px-2 py-1 text-sm"
-                                                                            />
-                                                                          </div>
-                                                                        </TableCell>
-                                                                        <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
-                                                                        <TableCell>{installment.scholarshipAmount ? (installment.scholarshipAmount).toLocaleString() : '--'}</TableCell>
-                                                                        <TableCell>{(installment.amountPayable).toLocaleString()}</TableCell>
-                                                                      </TableRow>
-                                                                    ))}
-                                                                  </TableBody>
-                                                                </Table>
-                                                                <div className="space-y-2 text-sm">
-                                                                  <div className="flex justify-between">
-                                                                    <span>Total Instalment Amount:</span>
-                                                                    <span>₹{(totalInstallmentAmount).toLocaleString()}</span>
-                                                                  </div>
-                                                                  <div className="flex justify-between">
-                                                                    <span>Total Amount Payable:</span>
-                                                                    <span className="font-bold">₹{(totalInstallmentAmount).toLocaleString()}</span>
-                                                                  </div>
-                                                                </div>
-                                                              </CardContent>
-                                                            </Card>
-                                                          );
-                                                        })}
-                                                      </TabsContent>
+            return (
+              <Card key={semesterIndex} className="mb-4">
+                <Badge
+                  variant="outline"
+                  className="text-[#00A3FF] border-[#00A3FF] bg-[#00A3FF]/20 px-2 py-1 text-sm rounded-full m-4"
+                >
+                  Semester {semesterIndex + 1}
+                </Badge>
+                <CardContent className="flex flex-col gap-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Instalment Date</TableHead>
+                        <TableHead>Scholarship %</TableHead>
+                        <TableHead>Scholarship Amount (₹)</TableHead>
+                        <TableHead>Amount Payable (₹)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {calculateInstallments(semesterIndex, { percentage: 0 }).map((installment, index) => (
+                        <TableRow key={index}>
+                          <TableCell>
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="date"
+                                value={installment.installmentDate}
+                                onChange={(e) =>
+                                  handleDateChange(semesterIndex, index, e.target.value)
+                                }
+                                className="border rounded px-2 py-1 text-sm"
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
+                          <TableCell>{installment.scholarshipAmount ? formatAmount(installment.scholarshipAmount) : '--'}</TableCell>
+                          <TableCell>{formatAmount(installment.amountPayable)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Total Instalment Amount:</span>
+                      <span>₹{formatAmount(totalInstallmentAmount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total Amount Payable:</span>
+                      <span className="font-bold">₹{formatAmount(totalInstallmentAmount)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </TabsContent>
         {scholarshipSlabs.map((slab: any) => (
           <TabsContent key={slab.id} value={slab.id}>
               <Card className="mb-4">
@@ -323,7 +317,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
             <CardContent className="flex flex-col">
               <div className="flex justify-between text-sm">
                 <span>Amount:</span>
-                <span className="font-bold">₹{((initialData?.cohortFeesDetail?.tokenFee)).toLocaleString()}</span>
+                <span className="font-bold">₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
               </div>
             </CardContent>
           </Card>
@@ -364,9 +358,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                               </div>
                             </TableCell>
                             <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
-                            <TableCell>{installment.scholarshipAmount ? (installment.scholarshipAmount).toLocaleString() : '--'}</TableCell>
-                            <TableCell>{(installment.amountPayable).toLocaleString()}</TableCell>
-                            <TableCell>{(installment.amountPayable*GSTAmount).toLocaleString()}</TableCell>
+                            <TableCell>{installment.scholarshipAmount ? formatAmount(installment.scholarshipAmount) : '--'}</TableCell>
+                            <TableCell>{formatAmount(installment.amountPayable)}</TableCell>
+                            <TableCell>{formatAmount(installment.amountPayable*GSTAmount)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -376,20 +370,20 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                       <>
                       <div className="flex justify-between">
                         <span>Total Instalment Amount:</span>
-                        <span>₹{(totalInstallmentAmount).toLocaleString()}</span>
+                        <span>₹{formatAmount(totalInstallmentAmount)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                        <span>₹{((totalInstallmentAmount*0.18)).toLocaleString()}</span>
+                        <span>₹{formatAmount((totalInstallmentAmount*0.18))}</span>
                       </div>
                       {totalScholarshipAmount !==0 && <div className="flex justify-between">
                         <span>Scholarship Amount ({slab.percentage}%):</span>
-                        <span className="text-red-500">- ₹{(totalScholarshipAmount*GSTAmount).toLocaleString()}</span>
+                        <span className="text-red-500">- ₹{formatAmount(totalScholarshipAmount*GSTAmount)}</span>
                       </div>}
                       </>}
                       <div className="flex justify-between">
                         <span>Total Amount Payable:</span>
-                        <span className="font-bold">₹{(totalpayableAmount-totalScholarshipAmount).toLocaleString()}</span>
+                        <span className="font-bold">₹{formatAmount(totalpayableAmount-totalScholarshipAmount)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -403,23 +397,23 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{(newBaseFee).toLocaleString()}</span>
+                <span>₹{formatAmount(newBaseFee)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
-                <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
+                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Admission Fee:</span>
-                <span className=""> ₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
+                <span className=""> ₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
               </div>
               {!isGST && <div className="flex justify-between text-sm">
                 <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                <span>₹{((newBaseFee - newBaseFee * (slab.percentage/100))*0.18).toLocaleString()}</span>
+                <span>₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100))*0.18)}</span>
               </div>}
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span className="font-bold">₹{((newBaseFee - newBaseFee * (slab.percentage/100))*GSTAmount + initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
+                <span className="font-bold">₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100))*GSTAmount + initialData?.cohortFeesDetail?.tokenFee)}</span>
               </div>
             </CardContent>
           </Card>
@@ -431,28 +425,28 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{(newBaseFee).toLocaleString()}</span>
+                <span>₹{formatAmount(newBaseFee)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
-                <span className="text-red-500">- ₹{(newBaseFee * (slab.percentage/100)).toLocaleString()}</span>
+                <span className="text-red-500">- ₹{formatAmount(newBaseFee * (slab.percentage/100))}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>One Shot Payment Discount ({(initialData?.cohortFeesDetail?.oneShotDiscount).toLocaleString()}%):</span>
-                <span className="text-red-500">- ₹{(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0)).toLocaleString()}</span>
+                <span>One Shot Payment Discount ({formatAmount(initialData?.cohortFeesDetail?.oneShotDiscount)}%):</span>
+                <span className="text-red-500">- ₹{formatAmount(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Admission Fee:</span>
-                <span className="">₹{(initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
+                <span className="">₹{formatAmount(initialData?.cohortFeesDetail?.tokenFee)}</span>
               </div>
               {!isGST && <div className="flex justify-between text-sm">
                 <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                <span>₹{((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*0.18).toLocaleString()}</span>
+                <span>₹{((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*0.18)}</span>
               </div>}
 
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span className="font-bold">₹{((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*GSTAmount + initialData?.cohortFeesDetail?.tokenFee).toLocaleString()}</span>
+                <span className="font-bold">₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*GSTAmount + initialData?.cohortFeesDetail?.tokenFee)}</span>
               </div>
             </CardContent>
           </Card>

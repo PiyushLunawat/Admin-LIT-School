@@ -22,6 +22,13 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showAllSemesters, setShowAllSemesters] = useState(false);
 
+  const colorClasses = [
+    'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
+    'text-[#3698FB] !bg-[#3698FB]/20 border-[#3698FB]',
+    'text-[#FA69E5] !bg-[#FA69E5]/20 border-[#FA69E5]',
+    'text-orange-600 !bg-orange-600/20 border-orange-600'
+  ];
+  
   const handleView = (url: string) => {
     setImageUrl(url);
     setOpen(true);
@@ -48,9 +55,6 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
       console.error("Error verifying token amount:", error);
     }
   }
-  
-
-  console.log("dd",student);
 
   useEffect(() => {
     if (!student.cohort?.feeStructureDetails) return;
@@ -94,6 +98,19 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
     }
   };
 
+  const getColor = (slabName: string): string => {
+    const index = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+      (slab: any) => slab.name === slabName
+    );
+    
+    return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
+  };
+
+
+  const formatAmount = (value: number | undefined) =>
+    value !== undefined
+      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
+      : "--";
 
   return (
     <div className="space-y-6">
@@ -106,24 +123,24 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="text-sm font-semibold">₹ {(totalAmount).toLocaleString() || "--"}</p>
+              <p className="text-sm font-semibold">₹ {formatAmount(totalAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="text-sm font-semibold">{paidAmount ? <>₹ {(paidAmount).toLocaleString()}</> : "--"}</p>
+              <p className="text-sm font-semibold">{paidAmount ? <>₹ {formatAmount(paidAmount)}</> : "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <p className="flex gap-1 text-sm items-center font-semibold">
+              <div className="flex gap-1.5 text-sm items-center font-semibold">
                 {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
                   <>
-                    ₹ {(scholarshipAmount).toLocaleString()}{' '}
-                    <Badge variant="secondary">
+                    ₹ {formatAmount(scholarshipAmount)}{' '}
+                    <Badge className={`capitalize ${getColor(sch?.scholarshipName)}`} variant="secondary">
                       {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
                     </Badge>
                   </>
                 ) : ( '--' )}
-              </p>
+              </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Admission Fee Status</p>
@@ -155,7 +172,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                 <div>
                   <h4 className="font-medium">Token Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: {(student?.cohort?.cohortFeesDetail?.tokenFee).toLocaleString()}
+                    Amount: {formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}
                     {student?.cousrseEnrolled?.length > 0 && (
                       <>
                         {" • Uploaded on "}
@@ -223,7 +240,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                       <div>
                         <h4 className="font-medium">Instalment {iIndex + 1}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Amount: {(instalment.amountPayable).toLocaleString()}
+                          Amount: {formatAmount(instalment.amountPayable)}
                         </p>
                       </div>
                       {/* <Badge variant="secondary">Pending</Badge> */}

@@ -93,7 +93,6 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
   
           // 4) Set Final Filtered Applications
           setApplications(filteredApplications);
-          console.log("Students Fetched & Filtered:", filteredApplications);
         } catch (error) {
           console.error("Error fetching students:", error);
         } finally {

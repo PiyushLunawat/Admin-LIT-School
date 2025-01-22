@@ -125,6 +125,38 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       }, 0);
   
       setTotalTokenAmountPaid(tokensPaid);
+
+      let oneShotAmountPaid = 0;
+      let installmentAmountPaid = 0;
+
+      applications.forEach((application) => {
+        const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+        if (!lastEnrolled) return;
+
+        // One-Shot Payment Processing
+        if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
+          const oneShotDetails = lastEnrolled?.oneShotPayment;
+          if (oneShotDetails) {
+            if (oneShotDetails?.verificationStatus === 'paid') {
+              oneShotAmountPaid += oneShotDetails?.amountPayable;
+            }
+          }
+        }
+        // Installments Processing
+        if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
+          lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+            const installments = semesterDetail?.installments;
+            installments.forEach((installment: any) => {
+              if (installment?.verificationStatus === 'paid') {
+                installmentAmountPaid += installment?.amountPayable;
+              }
+            });
+          });
+        }       
+      });
+
+      setPaymentsCount(oneShotAmountPaid+installmentAmountPaid+tokensPaid)
+
     } else {
       console.log("Applications data is not an array or is undefined.");
     }
@@ -137,6 +169,11 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
     }
   }
+
+  const formatAmount = (value: number | undefined) =>
+    value !== undefined
+      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
+      : "--";
 
   const metrics = [
     {
@@ -167,13 +204,13 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
     },
     {
       title: "Avg. Scholarships",
-      value: `${(avgScholarshipsPercentage ? (avgScholarshipsPercentage +'%') : '--').toString()}`,
-      description: `${(totalScholarshipsAmount ? (KLsystem(totalScholarshipsAmount)) : '-').toLocaleString()} Scholarship distributed`,
+      value: `${(avgScholarshipsPercentage ? (avgScholarshipsPercentage.toFixed(2) +'%') : '--').toString()}`,
+      description: `${(totalScholarshipsAmount ? (KLsystem(totalScholarshipsAmount)) : '-')} Scholarship distributed`,
       icon: Award,
     },
     {
       title: "Payments",
-      value: `${(paymentsCount ? ('₹'+paymentsCount) : '--').toString()}`,
+      value: `${(paymentsCount ? ('₹'+formatAmount(paymentsCount)) : '--').toString()}`,
       description: `${(totalTokenAmountPaid ? (KLsystem(totalTokenAmountPaid)) : '--').toString()} Admission Fee Collected`,
       icon: Wallet,
     },

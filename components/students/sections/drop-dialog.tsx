@@ -31,23 +31,23 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
           <div className="flex justify-between items-center border-b pb-3">
             <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
-                <AvatarImage src="/placeholder-avatar.jpg" alt={(student.firstName + student?.lastName) || '--'} />
-                <AvatarFallback>{firstNameInitial}{lastNameInitial}</AvatarFallback>
+                  <AvatarImage src={student?.profileUrl} className="object-cover" />
+                  <AvatarFallback>{student?.firstName?.[0] || "-"}{student?.lastName?.[0] || "-"}</AvatarFallback>
                 </Avatar>
                 <div className="space-y-1">
                 <h2 className="text-base font-semibold">{student.firstName} {student.lastName}</h2>
                 <div className="flex gap-4 h-5 items-center">
-                    <p className="text-sm text-muted-foreground">{student.email}</p>
+                    <p className="text-sm text-muted-foreground">{student?.email}</p>
                     <Separator orientation="vertical" />
-                    <p className="text-sm text-muted-foreground">{student.mobileNumber}</p>
+                    <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>
                 </div>
                 </div>
             </div>
             <div className="flex justify-between items-center text-right">
               <div>
                 <p className="text-sm text-muted-foreground">Program & Cohort</p>
-                <p className="font-medium">{student.program.name}</p>
-                <p className="text-sm">{student.cohort.cohortId}</p>
+                <p className="font-medium">{student?.program?.name}</p>
+                <p className="text-sm">{student?.cohort?.cohortId}</p>
               </div>
             </div>
           </div>

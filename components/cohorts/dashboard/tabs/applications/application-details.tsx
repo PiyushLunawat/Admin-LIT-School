@@ -232,7 +232,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <EyeIcon className="w-4 h-4 text-white"/> View
               </Button>}
             </div>
-            {(interview && application?.applicationDetails?.applicationStatus==='under review' ) && 
+            {(!interview && application?.applicationDetails?.applicationStatus==='under review' ) && 
               <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
                 <FileSignature className="w-4 h-4"/>Review Submission
               </Button>}

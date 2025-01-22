@@ -36,10 +36,10 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   const [interviewOpen, setInterviewOpen] = useState(false);
 
   const colorClasses = [
-    'text-emerald-600 bg-emerald-600/20 border-emerald-600',
-    'text-[#3698FB] bg-[#3698FB]/20 border-[#3698FB]',
-    'text-[#FA69E5] bg-[#FA69E5]/20 border-[#FA69E5]',
-    'text-orange-600 bg-orange-600/20 border-orange-600'
+    'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
+    'text-[#3698FB] !bg-[#3698FB]/20 border-[#3698FB]',
+    'text-[#FA69E5] !bg-[#FA69E5]/20 border-[#FA69E5]',
+    'text-orange-600 !bg-orange-600/20 border-orange-600'
   ];
   
   const getColor = (slabName: string): string => {
@@ -87,8 +87,8 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
           {/* Profile Section */}
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src="/placeholder-avatar.jpg" alt={(student.firstName + student?.lastName) || '--'} />
-              <AvatarFallback>{student.firstName[0]}{student.lastName[0]}</AvatarFallback>
+              <AvatarImage src={student?.profileUrl} className="object-cover" />
+              <AvatarFallback>{student?.firstName?.[0] || "-"}{student?.lastName?.[0] || "-"}</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
               <h2 className="text-base font-semibold">{student.firstName} {student.lastName}</h2>

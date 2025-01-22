@@ -84,7 +84,7 @@ export function PaymentsFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Plans</SelectItem>
-            <SelectItem value="one-shot-payment">One-Shot</SelectItem>
+            <SelectItem value="one shot payment">One-Shot</SelectItem>
             <SelectItem value="instalments">Instalments</SelectItem>
           </SelectContent>
         </Select>

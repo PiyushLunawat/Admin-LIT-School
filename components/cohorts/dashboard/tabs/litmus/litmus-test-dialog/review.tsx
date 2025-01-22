@@ -320,10 +320,8 @@ export function ReviewComponent({
       {/* Header Section */}
       <div className="flex items-center gap-4 border-b pb-3">
         <Avatar className="h-16 w-16">
-          <AvatarImage src="/placeholder-avatar.jpg" alt="John Doe" />
-          <AvatarFallback>
-            {application?.firstName[0] + application?.lastName[0]}
-          </AvatarFallback>
+          <AvatarImage src={application?.profileUrl} className="object-cover" />
+          <AvatarFallback>{application?.firstName?.[0] || "-"}{application?.lastName?.[0] || "-"}</AvatarFallback>
         </Avatar>
         <div className="space-y-1">
           <h2 className="text-base font-semibold">

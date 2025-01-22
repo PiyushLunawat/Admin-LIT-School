@@ -86,14 +86,8 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
         {/* Profile Section */}
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage
-              src="/placeholder-avatar.jpg"
-              alt={(student.firstName + student?.lastName) || "--"}
-            />
-            <AvatarFallback>
-              {student.firstName[0]}
-              {student.lastName[0]}
-            </AvatarFallback>
+            <AvatarImage src={student?.profileUrl} className="object-cover" />
+            <AvatarFallback>{student?.firstName?.[0] || "-"}{student?.lastName?.[0] || "-"}</AvatarFallback>
           </Avatar>
           <div className="space-y-1">
             <h2 className="text-base font-semibold">

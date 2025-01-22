@@ -112,6 +112,11 @@ const [sch, setSch] = useState<any>();
     }
   };
 
+  const formatAmount = (value: number | undefined) =>
+    value !== undefined
+      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
+      : "--";
+
   return (
     <div className="space-y-6">
       {/* Payment Schedule */}
@@ -123,28 +128,28 @@ const [sch, setSch] = useState<any>();
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="text-sm font-semibold">₹ {(totalAmount).toLocaleString() || "--"}</p>
+              <p className="text-sm font-semibold">₹ {formatAmount(totalAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="text-sm font-semibold">{paidAmount ? <>₹ {(paidAmount).toLocaleString()}</> : "--"}</p>
+              <p className="text-sm font-semibold">{paidAmount ? <>₹ {formatAmount(paidAmount)}</> : "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <p className="flex gap-1 text-sm items-center font-semibold">
+              <div className="flex gap-1 text-sm items-center font-semibold">
                 {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
                   <>
-                    ₹ {(scholarshipAmount).toLocaleString()}{' '}
+                    ₹ {formatAmount(scholarshipAmount)}{' '}
                     <Badge variant="secondary">
                       {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
                     </Badge>
                   </>
                 ) : ( '--' )}
-              </p>
+              </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Admission Fee Status</p>
-              <Badge variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
+              <Badge className="capitalize" variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
                 {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
               </Badge>
             </div>
@@ -172,7 +177,7 @@ const [sch, setSch] = useState<any>();
                 <div>
                   <h4 className="font-medium">Admission Fee Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: {(student?.cohort?.cohortFeesDetail?.tokenFee || '--').toLocaleString()}
+                    Amount: {(formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee) || '--')}
                     {student?.cousrseEnrolled?.length > 0 && (
                       <>
                         {" • Uploaded on "}
@@ -184,7 +189,7 @@ const [sch, setSch] = useState<any>();
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
+                  <Badge className="capitalize" variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
                     {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
                   </Badge>
                   {student?.cousrseEnrolled?.length > 0 && 
@@ -240,7 +245,7 @@ const [sch, setSch] = useState<any>();
                       <div>
                         <h4 className="font-medium">Instalment {iIndex + 1}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Amount: {(instalment.amountPayable).toLocaleString()}
+                          Amount: {formatAmount(instalment.amountPayable)}
                         </p>
                       </div>
                       {/* <Badge variant="secondary">Pending</Badge> */}

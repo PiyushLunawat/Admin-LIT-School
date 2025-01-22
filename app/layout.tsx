@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Admin Portal',
   description: 'Administrative dashboard for LIT School management',
   icons: {
-    icon: "/favicon.ico",
+    icon: ["/favicon.ico"],
   },
 };
 
