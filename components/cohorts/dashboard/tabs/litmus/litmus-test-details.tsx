@@ -40,8 +40,8 @@ import { getCurrentStudents } from "@/app/api/student";
 import { Card } from "@/components/ui/card";
 import { ViewComponent } from "./litmus-test-dialog/view";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
-import { AwardScholarship } from "@/components/common-dialog/award-scholarship";
 import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
+import { AwardScholarship } from "./litmus-test-dialog/award-scholarship";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
@@ -72,15 +72,10 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
 
+
   useEffect(() => {
-    if (application?.cohort?.feeStructureDetails && application?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
-      const scholarship = application.cohort.feeStructureDetails.find(
-        (scholarship: any) =>
-          scholarship._id === application.litmusTestDetails[0].litmusTaskId.scholarshipDetail
-      );
-      setSch(scholarship);
-    }
-  }, [application]);
+    setSch(application?.cousrseEnrolled?.[application?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
+}, [application]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {

@@ -17,6 +17,7 @@ interface DocumentsTabProps {
 export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   
   const [open, setOpen] = useState(false);
+  const [document, setDocument] = useState<any>(student?.personalDocsDetails);
 
   console.log("sdds",student);
   
@@ -26,28 +27,28 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
         name: "ID Proof (Aadhar card)",
         type: "PDF",
         size: "2.5 MB",
-        docDetails: student?.personalDocsDetails?.aadharDocument || [],
+        docDetails: document?.aadharDocument || [],
       },
       {
         id: "secondarySchoolMarksheet",
         name: "10th Marks Sheet",
         type: "PDF",
         size: "15.2 MB",
-        docDetails: student?.personalDocsDetails?.secondarySchoolMarksheet || [],
+        docDetails: document?.secondarySchoolMarksheet || [],
       },
       {
         id: "higherSecondaryMarkSheet",
         name: "12th Marks Sheet",
         type: "PDF",
         size: "1.8 MB",
-        docDetails: student?.personalDocsDetails?.higherSecondaryMarkSheet || [],
+        docDetails: document?.higherSecondaryMarkSheet || [],
       }, 
       {
         id: "graduationMarkSheet",
         name: "Graduation Marks Sheet",
         type: "PDF",
         size: "5.1 MB",
-        docDetails: student?.personalDocsDetails?.graduationMarkSheet || [],
+        docDetails: document?.graduationMarkSheet || [],
       },
     ];
 
@@ -60,7 +61,8 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
       try {
         const response = await updateDocumentStatus(studentId, docType, docId, "", status);
         console.log("ress",response);
-        onUpdateStatus();
+        setDocument(response.data)
+        // onUpdateStatus();
       } catch (error) {
         console.error("Error updating document status:", error);
       }

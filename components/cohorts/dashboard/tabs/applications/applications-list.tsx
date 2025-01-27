@@ -259,11 +259,9 @@ export function ApplicationsList({
                 <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "--")}>
                   {application?.applicationDetails?.applicationStatus || "--"}
                 </Badge>
-                {(application?.applicationDetails?.applicationStatus === 'under review' &&
-                  application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback !== undefined
-                ) &&
+                {(application?.applicationDetails?.applicationStatus === 'under review' && application?.applicationDetails?.applicationTasks?.length > 1) &&
                 <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
-                  <CheckCircle className="w-3 h-3"/> Application Revised
+                  <CheckCircle className="w-3 h-3"/> App. Revised
                 </Badge>}
               </TableCell>
               <TableCell>

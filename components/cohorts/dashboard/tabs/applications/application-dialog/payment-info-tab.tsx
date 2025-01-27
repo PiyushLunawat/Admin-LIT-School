@@ -61,9 +61,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
 
     const scholarshipId = student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail;
 
-    const matchedScholarship = student.cohort.feeStructureDetails.find(
-      (scholarship: any) => scholarship._id === scholarshipId
-    );
+    const matchedScholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails
     const fallbackScholarship = student.cohort.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );

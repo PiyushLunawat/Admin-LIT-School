@@ -26,8 +26,8 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { useEffect, useState } from "react";
-import { AwardScholarship } from "@/components/common-dialog/award-scholarship";
 import { Card } from "@/components/ui/card";
+import { AwardScholarship } from "../litmus/litmus-test-dialog/award-scholarship";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 interface PaymentDetailsProps {
@@ -69,53 +69,10 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
     });
   }
 
-    useEffect(() => {
-      if (student?.cohort?.feeStructureDetails && student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
-        const scholarship = student.cohort.feeStructureDetails.find(
-          (scholarship: any) =>
-            scholarship._id === student.litmusTestDetails[0].litmusTaskId.scholarshipDetail
-        );
-        setSch(scholarship);
-      }
-    }, [student]);
 
-  const payment = {
-    id: student,
-    studentName: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    paymentPlan: "Instalments",
-    totalAmount: "₹9,95,000",
-    paidAmount: "₹4,97,500",
-    scholarship: "Smart Mouth (5%)",
-    scholarshipAmount: "₹49,750",
-    tokenAmount: "₹50,000",
-    tokenPaid: true,
-    instalments: [
-      {
-        number: 1,
-        amount: "₹1,65,833",
-        dueDate: "2024-02-15",
-        status: "Paid",
-        paidDate: "2024-02-14",
-        receipt: "receipt-001.pdf",
-      },
-      {
-        number: 2,
-        amount: "₹1,65,833",
-        dueDate: "2024-03-15",
-        status: "Paid",
-        paidDate: "2024-03-13",
-        receipt: "receipt-002.pdf",
-      },
-      {
-        number: 3,
-        amount: "₹1,65,833",
-        dueDate: "2024-04-15",
-        status: "Pending",
-      },
-    ],
-  };
+  useEffect(() => {
+    setSch(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
+}, [student]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {

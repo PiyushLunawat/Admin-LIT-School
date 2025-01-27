@@ -51,13 +51,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   };
 
   useEffect(() => {
-    if (student?.cohort?.feeStructureDetails && student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail) {
-      const scholarship = student.cohort.feeStructureDetails.find(
-        (scholarship: any) =>
-          scholarship._id === student.litmusTestDetails[0].litmusTaskId.scholarshipDetail
-      );
-      setSch(scholarship);
-    }
+      setSch(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
   }, [student]);
 
   const getStatusColor = (status: string): BadgeVariant => {

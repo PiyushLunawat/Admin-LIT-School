@@ -167,7 +167,7 @@ export default function CentresPage() {
               Create Centre
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>{editMode ? "Edit Centre" : "Create New Centre"}</DialogTitle>
             </DialogHeader>

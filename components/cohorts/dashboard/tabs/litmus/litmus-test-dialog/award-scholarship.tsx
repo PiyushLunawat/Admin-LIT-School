@@ -21,11 +21,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { getCurrentStudents } from "@/app/api/student";
+import { getCurrentStudents, updateScholarship } from "@/app/api/student";
 import { useEffect, useState } from "react";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Label } from "../ui/label";
+import { Dialog, DialogContent } from "@/components/ui/dialog";import { Label } from "@/components/ui/label";
+import { log } from "console";
+;
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 
@@ -57,11 +58,7 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
       student?.cohort?.feeStructureDetails &&
       student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail
     ) {
-      const scholarship = student.cohort.feeStructureDetails.find(
-        (scholarship: any) =>
-          scholarship._id ===
-          student.litmusTestDetails[0].litmusTaskId.scholarshipDetail
-      );
+      const scholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails
       setSch(scholarship);
       setSelectedSch(scholarship)
     }
@@ -75,6 +72,17 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
       setSelectedSch(matchedScholarship);
     }
   };
+
+  const handleScholarship = async () => {
+console.log("award",student._id, selectedSch._id);
+
+    try {
+      const result = await updateScholarship(student._id, selectedSch._id);
+      console.log("Scholarship updated successfully:", result);
+    } catch (error) {
+      console.error("Failed to update scholarship:", error);
+    }
+  }
 
   if (!student) {
     return <p>Student data not available.</p>;
@@ -107,11 +115,11 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
 
         <div className="flex gap-6 mt-4">
             <div className="space-y-4 w-full flex flex-col h-full">
-                <div className="flex flex-col items-start space-y-2 flex-grow">
+                <div className=" space-y-2 h-full">
                     <h4 className="font-medium">Select Scholarship Slab</h4>
                     <div className="w-full grid grid-cols sm:grid-cols-2 gap-3">
                         {student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.map((slab: any, index: number) => ( 
-                            <div className={`flex flex-col p-4 bg-[#09090B] ${selectedSch?.scholarshipName === slab.name ? getBorderColor(index) : ''} border rounded-xl text-white space-y-6 w-full`}
+                            <div key={index} className={`flex flex-col p-4 bg-[#09090B] ${selectedSch?.scholarshipName === slab.name ? getBorderColor(index) : ''} border rounded-xl text-white space-y-6 w-full`}
                               onClick={() => handleSelect(slab.name)}>
                                 <div className="flex flex-col gap-2">
                                     <div className={`${ selectedSch?.scholarshipName === slab.name ? getColor(index) : 'text-white'} text-base font-medium`}>
@@ -128,7 +136,7 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
                         ))}
                     </div>
                 </div>
-                <Button className="w-full pt-auto">
+                <Button className="w-full pt-auto" onClick={() => handleScholarship()}>
                     Update Status
                 </Button>
             </div>

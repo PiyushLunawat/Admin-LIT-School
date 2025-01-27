@@ -164,7 +164,7 @@ export default function ProgramsPage() {
               Create Program
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>{editMode ? "Edit Program" : "Create New Program"}</DialogTitle>
             </DialogHeader>
@@ -190,19 +190,19 @@ export default function ProgramsPage() {
                 {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-  <Label htmlFor="duration">Duration (months)</Label>
-  <Input
-    id="duration"
-    type="number"
-    placeholder="6"
-    value={newProgram.duration || ""}
-    onChange={(e) =>
-      setNewProgram({ ...newProgram, duration: e.target.value ? Number(e.target.value) : 0 })
-    }
-  />
-  {errors.duration && <p className="text-red-500 text-sm">{errors.duration}</p>}
-</div>
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration (months)</Label>
+                  <Input
+                    id="duration"
+                    type="number"
+                    placeholder="6"
+                    value={newProgram.duration || ""}
+                    onChange={(e) =>
+                      setNewProgram({ ...newProgram, duration: e.target.value ? Number(e.target.value) : 0 })
+                    }
+                  />
+                  {errors.duration && <p className="text-red-500 text-sm">{errors.duration}</p>}
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="prefix">Program Prefix</Label>

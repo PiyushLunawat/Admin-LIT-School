@@ -155,6 +155,29 @@ export async function getStudents() {
     return response;
 }
 
+export async function updateScholarship(studentId: string, scholarshipId: string) {
+  try {
+    const response = await fetch(`${process.env.API_URL}/admin/update-scholarship`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId, scholarshipId }),
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
+      throw new Error(
+        `Failed to update scholarship. ${
+          errorDetails ? `${errorDetails.message || JSON.stringify(errorDetails)}` : ""
+        }`
+      );
+    }
+
+    return await response.json(); // Parse and return the response JSON
+  } catch (error) {
+    console.error("Error in updateScholarship:", error);
+    throw error;
+  }
+}
   
   // New API for uploading student documents
   export async function uploadStudentDocuments(documentData: {
@@ -200,6 +223,22 @@ export async function getStudents() {
   
     return await response.json();
   }
+
+    // New API for uploading student documents
+    export async function uploadNewStudentDocuments(formData: any) {
+      try{
+      const response = await fetch(`${process.env.API_URL}/admin/upload-student-doc`, {
+        method: "POST",
+        body: formData,
+      });
+      
+        return await response; 
+      } catch (error) {
+        console.error("Error:", error);
+        throw error;
+      }
+    }
+
 
   export async function verifyTokenAmount(tokenId: string, comment: string, verificationStatus: string) {
     try {

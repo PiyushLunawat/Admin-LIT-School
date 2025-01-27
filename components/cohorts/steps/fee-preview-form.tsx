@@ -190,7 +190,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
         installmentDate: initialData?.startDate, // Example date
         baseFee: newBaseFee,
         OneShotPaymentAmount: newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0),
-        amountPayable: (newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*GSTAmount,
+        amountPayable: (newBaseFee - newBaseFee * (slab.percentage * 0.01) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*GSTAmount,
         verificationStatus: "pending",
         receiptUrls: [],
         feedback: [],
@@ -446,7 +446,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
 
               <div className="flex justify-between text-sm mt-4">
                 <span>Total Amount Payable:</span>
-                <span className="font-bold">₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*GSTAmount + initialData?.cohortFeesDetail?.tokenFee)}</span>
+                <span className="font-bold">₹{formatAmount((newBaseFee - newBaseFee * (slab.percentage/100) - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*GSTAmount )}</span>
               </div>
             </CardContent>
           </Card>

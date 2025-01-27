@@ -11,28 +11,9 @@ import {
   FlagIcon,
   Upload,
 } from "lucide-react";
-import { getCurrentStudents, updateDocumentStatus } from "@/app/api/student";
+import { getCurrentStudents, updateDocumentStatus, uploadNewStudentDocuments } from "@/app/api/student";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-
-// Mocked Upload API for demonstration
-async function uploadDocumentAPI(
-  studentId: string,
-  docId: string,
-  formData: FormData
-) {
-  // Replace with your actual upload logic
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(
-        `Mock Upload for studentId=${studentId}, docId=${docId}, file=${
-          (formData.get("document") as File)?.name
-        }`
-      );
-      resolve({ success: true });
-    }, 1000);
-  });
-}
 
 interface DocumentsTabProps {
   studentId: string;
@@ -40,7 +21,6 @@ interface DocumentsTabProps {
 
 export function DocumentsTab({ studentId }: DocumentsTabProps) {
   const [student, setStudent] = useState<any>(null);
-  // For each required document, store the selected file in an object keyed by docId
   const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>(
     {}
   );
@@ -107,6 +87,8 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
     docId: string,
     status: string
   ) => {
+    console.log("docss",studentId, docType, docId, status);
+    
     try {
       const response = await updateDocumentStatus(
         studentId,
@@ -133,21 +115,21 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
 
   // Handle uploading a required document
   const handleRequiredDocUpload = async (docId: string, file: File) => {
-    try {
-      const formData = new FormData();
-      formData.append("document", file);
+      console.log("document", file);
+    // try {
+    //   const formData = new FormData();
 
-      // Your API call
-      const response = await uploadDocumentAPI(studentId, docId, formData);
-      console.log("Upload successful:", response);
+    //   // Your API call
+    //   const response = await uploadDocumentAPI(studentId, docId, formData);
+    //   console.log("Upload successful:", response);
 
-      // Reset the file selection for this doc
-      handleRequiredDocFileChange(docId, null);
-      // Optionally refresh the document data
-      fetchStudent();
-    } catch (error) {
-      console.error("Upload failed:", error);
-    }
+    //   // Reset the file selection for this doc
+    //   handleRequiredDocFileChange(docId, null);
+    //   // Optionally refresh the document data
+    //   fetchStudent();
+    // } catch (error) {
+    //   console.error("Upload failed:", error);
+    // }
   };
 
   // Handle "Upload New Document" (separate from required documents)
@@ -156,20 +138,22 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
   };
 
   const handleNewDocUpload = async () => {
+    console.log("dacsss",studentId, newDocName, newDocFile);
     if (!newDocFile) return;
 
     try {
       const formData = new FormData();
+      formData.append("studentId", studentId);
+      formData.append("fieldName", newDocName);
       formData.append("document", newDocFile);
-
-      // Your separate API logic for new docs
-      const response = await uploadDocumentAPI(studentId, "newDoc", formData);
-      console.log("New doc upload successful:", response);
+      
+      const response = await uploadNewStudentDocuments(formData);
+      console.log("New doc response:", response);
 
       // Clear the input fields
-      setNewDocName("");
-      setNewDocFile(null);
-      fetchStudent();
+      // setNewDocName("");
+      // setNewDocFile(null);
+      // fetchStudent();
     } catch (error) {
       console.error("New doc upload failed:", error);
     }
@@ -184,7 +168,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {documents.map((doc) => {
-            const docDetails = doc.docDetails[0] || null;
+            const docDetails = doc.docDetails[doc.docDetails.length - 1] || null;
             const isUploaded = !!docDetails;
             const status = docDetails?.status || "Pending";
 
@@ -299,11 +283,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                       variant="outline"
                       className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
                       onClick={() =>
-                        handleDocumentAction(
-                          student._id,
-                          doc.id,
-                          docDetails._id,
-                          "verified"
+                        handleDocumentAction( student._id, doc.id, docDetails._id, "verified"
                         )
                       }
                     >
@@ -315,9 +295,40 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
             );
           })}
         </CardContent>
+
+        <CardHeader>
+          <CardTitle>Additional Documents</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {student?.personalDocsDetails?.adminUploadedocuments.map((doc: any) => {
+            return (
+              <div key={doc._id} className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  {/* Document Heading */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium capitalize">{doc?.documentName}</p>
+                    </div>
+                      <div className="text-sm text-muted-foreground">
+                        • Uploaded on {new Date(doc?.date).toLocaleDateString()}
+                      </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
+                      <Eye className="h-4 w-4 mr-2" /> View
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <Download className="h-4 w-4 mr-2" /> Download
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </CardContent>
       </Card>
 
-      {/* Upload New Document */}
       <Card>
         <CardHeader>
           <CardTitle>Upload New Document</CardTitle>

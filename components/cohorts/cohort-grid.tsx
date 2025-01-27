@@ -244,7 +244,8 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
         case "Full":
         return (
           <div className="flex gap-2 w-full">
-            {cohort.filledSeats.length < 1 &&
+            {
+            // cohort.filledSeats.length < 1 &&
             <Button 
               variant="outline" 
               className="px-4" 
