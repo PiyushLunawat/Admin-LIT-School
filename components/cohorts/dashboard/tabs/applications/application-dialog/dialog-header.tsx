@@ -128,15 +128,18 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
             <div className="flex justify-between items-center py-3 border-t">
               <div>
                 <p className="text-sm text-muted-foreground">Application Status</p>
-                <Badge className="capitalize" variant={getStatusColor(student?.applicationDetails?.applicationStatus || "--")}>
-                  {student.applicationDetails.applicationStatus || "--"}
-                </Badge>
+                {student.applicationDetails.applicationStatus ?
+                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(student.applicationDetails.applicationStatus) ?
+                  'accepted' : student.applicationDetails.applicationStatus || "--")}>
+                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(student.applicationDetails.applicationStatus) ?
+                  'accepted' : student.applicationDetails.applicationStatus }
+                </Badge> : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Interview Status</p>
-                {student.interviewStatus ? 
+                {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(student.applicationDetails.applicationStatus) ? 
                 <Badge className="capitalize" variant={getStatusColor(student?.interviewStatus || "--")}>
-                  {student.interviewStatus}
+                  {student.applicationDetails.applicationStatus}
                 </Badge> : "--"}
               </div>
               <div>

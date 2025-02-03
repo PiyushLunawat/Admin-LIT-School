@@ -363,8 +363,8 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
           <div className="grid gap-4">
             <div className="">
               {student?.applicationDetails?.studenDetails?.financialInformation?.isFinanciallyIndependent === true ? 
-                <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially dependent on Parents</Label> : 
-                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially independent</Label>
+                <Label className="flex gap-2 items-center"><CircleCheckBig className="w-3 h-3 text-[#2EB88A] " />Financially independent</Label> :
+                <Label className="flex gap-2 items-center"><CircleMinus className="w-3 h-3 text-[#FF791F] " />Financially dependent on Parents</Label> 
               }
             </div>
             <div className="">

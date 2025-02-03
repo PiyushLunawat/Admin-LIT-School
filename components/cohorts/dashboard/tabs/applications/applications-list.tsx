@@ -251,12 +251,12 @@ export function ApplicationsList({
                 />
               </TableCell>
               <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
-              <TableCell className="!w-[32px] truncate">{application?._id || "--"}</TableCell>
+              <TableCell className="max-w-[42px] truncate">{application?._id || "--"}</TableCell>
               <TableCell>
                 {new Date(application?.applicationDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell className="space-y-1">
-                <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "--")}>
+                <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "--")}>
                   {application?.applicationDetails?.applicationStatus || "--"}
                 </Badge>
                 {(application?.applicationDetails?.applicationStatus === 'under review' && application?.applicationDetails?.applicationTasks?.length > 1) &&

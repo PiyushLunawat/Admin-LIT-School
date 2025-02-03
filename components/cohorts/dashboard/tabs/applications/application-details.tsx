@@ -41,6 +41,8 @@ import { SendMessage } from "./application-dialog/send-message";
 import InterviewFeedback from "./application-dialog/interview-feedback";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
+import { date } from "zod";
+import { Card } from "@/components/ui/card";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface ApplicationDetailsProps {
@@ -94,7 +96,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
       setApplication(student.data);
       console.log("student.data",student.data?.applicationDetails?.applicationStatus);
       
-      if(student.data?.applicationDetails?.applicationStatus === 'accepted' || student.data?.applicationDetails?.applicationStatus === 'rejected')
+      if(['not qualified', 'Interview Scheduled', 'concluded', 'waitlist', 'selected'].includes(student.data?.applicationDetails?.applicationStatus))
         setInterview(true)
       else setInterview(false)
 
@@ -154,42 +156,61 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "")}>{application?.applicationDetails?.applicationStatus}</Badge>
             </div>
             {interview ? 
-            <>  
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <div className="flex justify-center gap-3 items-center">
-                  <div className="flex gap-1 items-center">
-                    <Clock4 className="w-4 h-4"/>12:45 PM
+            <div className="space-y-3">  
+            <div className="space-y-1">
+              {application?.applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
+                  <div key={index} className="flex justify-between text-muted-foreground text-sm">
+                    <div className="flex justify-center gap-3 items-center">
+                      <div className="flex gap-1 items-center">
+                        <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <p className="capitalize">Interview {interview?.meetingStatus}</p>
                   </div>
-                  <div className="flex gap-1 items-center">
-                    <Calendar className="w-4 h-4"/>20/03/2024
-                  </div>
-                </div>
-                <p className="text-xs">Interview concluded</p>
+              ))}
               </div>
-              <Select value={application?.applicationDetails?.applicationStatus?.interview} onValueChange={handleInterviewStatusChange}>
+              <Select
+               disabled={['Interview Scheduled', 'not qualified', 'selected'].includes(application?.applicationDetails?.applicationStatus)}
+               value={application?.applicationDetails?.applicationStatus}
+               onValueChange={handleInterviewStatusChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="concluded">Reschedule Interview</SelectItem>
-                  <SelectItem value="accepted">Complete</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
+                  {!['not qualified', 'waitlist', 'selected'].includes(application?.applicationDetails?.applicationStatus) &&
+                    <SelectItem className="capitalize" value={application?.applicationDetails?.applicationStatus}>
+                      <span className="capitalize">{application?.applicationDetails?.applicationStatus}</span>
+                    </SelectItem>
+                  }
+                  <SelectItem value="waitlist">Waitlist</SelectItem>
+                  <SelectItem value="selected">Accepted</SelectItem>
+                  <SelectItem value="not qualified">Rejected</SelectItem>
                 </SelectContent>
               </Select>
               <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
                 <FileSignature className="w-4 h-4"/>Interview Feedback
               </Button>
-            </> : 
-            (application?.applicationDetails?.applicationStatus!=='initiated' && 
-              <Select value={application?.applicationDetails?.applicationStatus} onValueChange={handleStatusChange}>
+            </div> : 
+            (
+              <Select 
+              disabled={['initiated', 'accepted', 'rejected'].includes(application?.applicationDetails?.applicationStatus)} 
+                value={application?.applicationDetails?.applicationStatus} 
+                onValueChange={handleStatusChange}>
                 <SelectTrigger>
-                  <SelectValue className="capitalize" placeholder="Change status" />
+                  <SelectValue className="" placeholder="Change status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem className="capitalize" value={application?.applicationDetails?.applicationStatus}>{application?.applicationDetails?.applicationStatus}</SelectItem>
+                  {!['on hold', 'accepted', 'rejected'].includes(application?.applicationDetails?.applicationStatus) &&
+                    <SelectItem className="capitalize" value={application?.applicationDetails?.applicationStatus}>
+                      <span className="capitalize">{application?.applicationDetails?.applicationStatus}</span>
+                    </SelectItem>
+                  }
+                  <SelectItem value="on hold">Put On Hold</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="on hold">Put On Hold</SelectItem>
                 </SelectContent>
               </Select>
             )
@@ -260,12 +281,14 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 </div>}
               </div>
             ))} 
-            {status === 'on hold' && 
-              <div className="border rounded-lg p-4 space-y-2">
+            {application?.applicationDetails?.applicationTasks.map((task: any, index: any) => (
+              
+              task?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback && 
+              <Card key={index} className="p-4 space-y-2">
                 <h5 className="font-medium ">Application On Hold</h5>
                 <div className="">
-                  <h5 className="font-medium text-sm text-muted-foreground">Reason:</h5>
-                  {application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback.map((item: any, i: any) => (
+                  <h5 className="font-medium text-base text-muted-foreground">Reason:</h5>
+                  {task?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback.map((item: any, i: any) => (
                     <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                       <li className="text-sm" key={i}>
                         {item}
@@ -273,9 +296,34 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                     </ul>
                   ))}
                 </div>
-                <h5 className="font-medium text-xs text-muted-foreground">Updated by Admin</h5>
-              </div>
-            }
+                <div className="flex justify-between items-center">
+                  <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
+                  <div className="font-medium text-sm text-muted-foreground">{new Date(task?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.timestamp).toLocaleDateString()}</div>
+                </div>
+              </Card>
+            ))}
+
+            {application?.applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
+              
+              interview?.feedback[interview?.feedback.length - 1] && 
+              <Card key={index} className="p-4 space-y-2">
+                <h5 className="font-medium ">Interview Feedback</h5>
+                <div className="">
+                  <h5 className="font-medium text-base text-muted-foreground">Feedback:</h5>
+                  {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
+                    <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
+                      <li className="text-sm" key={i}>
+                        {item}
+                      </li>
+                    </ul>
+                  ))}
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
+                  <div className="font-medium text-sm text-muted-foreground">{new Date(interview?.feedback[interview?.feedback.length - 1]?.date).toLocaleDateString()}</div>
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
       </ScrollArea>
@@ -309,10 +357,9 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
             name={application?.firstName}
             email={application?.email}
             phone={application?.mobileNumber}
-            tasks={application?._id}
+            applicationId={application?.applicationDetails?._id}
             initialStatus={status}
-            ques={application?.cohort?.applicationFormDetail?.[0]?.task} 
-            submission={application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]}
+            interview={application?.applicationDetails?.applicationTestInterviews?.[application?.applicationDetails?.applicationTestInterviews.length - 1]}
             onClose={() => setFeedbackOpen(false)}
             onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />

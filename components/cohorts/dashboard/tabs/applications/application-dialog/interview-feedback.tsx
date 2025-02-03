@@ -1,38 +1,17 @@
-import React, { useEffect, useState, useRef, ChangeEvent } from "react";
+import React, { useEffect, useState, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  getStudentApplication,
-  updateStudentApplicationStatus,
-  updateStudentTaskFeedback,
-  updateStudentTaskFeedbackAccep,
-} from "@/app/api/student";
-import { Separator } from "@/components/ui/separator";
-import { FileIcon, ImageIcon, Link2Icon, MinusIcon, PlusIcon, VideoIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { log } from "console";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
-interface Task {
-  _id: string;
-  title: string;
-}
+import { updateInterviewStatus } from "@/app/api/student";
 
 interface InterviewFeedbackProps {
   name: string;
   email: string;
   phone: string;
-  tasks: string;
+  applicationId: string;
   initialStatus: string;
-  ques: any;
-  submission: any;
+  interview: any;
   onClose: () => void;
   onUpdateStatus: (status: string, feedback: { [key: string]: string[] }) => void;
 }
@@ -41,73 +20,38 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   name,
   email,
   phone,
-  tasks,
+  applicationId,
   initialStatus,
-  ques,
-  submission,
+  interview,
   onClose,
   onUpdateStatus,
 }) => {
-  const [status, setStatus] = useState<string>(initialStatus || 'concluded');
-  const [feedbacks, setFeedbacks] = useState<{
-    [taskId: string]: string[];
-  }>({});
-  const [reason, setReason] = useState<string[]>([""]);
-  const [taskList, setTaskList] = useState<Task[]>([]);
-  const [feedbackId, setFeedbackId] = useState("");
+  const [status, setStatus] = useState<string>(initialStatus || "concluded");
+  const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[] }>({});
+  const [reason, setReason] = useState<string[]>([]);
   const [reasonItemValue, setReasonItemValue] = useState("• ");
-
-
-  useEffect(() => {
-    async function fetchApplicationDetails() {
-      try {
-        const applicationDetails = await getStudentApplication(tasks);
-        console.log("Application Details:", applicationDetails.data.applicationTasks[0]?.tasks);
-        setTaskList(applicationDetails.data.applicationTasks[0]?.tasks || []);
-        setFeedbackId(applicationDetails.data?.applicationTasks[0]?._id)
-      } catch (error) {
-        console.error("Error fetching application details:", error);
-      }
-    }
-    fetchApplicationDetails();
-  }, [tasks]);
 
   const handleStatusChange = (value: string) => {
     setStatus(value);
-    if (value === "on hold") {
-      // If reason is effectively empty, initialize with a bullet
-      if (reasonItemValue.trim() === "" || reasonItemValue.trim() === "•") {
-        setReasonItemValue("• ");
-      }
-    } else if (value === "accepted" || value === "rejected") {
-      setFeedbacks((prevFeedbacks) => {
-        const newFeedbacks = { ...prevFeedbacks };
-        // For each task, if there is no feedback or it's empty, init with ["• "]
-        taskList.forEach((task) => {
-          const existing = newFeedbacks[task._id];
-          if (!existing || existing.length === 0) {
-            newFeedbacks[task._id] = ["• "];
-          }
-        });
-        return newFeedbacks;
-      });
+    if (reasonItemValue.trim() === "" || reasonItemValue.trim() === "•") {
+      setReasonItemValue("• ");
     }
   };
 
   const formatInput = (value: string): string => {
-    const lines = value.split('\n');
-    const formattedLines = lines.filter(line => {
+    const lines = value.split("\n");
+    const formattedLines = lines.filter((line) => {
       const trimmed = line.trimStart();
-      return trimmed.startsWith('• ');
+      return trimmed.startsWith("• ");
     });
-    return formattedLines.join('\n');
+    return formattedLines.join("\n");
   };
 
   const handleKeyDownForReasons = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
-      setReasonItemValue(prevValue => {
-        const newValue = prevValue + '\n• ';
+      setReasonItemValue((prevValue) => {
+        const newValue = prevValue + "\n• ";
         return formatInput(newValue);
       });
     }
@@ -116,39 +60,47 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   const handleChangeForReasons = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     setReasonItemValue(formatInput(value));
+    // Update reason array based on input
+    const reasons = value
+      .split("\n")
+      .filter((line) => line.trim().startsWith("• "))
+      .map((line) => line.trim());
+    setReason(reasons);
   };
-  
+
   const canUpdate = (): boolean => {
-      const trimmed = reasonItemValue.replace(/•/g, "").trim();
-      return trimmed.length > 0;
-    return true; // fallback
+    return reason.length > 0; // Only allow update if there's valid feedback
   };
 
-  async function handleApplicationUpdate(
-    applicationId: string,
-    newStatus: string
-  ) {
+  async function handleInterviewUpdate(newStatus: string) {
     try {
-        const validReasons = reason.filter((r) => r.trim() !== "");
-        console.log("Sending feedback:", {
-          feedbackId,
-          newStatus,
-          feedbackData: validReasons,
-        });
-
-        const feedback = { feedbackData: validReasons };
-        const res = await updateStudentTaskFeedback( applicationId, feedbackId, newStatus, feedback, );
-        console.log( `Feedback for application ${applicationId} submitted successfully`, res );
-    
+      const validReasons = reason.filter((r) => r.trim() !== "");
+      const meetingId = interview?._id;
+  
+      // Build a normal object (not FormData)
+      const payload = {
+        meetingId,
+        meetingStatus: "concluded", // Always concluded
+        feedback: validReasons,
+        applicationId,
+        applicationStatus: newStatus,
+      };
+      console.log("Interview update response", payload);
+  
+      // Send it as JSON
+      const response = await updateInterviewStatus(JSON.stringify(payload));
+      console.log("Interview update response", response);
+  
       onUpdateStatus(newStatus, feedbacks);
       onClose();
     } catch (error) {
       console.error("Failed to update application status or feedback:", error);
     }
   }
+  
 
   return (
-    <div className="">
+    <div>
       <div className="flex justify-between items-center pb-4 border-b border-gray-700 mb-4">
         <div>
           <h3 className="text-lg font-semibold">{name}</h3>
@@ -166,30 +118,33 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="concluded">Interview Concluded</SelectItem>
-              <SelectItem value="accepted">Accepted</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem className="capitalize" value={status}>
+                {status}
+              </SelectItem>
+              <SelectItem value="waitlist">Waitlist</SelectItem>
+              <SelectItem value="selected">Accepted</SelectItem>
+              <SelectItem value="not qualified">Rejected</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-          <div>
-            <Label className="text-lg ">Feedback</Label>
-            <Textarea
-              id="reasonItem"
-              value={reasonItemValue}
-              className="px-3 text-base"
-              onChange={handleChangeForReasons}
-              onKeyDown={handleKeyDownForReasons}
-              placeholder="Type here..."
-              rows={3}
-              cols={40}
-            />
-          </div>
+        <div>
+          <Label className="text-lg ">Feedback</Label>
+          <Textarea
+            id="reasonItem"
+            value={reasonItemValue}
+            className="px-3 text-base"
+            onChange={handleChangeForReasons}
+            onKeyDown={handleKeyDownForReasons}
+            placeholder="Type here..."
+            rows={3}
+            cols={40}
+          />
+        </div>
 
         <Button
           className="w-full mt-4"
-          onClick={() => handleApplicationUpdate(tasks, status)}
+          onClick={() => handleInterviewUpdate(status)}
           disabled={!canUpdate()}
         >
           Update Interview Status
