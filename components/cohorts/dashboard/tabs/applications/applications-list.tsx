@@ -117,6 +117,29 @@ export function ApplicationsList({
       return (!from || appDate >= from) && (!to || appDate <= to);
     });
     // 1) Filter
+
+    filteredApplications.sort((a: any, b: any) => {
+      const dateA = new Date(a?.updatedAt);
+      const dateB = new Date(b?.updatedAt);
+  
+      if (dateA > dateB) return -1;
+      if (dateA < dateB) return 1;
+  
+      const monthA = dateA.getMonth();
+      const monthB = dateB.getMonth();
+  
+      if (monthA > monthB) return -1;
+      if (monthA < monthB) return 1;
+  
+      const yearA = dateA.getFullYear(); 
+      const yearB = dateB.getFullYear(); 
+  
+      if (yearA > yearB) return -1; 
+      if (yearA < yearB) return 1; 
+  
+      return 0;
+    });
+  
     let filtered = filteredApplications;
 
     // a) Search filter by applicant name

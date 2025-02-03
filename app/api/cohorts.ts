@@ -46,26 +46,16 @@ export async function updateCohort(id: string, data: any) {
   return response.json();
 }
 
-// Update cohort details by ID
-// export async function inviteCollaborators(id: string, data: any) {
-//   const response = await fetch(`${process.env.API_URL}/admin/cohort/${id}?isInviting=true`, {
-//     method: "PATCH",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(data),
-//   });
-//   if (!response.ok) {
-//     throw new Error("Failed to update cohort");
-//   }
-//   return response.json();
-// }
-
 // Update cohort status by ID
 export async function updateCohortStatus(id: string, status: string) {
-  const response = await fetch(`${process.env.API_URL}/admin/cohort/status/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
+  const response = await fetch(
+    `${process.env.API_URL}/admin/cohort/status/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to update cohort status");
   }
@@ -82,12 +72,33 @@ export async function getCohortById(id: string) {
 
 // Invite collaborators to a cohort
 export async function inviteCollaborators(id: string) {
-  const response = await fetch(`http://localhost:4000/admin/invite-collaborators/${id}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const response = await fetch(
+    `${process.env.API_URL}/admin/invite-collaborators/${id}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to invite collaborators to cohort");
   }
   return response.json();
+}
+
+export async function checkEmailExists(email: string) {
+  try {
+    const res = await fetch(
+      `https://dev.cal.litschool.in/application-portal/user-checking?email=${email}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+    // Return a default fallback
+    return { success: false, message: "Unable to verify user at the moment" };
+  }
 }
