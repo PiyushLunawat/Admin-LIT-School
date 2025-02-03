@@ -24,6 +24,7 @@ import {
 
 import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
 import { checkEmailExists, inviteCollaborators, updateCohort } from "@/app/api/cohorts";
+import { useToast } from "@/hooks/use-toast";
 
 // Roles array (as before)
 const roles = [
@@ -63,7 +64,8 @@ export function CollaboratorsForm({
       ],
     },
   });
-
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState<number | null>(null);
 
   const { fields, append, remove } = useFieldArray({
@@ -101,8 +103,26 @@ export function CollaboratorsForm({
     setEditingCollaborator(index); // Set the collaborator to edit
   };
 
-  const handleCancelEdit = () => {
-    setEditingCollaborator(null); // Cancel editing
+  const handleSaveEdit = async (data: z.infer<typeof formSchema>) => {
+    try {
+    const collaboratorsToUpdate = data.collaborators.map((collab) => ({
+      email: collab.email,
+      role: collab.role,
+      isInvited: collab.isInvited ?? false,
+    }));
+
+    console.log("Collaborators data to send:", collaboratorsToUpdate);
+
+    // Update the cohort
+    const createdCohort = await updateCohort(initialData._id, {
+      collaborators: collaboratorsToUpdate,
+    });
+    onCohortCreated(createdCohort.data);
+  } catch (error) {
+  console.error("Failed to update cohort:", error);
+  } finally {
+    setEditingCollaborator(null);
+  }
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -120,7 +140,6 @@ export function CollaboratorsForm({
         const createdCohort = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
         });
-
         onCohortCreated(createdCohort.data);
         onComplete(); // proceed to the next step
       } else {
@@ -133,15 +152,18 @@ export function CollaboratorsForm({
 
   const handleInvite = async () => {
     try {
+      setLoading(true)
       if (initialData?._id) {
         await inviteCollaborators(initialData._id);
-        alert("Collaborators invited successfully!");
+        toast({ title: "Collaborators invited successfully!", variant: "success" });
       } else {
-        console.error("Cohort ID is missing. Unable to invite collaborators.");
+        toast({ title: "Cohort ID is missing. Unable to invite collaborators!", variant: "destructive" });
       }
     } catch (error) {
       console.error("Failed to invite collaborators:", error);
-      alert("Failed to invite collaborators. Please try again.");
+      toast({ title: `Failed to invite collaborators:", ${error}!`, variant: "destructive" });
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -308,7 +330,7 @@ export function CollaboratorsForm({
                 )}
                 {editingCollaborator === index && (
                   <div className="mt-3">
-                    <Button type="button" onClick={handleCancelEdit}>Save</Button>
+                    <Button type="button" onClick={() => handleSaveEdit}>Save</Button>
                   </div>
                 )}
               </CardContent>
@@ -325,7 +347,7 @@ export function CollaboratorsForm({
             onClick={handleInvite}
           >
             <Send className="mr-2 h-4 w-4" />
-            Invite Collaborator
+            {loading ? 'Sending Invite...' : 'Invite Collaborator'}
           </Button>
           <Button
             onClick={() => append({ email: "", role: "", isInvited: false })}
