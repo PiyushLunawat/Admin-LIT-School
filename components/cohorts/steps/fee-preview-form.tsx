@@ -359,7 +359,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                             </TableCell>
                             <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
                             <TableCell>{installment.scholarshipAmount ? formatAmount(installment.scholarshipAmount) : '--'}</TableCell>
-                            <TableCell>{formatAmount(installment.amountPayable)}</TableCell>
+                            <TableCell>{formatAmount(installment.amountPayable + installment.scholarshipAmount)}</TableCell>
                             <TableCell>{formatAmount(installment.amountPayable*GSTAmount)}</TableCell>
                           </TableRow>
                         ))}

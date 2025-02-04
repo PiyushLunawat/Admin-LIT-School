@@ -42,6 +42,7 @@ interface Centre {
 export default function CentresPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [centerLoading, setCenterLoading] = useState(false);
   const [centres, setCentres] = useState<Centre[]>([]);
   const [newCentre, setNewCentre] = useState<Omit<Centre, "_id" | "status">>({
     name: "",
@@ -100,7 +101,7 @@ export default function CentresPage() {
 
 
   const handleCreateOrUpdateCentre = async () => {
-
+    setCenterLoading(true)
     try {
       if (editMode && selectedCentre) {
         if (!validateFields()) {
@@ -122,6 +123,8 @@ export default function CentresPage() {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An error occurred";
       toast({ title: "Failed to save centre", description: errorMessage, variant: "destructive" });
+    } finally {
+      setCenterLoading(false)
     }
   };
 
@@ -204,7 +207,10 @@ export default function CentresPage() {
                 {errors.suffix && <p className="text-red-500 text-sm">{errors.suffix}</p>}
               </div>
               <Button className="w-full" onClick={handleCreateOrUpdateCentre}>
-                {editMode ? "Update Centre" : "Create Centre"}
+                {editMode ? 
+                  centerLoading ? 'Updating...' : "Update Centre" : 
+                  centerLoading ? 'Creating...' : "Create Centre"
+                }
               </Button>
             </div>
           </DialogContent>

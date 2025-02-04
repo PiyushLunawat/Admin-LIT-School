@@ -42,6 +42,7 @@ export default function ProgramsPage() {
   const { toast } = useToast();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
+  const [programLoading, setProgramLoading] = useState(false);
   const [newProgram, setNewProgram] = useState<Omit<Program, "_id" | "status">>({
     name: "",
     description: "",
@@ -95,8 +96,7 @@ export default function ProgramsPage() {
   };
 
   const handleCreateOrUpdateProgram = async () => {
-
-
+    setProgramLoading(true);
     try {
       if (editMode && selectedProgram) {
         if (!validateFields()) {
@@ -116,6 +116,8 @@ export default function ProgramsPage() {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An error occurred";
       toast({ title: "Failed to create program", description: errorMessage, variant: "destructive" });
+    } finally {
+    setProgramLoading(false);
     }
   };
 
@@ -216,8 +218,10 @@ export default function ProgramsPage() {
                   {errors.prefix && <p className="text-red-500 text-sm">{errors.prefix}</p>}
                 </div>
               </div>
-              <Button className="w-full" onClick={handleCreateOrUpdateProgram}>
-                {editMode ? "Update Program" : "Create Program"}
+              <Button className="w-full" onClick={handleCreateOrUpdateProgram} disabled={programLoading}>
+                {editMode ? 
+                  programLoading ? 'Updating...' : 'Update Program' :
+                  programLoading ? 'Creating...' : "Create Program"}
               </Button>
             </div>
           </DialogContent>

@@ -1,8 +1,10 @@
 "use client";
 
 
+import { getCohorts } from "@/app/api/cohorts";
 import { getStudents } from "@/app/api/student";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { addMonths } from "date-fns";
 import {
   Users,
   ClipboardList,
@@ -43,7 +45,7 @@ function MetricCard({ title, value, description, icon: Icon, trend }: MetricCard
         )}
         {trend && (
           <p className={`text-xs mt-1 ${trend.isPositive ? 'text-success' : 'text-destructive'}`}>
-            {trend.isPositive ? '↑' : '↓'} {trend.value}% from last month
+            {trend.isPositive ? '↑' : '↓'} {(trend.value).toFixed(2)}% from last month
           </p>
         )}
       </CardContent>
@@ -60,10 +62,13 @@ interface MetricsGridProps {
 
 export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, selectedCohort, }: MetricsGridProps) {
 
-  const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [activeCohorts, setActiveCohorts] = useState(0);
+  const [soonCohorts, setSoonCohorts] = useState(0);
+  const [applications, setApplications] = useState<any>([]);
   const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
+  const [applicationsThisMonth, setApplicationsThisMonth] = useState(0);
+  const [applicationsLastMonth, setApplicationsLastMonth] = useState(0);
   const [underReviewCount, setUnderReviewCount] = useState(0);
   const [interviewsScheduledCount, setInterviewsScheduledCount] = useState(0);
   const [admissionFeeCount, setAdmissionFeeCount] = useState(0);
@@ -71,9 +76,13 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
   const [reviewedCount, setReviewedCount] = useState(0);
   const [avgScholarshipsPercentage, setAvgScholarshipsPercentage] = useState(0);
   const [totalScholarshipsAmount, setTotalScholarshipsAmount] = useState(0);
-  const [paymentsCount, setPaymentsCount] = useState(0);
   const [totalTokenAmountPaid, setTotalTokenAmountPaid] = useState(0);
   const [droppedCount, setDroppedCount] = useState(0);
+  const [revenueCollected, setRevenueCollected] = useState(0);
+  const [revenuePending, setRevenuePending] = useState(0);
+  const [pendingPayments, setPendingPayments] = useState(0);
+  const [revenueCollectedThisMonth, setRevenueCollectedThisMonth] = useState(0);
+  const [revenueCollectedLastMonth, setRevenueCollectedLastMonth] = useState(0);
 
   useEffect(() => {
     async function fetchAndFilterStudents() {
@@ -81,6 +90,20 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
       try {
         // 1) Fetch All Students
         const response = await getStudents();
+
+        const resp = await getCohorts();
+
+        let activeCohort = 0, soonCohort = 0;
+        resp.data.filter(
+          (cohort: any) => {
+            if(cohort?.status !== 'archived')
+              activeCohort += 1;
+            if(cohort?.status !== 'archived' && new Date(cohort.startDate) > new Date())
+              soonCohort += 1;
+          }
+        );
+        setActiveCohorts(activeCohort);
+        setSoonCohorts(soonCohort);
 
         // 2) Filter Out Students with No Application Details
         const validStudents = response.data.filter(
@@ -145,6 +168,24 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
           if (applications && Array.isArray(applications)) {
             // Total Applications
             setTotalApplicationsCount(applications.length);
+
+            const thisMonthApps = applications.filter((app: any) => {
+              const appDate = new Date(app.updatedAt);
+              const startOfMonth = new Date();
+              startOfMonth.setDate(1);
+              return appDate >= startOfMonth;
+            });
+            setApplicationsThisMonth(thisMonthApps.length);
+    
+            const lastMonthApps = applications.filter((app: any) => {
+              const appDate = new Date(app.updatedAt);
+              const startOfLastMonth = addMonths(new Date(), -1);
+              startOfLastMonth.setDate(1);
+              const endOfLastMonth = new Date(startOfLastMonth);
+              endOfLastMonth.setMonth(startOfLastMonth.getMonth() + 1);
+              return appDate >= startOfLastMonth && appDate < endOfLastMonth;
+            });
+            setApplicationsLastMonth(lastMonthApps.length);
       
             // Under Review Count
             const underReview = applications.filter(
@@ -172,16 +213,16 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             // Litmus Tests Count
             const litmusTests = applications.filter(
               (application) =>
-                application?.litmusTestDetails?.[0]?.litmusTaskId !== undefined
+                ['under review', 'completed'].includes(application?.litmusTestDetails?.[0]?.litmusTaskId?.status)
             );
             setLitmusTestsCount(litmusTests.length);
 
             // Reviewed Count
             const reviewed = applications.filter(
               (application) =>
-                application?.litmusTestDetails?.[0]?.litmusTaskId !== undefined
+                application?.litmusTestDetails?.[0]?.litmusTaskId?.status === 'completed'
             );
-            setLitmusTestsCount(reviewed.length);
+            setReviewedCount(reviewed.length);
             
             // Total Scholarship and Average Scholarships Percentage
             let totalScholarship = 0;
@@ -218,18 +259,122 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             }, 0);
         
             setTotalTokenAmountPaid(tokensPaid);
+
+            let tokenPaid = 0;
+            let oneShot = 0;
+            let oneShotPaid = 0;
+            let oneShotAmount = 0;
+            let oneShotAmountPaid = 0;
+            let installmentAmount = 0;
+            let installmentAmountPaid = 0;
+            let pending = 0;
+
+            applications.forEach((application) => {
+
+              const breakdown: any[] = [];
+              for (let sem = 1; sem <= application?.cohort?.cohortFeesDetail?.semesters; sem++) {
+                const semesterBreakdown = [];
+                for (let inst = 1; inst <= application?.cohort.cohortFeesDetail.installmentsPerSemester; inst++) {
+                  semesterBreakdown.push({
+                    label: `Instalment ${inst}`,
+                    total: 0,
+                    received: 0,
+                    status: "pending",
+                  });
+                }
+                breakdown.push({
+                  semester: sem,
+                  installments: semesterBreakdown,
+                });
+              }
+        
+              
+              const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];    
+              if (!lastEnrolled) return;
+              
+              const tokenAmount = application?.cohort?.cohortFeesDetail?.tokenFee || 0;
+              const lastEnrollment = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+              if (lastEnrollment?.tokenFeeDetails?.verificationStatus === 'paid') {
+                tokenPaid += (tokenAmount || 0);
+              }
+              
+              // One-Shot Payment Processing
+              if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
+                oneShot += 1;
+                const oneShotDetails = lastEnrolled?.oneShotPayment;
+                if (oneShotDetails) {
+                  oneShotAmount += oneShotDetails?.amountPayable;
+                  if (oneShotDetails?.verificationStatus === 'paid') {
+                    oneShotPaid += 1;
+                    oneShotAmountPaid += oneShotDetails?.amountPayable;
+                  }
+                  if (oneShotDetails?.verificationStatus === 'pending') {
+                    pending += 1;
+                  }
+                }
+              }
+      
+              // Installments Processing
+              if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
+                lastEnrolled?.installmentDetails.forEach((semesterDetail: any, semIndex: any) => {
+                  const semesterNumber = semesterDetail?.semester;
+                  const installments = semesterDetail?.installments;
+                  installments.forEach((installment: any, instIndex: any) => {
+                    if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
+                      breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
+                      if (installment?.verificationStatus === 'paid') {
+                        breakdown[semIndex].installments[instIndex].received += installment?.amountPayable;
+                      }
+                      if (installment?.verificationStatus === 'pending') {
+                        pending += 1;
+                      }
+                    }
+                  });
+                });
+      
+                // Calculate total installments expected and received
+                lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+                  const installments = semesterDetail?.installments;
+                  installments.forEach((installment: any) => {
+                    installmentAmount += installment?.amountPayable;
+                    if (installment?.verificationStatus === 'paid') {
+                      installmentAmountPaid += installment?.amountPayable;
+                    }
+                  });
+                });
+              }   
+            });
+
+            setRevenueCollected(installmentAmountPaid+oneShotAmountPaid+tokensPaid)
+            setRevenuePending((installmentAmount+oneShotAmount)-(installmentAmountPaid+oneShotAmountPaid))
+            setPendingPayments(pending);
           } else {
             console.log("Applications data is not an array or is undefined.");
           }
         }, [applications]);
 
+        function KLsystem(amount: number): string {
+          if (amount >= 100000) {
+            return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
+          } else {
+            return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
+          }
+        }
+
+        const calculatePercentageIncrease = (current: number, previous: number) => {
+          if (current === 0) return 0;
+          if (previous === 0) return 100;
+          return ((current - previous) / previous) * 100;
+        };
+      
+
   const metrics = [
     {
       title: "Total Applications",
       value: totalApplicationsCount,
-      description: "45 new this month",
+      description: `${applicationsThisMonth} new this month`,
       icon: ClipboardList,
-      trend: { value: 12, isPositive: true },
+      trend: { value: calculatePercentageIncrease(applicationsThisMonth, applicationsLastMonth), isPositive: applicationsThisMonth > applicationsLastMonth },
     },
     {
       title: "Under Review",
@@ -246,40 +391,40 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
     {
       title: "LITMUS Tests",
       value: litmusTestsCount,
-      description: "32 evaluated",
+      description: `${reviewedCount} evaluated`,
       icon: GraduationCap,
     },
     {
       title: "Scholarships",
       value: `${(avgScholarshipsPercentage ? (avgScholarshipsPercentage.toFixed(2) +'%') : '--')}`,
-      description: `₹${(totalScholarshipsAmount/100000).toFixed(2)}L awarded`,
+      description: `${KLsystem(totalScholarshipsAmount)} awarded`,
       icon: Award,
     },
     {
       title: "Active Cohorts",
-      value: "8",
-      description: "3 starting soon",
+      value: activeCohorts,
+      description: `${soonCohorts} starting soon`,
       icon: Building2,
     },
     {
       title: "Revenue Collected",
-      value: "₹24.5L",
-      description: "This month",
+      value: `${KLsystem(revenueCollected)}`,
+      // description: "This month",
       icon: IndianRupee,
-      trend: { value: 8, isPositive: true },
+      // trend: { value: 8, isPositive: true },
     },
     {
       title: "Outstanding",
-      value: "₹12.4L",
-      description: "15 payments pending",
+      value: `${KLsystem(revenuePending)}`,
+      description: `${pendingPayments} payments pending`,
       icon: AlertTriangle,
     },
     {
       title: "Dropped Students",
       value: droppedCount,
-      description: "This month",
+      // description: "This month",
       icon: UserMinus,
-      trend: { value: 2, isPositive: false },
+      // trend: { value: 2, isPositive: false },
     },
     {
       title: "Total Students",

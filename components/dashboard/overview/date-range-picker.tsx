@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
     from: undefined,
     to: undefined,
   });
+  const [selectedValue, setSelectedValue] = useState("all");
 
   const presets = [
     { label: "Select Range", value: "all" },
@@ -48,10 +49,18 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
     [setDateRange]
   );
 
+  const resetDateRange = () => {
+    setDate(undefined); // Reset calendar date range
+    setDateRange(undefined); // Clear the selected range
+    setSelectedValue("all"); // Reset the selected value in Select
+  };
+
   return (
     <div className="flex items-center gap-4">
       <Select
+        value={selectedValue} 
         onValueChange={(value) => {
+          setSelectedValue(value);
           if (value === "all") {
             handleDateChange(undefined); // No date range selected
           } else {
@@ -113,6 +122,9 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
           />
         </PopoverContent>
       </Popover>
+      <Button variant="ghost" size="icon" className="-ml-3" onClick={resetDateRange}>
+        <X className="h-4 w-4" />
+      </Button>
     </div>
   );
 }

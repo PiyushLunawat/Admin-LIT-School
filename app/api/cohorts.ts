@@ -99,6 +99,6 @@ export async function checkEmailExists(email: string) {
   } catch (error) {
     console.error("Error checking user existence:", error);
     // Return a default fallback
-    return { success: false, message: "Unable to verify user at the moment" };
+    return { success: false, message: error };
   }
 }

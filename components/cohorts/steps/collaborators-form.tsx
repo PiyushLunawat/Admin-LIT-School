@@ -66,6 +66,7 @@ export function CollaboratorsForm({
   });
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState<number | null>(null);
 
   const { fields, append, remove } = useFieldArray({
@@ -150,10 +151,23 @@ export function CollaboratorsForm({
     }
   };
 
-  const handleInvite = async () => {
+  const handleInvite = async (data: z.infer<typeof formSchema>) => {
     try {
-      setLoading(true)
+      setInviteLoading(true)
       if (initialData?._id) {
+        const collaboratorsToUpdate = data.collaborators.map((collab) => ({
+          email: collab.email,
+          role: collab.role,
+          isInvited: collab.isInvited ?? false,
+        }));
+
+        console.log("Collaborators data to send:", collaboratorsToUpdate);
+
+        // Update the cohort
+        const createdCohort = await updateCohort(initialData._id, {
+          collaborators: collaboratorsToUpdate,
+        });
+        onCohortCreated(createdCohort.data);
         await inviteCollaborators(initialData._id);
         toast({ title: "Collaborators invited successfully!", variant: "success" });
       } else {
@@ -344,10 +358,10 @@ export function CollaboratorsForm({
             variant="outline"
             type="button"
             className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
-            onClick={handleInvite}
+            onClick={() => handleInvite}
           >
             <Send className="mr-2 h-4 w-4" />
-            {loading ? 'Sending Invite...' : 'Invite Collaborator'}
+            {inviteLoading ? 'Sending Invite...' : 'Invite Collaborator'}
           </Button>
           <Button
             onClick={() => append({ email: "", role: "", isInvited: false })}

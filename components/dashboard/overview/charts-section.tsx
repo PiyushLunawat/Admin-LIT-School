@@ -227,7 +227,7 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
         </CardContent>
       </Card> */}
 
-      <ScholarshipDistribution />
+      <ScholarshipDistribution applications={applications} />
       
     </div>
   );

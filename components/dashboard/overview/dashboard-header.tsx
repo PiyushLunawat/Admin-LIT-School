@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
@@ -31,13 +31,6 @@ interface CohortHeaderProps {
 
 export function DashboardHeader({ setDateRange, searchQuery, onSearchQueryChange, programs, selectedProgram, onProgramChange, cohorts, selectedCohort, onCohortChange, }: CohortHeaderProps){
 
-
-  const handleReset = () => {
-    onSearchQueryChange("");
-    onProgramChange("all-programs");
-    onCohortChange("all-cohorts");
-  };
-
   return (
     <div className="space-y-4 mb-6">
       <div>
@@ -48,16 +41,18 @@ export function DashboardHeader({ setDateRange, searchQuery, onSearchQueryChange
       </div>
       
       <div className="flex flex-col sm:flex-row gap-4">
-        {/* <GlobalSearch /> */}
-        <div className="relative flex-1">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search cohorts, programs, or students..."
-          className="pl-8"
-          value={searchQuery}
-          onChange={(e) => onSearchQueryChange(e.target.value)}
-        />
-      </div>
+        <div className="flex flex-1">
+          {/* <div className="relative flex-1">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search cohorts, programs, or students..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+            />
+          </div> */}
+          <DateRangePicker setDateRange={setDateRange} />
+        </div>
         <div className="flex gap-2">
         <Select value={selectedProgram} onValueChange={onProgramChange}>
           <SelectTrigger className="w-[180px]">
@@ -85,13 +80,8 @@ export function DashboardHeader({ setDateRange, searchQuery, onSearchQueryChange
             ))}
           </SelectContent>
         </Select>
-        </div>
-        <Button variant="ghost" size="icon" onClick={handleReset}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <DateRangePicker setDateRange={setDateRange}/>
+        </div> 
+      </div> 
     </div>
   );
 }

@@ -24,6 +24,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
   const [totalInstallmentAmountPaidCount, setTotalInstallmentAmountPaidCount] = useState(0);
   const [totalExpectedCount, setTotalExpectedCount] = useState(0);
   const [totalReceivedCount, setTotalReceivedCount] = useState(0);
+  const [pendingPayments, setPendingPayments] = useState(0);
   const [totalStudentCount, setTotalStudentCount] = useState(0);
   const [avgScholarshipsPercentage, setAvgScholarshipsPercentage] = useState<number | string>('--');
   const [totalScholarshipsAmount, setTotalScholarshipsAmount] = useState<number | string>('--');
@@ -51,6 +52,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
       let oneShotAmountPaid = 0;
       let installmentAmount = 0;
       let installmentAmountPaid = 0;
+      let pending = 0;
       let totalScholarship = 0;
       let scholarshipCount = 0;
       let totalPercentage = 0;
@@ -58,7 +60,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
       // Initialize installment breakdown based on cohort
       const breakdown: any[] = [];
-      for (let sem = 1; sem <= cohort.cohortFeesDetail.semesters; sem++) {
+      for (let sem = 1; sem <= cohort?.cohortFeesDetail?.semesters; sem++) {
         const semesterBreakdown = [];
         for (let inst = 1; inst <= cohort.cohortFeesDetail.installmentsPerSemester; inst++) {
           semesterBreakdown.push({
@@ -96,6 +98,9 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
               oneShotPaid += 1;
               oneShotAmountPaid += oneShotDetails?.amountPayable;
             }
+            if (oneShotDetails?.verificationStatus === 'pending') {
+              pending += 1;
+            }
           }
         }
 
@@ -109,6 +114,9 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
                 breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
                 if (installment?.verificationStatus === 'paid') {
                   breakdown[semIndex].installments[instIndex].received += installment?.amountPayable;
+                }
+                if (installment?.verificationStatus === 'pending') {
+                  pending += 1;
                 }
               }
             });
@@ -157,6 +165,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
            percentageCount += 1;
          }        
       });
+
       
       setTokenAmountCount(tokenPaid);
 
@@ -173,6 +182,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
       // Update Expected and Received Counts
       setTotalExpectedCount(oneShotAmount + installmentAmount + tokenPaid);
       setTotalReceivedCount(oneShotAmountPaid + installmentAmountPaid + tokenPaid);
+      setPendingPayments(pending);
 
       // Update Scholarships Metrics
       setTotalStudentCount(percentageCount)
@@ -245,7 +255,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         <CardContent>
           <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount-totalReceivedCount)}</div>
           <p className="text-xs text-muted-foreground mt-2">
-            8 payments overdue
+            {pendingPayments} payments pending
           </p>
         </CardContent>
       </Card>

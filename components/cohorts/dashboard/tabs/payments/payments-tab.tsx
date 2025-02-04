@@ -60,6 +60,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
             student?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed' &&
             student.cohort?._id === cohortId
         );
+        console.log("Vsvssvsv",mappedStudents)
 
         const filteredApplications = mappedStudents.filter((app: any) => {
           // --- Date Range Check ---
@@ -101,7 +102,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
           // --- Scholarship Check ---
           if (selectedScholarship !== "all") {
             const scholarships = app.cousrseEnrolled?.[app.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipName;
-            console.log("installmentType",scholarships,selectedScholarship);
+            // console.log("installmentType",scholarships,selectedScholarship);
             
             if (scholarships?.toLowerCase() !== selectedScholarship.toLowerCase()) {
               return false;
@@ -112,7 +113,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         });
 
         setApplications(filteredApplications);
-        console.log("Fetched & Filtered Students:", filteredApplications);
+        // console.log("Fetched & Filtered Students:", filteredApplications);
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
