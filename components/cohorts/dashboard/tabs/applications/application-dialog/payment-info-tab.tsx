@@ -57,6 +57,9 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
     }
   }
 
+  const lastCourse = student?.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
+  let lastStatus = '';
+
   useEffect(() => {
     if (!student.cohort?.feeStructureDetails) return;
 
@@ -88,6 +91,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "flagged":
+      case "overdue":
         return "warning";
       case "pending":
         return "lemon";
@@ -172,7 +176,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                 <div>
                   <h4 className="font-medium">Token Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: {formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}
+                    Amount: ₹{formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}
                     {student?.cousrseEnrolled?.length > 0 && (
                       <>
                         {" • Uploaded on "}
@@ -227,62 +231,142 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
               }
             </div>
 
-            {visibleSemesters?.map((semesterObj: any, semesterIndex: number) => (
-            <div key={semesterIndex}>
-              <Badge variant="blue" className="capitalize mb-3">
-                Semester {semesterObj.semester}
-              </Badge>
-
-              <div className="space-y-4">
-                {semesterObj.installments?.map((instalment: any, iIndex: number) => (
-                  <div key={iIndex} className="border rounded-lg p-4 space-y-1">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">Instalment {iIndex + 1}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Amount: {formatAmount(instalment.amountPayable)}
-                        </p>
-                      </div>
-                      {/* <Badge variant="secondary">Pending</Badge> */}
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Due:{" "}
-                        {instalment.installmentDate
-                          ? new Date(instalment.installmentDate).toLocaleDateString()
-                          : "--"}
-                      </div>
-                      {/* <Button variant="outline" size="sm">
-                        <UploadIcon className="h-4 w-4 mr-2" />
-                        Upload Receipt
-                        </Button> */}
-                    </div>
-                    {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate && 
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Paid:{" "}
-                      {instalment.installmentDate
-                        ? new Date(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()
-                        : "--"}
-                    </div>}
-                  </div>
-                ))}
+            {lastCourse?.feeSetup?.installmentType === 'one shot payment' ? 
+            <Card className="p-4 space-y-2">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h5 className="font-medium">One Shot Payement</h5>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(new Date(lastCourse?.oneShotPayment?.installmentDate) < new Date() && lastCourse?.oneShotPayment?.verificationStatus === 'pending' ) ?
+                    <Badge variant={getStatusColor('overdue')}>
+                      overdue
+                    </Badge>
+                  :
+                  <Badge variant={getStatusColor(lastCourse?.oneShotPayment?.verificationStatus)}>
+                    {lastCourse?.oneShotPayment?.verificationStatus}
+                  </Badge>
+                  }
+                  {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url && 
+                    <Button variant="ghost" size="sm" onClick={() => handleView(lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                  }
+                </div>
               </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.amountPayable)}</p>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 mr-2" />
+                Due: {new Date(lastCourse?.oneShotPayment?.installmentDate).toLocaleDateString()}
+              </div>
+              {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Paid: {new Date(lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()}
+                </div>
+              )}
+              {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
+                <Button variant="outline" size="sm" className="w-full mt-2">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Receipt
+                </Button>
+              ) : 
+                <Button variant="outline" size="sm" className="w-full mt-2">
+                  <UploadIcon className="h-4 w-4 mr-2" />
+                  Upload Receipt
+                </Button>
+              }             
+            </Card> : 
+            <div className="space-y-2">
+              {visibleSemesters?.map((semesterObj: any, semesterIndex: number) => (
+                <div key={semesterIndex}>
+                  <Badge variant="blue" className="capitalize mb-3">
+                    Semester {semesterObj.semester}
+                  </Badge>
+                  <div className="space-y-4">
+                    {semesterObj.installments?.map((instalment: any, iIndex: number) => (
+                      <div key={iIndex} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">Instalment {iIndex + 1}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Amount: ₹{formatAmount(instalment?.amountPayable)}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {lastStatus !== 'pending' && (
+                              (new Date(instalment?.installmentDate) < new Date() && instalment?.verificationStatus === 'pending' && !(instalment.receiptUrls[0]?.uploadedDate)) ?
+                                <Badge variant={getStatusColor('overdue')}>
+                                  overdue
+                                </Badge>
+                              :
+                                <Badge className="capitalize" variant={getStatusColor(instalment?.verificationStatus)}>
+                                  {instalment?.verificationStatus}
+                                </Badge>
+                            )}
+                            <div className="hidden">
+                              {lastStatus = instalment?.verificationStatus}
+                            </div>
+                            {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url && 
+                              <Button variant="ghost" size="sm" onClick={() => handleView(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Button>
+                            }
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Due:{" "}
+                            {instalment?.installmentDate
+                              ? new Date(instalment?.installmentDate).toLocaleDateString()
+                              : "--"}
+                          </div>
+                          {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate && 
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              Paid:{" "}
+                              {instalment?.installmentDate
+                                ? new Date(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()
+                                : "--"}
+                            </div>
+                          }
+                        </div>
+                        {/* <Button variant="outline" size="sm">
+                            <UploadIcon className="h-4 w-4 mr-2" />
+                            Upload Receipt
+                            </Button> */}
+                          {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url ? (
+                            <Button variant="outline" size="sm" className="w-full ">
+                              <Download className="h-4 w-4 mr-2" />
+                              Download Receipt
+                            </Button>
+                          ) : 
+                            <Button variant="outline" size="sm" className="w-full ">
+                              <UploadIcon className="h-4 w-4 mr-2" />
+                              Upload Receipt
+                            </Button>
+                          } 
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {sch?.scholarshipDetails?.length > 1 && (
+                <Button
+                  variant="outline" className="w-full"
+                  onClick={() => setShowAllSemesters(!showAllSemesters)}
+                >
+                  {showAllSemesters ? "Show Less" : "Show More"}
+                </Button>
+              )}
             </div>
-          ))}
-
-          {/* Show More / Show Less button, only if more than 1 semester */}
-          {sch?.scholarshipDetails?.length > 1 && (
-            <Button
-              variant="outline" className="w-full"
-              onClick={() => setShowAllSemesters(!showAllSemesters)}
-            >
-              {showAllSemesters ? "Show Less" : "Show More"}
-            </Button>
-          )}
-
+          }
         </CardContent>
       </Card>
 
