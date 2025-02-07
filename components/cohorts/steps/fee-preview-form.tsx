@@ -94,7 +94,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
     const totalSemesters = initialData?.cohortFeesDetail?.semesters || 0;
     const installmentsPerSemester = initialData?.cohortFeesDetail?.installmentsPerSemester || 0;
 
-    let installmentPercents;
+    let installmentPercents: any;
 
       switch (installmentsPerSemester) {
         case 2:

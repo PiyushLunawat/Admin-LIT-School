@@ -80,16 +80,41 @@ export function CollaboratorsForm({
     }
   }, [fields, append]);
 
-  const handleEmailChange = async (
+  
+
+  const handleRoleChange = async (value: string, index: number) => {
+    form.setValue(`collaborators.${index}.role`, value);  // Directly set the role value
+    form.clearErrors(`collaborators.${index}.email`);  // Clear email errors
+  
+    if (['interviewer', 'evaluator'].includes(value)) {
+      const emailVal = form.getValues(`collaborators.${index}.email`).trim();
+  
+      // Check if email exists if the role is interviewer or evaluator
+      if (emailVal) {
+        const result = await checkEmailExists(emailVal);
+        if (!result.success) {
+          form.setError(`collaborators.${index}.email`, {
+            type: "manual",
+            message: result.message || "User not found in the system",
+          });
+        } else {
+          // Clear previous errors if email is valid
+          form.clearErrors(`collaborators.${index}.email`);
+        }
+      }
+    }
+  };  
+
+  const handleCheckEmail = async (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
     const emailVal = e.target.value.trim();
-
+    const role = form.getValues(`collaborators.${index}.role`);
     form.setValue(`collaborators.${index}.email`, emailVal);
     form.clearErrors(`collaborators.${index}.email`);
 
-    if (emailVal) {
+    if (emailVal && ['interviewer', 'evaluator'].includes(role)) {
       const result = await checkEmailExists(emailVal);
       if (!result.success) {
         form.setError(`collaborators.${index}.email`, {
@@ -265,9 +290,8 @@ export function CollaboratorsForm({
                           <Input
                             type="email"
                             placeholder="email@example.com"
-                            // Use the field's value and the separate change handler
                             value={field.value || ""}
-                            onChange={(e) => handleEmailChange(e, index)}
+                            onChange={(e) => handleCheckEmail(e, index)}               
                           />
                           {fields.length > 1 && (
                             <Popover>
@@ -319,7 +343,7 @@ export function CollaboratorsForm({
                       name={`collaborators.${index}.role`}
                       render={({ field }) => (
                         <Select
-                          onValueChange={(value) => field.onChange(value)}
+                          onValueChange={(value) => handleRoleChange(value, index)} // Only update the role value
                           value={field.value}
                         >
                           <SelectTrigger>
