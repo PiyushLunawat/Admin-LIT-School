@@ -95,7 +95,7 @@ export function CollaboratorsForm({
         if (!result.success) {
           form.setError(`collaborators.${index}.email`, {
             type: "manual",
-            message: result.message || "User not found in the system",
+            message: "This email doesn't have an account in CalendLIT",
           });
         } else {
           // Clear previous errors if email is valid
@@ -119,7 +119,7 @@ export function CollaboratorsForm({
       if (!result.success) {
         form.setError(`collaborators.${index}.email`, {
           type: "manual",
-          message: result.message || "User not found in the system",
+          message: "This email doesn't have an account in CalendLIT",
         });
       }
     }
