@@ -165,7 +165,6 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
            percentageCount += 1;
          }        
       });
-
       
       setTokenAmountCount(tokenPaid);
 
@@ -189,12 +188,9 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
       setTotalScholarshipsAmount(totalScholarship);
       setAvgScholarshipsPercentage((totalPercentage / percentageCount));
 
-
       // Update Installment Breakdown
       setInstalmentBreakdown(breakdown);
 
-    } else {
-      console.log("Applications data is not an array, is undefined, or cohort data is missing.");
     }
   }, [applications, cohort]);
 

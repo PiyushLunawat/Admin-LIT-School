@@ -38,7 +38,6 @@ export function OverviewTab({ cohortId, selectedDateRange }: OverviewTabProps) {
             });
   
             setApplications(filteredApplications);
-          console.log("fetching students:", response.data);
         } catch (error) {
           console.error("Error fetching students:", error);
         } finally {

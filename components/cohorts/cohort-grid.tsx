@@ -22,6 +22,8 @@ import { useRouter } from "next/navigation";
 import { getPrograms } from "@/app/api/programs";
 import { getCentres } from "@/app/api/centres";
 import { deleteCohort, updateCohortStatus } from "@/app/api/cohorts";
+import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface Program {
   _id: string;
@@ -66,8 +68,8 @@ interface CohortGridProps {
 }
 
 export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange }: CohortGridProps) {
-   const uniquePrograms = Array.from(new Set(cohorts.map((cohort) => cohort.programDetail))); // Extract unique programs
-  const [activeProgram, setActiveProgram] = useState<string | null>(null); // Track selected program
+  const { toast } = useToast();
+  const uniquePrograms = Array.from(new Set(cohorts.map((cohort) => cohort.programDetail))); 
   const [programs, setPrograms] = useState<Program[]>([]);  
   const [centres, setCentres] = useState<Centre[]>([]);
 
@@ -166,9 +168,20 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
     const handleUpdateStatus = async (cohortId: string, newStatus: CohortStatus) => {
       try {
         await updateCohortStatus(cohortId, newStatus);
-        onStatusChange(); // Trigger the fetchCohorts function in CohortsPage after successful update
+        onStatusChange();
       } catch (error) {
         console.error("Failed to update cohort status:", error);
+      }
+    };
+
+    const handleDeleteCohort = async (cohortId: string) => {
+      try {
+        await deleteCohort(cohortId);
+        onStatusChange(); 
+        toast({ title: "Cohort deleted successfully!", variant: "success" });
+      } catch (error: any) {
+        console.error("Failed to delete cohort:", error);
+        toast({ title: "Failed to delete cohort", description: error, variant: "destructive" });
       }
     };
 
@@ -231,7 +244,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => { deleteCohort(cohort._id); onStatusChange();}}>
+                  <AlertDialogAction onClick={() => { handleDeleteCohort(cohort._id);}}>
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>

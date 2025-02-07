@@ -98,7 +98,7 @@ export function ApplicationFormBuilder({
             ],
     },
   });  
-
+  const [loading, setLoading] = useState(false);  
   const { control, handleSubmit } = form;
 
   const {
@@ -109,6 +109,7 @@ export function ApplicationFormBuilder({
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setLoading(true)
     try {
       console.log("Form data before submission:", data);
 
@@ -124,6 +125,8 @@ export function ApplicationFormBuilder({
       }
     } catch (error) {
       console.error("Failed to update cohort:", error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -159,7 +162,7 @@ export function ApplicationFormBuilder({
         ))}
 
         {/* Submit Button */}
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={loading}>
           Next: LITMUS Test
         </Button>
       </form>

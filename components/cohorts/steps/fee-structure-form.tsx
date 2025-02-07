@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { updateCohort } from "@/app/api/cohorts";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
 interface FeeStructureFormProps {
   onNext: () => void;
@@ -41,13 +42,14 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
       oneShotDiscount: initialData?.cohortFeesDetail?.oneShotDiscount || "",
     }
   });
+  const [loading, setLoading] = useState(false);  
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     if (!initialData?._id) {
       console.error("Cohort ID is missing. Unable to update.");
       return;
     }
-
+    setLoading(true)
     try {
       // Update cohort fee details
       const createdCohort = await updateCohort(initialData._id, { cohortFeesDetail: data });
@@ -56,7 +58,25 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
       onNext(); // Proceed to the next step
     } catch (error) {
       console.error("Failed to update cohort fees:", error);
+    } finally {
+      setLoading(false)
     }
+  }
+
+  function formatIndianCurrency(value: string | number): string {
+    if (!value) return "";
+    const numStr = value.toString();
+    const lastThreeDigits = numStr.slice(-3); // Last 3 digits
+    const otherDigits = numStr.slice(0, -3); // Digits before last 3
+    const formattedOtherDigits = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ","); // Add commas in groups of 2
+    return otherDigits
+      ? `${formattedOtherDigits},${lastThreeDigits}`
+      : lastThreeDigits; // Combine both parts
+  }
+  
+  // Remove formatting to get raw value
+  function removeFormatting(value: string): string {
+    return value.replace(/,/g, ""); // Remove commas
   }
 
   return (
@@ -71,9 +91,13 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
                 <Label>Application Fee (₹)</Label>
                 <FormControl>
                   <Input
-                    type="number" min="1"
+                    type="text"
                     placeholder="₹500"
-                    {...field}
+                    value={formatIndianCurrency(field.value)} // Format the value on render
+                    onChange={(e) => {
+                      const rawValue = removeFormatting(e.target.value); // Remove formatting for raw input
+                      field.onChange(rawValue); // Update the field with unformatted value
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -89,9 +113,13 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
                 <Label>Admission Fee (₹)</Label>
                 <FormControl>
                   <Input
-                    type="number" min="1"
+                    type="text" 
                     placeholder="₹50,000"
-                    {...field}
+                    value={formatIndianCurrency(field.value)} // Format the value on render
+                    onChange={(e) => {
+                      const rawValue = removeFormatting(e.target.value); // Remove formatting for raw input
+                      field.onChange(rawValue); // Update the field with unformatted value
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -156,7 +184,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={loading}>
           Next: Fee Preview
         </Button>
       </form>

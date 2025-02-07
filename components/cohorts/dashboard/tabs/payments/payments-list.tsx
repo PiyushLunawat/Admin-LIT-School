@@ -53,7 +53,7 @@ export function PaymentsList({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(applications[0]?._id || null);
   
   const getStatusColor = (status: PaymentRecord["status"]): BadgeVariant => {
     switch (status?.toLowerCase()) {
@@ -63,6 +63,8 @@ export function PaymentsList({
         return "warning";
       case "verification pending":
         return "lemon";
+      case "verification pending":
+        return "default";
       default:
         return "default";
     }
@@ -92,6 +94,14 @@ export function PaymentsList({
   const handleStatusUpdate = () => {
     onApplicationUpdate();
   };
+
+  useEffect(() => {
+    if (applications.length > 0) {
+      const firstApplication = applications[0];
+      setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
+      onStudentSelect(firstApplication); // Call the onApplicationSelect function for the first application
+    }
+  }, [applications]);
 
   return (
     <div className="border rounded-lg">
@@ -156,7 +166,6 @@ export function PaymentsList({
                 }
               }
               
-              console.log("datatata",new Date(earliestUnpaid.installmentDate).toLocaleDateString());
               if (allPaid) {
                 paymentStatus = "Complete";
                 dueDate = "--";

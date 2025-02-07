@@ -158,10 +158,9 @@ export function LitmusTestForm({
         },
 
   });
-
+  const [loading, setLoading] = useState(false);  
   const { control, handleSubmit, watch, setValue  } = form;
   
-
   const {
     fields: taskFields,
     append: appendTask,
@@ -181,9 +180,9 @@ export function LitmusTestForm({
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setLoading(true)
     try {
       console.log("Form data before submission:", data);
-
       if (initialData?._id) {
         const createdCohort = await updateCohort(initialData._id, {
           litmusTestDetail: data,
@@ -196,6 +195,8 @@ export function LitmusTestForm({
       }
     } catch (error) {
       console.error("Failed to update cohort:", error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -314,7 +315,7 @@ export function LitmusTestForm({
           />
         </div> */}
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={loading}>
           Next: Fee Structure
         </Button>
       </form>

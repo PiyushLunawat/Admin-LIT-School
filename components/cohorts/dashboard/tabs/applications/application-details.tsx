@@ -67,22 +67,27 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
  
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
+      case "initiated":
+        return "default";
       case "under review":
         return "secondary";
       case "accepted":
+      case "selected":
         return "success";
       case "rejected":
+      case "not qualified":
         return "warning";
       case "on hold":
+      case "waitlist":
         return "onhold";
       case "interview scheduled":
         return "default";
       case "interview rescheduled":
         return "lemon";
-      case "update status":
+      case "interview concluded":
         return "lemon";
       default:
-        return "default";
+        return "secondary";
     }
   };
 
@@ -94,7 +99,6 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
     try {
       const student = await getCurrentStudents(applicationId?._id);
       setApplication(student.data);
-      console.log("student.data",student.data?.applicationDetails?.applicationStatus);
       
       if(['not qualified', 'Interview Scheduled', 'concluded', 'waitlist', 'selected'].includes(student.data?.applicationDetails?.applicationStatus))
         setInterview(true)

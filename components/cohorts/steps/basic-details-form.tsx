@@ -103,6 +103,7 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
     },
   });
 
+  const [loading, setLoading] = useState(false);  
   const [programs, setPrograms] = useState<Program[]>([]);  
   const [centres, setCentres] = useState<Centre[]>([]);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
@@ -123,7 +124,6 @@ function formatIndianCurrency(value: string | number): string {
 function removeFormatting(value: string): string {
   return value.replace(/,/g, ""); // Remove commas
 }
-
 
   useEffect(() => {
     async function fetchData() {
@@ -191,6 +191,7 @@ function removeFormatting(value: string): string {
       status: "Draft",
       isGSTIncluded: values.isGSTIncluded
     };
+    setLoading(true);
     try {
       if (initialData?._id) {
         const createdCohort = await updateCohort(initialData._id, dataWithCohortId);
@@ -205,6 +206,8 @@ function removeFormatting(value: string): string {
       onNext();
     } catch (error) {
       console.error("Failed to create cohort:", error);
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -458,14 +461,14 @@ function removeFormatting(value: string): string {
                 <Label>Base Fee</Label>
                 <FormControl>
                 <Input
-          type="text" // Change input type to text to handle formatted value
-          placeholder="995000"
-          value={formatIndianCurrency(field.value)} // Format the value on render
-          onChange={(e) => {
-            const rawValue = removeFormatting(e.target.value); // Remove formatting for raw input
-            field.onChange(rawValue); // Update the field with unformatted value
-          }}
-        />
+                  type="text" // Change input type to text to handle formatted value
+                  placeholder="9,95,000"
+                  value={formatIndianCurrency(field.value)} // Format the value on render
+                  onChange={(e) => {
+                    const rawValue = removeFormatting(e.target.value); // Remove formatting for raw input
+                    field.onChange(rawValue); // Update the field with unformatted value
+                  }}
+                />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -492,7 +495,7 @@ function removeFormatting(value: string): string {
           />
         </div>
 
-        <Button type="submit" className="w-full">Next: Application Form</Button>
+        <Button type="submit" className="w-full" disabled={loading}>Next: Application Form</Button>
       </form>
     </Form>
   );

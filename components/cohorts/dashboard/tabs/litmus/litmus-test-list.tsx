@@ -188,6 +188,14 @@ export function LitmusTestList({
     onApplicationUpdate();
   };
 
+  useEffect(() => {
+    if (filteredAndSortedApplications.length > 0) {
+      const firstApplication = filteredAndSortedApplications[0];
+      setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
+      onSubmissionSelect(firstApplication); // Call the onApplicationSelect function for the first application
+    }
+  }, [filteredAndSortedApplications]);
+
   return (
     loading ?
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">

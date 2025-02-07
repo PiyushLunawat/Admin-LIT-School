@@ -60,7 +60,6 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
             student?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed' &&
             student.cohort?._id === cohortId
         );
-        console.log("Vsvssvsv",mappedStudents)
 
         const filteredApplications = mappedStudents.filter((app: any) => {
           // --- Date Range Check ---

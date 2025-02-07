@@ -25,9 +25,6 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const [centres, setCentres] = useState<any[]>([]);
   const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
 
-  console.log("bsvs",student);
-  
-
   useEffect(() => {
     async function fetchData() {
       try {
@@ -36,7 +33,6 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
         // setPrograms(programsData.data);
         const centresData = await getCentres();
         setCentres(centresData.data);
-        console.log("e",centres);
         
         // const openCohorts = cohortsData.data.filter((cohort:Cohort) => cohort.status === "Open");
         // setInterest(openCohorts);
@@ -49,7 +45,6 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   }, []);
 
   const getCenterName = (centerId: string) => {
-    console.log("e",centerId,centres);
     const center = centres.find((c) => c._id === centerId);
     return center ? center.name : "--";
   };

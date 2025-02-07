@@ -29,7 +29,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { AwardScholarship } from "../litmus/litmus-test-dialog/award-scholarship";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
 interface PaymentDetailsProps {
   student: any;
   onClose: () => void;
@@ -39,13 +39,22 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [sch, setSch] = useState<any>(null);
   const [schOpen, setSchOpen] = useState(false);
+  const [showAllSemesters, setShowAllSemesters] = useState(false);
+
+  const lastCourse = student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
+  let lastStatus = '';
+
+  const visibleSemesters = showAllSemesters
+  ? lastCourse?.installmentDetails
+  : lastCourse?.installmentDetails?.slice(0, 1); 
+
 
   const colorClasses = ['text-emerald-600', 'text-[#3698FB]', 'text-[#FA69E5]', 'text-orange-600'];
 
   let paidAmount = 0;
   let notPaidAmount = 0;
 
-  const lastEnrolled = student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
+  const lastEnrolled = lastCourse;
   if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
     const oneShotDetails = lastEnrolled?.oneShotPayment;
     if (oneShotDetails) {
@@ -69,7 +78,6 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
     });
   }
 
-
   useEffect(() => {
     setSch(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
 }, [student]);
@@ -79,9 +87,11 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
       case "paid":
         return "success";
       case "pending":
-        return "warning";
+        return "default";
       case "overdue":
-        return "destructive";
+        return "warning";
+      case "verification pending":
+        return "lemon";
       default:
         return "default";
     }
@@ -136,8 +146,8 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Admission Fee Status</p>
                 <span className="text-base mr-2">{formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}</span>
-                <Badge className="capitalize" variant={getStatusColor(student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.tokenFeeDetails?.verificationStatus)}>
-                  ₹{student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.tokenFeeDetails?.verificationStatus}
+                <Badge className="capitalize" variant={getStatusColor(lastCourse?.tokenFeeDetails?.verificationStatus)}>
+                  ₹{lastCourse?.tokenFeeDetails?.verificationStatus}
                 </Badge>
               </div>
             </div>
@@ -199,32 +209,39 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
           <div className="space-y-4">
             <h4 className="font-medium">Payment Schedule</h4>
 
-            {student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.feeSetup?.installmentType === 'one shot payment' ? 
+            {lastCourse?.feeSetup?.installmentType === 'one shot payment' ? 
             <Card className="p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
                   <h5 className="font-medium">One Shot Payement</h5>
                 </div>
-                <Badge variant={getStatusColor(student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.verificationStatus)}>
-                  {student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.verificationStatus}
+
+                {(new Date(lastCourse?.oneShotPayment?.installmentDate) < new Date() && lastCourse?.oneShotPayment?.verificationStatus === 'pending' ) ?
+                  <Badge variant={getStatusColor('overdue')}>
+                    overdue
+                  </Badge>
+                :
+                <Badge variant={getStatusColor(lastCourse?.oneShotPayment?.verificationStatus)}>
+                  {lastCourse?.oneShotPayment?.verificationStatus}
                 </Badge>
+                }
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Amount: ₹{formatAmount(student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.amountPayable)}</p>
-                <p className="text-xs text-muted-foreground">One Shot Discount: {formatAmount(student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.OneShotPaymentAmount)}</p>
-                <p className="text-xs text-muted-foreground">Base Amount: ₹{formatAmount(student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.baseFee)}</p>
+                <p className="text-sm text-muted-foreground">Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.amountPayable)}</p>
+                <p className="text-xs text-muted-foreground">One Shot Discount: {formatAmount(lastCourse?.oneShotPayment?.OneShotPaymentAmount)}</p>
+                <p className="text-xs text-muted-foreground">Base Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.baseFee)}</p>
               </div>
               <div className="flex items-center text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4 mr-2" />
-                Due: {new Date(student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.installmentDate).toLocaleDateString()}
+                Due: {new Date(lastCourse?.oneShotPayment?.installmentDate).toLocaleDateString()}
               </div>
-              {student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.receiptUrls[student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate && (
+              {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate && (
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Paid: {new Date(student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.receiptUrls[student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()}
+                  Paid: {new Date(lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()}
                 </div>
               )}
-              {student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.receiptUrls[student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
+              {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
                 <Button variant="outline" size="sm" className="w-full mt-2">
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
@@ -235,8 +252,8 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                   Upload Receipt
                 </Button>}             
             </Card> : 
-            student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1]?.installmentDetails?.map(
-              (semesterDetail: any, semesterIndex: number) => (
+            <div className="">
+            {visibleSemesters?.map( (semesterDetail: any, semesterIndex: number) => (
                 <div key={semesterIndex} className="space-y-2">
                   {semesterDetail?.installments?.map((installment: any, installmentIndex: number) => (
                     <Card key={installmentIndex} className="p-4 space-y-2">
@@ -245,19 +262,29 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                           <h5 className="font-medium">Installment {installmentIndex + 1}</h5>
                           <p className="text-xs text-[#00A3FF]">Semester {semesterDetail.semester}</p>
                         </div>
-                        <Badge className="capitalize" variant={getStatusColor(installment.verificationStatus)}>
-                          {installment.verificationStatus}
-                        </Badge>
+                        {lastStatus !== 'pending' && (
+                          (new Date(lastCourse?.oneShotPayment?.installmentDate) < new Date() && lastCourse?.oneShotPayment?.verificationStatus === 'pending' && !(installment.receiptUrls[0]?.uploadedDate)) ?
+                            <Badge variant={getStatusColor('overdue')}>
+                              overdue
+                            </Badge>
+                          :
+                            <Badge className="capitalize" variant={getStatusColor(installment.verificationStatus)}>
+                              {installment.verificationStatus}
+                            </Badge>
+                        )}
+                        <div className="hidden">
+                          {lastStatus = installment.verificationStatus}
+                        </div>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">
                           Amount Payable: ₹{formatAmount(installment.amountPayable)}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Scholarship Waiver: ₹{formatAmount(installment.scholarshipAmount)}
+                          Base Amount: ₹{formatAmount(installment.baseFee + installment.scholarshipAmount)}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          Base Amount: ₹{formatAmount(installment.baseFee)}
+                        <p className="text-xs   text-destructive">
+                          Scholarship Waiver: ₹{formatAmount(installment.scholarshipAmount)}
                         </p>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
@@ -291,6 +318,16 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                 </div>
               )
             )}
+              {sch?.scholarshipDetails?.length > 1 && (
+                <Button
+                  variant="outline" className="w-full"
+                  onClick={() => setShowAllSemesters(!showAllSemesters)}
+                >
+                  {showAllSemesters ? "Show Less" : "Show More"}
+                </Button>
+              )}
+            </div>
+            }
           </div>
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>

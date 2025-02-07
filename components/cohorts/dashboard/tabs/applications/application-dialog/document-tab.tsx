@@ -18,8 +18,6 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   
   const [open, setOpen] = useState(false);
   const [document, setDocument] = useState<any>(student?.personalDocsDetails);
-
-  console.log("sdds",student);
   
   const documents = [
       {
@@ -77,7 +75,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {documents.map((doc: any, index: any) => {
-          const docDetails = doc.docDetails[0] || null; 
+          const docDetails = doc.docDetails[doc.docDetails.length - 1] || null; 
           const isUploaded = !!docDetails; 
           const status = docDetails?.status || "Pending";
           console.log("docs", docDetails,isUploaded,status)
@@ -107,10 +105,10 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                     <Badge className="capitalize" variant={status === "verified" ? "success" : "warning"}>
                     {status}
                   </Badge>}
-                  <Button variant="ghost" size="sm" onClick={() =>setOpen(true)}>
+                  {/* <Button variant="ghost" size="sm" onClick={() =>setOpen(true)}>
                     <Eye className="h-4 w-4 mr-2" />
                     View
-                  </Button>
+                  </Button> */}
                   <Button variant="ghost" size="sm">
                     <Download className="h-4 w-4 mr-2" />
                     Download

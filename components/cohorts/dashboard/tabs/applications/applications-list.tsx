@@ -58,7 +58,7 @@ export function ApplicationsList({
 }: ApplicationsListProps) {
   const [open, setOpen] = useState(false);
   const [applications, setApplications] = useState<any>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
@@ -80,7 +80,6 @@ export function ApplicationsList({
         setLoading(false);
       }
     }
-
     fetchStudents();
   }, []);
 
@@ -92,16 +91,19 @@ export function ApplicationsList({
       case "under review":
         return "secondary";
       case "accepted":
+      case "selected":
         return "success";
       case "rejected":
+      case "not qualified":
         return "warning";
       case "on hold":
+      case "waitlist":
         return "onhold";
       case "interview scheduled":
         return "default";
       case "interview rescheduled":
         return "lemon";
-      case "update status":
+      case "interview concluded":
         return "lemon";
       default:
         return "secondary";
@@ -230,11 +232,15 @@ export function ApplicationsList({
     onApplicationUpdate();
   };
 
+  useEffect(() => {
+    if (filteredAndSortedApplications.length > 0) {
+      const firstApplication = filteredAndSortedApplications[0];
+      setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
+      onApplicationSelect(firstApplication); // Call the onApplicationSelect function for the first application
+    }
+  }, [filteredAndSortedApplications]);
+
   return (
-    loading ?
-    <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
-      <div >Loading... </div>
-    </div> :
     applications.length === 0 ?
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
       <div >All your students will appear here</div>
@@ -325,25 +331,25 @@ export function ApplicationsList({
             <StudentApplicationHeader student={selectedStudentId} />
           )}
 
-      <Tabs defaultValue="personal" className="space-y-6">
-        <TabsList className="w-full">
-          <TabsTrigger value="personal">Personal Details</TabsTrigger>
-          <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-        </TabsList>
+            <Tabs defaultValue="personal" className="space-y-6">
+              <TabsList className="w-full">
+                <TabsTrigger value="personal">Personal Details</TabsTrigger>
+                <TabsTrigger value="payment">Payment</TabsTrigger>
+                <TabsTrigger value="documents">Documents</TabsTrigger>
+              </TabsList>
 
-        <TabsContent value="personal">
-          <PersonalDetailsTab student={selectedStudentId} />
-        </TabsContent>
+              <TabsContent value="personal">
+                <PersonalDetailsTab student={selectedStudentId} />
+              </TabsContent>
 
-        <TabsContent value="payment">
-          <PaymentInformationTab student={selectedStudentId} />
-        </TabsContent>
+              <TabsContent value="payment">
+                <PaymentInformationTab student={selectedStudentId} />
+              </TabsContent>
 
-        <TabsContent value="documents">
-          <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
-        </TabsContent>
-      </Tabs>
+              <TabsContent value="documents">
+                <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
+              </TabsContent>
+            </Tabs>
         </DialogContent>
       </Dialog>
     </div>

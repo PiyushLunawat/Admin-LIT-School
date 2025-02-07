@@ -18,6 +18,7 @@ interface PaymentInformationTabProps {
 export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
 
   const [sch, setSch] = useState<any>();
+  const [feeStructure, setFeeStructure] = useState<any>();
   const [open, setOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showAllSemesters, setShowAllSemesters] = useState(false);
@@ -65,16 +66,17 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
     const fallbackScholarship = student.cohort.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );
-
-    setSch(matchedScholarship || fallbackScholarship);
+    const finalScholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.installmentDetails
+    setFeeStructure(finalScholarship);
+    setSch((matchedScholarship || fallbackScholarship));
   }, [student]);
 
   const visibleSemesters = showAllSemesters
-  ? sch?.scholarshipDetails
-  : sch?.scholarshipDetails?.slice(0, 1); 
+  ? (feeStructure || sch?.scholarshipDetails)
+  : (feeStructure || sch?.scholarshipDetails)?.slice(0, 1); 
 
   const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
-  const installments = sch?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+  const installments = (feeStructure || sch?.scholarshipDetails)?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
   const scholarshipAmount = installments.reduce((sum: number, installment: any) => sum + (installment.scholarshipAmount || 0), 0);
   const totalAmount = tokenAmount + installmentTotal;
@@ -255,8 +257,16 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                       {/* <Button variant="outline" size="sm">
                         <UploadIcon className="h-4 w-4 mr-2" />
                         Upload Receipt
-                      </Button> */}
+                        </Button> */}
                     </div>
+                    {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate && 
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Paid:{" "}
+                      {instalment.installmentDate
+                        ? new Date(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()
+                        : "--"}
+                    </div>}
                   </div>
                 ))}
               </div>

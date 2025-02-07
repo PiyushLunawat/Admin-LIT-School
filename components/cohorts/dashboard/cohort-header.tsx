@@ -66,7 +66,7 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
             
             setIntCleared(
               mappedStudents.filter(
-                (student: any) => student?.applicationDetails?.applicationStatus === 'cleared'
+                (student: any) => student?.applicationDetails?.applicationStatus === 'selected'
               ).length
             );
 
@@ -74,13 +74,7 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
               mappedStudents.filter(
                 (student: any) => student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid'
               ).length
-            );
-
-            console.log("csc",cohort?.filledSeats.length,intCleared,response.data.filter(
-              (student: any) => student?.applicationDetails?.applicationStatus === 'initiated'
-            ).length);
-            
-        
+            );       
       } catch (error) {
         console.error("Error fetching programs:", error);
       }
@@ -103,7 +97,6 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
       try {
         const cohortData = await getCohortById(cohortId);
         setCohort(cohortData.data);
-        console.log(" cohort:", cohortData);
       } catch (error) {
         console.error("Failed to fetch cohort:", error);
       }
@@ -139,9 +132,9 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
             <p className="text-sm text-muted-foreground">Schedule</p>
             <p className="font-medium">{cohort.schedule}</p>
             <p className="text-sm">
-  {new Date(cohort.startDate).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })} - {" "}
-  {new Date(cohort.endDate).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
-</p>
+              {new Date(cohort.startDate).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })} - {" "}
+              {new Date(cohort.endDate).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
+            </p>
           </div>
 
           <div className="space-y-2">

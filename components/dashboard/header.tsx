@@ -10,7 +10,7 @@ export function Header() {
       <div className="flex h-16 items-center px-4">
         <div className="ml-auto flex items-center space-x-4">
           <ThemeToggle />
-          <NotificationsButton />
+          {/* <NotificationsButton /> */}
           <UserButton />
         </div>
       </div>

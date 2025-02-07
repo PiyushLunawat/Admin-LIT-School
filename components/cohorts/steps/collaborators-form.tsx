@@ -127,6 +127,7 @@ export function CollaboratorsForm({
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setLoading(true)
     try {
       if (initialData?._id) {
         const collaboratorsToUpdate = data.collaborators.map((collab) => ({
@@ -148,6 +149,8 @@ export function CollaboratorsForm({
       }
     } catch (error) {
       console.error("Failed to update cohort:", error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -161,15 +164,21 @@ export function CollaboratorsForm({
           isInvited: collab.isInvited ?? false,
         }));
 
-        console.log("Collaborators data to send:", collaboratorsToUpdate);
-
-        // Update the cohort
         const createdCohort = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
         });
         onCohortCreated(createdCohort.data);
-        await inviteCollaborators(initialData._id);
+
+        const invited = await inviteCollaborators(initialData._id);
+
         toast({ title: "Collaborators invited successfully!", variant: "success" });
+
+        onCohortCreated(invited.data);
+
+        form.reset({
+          collaborators: invited.data.collaborators,
+        });
+
       } else {
         toast({ title: "Cohort ID is missing. Unable to invite collaborators!", variant: "destructive" });
       }
@@ -177,7 +186,7 @@ export function CollaboratorsForm({
       console.error("Failed to invite collaborators:", error);
       toast({ title: `Failed to invite collaborators:", ${error}!`, variant: "destructive" });
     } finally {
-      setLoading(false)
+      setInviteLoading(false)
     }
   };
 
@@ -358,7 +367,7 @@ export function CollaboratorsForm({
             variant="outline"
             type="button"
             className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
-            onClick={() => handleInvite}
+            onClick={() => handleInvite(form.getValues())}
           >
             <Send className="mr-2 h-4 w-4" />
             {inviteLoading ? 'Sending Invite...' : 'Invite Collaborator'}
@@ -375,7 +384,7 @@ export function CollaboratorsForm({
         </div>
 
         {/* Submit (Update) */}
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={loading}>
           Update Cohort
         </Button>
       </form>
