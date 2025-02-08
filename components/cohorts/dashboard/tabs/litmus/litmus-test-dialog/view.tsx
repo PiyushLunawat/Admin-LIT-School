@@ -25,9 +25,12 @@ interface Section {
 
 
 export function ViewComponent({ application, onApplicationUpdate }: ReviewComponentProps) {
+  
+  const studentId = application?._id ;
+  const litmusTestDetails = application?.litmusTestDetails[0];
+  const litmusTaskId = litmusTestDetails?.litmusTaskId?._id ;
 
-  const [rating, setRating] = useState<number>(application?.litmusTestDetails[0]?.litmusTaskId?.performanceRating || 0);
-  console.log("rea",(application?.litmusTestDetails[0]?.litmusTaskId?.results));
+  const [rating, setRating] = useState<number>(litmusTestDetails?.litmusTaskId?.performanceRating || 0);
   
   const [hoverRating, setHoverRating] = useState<number>(0);
   const max = 5;
@@ -48,19 +51,19 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
   const sections: Section[] = [
     {
       title: "Strengths",
-      data: application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback[0]?.data || [],
+      data: litmusTestDetails?.litmusTaskId?.overAllfeedback[0]?.feedback[0]?.data || [],
     },
     {
       title: "Weakness",
-      data: application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback[1]?.data || [],
+      data: litmusTestDetails?.litmusTaskId?.overAllfeedback[0]?.feedback[1]?.data || [],
     },
     {
       title: "Opportunities",
-      data: application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback[2]?.data || [],
+      data: litmusTestDetails?.litmusTaskId?.overAllfeedback[0]?.feedback[2]?.data || [],
     },
     {
       title: "Threats",
-      data: application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback[3]?.data || [],
+      data: litmusTestDetails?.litmusTaskId?.overAllfeedback[0]?.feedback[3]?.data || [],
     },
   ];
   
@@ -140,7 +143,6 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
     tasks.map((task: any, index: number) =>
       task.judgmentCriteria.map((criteria: any, cIndex: number) => {
         const initialScore = application?.litmusTestDetails?.[0]?.litmusTaskId?.results?.[index]?.score?.[cIndex]?.score || 0;
-        console.log("score", initialScore);
         return initialScore; // Return the initial score for this criteria
       })
     )
@@ -158,10 +160,6 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
     });
   };
 
-
-    const studentId = application?._id ;
-    const litmusTaskId = application?.litmusTestDetails[0]?.litmusTaskId?._id ;
-
     const handlePublish = async () => {
       // Construct results from tasks and taskScores
       const results = tasks.map((task: any, tIndex: number) => {
@@ -176,25 +174,23 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
         };
       });
   
-// Construct feedbackData from sections
-const feedbackData = sections.map((section) => {
-  // Extract bullet lines
-  const bulletLines = feedbackInputs[section.title]
-    .split("\n")
-    .map((line) => line.replace(/^•\s*/, "").trim())
-    .filter((line) => line.length > 0);
+      // Construct feedbackData from sections
+      const feedbackData = sections.map((section) => {
+        // Extract bullet lines
+        const bulletLines = feedbackInputs[section.title]
+          .split("\n")
+          .map((line) => line.replace(/^•\s*/, "").trim())
+          .filter((line) => line.length > 0);
 
-  return {
-    feedbackTitle: section.title, // changed from feebbackTitle to feedbackTitle
-    data: bulletLines,
-  };
-});
-
+        return {
+          feedbackTitle: section.title, // changed from feebbackTitle to feedbackTitle
+          data: bulletLines,
+        };
+      });
   
       const scholarshipDetail = "507f1f77bcf86cd799439011";
       const performanceRating = rating;
   
-
       try {
         console.log("task eve",litmusTaskId);
         
@@ -217,18 +213,18 @@ const feedbackData = sections.map((section) => {
     <div className="space-y-3">
       {/* Header Section */}
       <div className="flex items-center gap-4 border-b pb-3">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={application?.profileUrl} className="object-cover" />
-              <AvatarFallback>{application?.firstName?.[0] || "-"}{application?.lastName?.[0] || "-"}</AvatarFallback>
-            </Avatar>
-            <div className="space-y-1">
-              <h2 className="text-base font-semibold">{application?.firstName+" "+application?.lastName}</h2>
-              <div className="flex gap-4 h-5 items-center">
-                <p className="text-sm text-muted-foreground">{application?.email}</p>
-                <Separator orientation="vertical" />
-                <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
-              </div>
-            </div>
+        <Avatar className="h-16 w-16">
+          <AvatarImage src={application?.profileUrl} className="object-cover" />
+          <AvatarFallback>{application?.firstName?.[0] || "-"}{application?.lastName?.[0] || "-"}</AvatarFallback>
+        </Avatar>
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold">{application?.firstName+" "+application?.lastName}</h2>
+          <div className="flex gap-4 h-5 items-center">
+            <p className="text-sm text-muted-foreground">{application?.email}</p>
+            <Separator orientation="vertical" />
+            <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
+          </div>
+        </div>
       </div>
 
       {/* Task Section */}
@@ -272,17 +268,17 @@ const feedbackData = sections.map((section) => {
       </div>
       </div>
 
-     {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index] && 
+     {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index] && 
      <div className="">
         <div className="text-[#FFF552] text-md font-medium">
           Submission 0{index+1}
         </div>
-        {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.text?.map((textItem: string, id: number) => (
+        {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.text?.map((textItem: string, id: number) => (
               <div key={`text-${id}`} className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">
                 {textItem}
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.links?.map((linkItem: string, id: number) => (
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.links?.map((linkItem: string, id: number) => (
               <div key={`link-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <Link2Icon className="w-4 h-4" />
                 <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -290,7 +286,7 @@ const feedbackData = sections.map((section) => {
                 </a>
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.images?.map((imageItem: string, id: number) => (
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.images?.map((imageItem: string, id: number) => (
               <div key={`image-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <ImageIcon className="w-4 h-4" />
                 <a href={imageItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -298,7 +294,7 @@ const feedbackData = sections.map((section) => {
                 </a>
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.videos?.map((videoItem: string, id: number) => (
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.videos?.map((videoItem: string, id: number) => (
               <div key={`video-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <VideoIcon className="w-4 h-4" />
                 <a href={videoItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -306,7 +302,7 @@ const feedbackData = sections.map((section) => {
                 </a>
               </div>
             ))}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.files?.map((fileItem: string, id: number) => (
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.files?.map((fileItem: string, id: number) => (
               <div key={`file-${id}`} className="flex items-center gap-2 mt-2 p-2 border rounded-xl">
                 <FileIcon className="w-4 h-4" />
                 <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">

@@ -294,15 +294,15 @@ export function ApplicationsList({
                 </Badge>}
               </TableCell>
               <TableCell>
-                {application.interviewDate ? (
+                {application?.applicationDetails?.applicationTestInterviews[application?.applicationDetails?.applicationTestInterviews.length - 1] ? (
                   <>
-                    <div className="flex items-center text-xs">
+                    <div className="flex items-center text-sm">
                       <Clock4Icon className="h-3 w-3 mr-1" />
-                      {application?.interviewTime}
+                      {application?.applicationDetails?.applicationTestInterviews[application?.applicationDetails?.applicationTestInterviews.length - 1]?.startTime}
                     </div>
-                    <div className="flex items-center text-xs">
+                    <div className="flex items-center text-sm">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(application?.lastActivity || new Date().toISOString()).toLocaleDateString() || "--"}
+                      {new Date(application?.applicationDetails?.applicationTestInterviews[application?.applicationDetails?.applicationTestInterviews.length - 1]?.meetingDate).toLocaleDateString() || "--"}
                     </div>
                   </>
                 ) : "--"}

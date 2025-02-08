@@ -113,7 +113,9 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
                 <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
                 Send WhatsApp
               </Button> */}
-              <Button variant="outline" className="justify-start" onClick={() => setInterviewOpen(true)}>
+              <Button variant="outline" className="justify-start" 
+              // onClick={() => setInterviewOpen(true)}
+              >
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>

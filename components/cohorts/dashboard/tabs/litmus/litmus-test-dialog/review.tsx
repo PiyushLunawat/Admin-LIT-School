@@ -32,8 +32,11 @@ export function ReviewComponent({
   application,
   onApplicationUpdate,
 }: ReviewComponentProps) {
+
+  const litmusTestDetails = application?.litmusTestDetails[0];
+  
   const [rating, setRating] = useState<number>(
-    application?.litmusTestDetails[0]?.litmusTaskId?.performanceRating || 0
+    litmusTestDetails?.litmusTaskId?.performanceRating || 0
   );
   const [hoverRating, setHoverRating] = useState<number>(0);
   const max = 5;
@@ -53,25 +56,25 @@ export function ReviewComponent({
     {
       title: "Strengths",
       data:
-        application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]
+        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
           ?.feedback[0]?.data || [],
     },
     {
       title: "Weakness",
       data:
-        application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]
+        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
           ?.feedback[1]?.data || [],
     },
     {
       title: "Opportunities",
       data:
-        application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]
+        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
           ?.feedback[2]?.data || [],
     },
     {
       title: "Threats",
       data:
-        application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]
+        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
           ?.feedback[3]?.data || [],
     },
   ];
@@ -179,7 +182,7 @@ export function ReviewComponent({
   };
 
   const studentId = application?._id;
-  const litmusTaskId = application?.litmusTestDetails[0]?.litmusTaskId?._id;
+  const litmusTaskId = litmusTestDetails?.litmusTaskId?._id;
 
   /**
    * This function checks:
@@ -391,7 +394,7 @@ export function ReviewComponent({
             <div className="text-[#FFF552] text-md font-medium">
               Submission 0{index + 1}
             </div>
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.text?.map(
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.text?.map(
               (textItem: string, id: number) => (
                 <div
                   key={`text-${id}`}
@@ -401,7 +404,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.links?.map(
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.links?.map(
               (linkItem: string, id: number) => (
                 <div
                   key={`link-${id}`}
@@ -414,7 +417,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.images?.map(
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.images?.map(
               (imageItem: string, id: number) => (
                 <div
                   key={`image-${id}`}
@@ -427,7 +430,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.videos?.map(
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.videos?.map(
               (videoItem: string, id: number) => (
                 <div
                   key={`video-${id}`}
@@ -440,7 +443,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {application?.litmusTestDetails[0]?.litmusTaskId?.litmustasks[0]?.[index]?.task?.files?.map(
+            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.files?.map(
               (fileItem: string, id: number) => (
                 <div
                   key={`file-${id}`}

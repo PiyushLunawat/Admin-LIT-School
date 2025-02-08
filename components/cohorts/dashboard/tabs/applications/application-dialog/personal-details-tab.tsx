@@ -22,32 +22,23 @@ interface PersonalDetailsTabProps {
 
 export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [centres, setCentres] = useState<any[]>([]);
-  const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
+  const [selectedCentre, setSelectedCentre] = useState("");
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchData() {      
       try {
-        // const cohortsData = await getCohorts();
-        // const programsData = await getPrograms();
-        // setPrograms(programsData.data);
         const centresData = await getCentres();
-        setCentres(centresData.data);
-        
-        // const openCohorts = cohortsData.data.filter((cohort:Cohort) => cohort.status === "Open");
-        // setInterest(openCohorts);
-        // setCohorts(cohortsData.data);
+
+        const center = centresData.data.find((c: any) => c._id === student?.cohort?.centerDetail);
+        setSelectedCentre(center?.name || "--")
+        console.log("3",center?.name);
+
       } catch (error) {
         console.error("Error fetching programs:", error);
       }
     }
     fetchData();
-  }, []);
-
-  const getCenterName = (centerId: string) => {
-    const center = centres.find((c) => c._id === centerId);
-    return center ? center.name : "--";
-  };
+  }, [student]);
 
   function formatDateToMonthYear(dateString: string): string {
     const date = new Date(dateString);
@@ -130,7 +121,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label>Cohort</Label>
               <Input
-                defaultValue={formatDateToMonthYear(student?.cohort?.startDate) +' '+(student?.cohort.timeSlot)+', '+ getCenterName(student?.cohort?.centerDetail)}
+                value={formatDateToMonthYear(student?.cohort?.startDate) +' '+(student?.cohort.timeSlot)+', '+ selectedCentre}
                 readOnly={!isEditing}
               />
             </div>

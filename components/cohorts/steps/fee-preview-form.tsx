@@ -60,6 +60,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
   const [newBaseFee, setNewBaseFee] = useState(initialData?.baseFee || 0);
   const [isGST, setIsGST] = useState(true);
   const [GSTAmount, setGSTAmount] = useState(1);
+  const [withoutGSTAmount, setWithoutGSTAmount] = useState(1);
   const [editableDates, setEditableDates] = useState<Record<string, string>>({});
   const uniqueId = useId();
 
@@ -73,7 +74,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
   useEffect(() => {
     if (initialData?.isGSTIncluded === false) {
       setIsGST(false);
-      setGSTAmount(1.18); // 1 + 0.18
+      setGSTAmount(1.18);
+    } else {
+      setWithoutGSTAmount(1.18);
     }
   }, [initialData]);
 
@@ -317,7 +320,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                               />
                             </div>
                           </TableCell>
-                          <TableCell>{formatAmount(installment.amountPayable)}</TableCell>
+                          <TableCell>{formatAmount(installment.amountPayable/withoutGSTAmount)}</TableCell>
                           <TableCell>{formatAmount(installment.amountPayable * GSTAmount)}</TableCell>
                         </TableRow>
                       ))}
@@ -326,7 +329,14 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Total Instalment Amount:</span>
-                      <span>₹{formatAmount(totalInstallmentAmount)}</span>
+                      <span>₹{formatAmount(totalInstallmentAmount/withoutGSTAmount)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
+                      {isGST ? 
+                        <span>₹{formatAmount((totalInstallmentAmount - totalInstallmentAmount/withoutGSTAmount))}</span> :
+                        <span>₹{formatAmount((totalInstallmentAmount)*0.18)}</span>
+                      }
                     </div>
                     <div className="flex justify-between">
                       <span>Total Amount Payable:</span>
@@ -348,12 +358,15 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
           </div>
           <div className="flex justify-between text-sm">
             <span>Total Fee Amount:</span>
-            <span>₹{formatAmount(newBaseFee)}</span>
+            <span>₹{formatAmount(newBaseFee/withoutGSTAmount)}</span>
           </div>
-          {!isGST && <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm">
             <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-            <span>₹{formatAmount((newBaseFee)*0.18)}</span>
-          </div>}
+            {isGST ? 
+              <span>₹{formatAmount((newBaseFee - newBaseFee/withoutGSTAmount))}</span> :
+              <span>₹{formatAmount((newBaseFee)*0.18)}</span>
+            }
+          </div>
           <div className="flex justify-between text-sm mt-4">
             <span>Total Amount Payable:</span>
             <span className="font-bold">₹{formatAmount((newBaseFee)*GSTAmount)}</span>
@@ -372,16 +385,19 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
           </div>
           <div className="flex justify-between text-sm">
             <span>Total Fee Amount:</span>
-            <span>₹{formatAmount(newBaseFee)}</span>
+            <span>₹{formatAmount(newBaseFee/withoutGSTAmount)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span>One Shot Payment Discount ({formatAmount(initialData?.cohortFeesDetail?.oneShotDiscount)}%):</span>
-            <span className="text-red-500">- ₹{formatAmount(newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
+            <span className="text-red-500">- ₹{formatAmount(newBaseFee/withoutGSTAmount * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))}</span>
           </div>
-          {!isGST && <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm">
             <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
+          {isGST ?
+            <span>₹{formatAmount((newBaseFee/withoutGSTAmount - newBaseFee/withoutGSTAmount * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*0.18)}</span> :
             <span>₹{formatAmount((newBaseFee - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0))*0.18)}</span>
-          </div>}
+          }
+          </div>
 
           <div className="flex justify-between text-sm mt-4">
             <span>Total Amount Payable:</span>
@@ -442,19 +458,19 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                             </TableCell>
                             <TableCell>{installment.scholarshipAmount ? installment.scholarshipPercentage : '--'}</TableCell>
                             <TableCell>{installment.scholarshipAmount ? formatAmount(installment.scholarshipAmount) : '--'}</TableCell>
-                            <TableCell>{formatAmount(installment.amountPayable + installment.scholarshipAmount)}</TableCell>
+                            <TableCell>{formatAmount((installment.amountPayable + installment.scholarshipAmount)/withoutGSTAmount)}</TableCell>
                             <TableCell>{formatAmount(installment.amountPayable*GSTAmount)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
                     <div className="space-y-2 text-sm">
-                      {(!isGST || totalScholarshipAmount !==0) &&
-                      <>
                       <div className="flex justify-between">
                         <span>Total Instalment Amount:</span>
-                        <span>₹{formatAmount(totalInstallmentAmount)}</span>
+                        <span>₹{formatAmount(totalInstallmentAmount/withoutGSTAmount)}</span>
                       </div>
+                      {(!isGST || totalScholarshipAmount !==0) &&
+                      <>
                       {totalScholarshipAmount !==0 && 
                       <div className="flex justify-between">
                         <span>Scholarship Amount ({slab.percentage}%):</span>
@@ -463,7 +479,10 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
                       </>}
                       <div className="flex justify-between">
                         <span>GST <span className="text-muted-foreground text-xs">(18%)</span>:</span>
-                        <span>₹{formatAmount(((totalInstallmentAmount-totalScholarshipAmount)*0.18))}</span>
+                        {isGST ?
+                          <span>₹{formatAmount((totalInstallmentAmount - totalInstallmentAmount/withoutGSTAmount))}</span> :
+                          <span>₹{formatAmount(((totalInstallmentAmount-totalScholarshipAmount)*0.18))}</span>
+                        }
                       </div>
                       <div className="flex justify-between">
                         <span>Total Amount Payable:</span>
@@ -485,7 +504,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{formatAmount(newBaseFee)}</span>
+                <span>₹{formatAmount(newBaseFee/withoutGSTAmount)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>
@@ -513,7 +532,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Fee Amount:</span>
-                <span>₹{formatAmount(newBaseFee)}</span>
+                <span>₹{formatAmount(newBaseFee/withoutGSTAmount)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Total Scholarship Amount (5%):</span>

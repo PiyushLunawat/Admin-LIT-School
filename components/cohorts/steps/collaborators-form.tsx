@@ -95,7 +95,7 @@ export function CollaboratorsForm({
         if (!result.success) {
           form.setError(`collaborators.${index}.email`, {
             type: "manual",
-            message: "This email doesn't have an account in CalendLIT",
+            message: "This email doesn't have an account on Cal.LIT",
           });
         } else {
           // Clear previous errors if email is valid

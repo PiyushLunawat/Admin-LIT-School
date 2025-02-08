@@ -192,7 +192,9 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
           <div className="space-y-2">
             <h4 className="font-medium">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start " onClick={() => setInterviewOpen(true)}>
+              <Button variant="outline" className="justify-start " 
+              // onClick={() => setInterviewOpen(true)}
+              >
                 <Calendar className="h-4 w-4 mr-2" />
                 <span className="truncate w-[170px]">Schedule Presentation</span>
               </Button>

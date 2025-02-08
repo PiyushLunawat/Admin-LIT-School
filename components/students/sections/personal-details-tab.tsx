@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { CircleCheck, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
 import { getCurrentStudents } from "@/app/api/student";
+import { getCentres } from "@/app/api/centres";
+import { format } from "date-fns";
 
 interface PersonalDetailsTabProps {
   studentId: any;
@@ -22,6 +24,7 @@ interface PersonalDetailsTabProps {
 
 export function PersonalDetailsTab({ studentId, setStudentName }: PersonalDetailsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedCentre, setSelectedCentre] = useState("");
   const [student, setStudent] = useState<any>(null);
 
   useEffect(() => {
@@ -38,11 +41,22 @@ export function PersonalDetailsTab({ studentId, setStudentName }: PersonalDetail
         const fullName = `${application?.data.firstName} ${application?.data.lastName}`;
         setStudentName(fullName);
       }
-      console.log("asfsfv",application?.data)
+
+      const centresData = await getCentres();
+      const center = centresData.data.find((c: any) => c._id === application?.data?.cohort?.centerDetail);
+      setSelectedCentre(center?.name || "--")
     } catch (error) {
       console.error("Failed to fetch student data:", error);
     }
   }
+
+  function formatDateToMonthYear(dateString: string | null): string {
+    if (!dateString || isNaN(new Date(dateString).getTime())) {
+      return ""; // Return an empty string or a placeholder if the date is invalid
+    }
+    const date = new Date(dateString);
+    return format(date, "MMMM, yyyy");
+  }  
 
   return (
     <div className="space-y-6">
@@ -120,7 +134,7 @@ export function PersonalDetailsTab({ studentId, setStudentName }: PersonalDetail
             <div className="space-y-2">
               <Label>Cohort</Label>
               <Input disabled
-                defaultValue={student?.cohort?.cohortId}
+                value={formatDateToMonthYear(student?.cohort?.startDate) +' '+(student?.cohort.timeSlot)+', '+ selectedCentre}
                 readOnly={!isEditing}
               />
             </div>

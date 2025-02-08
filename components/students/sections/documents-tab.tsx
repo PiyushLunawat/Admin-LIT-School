@@ -1,19 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  CircleCheckBig,
-  Download,
-  Eye,
-  FlagIcon,
-  Upload,
-} from "lucide-react";
-import { getCurrentStudents, updateDocumentStatus, uploadNewStudentDocuments } from "@/app/api/student";
-import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CircleCheckBig, Download, Eye, FlagIcon, Upload } from "lucide-react";
+
+// These API functions are assumed to be defined in your project.
+import {
+  getCurrentStudents,
+  updateDocumentStatus,
+  uploadNewStudentDocuments,
+} from "@/app/api/student";
 
 interface DocumentsTabProps {
   studentId: string;
@@ -21,18 +21,17 @@ interface DocumentsTabProps {
 
 export function DocumentsTab({ studentId }: DocumentsTabProps) {
   const [student, setStudent] = useState<any>(null);
-  const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>(
-    {}
-  );
-
-  // Separate state for the "Upload New Document" section
+  const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
+  
+  // State for "Upload New Document" section
   const [newDocName, setNewDocName] = useState<string>("");
   const [newDocFile, setNewDocFile] = useState<File | null>(null);
-
-  // Dialog open state
+  
+  // State for the dialog (to preview the PDF)
   const [open, setOpen] = useState(false);
+  const [viewDoc, setViewDoc] = useState("");
 
-  // Fetch Student
+  // Fetch student data when studentId changes
   useEffect(() => {
     if (studentId) {
       fetchStudent();
@@ -48,7 +47,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
     }
   }
 
-  // Required documents
+  // Define your required documents here
   const documents = [
     {
       id: "aadharDocument",
@@ -80,65 +79,58 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
     },
   ];
 
-  // Handle "Flag" or "Verified" actions
+  // Append the query parameter to force inline display of the PDF.
+  const getInlinePDFUrl = (url: string) => {
+    if (!url) return "";
+    return url.includes("?")
+      ? `${url}&response-content-disposition=inline`
+      : `${url}?response-content-disposition=inline`;
+  };
+
+  // Handle document action (flag/verify)
   const handleDocumentAction = async (
     studentId: string,
     docType: string,
     docId: string,
     status: string
   ) => {
-    console.log("docss",studentId, docType, docId, status);
-    
     try {
-      const response = await updateDocumentStatus(
-        studentId,
-        docType,
-        docId,
-        "",
-        status
-      );
-      console.log("Updated doc status:", response);
-      // Optionally refetch student
+      const response = await updateDocumentStatus(studentId, docType, docId, "", status);
+      console.log("Updated document status:", response);
+      // Optionally refetch student data
       fetchStudent();
     } catch (error) {
       console.error("Error updating document status:", error);
     }
   };
 
-  // Handle file selection for each required document
+  // Handle file selection for required documents
   const handleRequiredDocFileChange = (docId: string, file: File | null) => {
-    setSelectedFiles((prev) => ({
-      ...prev,
-      [docId]: file,
-    }));
+    setSelectedFiles((prev) => ({ ...prev, [docId]: file }));
   };
 
-  // Handle uploading a required document
+  // Upload required document (API logic to be added)
   const handleRequiredDocUpload = async (docId: string, file: File) => {
-      console.log("document", file);
-    // try {
-    //   const formData = new FormData();
-
-    //   // Your API call
-    //   const response = await uploadDocumentAPI(studentId, docId, formData);
-    //   console.log("Upload successful:", response);
-
-    //   // Reset the file selection for this doc
-    //   handleRequiredDocFileChange(docId, null);
-    //   // Optionally refresh the document data
-    //   fetchStudent();
-    // } catch (error) {
-    //   console.error("Upload failed:", error);
-    // }
+    console.log("Uploading document:", file);
+    // Implement your API upload logic here.
+    // Example:
+    // const formData = new FormData();
+    // formData.append("studentId", studentId);
+    // formData.append("docType", docId);
+    // formData.append("document", file);
+    // const response = await uploadDocumentAPI(formData);
+    // console.log("Upload successful:", response);
+    // handleRequiredDocFileChange(docId, null);
+    // fetchStudent();
   };
 
-  // Handle "Upload New Document" (separate from required documents)
+  // Handle file selection for a new document
   const handleNewDocFileChange = (file: File | null) => {
     setNewDocFile(file);
   };
 
+  // Handle uploading a new document
   const handleNewDocUpload = async () => {
-    console.log("dacsss",studentId, newDocName, newDocFile);
     if (!newDocFile) return;
 
     try {
@@ -148,14 +140,14 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
       formData.append("document", newDocFile);
       
       const response = await uploadNewStudentDocuments(formData);
-      console.log("New doc response:", response);
+      console.log("New document uploaded:", response);
 
-      // Clear the input fields
+      // Optionally clear the fields and refetch data
       // setNewDocName("");
       // setNewDocFile(null);
       // fetchStudent();
     } catch (error) {
-      console.error("New doc upload failed:", error);
+      console.error("New document upload failed:", error);
     }
   };
 
@@ -168,17 +160,17 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {documents.map((doc) => {
+            // Get the latest document details (if any)
             const docDetails = doc.docDetails[doc.docDetails.length - 1] || null;
             const isUploaded = !!docDetails;
             const status = docDetails?.status || "Pending";
-
-            // Get this doc's selected file
+            const url = docDetails?.url || "";
             const docFile = selectedFiles[doc.id] || null;
 
             return (
               <div key={doc.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between">
-                  {/* Document Heading */}
+                  {/* Document Information */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{doc.name}</p>
@@ -186,9 +178,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                     {isUploaded ? (
                       <div className="text-sm text-muted-foreground">
                         {doc.type} • {doc.size} • Uploaded on{" "}
-                        {new Date(
-                          docDetails.uploadDate || Date.now()
-                        ).toLocaleDateString()}
+                        {new Date(docDetails.uploadDate || Date.now()).toLocaleDateString()}
                       </div>
                     ) : (
                       <div className="text-sm text-muted-foreground">
@@ -197,15 +187,13 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                     )}
                   </div>
 
-                  {/* Already Uploaded? */}
+                  {/* Actions */}
                   {isUploaded ? (
                     <div className="flex items-center gap-2">
                       {(status === "verified" || status === "flagged") && (
                         <Badge
                           className="capitalize"
-                          variant={
-                            status === "verified" ? "success" : "warning"
-                          }
+                          variant={status === "verified" ? "success" : "warning"}
                         >
                           {status}
                         </Badge>
@@ -213,7 +201,11 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setOpen(true)}
+                        onClick={() => {
+                          // Open dialog and set the URL with inline disposition
+                          setOpen(true);
+                          setViewDoc(getInlinePDFUrl(url));
+                        }}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View
@@ -224,14 +216,12 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                       </Button>
                     </div>
                   ) : (
-                    // Not Uploaded => Show file input + Upload button
                     <div className="flex items-center gap-2">
                       <div className="border rounded-lg p-1.5">
                         <label className="w-full px-3 text-muted-foreground">
                           <input
                             type="file"
                             className="hidden"
-                            // Reset the input key if docFile changes
                             key={docFile ? docFile.name : ""}
                             onChange={(e) => {
                               const file = e.target.files?.[0] || null;
@@ -240,9 +230,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                           />
                           <span className="cursor-pointer">
                             {docFile ? (
-                              <span className="text-white ">
-                                {docFile.name}
-                              </span>
+                              <span className="text-white">{docFile.name}</span>
                             ) : (
                               "Choose File"
                             )}
@@ -250,10 +238,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                         </label>
                       </div>
                       {docFile && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleRequiredDocUpload(doc.id, docFile)}
-                        >
+                        <Button size="sm" onClick={() => handleRequiredDocUpload(doc.id, docFile)}>
                           <Upload className="h-4 w-4 mr-2" />
                           Upload
                         </Button>
@@ -262,32 +247,28 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                   )}
                 </div>
 
-                {/* Show "Flag" / "Verify" if doc status is "updated" and is uploaded */}
+                {/* Show Flag/Verify actions if the document is uploaded and marked as "updated" */}
                 {status === "updated" && isUploaded && (
                   <div className="flex gap-4 mt-4">
                     <Button
                       variant="outline"
                       className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]"
                       onClick={() =>
-                        handleDocumentAction(
-                          student._id,
-                          doc.id,
-                          docDetails._id,
-                          "flagged"
-                        )
+                        handleDocumentAction(student._id, doc.id, docDetails._id, "flagged")
                       }
                     >
-                      <FlagIcon className="w-4 h-4" /> Flag Document
+                      <FlagIcon className="w-4 h-4" />
+                      Flag Document
                     </Button>
                     <Button
                       variant="outline"
                       className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
                       onClick={() =>
-                        handleDocumentAction( student._id, doc.id, docDetails._id, "verified"
-                        )
+                        handleDocumentAction(student._id, doc.id, docDetails._id, "verified")
                       }
                     >
-                      <CircleCheckBig className="w-4 h-4" /> Mark as Verified
+                      <CircleCheckBig className="w-4 h-4" />
+                      Mark as Verified
                     </Button>
                   </div>
                 )}
@@ -296,39 +277,47 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
           })}
         </CardContent>
 
+        {/* Additional Documents */}
         <CardHeader>
           <CardTitle>Additional Documents</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {student?.personalDocsDetails?.adminUploadedocuments.map((doc: any) => {
-            return (
-              <div key={doc._id} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between">
-                  {/* Document Heading */}
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium capitalize">{doc?.documentName}</p>
-                    </div>
-                      <div className="text-sm text-muted-foreground">
-                        • Uploaded on {new Date(doc?.date).toLocaleDateString()}
-                      </div>
-                  </div>
-
+          {student?.personalDocsDetails?.adminUploadedocuments?.map((doc: any) => (
+            <div key={doc._id} className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
-                      <Eye className="h-4 w-4 mr-2" /> View
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Download className="h-4 w-4 mr-2" /> Download
-                    </Button>
+                    <p className="font-medium capitalize">{doc?.documentName}</p>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    • Uploaded on {new Date(doc?.date).toLocaleDateString()}
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      // Assumes that the admin-uploaded document has a URL property
+                      setOpen(true);
+                      setViewDoc(getInlinePDFUrl(doc.url));
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View
+                  </Button>
+                  <Button variant="ghost" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </CardContent>
       </Card>
 
+      {/* Upload New Document Section */}
       <Card>
         <CardHeader>
           <CardTitle>Upload New Document</CardTitle>
@@ -371,9 +360,14 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
         </CardContent>
       </Card>
 
+      {/* PDF Preview Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
-          <div>Preview Document Here</div>
+          {viewDoc ? (
+            <embed src={viewDoc} width="100%" height="100%" type="application/pdf" />
+          ) : (
+            <div>No document to preview</div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
