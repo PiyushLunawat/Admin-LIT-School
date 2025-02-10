@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle, Clock, XCircle } from "lucide-react";
+import { CheckCircle, Clock, RotateCcw, XCircle } from "lucide-react";
 
 export function RecentActivity() {
   const activities = [
@@ -13,6 +13,7 @@ export function RecentActivity() {
       description: "Completed review for John Doe's application",
       timestamp: "10 minutes ago",
       status: "completed",
+      cohort: ["CM01JY"],
     },
     {
       id: "2",
@@ -20,6 +21,7 @@ export function RecentActivity() {
       description: "3 new applications assigned to you",
       timestamp: "1 hour ago",
       status: "pending",
+      cohort: ["CP01JY", "CM02JY"],
     },
     {
       id: "3",
@@ -27,6 +29,15 @@ export function RecentActivity() {
       description: "Requested additional documents from Sarah Smith",
       timestamp: "2 hours ago",
       status: "action-needed",
+      cohort: ["CM02JY"],
+    },
+    {
+      id: "4",
+      type: "Information Requested",
+      description: "Requested additional documents from Sarah Smith",
+      timestamp: "2 hours ago",
+      status: "action-needed",
+      cohort: ["CP01JY"],
     },
   ];
 
@@ -37,7 +48,7 @@ export function RecentActivity() {
       case "pending":
         return <Clock className="h-4 w-4 text-warning" />;
       case "action-needed":
-        return <XCircle className="h-4 w-4 text-destructive" />;
+        return <RotateCcw className="h-4 w-4 text-[#FFF552]" />;
       default:
         return null;
     }
@@ -67,6 +78,13 @@ export function RecentActivity() {
                   <p className="text-sm text-muted-foreground">
                     {activity.description}
                   </p>
+                <div className="flex gap-1">
+                  {activity.cohort.map((id: any, index: any) => (
+                    <div className="text-xs bg-[#FFF552]/10 p-1 rounded">
+                      {id}
+                    </div>
+                  ))}
+                </div>
                 </div>
               </div>
             ))}

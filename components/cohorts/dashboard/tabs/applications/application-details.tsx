@@ -99,6 +99,12 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
     try {
       const student = await getCurrentStudents(applicationId?._id);
       setApplication(student.data);
+      const currentStatus = student.data?.applicationDetails?.applicationStatus;
+
+      if (currentStatus === "Interview Scheduled") {
+        checkInterviewStatus(student.data?.applicationDetails?.applicationTestInterviews);
+      }
+
       
       if(['not qualified', 'Interview Scheduled', 'concluded', 'waitlist', 'selected'].includes(student.data?.applicationDetails?.applicationStatus))
         setInterview(true)
@@ -108,6 +114,41 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
     } catch (error) {
       console.error("Failed to fetch student data:", error);
     }
+  }
+
+  function checkInterviewStatus(interviews: any) {
+    if (!interviews || interviews.length === 0) return;
+
+    const lastInterview = interviews[interviews.length - 1];
+    const endTime = lastInterview?.endTime; // Assume endTime is a string like "3:00 PM"
+    const currentTime = new Date();
+
+    if (endTime) {
+      const endDate = getEndTimeDate(endTime);
+console.log("timee", (endDate < currentTime), endDate, currentTime)
+      if (endDate < currentTime) {
+        setStatus("Interview Concluded");
+      }
+    }
+  }
+
+  
+  function getEndTimeDate(timeString: string): Date {
+    const currentDate = new Date();
+    const [time, period] = timeString.split(" ");
+    const [hours, minutes] = time.split(":");
+
+    let hoursInt = parseInt(hours, 10);
+    if (period === "PM" && hoursInt !== 12) {
+      hoursInt += 12;
+    } else if (period === "AM" && hoursInt === 12) {
+      hoursInt = 0;
+    }
+
+    const endTimeDate = new Date(currentDate);
+    endTimeDate.setHours(hoursInt, parseInt(minutes, 10), 0, 0); // Set the time on the current date
+
+    return endTimeDate;
   }
 
   const handleSendMessage = (type: string, recipient: string) => {
@@ -157,7 +198,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Current Status</h4>
-              <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "")}>{application?.applicationDetails?.applicationStatus}</Badge>
+              <Badge className="capitalize" variant={getStatusColor(status)}>{status}</Badge>
             </div>
             {interview ? 
             <div className="space-y-3">  
@@ -178,7 +219,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               </div>
               <Select
                disabled={['Interview Scheduled', 'not qualified', 'selected'].includes(application?.applicationDetails?.applicationStatus)}
-               value={application?.applicationDetails?.applicationStatus}
+               value={status}
                onValueChange={handleInterviewStatusChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />

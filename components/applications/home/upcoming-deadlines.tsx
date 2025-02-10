@@ -13,22 +13,25 @@ export function UpcomingDeadlines() {
     {
       id: "1",
       applicantName: "John Doe",
-      applicationId: "APP001",
+      applicationId: "CM01JY",
       dueDate: "2024-03-25",
+      assigineeName: "Simran Khanduja",
       priority: "high",
     },
     {
       id: "2",
       applicantName: "Jane Smith",
-      applicationId: "APP002",
+      applicationId: "CP01JY",
       dueDate: "2024-03-26",
+      assigineeName: "Simran Khanduja",
       priority: "medium",
     },
     {
       id: "3",
       applicantName: "Mike Johnson",
-      applicationId: "APP003",
+      applicationId: "CM01JY",
       dueDate: "2024-03-27",
+      assigineeName: "Vritika Rao",
       priority: "low",
     },
   ];
@@ -58,26 +61,33 @@ export function UpcomingDeadlines() {
         {deadlines.map((deadline) => (
           <div
             key={deadline.id}
-            className="flex items-center justify-between p-4 border rounded-lg"
+            className="space-y-1 p-4 border rounded-lg"
           >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <p className="font-medium">{deadline.applicantName}</p>
-                <Badge variant={getPriorityColor(deadline.priority)}>
-                  {deadline.priority}
-                </Badge>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">{deadline.applicantName}</p>
+                  <Badge variant={getPriorityColor(deadline.priority)}>
+                    {deadline.priority}
+                  </Badge>
+                </div>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Due: {new Date(deadline.dueDate).toLocaleDateString()}
+                </div>
               </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Clock className="h-4 w-4 mr-2" />
-                Due: {new Date(deadline.dueDate).toLocaleDateString()}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                ID: {deadline.applicationId}
-              </p>
+              <Button variant="outline" size="sm">
+                Review Now
+              </Button>
             </div>
-            <Button variant="outline" size="sm">
-              Review Now
-            </Button>
+              <div className="flex justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Cohort ID: {deadline.applicationId}
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  Assigned to {deadline.assigineeName}
+                </div>
+              </div>
           </div>
         ))}
       </CardContent>

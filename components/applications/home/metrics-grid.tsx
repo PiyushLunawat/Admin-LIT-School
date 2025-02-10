@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClipboardList, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { ClipboardList, Clock, CheckCircle, AlertTriangle, RotateCcw, Calendar } from "lucide-react";
 
 interface MetricCardProps {
   title: string;
@@ -30,28 +30,28 @@ function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) 
 export function MetricsGrid() {
   const metrics = [
     {
-      title: "Total Assigned",
+      title: "Total Applications",
       value: "45",
-      description: "Applications in your queue",
+      description: "in Ongoing Cohorts",
       icon: ClipboardList,
     },
     {
       title: "Pending Review",
       value: "23",
-      description: "Awaiting your evaluation",
+      description: "Awaiting Your Evaluation",
       icon: Clock,
     },
     {
       title: "Reviewed Today",
       value: "12",
       description: "Applications processed",
-      icon: CheckCircle,
+      icon: Calendar,
     },
     {
-      title: "Needs Action",
+      title: "Revised Applications",
       value: "8",
-      description: "Requiring additional information",
-      icon: AlertTriangle,
+      description: "in Ongoing Cohorts",
+      icon: RotateCcw,
     },
   ];
 

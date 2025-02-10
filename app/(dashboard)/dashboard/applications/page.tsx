@@ -14,26 +14,26 @@ export default function ApplicationsDashboard() {
       <Tabs defaultValue="home" className="space-y-6">
         <TabsList className="w-full">
           <TabsTrigger value="home">Home</TabsTrigger>
-          <TabsTrigger value="queue">Applications Queue</TabsTrigger>
-          <TabsTrigger value="communications">Communications</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="applications">Applications</TabsTrigger>
+          {/* <TabsTrigger value="communications">Communications</TabsTrigger> */}
+          {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="home">
           <ApplicationsHome />
         </TabsContent>
 
-        <TabsContent value="queue">
+        <TabsContent value="applications">
           <ApplicationsQueue />
         </TabsContent>
 
-        <TabsContent value="communications">
+        {/* <TabsContent value="communications">
           <CommunicationsTab />
         </TabsContent>
 
         <TabsContent value="settings">
           <SettingsTab />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );

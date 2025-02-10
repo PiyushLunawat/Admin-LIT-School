@@ -53,8 +53,8 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
           </div>
           <div className="space-y-4 ">
             <div className="mt-2 space-y-2">
-              <h3 className="">Provide Reasons</h3>
-              <Textarea className=""/>
+              <label className="text-lg pl-3">Provide Reasons</label>
+              <Textarea className="h-[150px]"/>
             </div>
             <div className="flex gap-2 ">
               <Button variant="outline" className="flex-1" >Cancel</Button>

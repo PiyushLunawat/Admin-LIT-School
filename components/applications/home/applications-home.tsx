@@ -8,23 +8,19 @@ import { QuickActions } from "./quick-actions";
 export function ApplicationsHome() {
   return (
     <div className="space-y-6">
-      {/* Welcome Message */}
-      <div>
+      {/* <div>
         <h2 className="text-2xl font-bold">Welcome back, Sarah!</h2>
         <p className="text-muted-foreground">Here&apos;s an overview of your review queue</p>
-      </div>
+      </div> */}
 
-      {/* Key Metrics */}
       <MetricsGrid />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Column */}
         <div className="space-y-6">
           <RecentActivity />
-          <QuickActions />
+          {/* <QuickActions /> */}
         </div>
 
-        {/* Right Column */}
         <div>
           <UpcomingDeadlines />
         </div>
