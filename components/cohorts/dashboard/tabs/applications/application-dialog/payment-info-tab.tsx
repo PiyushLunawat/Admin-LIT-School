@@ -69,15 +69,21 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
     const fallbackScholarship = student.cohort.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );
-    const finalScholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.installmentDetails
-    setFeeStructure(finalScholarship);
+    const finalScholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.installmentDetails;
+    if (finalScholarship && finalScholarship.length > 0) {
+      setFeeStructure(finalScholarship);
+    }
+
     setSch((matchedScholarship || fallbackScholarship));
+    console.log("fee ee", fallbackScholarship)
   }, [student]);
 
+  
   const visibleSemesters = showAllSemesters
   ? (feeStructure || sch?.scholarshipDetails)
   : (feeStructure || sch?.scholarshipDetails)?.slice(0, 1); 
-
+  
+  console.log("geeee",visibleSemesters, sch?.scholarshipDetails)
   const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
   const installments = (feeStructure || sch?.scholarshipDetails)?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);

@@ -1,11 +1,13 @@
 "use client";
 
+import { getStudents } from "@/app/api/student";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList, Clock, CheckCircle, AlertTriangle, RotateCcw, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface MetricCardProps {
   title: string;
-  value: string;
+  value: number;
   description?: string;
   icon: React.ElementType;
 }
@@ -28,28 +30,100 @@ function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) 
 }
 
 export function MetricsGrid() {
+
+  const [loading, setLoading] = useState<boolean>(true);
+    const [applications, setApplications] = useState<any>([]);
+    const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
+    const [underReviewCount, setUnderReviewCount] = useState(0);
+    const [ReviewTodayCount, setReviewTodayCount] = useState(0);
+    const [revisedApplicationsCount, setRevisedApplicationsCount] = useState(0);
+
+    useEffect(() => {
+        async function fetchAndFilterStudents() {
+          setLoading(true);
+          try {
+            // 1) Fetch All Students
+            const response = await getStudents();
+    
+            // 2) Filter Out Students with No Application Details
+            const validStudents = response.data.filter(
+              (student: any) => student?.applicationDetails !== undefined
+            );
+    
+            setApplications(validStudents);
+          } catch (error) {
+            console.error("Error fetching students:", error);
+          } finally {
+            setLoading(false);
+          }
+        }
+    
+        fetchAndFilterStudents();
+      }, []);
+
+      useEffect(() => {
+                if (applications && Array.isArray(applications)) {
+                  // Total Applications
+                  setTotalApplicationsCount(applications.length);
+            
+                  // Under Review Count
+                  const underReview = applications.filter(
+                    (application) =>
+                      application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+                      "under review"
+                  );
+                  setUnderReviewCount(underReview.length);
+            
+                  // Interviews Scheduled Count
+                  // const interviewsScheduled = applications.filter(
+                  //   (application) =>
+                  //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+                  //     "interviews scheduled"
+                  // );
+                  // setInterviewsScheduledCount(interviewsScheduled.length);
+      
+                  // Reviewed Count
+                  const reviewed = applications.filter(
+                    (application) =>
+                      ['on hold', 'accepted', 'rejected'].includes(application?.litmusTestDetails?.[0]?.litmusTaskId?.status) &&
+                    new Date(application?.updatedAt) === new Date()
+                  );
+                  setReviewTodayCount(reviewed.length);
+
+                  const revised = applications.filter(
+                    (application) =>
+                      application?.applicationDetails?.applicationStatus?.toLowerCase() === "under review" &&
+                    application?.applicationDetails?.applicationTasks?.length > 1
+                  );
+                  setRevisedApplicationsCount(underReview.length);
+        
+                } else {
+                  console.log("Applications data is not an array or is undefined.");
+                }
+              }, [applications]);
+  
   const metrics = [
     {
       title: "Total Applications",
-      value: "45",
+      value: totalApplicationsCount,
       description: "in Ongoing Cohorts",
       icon: ClipboardList,
     },
     {
       title: "Pending Review",
-      value: "23",
+      value: underReviewCount,
       description: "Awaiting Your Evaluation",
       icon: Clock,
     },
     {
       title: "Reviewed Today",
-      value: "12",
+      value: ReviewTodayCount,
       description: "Applications processed",
       icon: Calendar,
     },
     {
       title: "Revised Applications",
-      value: "8",
+      value: revisedApplicationsCount,
       description: "in Ongoing Cohorts",
       icon: RotateCcw,
     },

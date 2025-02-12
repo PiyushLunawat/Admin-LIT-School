@@ -106,7 +106,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
       }
 
       
-      if(['not qualified', 'Interview Scheduled', 'concluded', 'waitlist', 'selected'].includes(student.data?.applicationDetails?.applicationStatus))
+      if(['Interview Scheduled', 'interview cancelled', 'concluded', 'waitlist', 'selected', 'not qualified'].includes(student.data?.applicationDetails?.applicationStatus))
         setInterview(true)
       else setInterview(false)
 
@@ -218,7 +218,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
               ))}
               </div>
               <Select
-               disabled={['Interview Scheduled', 'not qualified', 'selected'].includes(application?.applicationDetails?.applicationStatus)}
+               disabled={['Interview Scheduled','interview cancelled', 'not qualified', 'selected'].includes(application?.applicationDetails?.applicationStatus)}
                value={status}
                onValueChange={handleInterviewStatusChange}>
                 <SelectTrigger>

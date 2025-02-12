@@ -67,7 +67,7 @@ export function DashboardHeader({ setDateRange, searchQuery, onSearchQueryChange
             ))}
           </SelectContent>
         </Select>
-          <Select value={selectedCohort} onValueChange={onCohortChange}>
+        <Select value={selectedCohort} onValueChange={onCohortChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Cohort" />
           </SelectTrigger>

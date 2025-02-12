@@ -57,15 +57,18 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "accepted":
+      case "selected":
       case "completed":
       case "evaluated":
       case "enrolled":
       case "token paid":
         return "success";
+        break;
       case "rejected":
         return "warning";
+        break;
       default:
-        return "default";
+        return "secondary";
     }
   };
 
@@ -140,7 +143,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Interview Status</p>
                 {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(student.applicationDetails.applicationStatus) ? 
-                <Badge className="capitalize" variant={getStatusColor(student?.interviewStatus || "--")}>
+                <Badge className="capitalize" variant={getStatusColor(student.applicationDetails.applicationStatus || "--")}>
                   {student.applicationDetails.applicationStatus}
                 </Badge> : "--"}
               </div>

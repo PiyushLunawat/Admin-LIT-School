@@ -154,7 +154,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Admission Fee Status</p>
                 <span className="text-base mr-2">{formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}</span>
-                <Badge className="capitalize" variant={getStatusColor(lastCourse?.tokenFeeDetails?.verificationStatus)}>
+                <Badge className="capitalize" variant={getStatusColor(lastCourse?.tokenFeeDetails?.verificationStatus || '')}>
                   ₹{lastCourse?.tokenFeeDetails?.verificationStatus}
                 </Badge>
               </div>
@@ -229,7 +229,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                       overdue
                     </Badge>
                   :
-                  <Badge variant={getStatusColor(lastCourse?.oneShotPayment?.verificationStatus)}>
+                  <Badge variant={getStatusColor(lastCourse?.oneShotPayment?.verificationStatus || '')}>
                     {lastCourse?.oneShotPayment?.verificationStatus}
                   </Badge>
                   }
@@ -287,7 +287,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                                 overdue
                               </Badge>
                             :
-                              <Badge className="capitalize" variant={getStatusColor(instalment.verificationStatus)}>
+                              <Badge className="capitalize" variant={getStatusColor(instalment.verificationStatus || '')}>
                                 {instalment.verificationStatus}
                               </Badge>
                           )}

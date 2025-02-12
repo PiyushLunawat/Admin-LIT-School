@@ -24,10 +24,14 @@ export function ApplicationFilters() {
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all-status">All Status</SelectItem>
-            <SelectItem value="pending">Pending Review</SelectItem>
-            <SelectItem value="under-review">Under Review</SelectItem>
-            <SelectItem value="reviewed">Reviewed</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="initiated">Initiated</SelectItem>
+            <SelectItem value="under review">Under Review</SelectItem>
+            <SelectItem value="accepted">Accepted</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="on hold">On Hold</SelectItem>
+            <SelectItem value="interview scheduled">Interview Scheduled</SelectItem>
+            <SelectItem value="dropped">Dropped</SelectItem>
           </SelectContent>
         </Select>
 

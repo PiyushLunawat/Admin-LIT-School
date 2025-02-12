@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CircleCheckBig, Download, Eye, FlagIcon, Upload } from "lucide-react";
+import { Viewer, Worker } from "@react-pdf-viewer/core";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
 // These API functions are assumed to be defined in your project.
 import {
@@ -20,6 +24,8 @@ interface DocumentsTabProps {
 }
 
 export function DocumentsTab({ studentId }: DocumentsTabProps) {
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+
   const [student, setStudent] = useState<any>(null);
   const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
   
@@ -78,14 +84,6 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
       docDetails: student?.personalDocsDetails?.graduationMarkSheet || [],
     },
   ];
-
-  // Append the query parameter to force inline display of the PDF.
-  const getInlinePDFUrl = (url: string) => {
-    if (!url) return "";
-    return url.includes("?")
-      ? `${url}&response-content-disposition=inline`
-      : `${url}?response-content-disposition=inline`;
-  };
 
   // Handle document action (flag/verify)
   const handleDocumentAction = async (
@@ -204,7 +202,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                         onClick={() => {
                           // Open dialog and set the URL with inline disposition
                           setOpen(true);
-                          setViewDoc(getInlinePDFUrl(url));
+                          setViewDoc(url);
                         }}
                       >
                         <Eye className="h-4 w-4 mr-2" />
@@ -300,7 +298,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
                     onClick={() => {
                       // Assumes that the admin-uploaded document has a URL property
                       setOpen(true);
-                      setViewDoc(getInlinePDFUrl(doc.url));
+                      setViewDoc(doc.url);
                     }}
                   >
                     <Eye className="h-4 w-4 mr-2" />
@@ -364,7 +362,13 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {viewDoc ? (
-            <embed src={viewDoc} width="100%" height="100%" type="application/pdf" />
+            <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+              <Viewer
+                fileUrl={viewDoc}
+                plugins={[defaultLayoutPluginInstance]}
+              />
+            </Worker>   
+            // <embed src={viewDoc} width="100%" height="100%" type="application/pdf" />
           ) : (
             <div>No document to preview</div>
           )}

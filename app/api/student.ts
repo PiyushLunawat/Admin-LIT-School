@@ -61,6 +61,20 @@ export async function getStudentApplication(applicationId: string) {
   return response.json();
 }
 
+export async function updateStudentData(data: any) {
+  const response = await fetch(
+    `http://localhost:4000/admin/update-student-details`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // we send JSON as in the curl example
+      },
+      body: JSON.stringify(data),
+    }
+  );
+  return await response.json();
+}
+
 export async function updateStudentTaskFeedback(
   applicationId: string,
   applicationTaskId: string,

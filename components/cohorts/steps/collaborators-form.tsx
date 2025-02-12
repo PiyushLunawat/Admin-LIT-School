@@ -29,7 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 // Roles array (as before)
 const roles = [
   { value: "reviewer", label: "Application Reviewer" },
-  { value: "interviewer", label: "Interviewer" },
+  { value: "interviewer", label: "Application Interviewer" },
   { value: "collector", label: "Fee Collector" },
   { value: "evaluator", label: "LITMUS Test Evaluator" },
 ];
@@ -67,6 +67,7 @@ export function CollaboratorsForm({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState<number | null>(null);
 
   const { fields, append, remove } = useFieldArray({
@@ -80,7 +81,20 @@ export function CollaboratorsForm({
     }
   }, [fields, append]);
 
-  
+  const getRole = (role: string) => {
+    switch (role) {
+      case "reviewer":
+        return "Application Reviewer";
+      case "interviewer":
+        return "Application Interviewer";
+      case "collector":
+        return "Fee Collector";
+      case "evaluator":
+        return "LITMUS Test Evaluator";
+      default:
+        return "--";
+    }
+  };
 
   const handleRoleChange = async (value: string, index: number) => {
     form.setValue(`collaborators.${index}.role`, value);  // Directly set the role value
@@ -119,35 +133,37 @@ export function CollaboratorsForm({
       if (!result.success) {
         form.setError(`collaborators.${index}.email`, {
           type: "manual",
-          message: "This email doesn't have an account in CalendLIT",
+          message: "This email doesn't have an account on CalendLIT",
         });
       }
     }
   };
 
   const handleEdit = (index: number) => {
-    setEditingCollaborator(index); // Set the collaborator to edit
+    setEditingCollaborator(index);
   };
 
   const handleSaveEdit = async (data: z.infer<typeof formSchema>) => {
     try {
-    const collaboratorsToUpdate = data.collaborators.map((collab) => ({
-      email: collab.email,
-      role: collab.role,
-      isInvited: collab.isInvited ?? false,
-    }));
-
-    console.log("Collaborators data to send:", collaboratorsToUpdate);
-
-    // Update the cohort
-    const createdCohort = await updateCohort(initialData._id, {
-      collaborators: collaboratorsToUpdate,
-    });
-    onCohortCreated(createdCohort.data);
+      setSaveLoading(true)
+      const collaboratorsToUpdate = data.collaborators.map((collab) => ({
+        email: collab.email,
+        role: collab.role,
+        isInvited: collab.isInvited ?? false,
+      }));
+    
+      const savedCohort = await updateCohort(initialData._id, {
+        collaborators: collaboratorsToUpdate,
+      });
+      onCohortCreated(savedCohort.data);
+      form.reset({
+        collaborators: savedCohort.data.collaborators,
+      });
   } catch (error) {
   console.error("Failed to update cohort:", error);
   } finally {
     setEditingCollaborator(null);
+    setSaveLoading(false)
   }
   };
 
@@ -168,7 +184,7 @@ export function CollaboratorsForm({
           collaborators: collaboratorsToUpdate,
         });
         onCohortCreated(createdCohort.data);
-        onComplete(); // proceed to the next step
+        onComplete(); 
       } else {
         console.error("Cohort ID is missing. Unable to update.");
       }
@@ -226,59 +242,59 @@ export function CollaboratorsForm({
             <Card key={collaborator.id}>
               <CardContent className="pt-6">
                 {(editingCollaborator !== index && collaborator.isInvited) ? (
-                      <div className="flex grid-cols-3 justify-between items-center">
-                        <div className="w-2/5">{collaborator.email}</div>
-                        <div className="w-1/5 flex gap-1 mx-auto items-center">
-                          Invited
-                          <CheckCircle className="w-4 h-4 text-[#2EB88A]" />
-                        </div>
-                        <div className="flex gap-1 justify-center items-center">
+                  <div className="w-full flex grid-cols-3 justify-between items-center">
+                    <div className="w-3/5 flex-1">{collaborator.email}</div>
+                    <div className="w-1/5 flex gap-1 mx-auto items-center">
+                      Invited
+                      <CheckCircle className="w-4 h-4 text-[#2EB88A]" />
+                    </div>
+                    <div className="flex gap-1 flex-1 justify-end items-center">
 
-                        <div className="px-3 py-2 capitalize bg-[#262626] rounded">
-                          {collaborator.role}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          onClick={() => handleEdit(index)} // On click, edit this collaborator
-                          >
-                          <SquarePen className="w-4 h-4"/>
-                        </Button>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive"
-                              >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            align="end"
-                            side="top"
-                            className="max-w-[345px] w-full"
-                            >
-                            <div className="text-base font-medium mb-2">
-                              {`Are you sure you would like to delete ${form.getValues(
-                                `collaborators.${index}.email`
-                              )}?`}
-                            </div>
-                            <div className="flex gap-2 justify-end">
-                              <Button variant="outline">Cancel</Button>
-                              <Button
-                                className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
-                                onClick={() => remove(index)}
-                                >
-                                Delete
-                              </Button>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        </div>
+                      <div className="px-3 py-2 capitalize bg-[#262626] rounded">
+                        {getRole(collaborator.role)}
                       </div>
-                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        onClick={() => handleEdit(index)} // On click, edit this collaborator
+                        >
+                        <SquarePen className="w-4 h-4"/>
+                      </Button>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive"
+                            >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          align="end"
+                          side="top"
+                          className="max-w-[345px] w-full"
+                          >
+                          <div className="text-base font-medium mb-2">
+                            {`Are you sure you would like to delete ${form.getValues(
+                              `collaborators.${index}.email`
+                            )}?`}
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <Button variant="outline">Cancel</Button>
+                            <Button
+                              className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
+                              onClick={() => remove(index)}
+                              >
+                              Delete
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                ) : (
                 <div className="grid gap-4">
                   <div className="grid gap-3 flex-1">
                     <Label>Email Address</Label>
@@ -288,6 +304,7 @@ export function CollaboratorsForm({
                       render={({ field }) => (
                         <div className="flex justify-between items-center">
                           <Input
+                            disabled={collaborator.isInvited}
                             type="email"
                             placeholder="email@example.com"
                             value={field.value || ""}
@@ -377,7 +394,7 @@ export function CollaboratorsForm({
                 )}
                 {editingCollaborator === index && (
                   <div className="mt-3">
-                    <Button type="button" onClick={() => handleSaveEdit}>Save</Button>
+                    <Button type="button" onClick={() => handleSaveEdit(form.getValues())}>Save</Button>
                   </div>
                 )}
               </CardContent>

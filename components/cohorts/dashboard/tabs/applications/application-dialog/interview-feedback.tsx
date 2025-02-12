@@ -133,7 +133,7 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
           <Textarea
             id="reasonItem"
             value={reasonItemValue}
-            className="px-3 text-base"
+            className="px-3 text-base h-[125px]"
             onChange={handleChangeForReasons}
             onKeyDown={handleKeyDownForReasons}
             placeholder="Type here..."
