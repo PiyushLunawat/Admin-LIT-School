@@ -5,8 +5,34 @@ import { RecentActivity } from "@/components/litmus-evaluator/home/recent-activi
 import { UpcomingPresentations } from "@/components/litmus-evaluator/home/upcoming-presentations";
 import { AlertsSection } from "@/components/litmus-evaluator/home/alerts-section";
 import { QuickActions } from "@/components/litmus-evaluator/home/quick-actions";
+import { useEffect, useState } from "react";
+import { getStudents } from "@/app/api/student";
 
 export function LitmusHome() {
+  const [loadint, setLoading] = useState(false);
+  const [applications, setApplications] = useState<any>([]);
+
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await getStudents();
+        const mappedStudents =
+          response.data.filter(
+            (student: any) =>
+              student?.litmusTestDetails[0]?.litmusTaskId !== undefined
+          )    
+          
+        setApplications(mappedStudents);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStudents();
+  }, []);
+
+
   return (
     <div className="space-y-6">
       {/* Welcome Message */}
@@ -16,7 +42,7 @@ export function LitmusHome() {
       </div>
 
       {/* Key Metrics */}
-      <MetricsGrid />
+      <MetricsGrid applications={applications}/>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Column */}

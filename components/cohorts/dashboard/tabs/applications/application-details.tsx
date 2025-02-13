@@ -181,7 +181,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b flex items-center justify-between">
+      <div className="p-4 border-b flex items-start justify-between">
         <div>
           <h3 className="font-semibold">{application?.firstName+" "+application?.lastName}</h3>
           <p className="text-sm text-muted-foreground">{application?.email}</p>
@@ -198,7 +198,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Current Status</h4>
-              <Badge className="capitalize" variant={getStatusColor(status)}>{status}</Badge>
+              <Badge className="capitalize" variant={getStatusColor(status || "")}>{status}</Badge>
             </div>
             {interview ? 
             <div className="space-y-3">  

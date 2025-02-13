@@ -35,7 +35,8 @@ export default function DashboardPage() {
     }, []);
   return (
     <div className="p-6 space-y-6">
-      <DashboardHeader setDateRange={setDateRange} searchQuery={searchQuery}
+      <DashboardHeader setDateRange={setDateRange}
+        searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
         programs={programs}
         selectedProgram={selectedProgram}

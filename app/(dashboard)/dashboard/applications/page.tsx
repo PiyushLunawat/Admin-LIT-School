@@ -4,7 +4,6 @@ import { Suspense } from "react";
 
 export default function ApplicationsPage() {
   return (
-
     <Suspense fallback={<div>Loading...</div>}>
       <ApplicationDashboard />
     </Suspense>

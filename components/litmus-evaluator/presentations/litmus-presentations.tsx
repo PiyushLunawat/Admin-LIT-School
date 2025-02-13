@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { PresentationCalendar } from "./presentations/presentation-calendar";
-import { PresentationList } from "./presentations/presentation-list";
-import { PresentationDetails } from "./presentations/presentation-details";
-import { PresentationFilters } from "./presentations/presentation-filters";
+import { PresentationCalendar } from "./presentation-calendar";
+import { PresentationList } from "./presentation-list";
+import { PresentationDetails } from "./presentation-details";
+import { PresentationFilters } from "./presentation-filters";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Card } from "@/components/ui/card";

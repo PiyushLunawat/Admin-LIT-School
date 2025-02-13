@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { MessageInbox } from "./communications/message-inbox";
-import { ComposeMessage } from "./communications/compose-message";
-import { TemplatesManager } from "./communications/templates-manager";
-import { NotificationSettings } from "./communications/notification-settings";
+import { MessageInbox } from "./message-inbox";
+import { ComposeMessage } from "./compose-message";
+import { TemplatesManager } from "./templates-manager";
+import { NotificationSettings } from "./notification-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function LitmusCommunications() {

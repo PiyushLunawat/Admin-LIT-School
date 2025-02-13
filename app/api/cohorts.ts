@@ -88,7 +88,7 @@ export async function inviteCollaborators(id: string) {
 export async function checkEmailExists(email: string) {
   try {
     const res = await fetch(
-      `https://dev.cal.litschool.in/application-portal/user-checking?email=${email}`,
+      `https://dev.cal.litschool.in/api/application-portal/user-checking?email=${email}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },

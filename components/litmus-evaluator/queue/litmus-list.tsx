@@ -11,26 +11,26 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Clock, CheckCircle, Clock4Icon, Calendar } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Calendar, Eye, Award } from "lucide-react";
+import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import student from "@/app/api/student";
 
-interface ApplicationsListProps {
+type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
+
+interface LitmusListProps {
   applications: any;
   onApplicationSelect: (id: any) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
-
-export function ApplicationsList({
+export function LitmusList({
   applications,
   onApplicationSelect,
   selectedIds,
   onSelectedIdsChange,
-}: ApplicationsListProps) {
-
+}: LitmusListProps) {
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   const toggleSelectAll = () => {
@@ -49,51 +49,42 @@ export function ApplicationsList({
     }
   };
 
-  const getPriorityColor = (priority: string): BadgeVariant => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "destructive";
-      case "medium":
-        return "warning";
-      case "low":
-        return "secondary";
-      default:
-        return "default";
+  const timeAgo = (timestamp: string) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffInMs = now.getTime() - date.getTime(); // Difference in milliseconds
+    
+    const diffInSecs = Math.floor(diffInMs / 1000); // Seconds
+    const diffInMins = Math.floor(diffInSecs / 60); // Minutes
+    const diffInHours = Math.floor(diffInMins / 60); // Hours
+    const diffInDays = Math.floor(diffInHours / 24); // Days
+    
+    if (diffInDays > 0) {
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    } else if (diffInHours > 0) {
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    } else if (diffInMins > 0) {
+      return `${diffInMins} minute${diffInMins > 1 ? "s" : ""} ago`;
+    } else if (diffInSecs > 0) {
+      return `Just now`;
+    } else {
+      return ``;
     }
   };
-
+  
+  
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
-      case "initiated":
-        return "default";
+      case "pending":
+        return "lemon";
       case "under review":
         return "secondary";
-      case "accepted":
-      case "selected":
+      case "completed":
         return "success";
-      case "rejected":
-      case "not qualified":
-        return "warning";
-      case "on hold":
-      case "waitlist":
-        return "onhold";
-      case "interview scheduled":
-        case "interview rescheduled":
-        return "default";
-      case "interview concluded":
-        return "lemon";
       default:
-        return "secondary";
+        return "default";
     }
   };
-
-    useEffect(() => {
-      if (applications.length > 0) {
-        const firstApplication = applications[0];
-        setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
-        onApplicationSelect(firstApplication); // Call the onApplicationSelect function for the first application
-      }
-    }, [applications]);
 
   return (
     <div className="border rounded-lg">
@@ -106,16 +97,17 @@ export function ApplicationsList({
                 onCheckedChange={toggleSelectAll}
               />
             </TableHead>
-            <TableHead>Name</TableHead>
+            <TableHead>Applicant</TableHead>
             <TableHead>Application ID</TableHead>
             <TableHead>Submission Date</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Presentation</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {applications.map((application: any) => (
-            <TableRow 
+            <TableRow
               key={application._id}
               className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
               onClick={() => {
@@ -129,7 +121,9 @@ export function ApplicationsList({
                   onCheckedChange={() => toggleSelectApplication(application._id)}
                 />
               </TableCell>
-              <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
+              <TableCell className="font-medium">
+                {`${application?.firstName || ""} ${application?.lastName || ""}`.trim()}
+              </TableCell>
               <TableCell className="">
                 <TooltipProvider>
                   <Tooltip>
@@ -144,27 +138,44 @@ export function ApplicationsList({
                 </div>
               </TableCell>
               <TableCell>
-                {new Date(application?.applicationDetails?.updatedAt).toLocaleDateString() || "--"}
+                {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.updatedAt).toLocaleDateString() || "--"}
+              </TableCell>
+              <TableCell className="space-y-1 ">
+                {['under review', 'submitted', 'interview cancelled'].includes(application?.litmusTestDetails[0]?.litmusTaskId?.status) &&
+                  <div className="text-sm text-muted-foreground w-[140px]">
+                    Waiting for Interview to be scheduled...
+                  </div>
+                }
+                <Badge
+                  className="capitalize"
+                  variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "")}
+                >
+                  {application?.litmusTestDetails[0]?.litmusTaskId?.status || ""}
+                </Badge>
+                {application?.litmusTestDetails[0]?.litmusTaskId?.status === "pending" &&
+                  <div className="text-xs text-muted-foreground w-[110px] ">
+                    Admission Fee Paid {timeAgo(application?.cousrseEnrolled?.[application.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.updatedAt)}
+                  </div>
+                }
               </TableCell>
               <TableCell>
-                {application?.applicationDetails?.applicationStatus ?
-                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(application?.applicationDetails?.applicationStatus) ?
-                  'accepted' : application?.applicationDetails?.applicationStatus || "--")}>
-                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(application?.applicationDetails?.applicationStatus) ?
-                  'accepted' : application?.applicationDetails?.applicationStatus }
-                </Badge> : "--"}
-                {(application?.applicationDetails?.applicationStatus === 'under review' && application?.applicationDetails?.applicationTasks?.length > 1) &&
-                <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
-                  <CheckCircle className="w-3 h-3"/> App. Revised
-                </Badge>}
+                {application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate ? (
+                  <div className="flex items-center text-sm">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate).toLocaleDateString() || "--"}
+                  </div>
+                ) : (
+                  "--"
+                )}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="hover:bg-black"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onApplicationSelect(application.id);
+                    // handleEyeClick(application);
                   }}
                 >
                   <Eye className="h-4 w-4" />

@@ -55,8 +55,8 @@ export function ReportsTab() {
       </Card>
 
       <div className="grid gap-6">
-        <PerformanceMetrics dateRange={dateRange} />
-        <InterviewInsights dateRange={dateRange} />
+        {/* <PerformanceMetrics dateRange={dateRange} /> */}
+        {/* <InterviewInsights dateRange={dateRange} /> */}
       </div>
     </div>
   );

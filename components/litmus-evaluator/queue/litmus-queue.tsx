@@ -1,20 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ApplicationsList } from "./applications-list";
-import { ApplicationFilters } from "./application-filters";
-import { ApplicationDetails } from "./application-details";
+import { LitmusList } from "./litmus-list";
+import { LitmusFilters } from "./litmus-filters";
+import { LitmusDetails } from "./litmus-details";
 import { Button } from "@/components/ui/button";
 import { Mail, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getCohorts } from "@/app/api/cohorts";
-import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
+import { DateRange } from "react-day-picker";
 import { CohortDetails } from "./cohort-details";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
-export function ApplicationsQueue() {
+export function LitmusQueue() {
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+  const [selectedSubmissionIds, setSelectedSubmissionIds] = useState<string[]>([]);
+
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -41,7 +44,7 @@ export function ApplicationsQueue() {
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              student?.applicationDetails !== undefined
+              student?.litmusTestDetails[0]?.litmusTaskId !== undefined
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -203,22 +206,30 @@ export function ApplicationsQueue() {
   };
 
   const handleBulkEmail = () => {
-    console.log("Sending bulk email to:", selectedApplicationIds);
+    console.log("Sending bulk email to:", selectedSubmissionIds);
   };
 
   const handleBulkExport = () => {
-    console.log("Exporting data for:", selectedApplicationIds);
+    console.log("Exporting data for:", selectedSubmissionIds);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Applications Queue</h2>
+        <h2 className="text-2xl font-bold">LITMUS Test</h2>
         <div className="flex gap-2">
+          {/* <Button
+            variant="outline"
+            onClick={handleBulkEmail}
+            disabled={selectedSubmissionIds.length === 0}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Bulk Email
+          </Button> */}
           <Button
             variant="outline"
             onClick={handleBulkExport}
-            disabled={selectedApplicationIds.length === 0}
+            disabled={selectedSubmissionIds.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
@@ -226,8 +237,7 @@ export function ApplicationsQueue() {
         </div>
       </div>
 
-      <ApplicationFilters 
-        setDateRange={setDateRange}
+      <LitmusFilters setDateRange={setDateRange}
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
         cohorts={cohorts}
@@ -236,8 +246,7 @@ export function ApplicationsQueue() {
         selectedStatus={selectedStatus}
         onSelectedStatusChange={setSelectedStatus}
         sortBy={sortBy}
-        onSortByChange={setSortBy}
-      />
+        onSortByChange={setSortBy}/>
 
       {selectedCohort !== 'all-cohorts' &&
        <CohortDetails 
@@ -249,8 +258,8 @@ export function ApplicationsQueue() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ApplicationsList
-            applications={filteredAndSortedApplications} // Pass filtered and sorted applications to the list
+          <LitmusList
+            applications={filteredAndSortedApplications}
             onApplicationSelect={(application) => setSelectedApplication(application)}
             selectedIds={selectedApplicationIds}
             onSelectedIdsChange={setSelectedApplicationIds}
@@ -260,15 +269,15 @@ export function ApplicationsQueue() {
           <div className="sticky top-6">
             <Card className="h-[calc(100vh-7rem)] overflow-hidden">
               {selectedApplication ? (
-                <ApplicationDetails
+                <LitmusDetails
                   application={selectedApplication}
-                  onClose={() => setSelectedApplication(null)}
-                  onApplicationUpdate={handleApplicationUpdate}
+                  onClose={() => setSelectedSubmissionId(null)}
+                  onApplicationUpdate={handleApplicationUpdate} 
                 />
               ) : (
                 <div className="h-full flex items-center justify-center p-6 text-muted-foreground">
                   <p className="text-center">
-                    Select an application to view details
+                    Select a submission to view details
                   </p>
                 </div>
               )}

@@ -34,24 +34,23 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { ScholarshipDistribution } from "../overview/scholarship-distribution";
-import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getCurrentStudents } from "@/app/api/student";
 import { Card } from "@/components/ui/card";
-import { ViewComponent } from "./litmus-test-dialog/view";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
-import { AwardScholarship } from "./litmus-test-dialog/award-scholarship";
+import { AwardScholarship } from "@/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/award-scholarship";
+import { ViewComponent } from "@/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/view";
+import { ReviewComponent } from "@/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/review";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
-interface LitmusTestDetailsProps {
+interface LitmusDetailsProps {
   application: any;
   onClose: () => void;
   onApplicationUpdate: () => void;
 }
 
-export function LitmusTestDetails({ application, onClose, onApplicationUpdate }: LitmusTestDetailsProps) {
+export function LitmusDetails({ application, onClose, onApplicationUpdate }: LitmusDetailsProps) {
   const [open, setOpen] = useState(false);
   const [vopen, setVopen] = useState(false);
   const [schOpen, setSchOpen] = useState(false);
@@ -153,12 +152,11 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b flex items-center justify-between">
+      <div className="p-4 border-b flex items-start justify-between">
         <div>
           <h3 className="font-semibold">{application?.firstName+" "+application?.lastName}</h3>
-          <p className="text-sm text-muted-foreground">
-            Submitted on {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.createdAt).toLocaleDateString()}
-          </p>
+          <p className="text-sm text-muted-foreground">{application?.email}</p>
+          <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
@@ -211,13 +209,13 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                   </Button>
                     :
                   <Button variant="outline" className="justify-start">
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-center text-muted-foreground">
                       <Star className="h-4 w-4" />
                       Award Scholarship
                     </div>
                   </Button>
                 }
-              <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                 <UserMinus className="h-4 w-4 mr-2" />
                 Mark as Dropped
               </Button>
@@ -232,7 +230,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
               <h4 className="font-medium">LITMUS Challenges</h4>
               <div className="flex gap-3">
                 <Button size="zero" variant="ghost" className="flex gap-1 text-xs items-center text-muted-foreground" onClick={() => {setVopen(true);}}>
-                  <EyeIcon className="w-3 h-3 text-white"/> View
+                  <EyeIcon className="w-3 h-3 text-white"/> View Task
                 </Button>
                 {application?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed' && <Button size="zero" variant="ghost" className="flex gap-1 text-xs items-center text-muted-foreground" onClick={() => {setOpen(true);}}>
                   <Edit2Icon className="w-3 h-3 text-white"/> Edit Review
@@ -286,22 +284,22 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <p className="text-sm text-muted-foreground">Judgement Criteria:</p>
                 <div className="space-y-1">
                   {task?.judgmentCriteria.map((criterion: any, criterionIndex: any) => (
-                      <div key={criterionIndex} className="space-y-1">
-                        <div className="flex justify-between">
-                          <Label>{criterion?.name}</Label>
-                          <span className="text-sm">
-                            {
-                              // Check if the score exists and display the score, otherwise display a default value
-                              application?.litmusTestDetails[0]?.litmusTaskId?.results[taskIndex]?.score[criterionIndex]?.score
-                                ? (application?.litmusTestDetails[0]?.litmusTaskId?.results[taskIndex]?.score[criterionIndex]?.score+'/')
-                                : "" 
-                            }
-                            {criterion?.points}
-                          </span>
-                        </div>
+                    <div key={criterionIndex} className="space-y-1">
+                      <div className="flex justify-between">
+                        <Label>{criterion?.name}</Label>
+                        <span className="text-sm">
+                          {
+                            // Check if the score exists and display the score, otherwise display a default value
+                            application?.litmusTestDetails[0]?.litmusTaskId?.results[taskIndex]?.score[criterionIndex]?.score
+                              ? (application?.litmusTestDetails[0]?.litmusTaskId?.results[taskIndex]?.score[criterionIndex]?.score+'/')
+                              : "" 
+                          }
+                          {criterion?.points}
+                        </span>
                       </div>
-                    ))}
-                    {(() => {
+                    </div>
+                  ))}
+                  {(() => {
                       const totalScore = application?.litmusTestDetails[0]?.litmusTaskId?.results[taskIndex]?.score.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
                       const maxScore = task?.judgmentCriteria.reduce((acc: any, criterion: any) => acc + Number(criterion.points), 0);
                       const percentage = totalScore ? ((totalScore / maxScore) * 100).toFixed(0) : '--';
@@ -323,20 +321,21 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </div>
               </div>
             ))}
-            <div className="mx-2 py-4 px-2 space-y-2">               
-              <p className="text-sm text-muted-foreground">Feedback:</p>
-              {application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback.map((feedback: any, feedbackIndex: any) => (
-                <div key={feedbackIndex} className="space-y-1">
-                <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
-                  {feedback?.data.map((criterion: any, criterionIndex: any) => (
-                    <li key={criterionIndex} className="text-sm pl-3">
-                      {criterion}
-                    </li>
-                  ))}
-                </div>
-              ))}
-           </div>
-
+            {application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback.length > 0 &&
+              <div className="mx-2 py-4 px-2 space-y-2">               
+                <p className="text-sm text-muted-foreground">Feedback:</p>
+                {application?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback.map((feedback: any, feedbackIndex: any) => (
+                  <div key={feedbackIndex} className="space-y-1">
+                  <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
+                    {feedback?.data.map((criterion: any, criterionIndex: any) => (
+                      <li key={criterionIndex} className="text-sm pl-3">
+                        {criterion}
+                      </li>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            }
             </Card>
           </div>
 
@@ -344,16 +343,16 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
 
           {/* Scholarship Assignment */}
           <div className="space-y-2">
-            <h4 className="font-medium">Performance Rating</h4>
-            <div className="flex space-x-1 bg-[#262626] p-2 rounded-lg justify-center mx-auto">
-            {[...Array(5)].map((_, index) => (
-              <span key={index} className={`text-2xl transition-colors ${
-              index < application?.litmusTestDetails[0]?.litmusTaskId?.performanceRating ? 'text-[#F8E000]' : 'text-[#A3A3A366]'}`}>
-                ★
-              </span>
-              ))}
+              <h4 className="font-medium">Performance Rating</h4>
+              <div className="flex space-x-1 bg-[#262626] p-2 rounded-lg justify-center mx-auto">
+              {[...Array(5)].map((_, index) => (
+                <span key={index} className={`text-2xl transition-colors ${
+                index < application?.litmusTestDetails[0]?.litmusTaskId?.performanceRating ? 'text-[#F8E000]' : 'text-[#A3A3A366]'}`}>
+                  ★
+                </span>
+                ))}
+              </div>
             </div>
-          </div>
         </div>
       </ScrollArea>
 

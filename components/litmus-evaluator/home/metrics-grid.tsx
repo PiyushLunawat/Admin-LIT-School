@@ -33,7 +33,11 @@ function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) 
   );
 }
 
-export function MetricsGrid() {
+interface MetricGridProps {
+  applications: any;
+}
+
+export function MetricsGrid({ applications }: MetricGridProps) {
   const metrics = [
     {
       title: "Total Assigned",

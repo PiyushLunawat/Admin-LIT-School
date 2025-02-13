@@ -11,10 +11,9 @@ import {
 } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
 import { Dispatch, SetStateAction, useCallback } from "react";
-import { DateRangePicker } from "./date-range-picker";
 import { DateRange } from "react-day-picker";
 
-interface ApplicationFiltersProps {
+interface LitmusFiltersProps {
   setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
   searchQuery: string;
   onSearchQueryChange: Dispatch<SetStateAction<string>>;
@@ -27,7 +26,7 @@ interface ApplicationFiltersProps {
   onSortByChange: Dispatch<SetStateAction<string>>;
 }
 
-export function ApplicationFilters({
+export function LitmusFilters({
   setDateRange,
   searchQuery,
   onSearchQueryChange,
@@ -38,7 +37,7 @@ export function ApplicationFilters({
   onSelectedStatusChange,
   sortBy,
   onSortByChange,
-}: ApplicationFiltersProps) {
+}: LitmusFiltersProps) {
 
   const handleClearFilters = useCallback(() => {
     onSearchQueryChange("");
@@ -107,9 +106,6 @@ export function ApplicationFilters({
             <X className="-ml-4 h-4 w-4" />
           </Button>
         }
-      </div>
-      <div className="">
-        <DateRangePicker setDateRange={setDateRange} />
       </div>
     </div>
   );

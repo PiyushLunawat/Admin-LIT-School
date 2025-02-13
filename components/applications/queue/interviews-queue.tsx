@@ -11,10 +11,11 @@ import { getCohorts } from "@/app/api/cohorts";
 import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
 import { CohortDetails } from "./cohort-details";
+import { InterviewsList } from "./interviews-list";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
-export function ApplicationsQueue() {
+export function InterviewsQueue() {
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -41,7 +42,7 @@ export function ApplicationsQueue() {
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              student?.applicationDetails !== undefined
+            ['accepted', 'interview scheduled', 'interview cancelled', 'waitlist', 'selected', 'not qualified', 'dropped'].includes(student?.applicationDetails?.applicationStatus)
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -213,7 +214,7 @@ export function ApplicationsQueue() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Applications Queue</h2>
+        <h2 className="text-2xl font-bold">Interviews Queue</h2>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -249,9 +250,9 @@ export function ApplicationsQueue() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ApplicationsList
+          <InterviewsList
             applications={filteredAndSortedApplications} // Pass filtered and sorted applications to the list
-            onApplicationSelect={(application) => setSelectedApplication(application)}
+            onApplicationSelect={(id) => setSelectedApplication(id)}
             selectedIds={selectedApplicationIds}
             onSelectedIdsChange={setSelectedApplicationIds}
           />

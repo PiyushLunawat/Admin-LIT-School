@@ -39,11 +39,11 @@ const routes = [
     icon: ClipboardList,
     href: "/dashboard/applications",
   },
-  {
-    label: "Interviews",
-    icon: Calendar,
-    href: "/dashboard/interviews",
-  },
+  // {
+  //   label: "Interviews",
+  //   icon: Calendar,
+  //   href: "/dashboard/interviews",
+  // },
   {
     label: "LITMUS Test",
     icon: GraduationCap,

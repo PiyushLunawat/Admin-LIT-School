@@ -9,6 +9,7 @@ import { ApplicationsHome } from "./home/applications-home";
 import { ApplicationsQueue } from "./queue/applications-queue";
 import { CommunicationsTab } from "./communications/communications-tab";
 import { SettingsTab } from "./settings/settings-tab";
+import { InterviewsQueue } from "./queue/interviews-queue";
 
 
 export function ApplicationDashboard() {
@@ -34,6 +35,7 @@ export function ApplicationDashboard() {
         <TabsList className="w-full">
           <TabsTrigger value="home">Home</TabsTrigger>
           <TabsTrigger value="applications">Applications</TabsTrigger>
+          <TabsTrigger value="interviews">Interviews</TabsTrigger>
           {/* <TabsTrigger value="communications">Communications</TabsTrigger> */}
           {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
@@ -44,6 +46,10 @@ export function ApplicationDashboard() {
 
         <TabsContent value="applications">
           <ApplicationsQueue />
+        </TabsContent>
+
+        <TabsContent value="interviews">
+          <InterviewsQueue />
         </TabsContent>
 
         <TabsContent value="communications">

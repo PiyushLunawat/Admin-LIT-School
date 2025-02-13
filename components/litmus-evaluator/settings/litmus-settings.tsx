@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileSettings } from "./settings/profile-settings";
-import { SecuritySettings } from "./settings/security-settings";
-import { NotificationSettings } from "./settings/notification-settings";
-import { AvailabilitySettings } from "./settings/availability-settings";
-import { IntegrationSettings } from "./settings/integration-settings";
-import { HelpSupport } from "./settings/help-support";
+import { ProfileSettings } from "./profile-settings";
+import { SecuritySettings } from "./security-settings";
+import { NotificationSettings } from "./notification-settings";
+import { AvailabilitySettings } from "./availability-settings";
+import { IntegrationSettings } from "./integration-settings";
+import { HelpSupport } from "./help-support";
 
 export function LitmusSettings() {
   return (
