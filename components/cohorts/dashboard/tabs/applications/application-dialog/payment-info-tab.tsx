@@ -83,7 +83,6 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   ? (feeStructure || sch?.scholarshipDetails)
   : (feeStructure || sch?.scholarshipDetails)?.slice(0, 1); 
   
-  console.log("geeee",visibleSemesters, sch?.scholarshipDetails)
   const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
   const installments = (feeStructure || sch?.scholarshipDetails)?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
@@ -115,7 +114,6 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
     
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
-
 
   const formatAmount = (value: number | undefined) =>
     value !== undefined

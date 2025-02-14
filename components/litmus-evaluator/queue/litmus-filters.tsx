@@ -79,12 +79,11 @@ export function LitmusFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-status">All Status</SelectItem>
-              <SelectItem value="initiated">Initiated</SelectItem>
-              <SelectItem value="under review">Under Review</SelectItem>
-              <SelectItem value="accepted">Accepted</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-              <SelectItem value="on hold">On Hold</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
               <SelectItem value="interview scheduled">Interview Scheduled</SelectItem>
+              <SelectItem value="interview cancelleed">Interview Cancelled</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="dropped">Dropped</SelectItem>
             </SelectContent>
           </Select>

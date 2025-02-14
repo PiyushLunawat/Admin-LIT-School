@@ -1,34 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { LitmusList } from "./litmus-list";
-import { LitmusFilters } from "./litmus-filters";
-import { LitmusDetails } from "./litmus-details";
+import { EnrolmentList } from "./enrolment-list";
+import { EnrolmentFilters } from "./enrolment-filters";
+import { EnrolmentDetails } from "./enrolment-details";
 import { Button } from "@/components/ui/button";
-import { Mail, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { getCohorts } from "@/app/api/cohorts";
-import { getStudents } from "@/app/api/student";
+import { Download, Mail } from "lucide-react";
+import { MetricsGrid } from "./metrics-grid";
 import { DateRange } from "react-day-picker";
-import { CohortDetails } from "./cohort-details";
+import { getStudents } from "@/app/api/student";
+import { getCohorts } from "@/app/api/cohorts";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
-export function LitmusQueue() {
-  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
-  const [selectedSubmissionIds, setSelectedSubmissionIds] = useState<string[]>([]);
-
+export function EnrolmentQueue() {
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [cohorts, setCohorts] = useState<any[]>([]);
   const [currentCohort, setCurrentCohort] = useState<any>();
   const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState(true);
-
-  const [applied, setApplied] = useState(0);
-  const [intCleared, setIntCleared] = useState(0);
-  const [feePaid, setFeePaid] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState<string>(""); // added for search
   const [selectedCohort, setSelectedCohort] = useState<string>("all-cohorts");
@@ -44,7 +36,7 @@ export function LitmusQueue() {
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              student?.litmusTestDetails[0]?.litmusTaskId !== undefined
+              student?.applicationDetails?.applicationStatus === 'selected' || student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -92,34 +84,8 @@ export function LitmusQueue() {
       return app.cohort?.cohortId === selectedCohort;
     });
 
-    setApplied(
-      applications.filter(
-        (student: any) => student?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.cohort?.cohortId === selectedCohort
-      ).length
-    );
-    
-    setIntCleared(
-      applications.filter(
-        (student: any) => student?.applicationDetails?.applicationStatus === 'selected' && student?.cohort?.cohortId === selectedCohort
-      ).length
-    );
-
-    setFeePaid(
-      applications.filter(
-        (student: any) => student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && student?.cohort?.cohortId === selectedCohort
-      ).length
-    );   
-    
-    // Filter by date range
-    const filteredByDate = filteredByCohort.filter((app: any) => {
-      if (!dateRange) return true;
-      const appDate = new Date(app.updatedAt);
-      const { from, to } = dateRange;
-      return (!from || appDate >= from) && (!to || appDate <= to);
-    });
-
     // a) Search filter by applicant name
-    const filteredBySearch = filteredByDate.filter((app: any) => {
+    const filteredBySearch = filteredByCohort.filter((app: any) => {
       if (searchQuery.trim()) {
         const lowerSearch = searchQuery.toLowerCase();
         const name = `${app.firstName ?? ""} ${app.lastName ?? ""}`.toLowerCase();
@@ -131,7 +97,7 @@ export function LitmusQueue() {
     // b) Status filter
     const filteredByStatus = filteredBySearch.filter((app: any) => {
       if (selectedStatus !== "all-status") {
-        const status = app?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() || "pending";
+        const status = app?.cousrseEnrolled?.[app.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus?.toLowerCase() || "pending";
         return status === selectedStatus;
       }
       return true;
@@ -174,7 +140,7 @@ export function LitmusQueue() {
     }
 
     return sortedApplications;
-  }, [applications, searchQuery, selectedStatus, sortBy, dateRange, selectedCohort]);
+  }, [applications, searchQuery, selectedStatus, sortBy, selectedCohort]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -204,40 +170,42 @@ export function LitmusQueue() {
   const handleApplicationUpdate = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
   };
-
-  const handleBulkEmail = () => {
-    console.log("Sending bulk email to:", selectedSubmissionIds);
+  
+  const handleBulkReminder = () => {
+    console.log("Sending payment reminders to:", selectedApplicationIds);
   };
 
   const handleBulkExport = () => {
-    console.log("Exporting data for:", selectedSubmissionIds);
+    console.log("Exporting payment data for:", selectedApplicationIds);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">LITMUS Test</h2>
+      {/* <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Payment Management</h2>
         <div className="flex gap-2">
-          {/* <Button
+          <Button
             variant="outline"
-            onClick={handleBulkEmail}
-            disabled={selectedSubmissionIds.length === 0}
+            onClick={handleBulkReminder}
+            disabled={selectedApplicationIds.length === 0}
           >
             <Mail className="h-4 w-4 mr-2" />
-            Bulk Email
-          </Button> */}
+            Send Reminders
+          </Button>
           <Button
             variant="outline"
             onClick={handleBulkExport}
-            disabled={selectedSubmissionIds.length === 0}
+            disabled={selectedApplicationIds.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
           </Button>
         </div>
-      </div>
+      </div> */}
 
-      <LitmusFilters setDateRange={setDateRange}
+      <MetricsGrid applications={filteredAndSortedApplications}/>
+
+      <EnrolmentFilters 
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
         cohorts={cohorts}
@@ -246,19 +214,12 @@ export function LitmusQueue() {
         selectedStatus={selectedStatus}
         onSelectedStatusChange={setSelectedStatus}
         sortBy={sortBy}
-        onSortByChange={setSortBy}/>
-
-      {selectedCohort !== 'all-cohorts' &&
-       <CohortDetails 
-        cohort={currentCohort}
-        applied={applied}
-        intCleared={intCleared}
-        feePaid={feePaid} />
-      }
+        onSortByChange={setSortBy}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <LitmusList
+          <EnrolmentList
             applications={filteredAndSortedApplications}
             onApplicationSelect={(application) => setSelectedApplication(application)}
             selectedIds={selectedApplicationIds}
@@ -269,15 +230,15 @@ export function LitmusQueue() {
           <div className="sticky top-6">
             <Card className="h-[calc(100vh-7rem)] overflow-hidden">
               {selectedApplication ? (
-                <LitmusDetails
+                <EnrolmentDetails
                   application={selectedApplication}
-                  onClose={() => setSelectedSubmissionId(null)}
-                  onApplicationUpdate={handleApplicationUpdate} 
+                  onClose={() => setSelectedApplication(null)}
+                  onApplicationUpdate={handleApplicationUpdate}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center p-6 text-muted-foreground">
                   <p className="text-center">
-                    Select a submission to view details
+                    Select a payment to view details
                   </p>
                 </div>
               )}

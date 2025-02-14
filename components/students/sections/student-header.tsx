@@ -131,7 +131,7 @@ export function StudentHeader({ studentId }: StudentHeaderProps) {
                 <Download className="h-4 w-4 mr-2" />
                 Export Data
               </Button>
-              <Button variant="outline" size="sm" className="text-destructive">
+              <Button variant="outline" size="sm" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive">
                 <UserMinus className="h-4 w-4 mr-2" />
                 Mark as Dropped
               </Button>

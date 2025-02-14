@@ -14,7 +14,7 @@ import { Dispatch, SetStateAction, useCallback } from "react";
 import { DateRangePicker } from "./date-range-picker";
 import { DateRange } from "react-day-picker";
 
-interface ApplicationFiltersProps {
+interface InterviewsFiltersProps {
   setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
   searchQuery: string;
   onSearchQueryChange: Dispatch<SetStateAction<string>>;
@@ -27,7 +27,7 @@ interface ApplicationFiltersProps {
   onSortByChange: Dispatch<SetStateAction<string>>;
 }
 
-export function ApplicationFilters({
+export function InterviewsFilters({
   setDateRange,
   searchQuery,
   onSearchQueryChange,
@@ -38,7 +38,7 @@ export function ApplicationFilters({
   onSelectedStatusChange,
   sortBy,
   onSortByChange,
-}: ApplicationFiltersProps) {
+}: InterviewsFiltersProps) {
 
   const handleClearFilters = useCallback(() => {
     onSearchQueryChange("");
@@ -80,12 +80,12 @@ export function ApplicationFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-status">All Status</SelectItem>
-              <SelectItem value="initiated">Initiated</SelectItem>
-              <SelectItem value="under review">Under Review</SelectItem>
-              <SelectItem value="on hold">On Hold</SelectItem>
-              <SelectItem value="accepted">Accepted</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
               <SelectItem value="interview scheduled">Interview Scheduled</SelectItem>
+              <SelectItem value="interview cancelled">Interview Cancelled</SelectItem>
+              <SelectItem value="under review">Interview Concluded</SelectItem>
+              <SelectItem value="waitlist">Waitlist</SelectItem>
+              <SelectItem value="selected">Selected</SelectItem>
+              <SelectItem value="not qualified">Not Qualified</SelectItem>
               <SelectItem value="dropped">Dropped</SelectItem>
             </SelectContent>
           </Select>

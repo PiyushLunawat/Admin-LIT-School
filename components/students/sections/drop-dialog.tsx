@@ -24,7 +24,7 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
   return (
     <div>
         <div className="grid gap-3">
-          <div className="flex gap-2 text-2xl items-center">
+          <div className="flex gap-2 text-2xl border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive">
             <UserMinus className="h-6 w-6 text-red-500" />
             Mark as Dropped
           </div>

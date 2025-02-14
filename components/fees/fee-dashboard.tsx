@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FeesHome } from "./fees-home";
-import { PaymentManagement } from "./payment-management/payment-management";
-import { StudentAccounts } from "./student-accounts/student-accounts";
+import { FeesHome } from "./home/fees-home";
+import { EnrolmentQueue } from "./fee-enrolment/enrolment-queue";
+import { FeeCollection } from "./fee-collection/fee-collection";
 import { FeesReports } from "./reports/fees-reports";
 import { FeesCommunication } from "./communication/fees-communication";
 import { FeesSettings } from "./settings/fees-settings";
@@ -31,7 +31,7 @@ export function FeeDashboard() {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold">Fees Dashboard</h1>
 
-      <Tabs defaultValue="home" className="space-y-6">
+      <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="w-full">
           <TabsTrigger value="home">Home</TabsTrigger>
           <TabsTrigger value="enrolment">Enrolment</TabsTrigger>
@@ -46,11 +46,11 @@ export function FeeDashboard() {
         </TabsContent>
 
         <TabsContent value="enrolment">
-          <PaymentManagement />
+          <EnrolmentQueue/>
         </TabsContent>
 
         <TabsContent value="fee-collection">
-          <StudentAccounts />
+          <FeeCollection />
         </TabsContent>
 
         {/* <TabsContent value="reports">

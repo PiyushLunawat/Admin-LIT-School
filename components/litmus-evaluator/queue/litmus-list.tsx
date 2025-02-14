@@ -71,8 +71,7 @@ export function LitmusList({
       return ``;
     }
   };
-  
-  
+    
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending":

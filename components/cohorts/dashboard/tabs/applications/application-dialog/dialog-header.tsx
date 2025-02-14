@@ -122,7 +122,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
-              <Button variant="outline" className="justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                     <UserMinus className="h-4 w-4 mr-2" />
                     Mark as Dropped
                   </Button>

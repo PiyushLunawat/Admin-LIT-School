@@ -4,39 +4,36 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  Mail,
-  MessageSquare,
-  UserMinus,
-  X,
-  Upload,
-  Download,
-  Calendar,
-  UploadIcon,
-  StarIcon,
-  DownloadIcon,
-  Star,
-  Eye,
-} from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { AwardScholarship } from "../litmus/litmus-test-dialog/award-scholarship";
+import {
+  Calendar,
+  Mail,
+  MessageSquare,
+  UserMinus,
+  X,
+  Download,
+  CreditCard,
+  DownloadIcon,
+  Star,
+  Eye,
+  UploadIcon,
+  FilePenLine,
+} from "lucide-react";
+import { AwardScholarship } from "@/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/award-scholarship";
 
-type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
-interface PaymentDetailsProps {
-  student: any;
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
+
+interface FeeCollectionDetailsProps {
+  application: any;
   onClose: () => void;
+  onApplicationUpdate: () => void;
 }
 
-export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
+export function FeeCollectionDetails({ application, onClose, onApplicationUpdate }: FeeCollectionDetailsProps) {
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [sch, setSch] = useState<any>(null);
   const [schOpen, setSchOpen] = useState(false);
@@ -49,7 +46,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
     setOpen(true);
   };
 
-  const lastCourse = student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
+  const lastCourse = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
   let lastStatus = '';
 
   const visibleSemesters = showAllSemesters
@@ -87,8 +84,8 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   }
 
   useEffect(() => {
-    setSch(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
-}, [student]);
+    setSch(application?.cousrseEnrolled?.[application?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
+}, [application]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -106,7 +103,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   };
 
   const getColor = (slabName: string): string => {
-    const index = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+    const index = application?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
       (slab: any) => slab.name === slabName
     );
     
@@ -121,10 +118,11 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b flex items-center justify-between">
+      <div className="p-4 border-b flex items-start justify-between">
         <div>
-          <h3 className="font-semibold">{student?.firstName+" "+student?.lastName}</h3>
-          <p className="text-sm text-muted-foreground">{student?.email}</p>
+          <h3 className="font-semibold">{application?.firstName+" "+application?.lastName}</h3>
+          <p className="text-sm text-muted-foreground">{application?.email}</p>
+          <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
@@ -147,13 +145,16 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
-                <p className={`font-medium ${getColor(sch?.scholarshipName)}`}>
-                  {sch?.scholarshipName+' ('+sch?.scholarshipPercentage+'%)'}
+                <p className={`flex gap-1 font-medium ${getColor(sch?.scholarshipName || '')}`}>
+                {sch?.scholarshipName ? 
+                  <><div className="truncate">{sch?.scholarshipName}</div><span className="text-white">({sch?.scholarshipPercentage}%)</span></> :
+                  '--'
+                }
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Admission Fee Status</p>
-                <span className="text-base mr-2">₹{formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}</span>
+                <span className="text-base mr-2">₹{formatAmount(application?.cohort?.cohortFeesDetail?.tokenFee)}</span>
                 <Badge className="capitalize" variant={getStatusColor(lastCourse?.tokenFeeDetails?.verificationStatus || '')}>
                   {lastCourse?.tokenFeeDetails?.verificationStatus}
                 </Badge>
@@ -176,28 +177,18 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
           <div className="space-y-2">
             <h4 className="font-medium">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start">
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule Presen...
+              <Button variant="outline" className="border-none bg-[#FF791F]/90 hover:bg-[#FF791F] justify-start text-destructivejustify-start">
+                <Mail className="h-4 w-4 mr-2" />
+                Share Reminder
               </Button>
               <Button variant="outline" className="justify-start">
                 <DownloadIcon className="h-4 w-4 mr-2" />
                 Download Files
               </Button>
-              {sch ? 
-                  <Button variant="outline" className={`justify-start ${getColor(sch?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
-                    <div className="flex gap-2 items-center">
-                      <span className="text-lg pb-[2px]">★ </span> {sch?.scholarshipName+' ('+sch?.scholarshipPercentage+'%)'}
-                    </div> 
-                  </Button>
-                    :
-                  <Button variant="outline" className="justify-start">
-                    <div className="flex gap-2 items-center">
-                      <Star className="h-4 w-4" />
-                      Award Scholarship
-                    </div>
-                  </Button>
-                }
+              <Button variant="outline" className="justify-start">
+                <Calendar className="h-4 w-4 mr-2" />
+                Schedule Present...
+              </Button>
               <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                 <UserMinus className="h-4 w-4 mr-2" />
                 Mark as Dropped
@@ -205,7 +196,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
 
               <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
                 <DialogContent className="max-w-4xl py-4 px-6">
-                  <MarkedAsDialog student={student}/>
+                  <MarkedAsDialog student={application}/>
                 </DialogContent>
               </Dialog>
             </div>
@@ -243,11 +234,13 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
               </div>
               <div>
                 <p className="text-sm ">Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.amountPayable)}</p>
-                <p className="text-sm text-muted-foreground">Base Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.baseFee)}</p>
-                <p className="text-sm text-muted-foreground">One Shot Discount: ₹{formatAmount(lastCourse?.oneShotPayment?.OneShotPaymentAmount)}</p>
-                <p className="text-sm text-muted-foreground">Scholarship Waiver: ₹{formatAmount(lastCourse?.oneShotPayment?.baseFee*sch?.scholarshipPercentage*0.01)}</p>
+                <p className="text-xs text-muted-foreground">Base Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.baseFee)}</p>
+                <p className="text-xs text-muted-foreground">One Shot Discount: ₹{formatAmount(lastCourse?.oneShotPayment?.OneShotPaymentAmount)}</p>
+                {lastCourse?.oneShotPayment?.baseFee*sch?.scholarshipPercentage !== 0 &&
+                  <p className="text-xs text-muted-foreground">Scholarship Waiver: <span className={`${getColor(sch?.scholarshipName || '')}`}>₹{formatAmount(lastCourse?.oneShotPayment?.baseFee*sch?.scholarshipPercentage*0.01)}</span></p>
+                }
               </div>
-              <div className="flex justify-between items-center gap-2">
+              <div className="space-y-2">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-2" />
                   Due: {new Date(lastCourse?.oneShotPayment?.installmentDate).toLocaleDateString()}
@@ -305,14 +298,16 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                         <p className="text-sm ">
                           Amount Payable: ₹{formatAmount(instalment.amountPayable)}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           Base Amount: ₹{formatAmount(instalment.baseFee + instalment.scholarshipAmount)}
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          Scholarship Waiver: ₹{formatAmount(instalment.scholarshipAmount)}
-                        </p>
+                        {instalment.scholarshipAmount !== 0 && 
+                          <p className="text-xs text-muted-foreground">
+                            Scholarship Waiver: <span className={`${getColor(sch.scholarshipName || '')}`}>₹{formatAmount(instalment.scholarshipAmount)}</span>
+                          </p>
+                        }
                       </div>
-                      <div className="flex justify-between items-center gap-2">
+                      <div className="space-y-2">
                         <div className="flex items-center text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4 mr-2" />
                           Due: {new Date(instalment.installmentDate).toLocaleDateString()}
@@ -325,6 +320,15 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                         )}
                       </div>
                       {instalment.receiptUrls[instalment.receiptUrls.length - 1]?.url ? (
+                        instalment.verificationStatus === 'verification pending' ?
+                        <Button
+                          size="sm"
+                          className="w-full mt-2"
+                          // onClick={() => window.open(instalment.receiptUrls[0]?.url, "_blank")}
+                        >
+                          <FilePenLine className="h-4 w-4 mr-2" />
+                          Verify Acknowledgement Receipt
+                        </Button> :
                         <Button
                           variant="outline"
                           size="sm"
@@ -347,10 +351,10 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
             )}
               {sch?.scholarshipDetails?.length > 1 && (
                 <Button
-                  variant="outline" className="w-full"
+                  variant="ghost" className="w-full underline text-muted-foreground"
                   onClick={() => setShowAllSemesters(!showAllSemesters)}
                 >
-                  {showAllSemesters ? "Show Less" : "Show More"}
+                  {showAllSemesters ? "View Less" : "View More"}
                 </Button>
               )}
             </div>
@@ -359,7 +363,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>
             <DialogContent className="max-w-5xl">
-              <AwardScholarship student={student} />
+              <AwardScholarship student={application} />
             </DialogContent>
           </Dialog>
 

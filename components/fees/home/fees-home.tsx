@@ -1,10 +1,10 @@
 "use client";
 
-import { MetricsGrid } from "./home/metrics-grid";
-import { RecentActivity } from "./home/recent-activity";
-import { UpcomingDeadlines } from "./home/upcoming-deadlines";
-import { AlertsSection } from "./home/alerts-section";
-import { QuickActions } from "./home/quick-actions";
+import { MetricsGrid } from "./metrics-grid";
+import { RecentActivity } from "./recent-activity";
+import { UpcomingDeadlines } from "./upcoming-deadlines";
+import { AlertsSection } from "./alerts-section";
+import { QuickActions } from "./quick-actions";
 
 export function FeesHome() {
   return (

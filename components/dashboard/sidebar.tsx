@@ -47,7 +47,7 @@ const routes = [
   {
     label: "LITMUS Test",
     icon: GraduationCap,
-    href: "/dashboard/litmus-evaluator/home",
+    href: "/dashboard/litmus-evaluator",
   },
   {
     label: "Fees",

@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ApplicationsList } from "./applications-list";
-import { ApplicationFilters } from "./application-filters";
 import { ApplicationDetails } from "./application-details";
 import { Button } from "@/components/ui/button";
-import { Mail, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getCohorts } from "@/app/api/cohorts";
 import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
 import { CohortDetails } from "./cohort-details";
 import { InterviewsList } from "./interviews-list";
+import { InterviewsFilters } from "./interviews-filters";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
@@ -227,7 +226,7 @@ export function InterviewsQueue() {
         </div>
       </div>
 
-      <ApplicationFilters 
+      <InterviewsFilters 
         setDateRange={setDateRange}
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
