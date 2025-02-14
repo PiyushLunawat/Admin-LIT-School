@@ -2,9 +2,10 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileIcon, FileText, ImageIcon, Link2Icon, VideoIcon } from 'lucide-react';
+import { ArrowUpRight, Download, FileIcon, FileText, ImageIcon, Link2Icon, VideoIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getStudentApplication } from '@/app/api/student';
+import { Button } from '@/components/ui/button';
 
 
 interface SubmissionViewProps {
@@ -13,9 +14,6 @@ interface SubmissionViewProps {
 }
 
 const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) => {
-
-  console.log("subb",submission);
-  
 
   return (
     <div className="">
@@ -80,44 +78,70 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                       .map((configItem: any) => configItem?.type)
                       .join(", ")}
                 </div>
-              </div>}
-            {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
-              <div key={`text-${id}`} className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
-                {textItem}
               </div>
-            ))}
-            {submission?.tasks[index]?.task?.links?.map((linkItem: string, id: number) => (
-              <div key={`link-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <Link2Icon className="w-4 h-4" />
-                <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {linkItem}
-                </a>
+            }
+              <div className='flex flex-wrap gap-2 mt-2'>
+              {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
+                <div key={`text-${id}`} className="w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl">
+                  {textItem}
+                </div>
+              ))}
+              {submission?.tasks[index]?.task?.links?.map((linkItem: string, id: number) => (
+                <div key={`link-${id}`} className="w-full flex items-center gap-2 text-sm p-3 border rounded-xl">
+                  <Link2Icon className="w-4 h-4" />
+                  <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                    {linkItem}
+                  </a>
+                </div>
+              ))}
+              {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
+                <div key={`image-${id}`} className="w-[49%] flex flex-col items-center text-sm border rounded-xl">
+                  <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[240px] object-cover rounded-t-xl' />
+                  <div className='w-full flex justify-between items-center p-3 border-t'>
+                    <div className='flex items-center gap-2 text-sm truncate'>
+                      <ImageIcon className="w-4 h-4" />
+                      <span className='w-[220px] text-white truncate'>
+                        {imageItem.split('/').pop()}
+                      </span>
+                    </div>
+                    <Button variant={'ghost'} size={'zero'} className=''>
+                      <a href={imageItem} target="_blank" rel="noopener noreferrer" className="">
+                        <Download className="w-4 h-4 " />
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
+                <div key={`video-${id}`} className="w-[49%] flex flex-col w-fit items-center text-sm border rounded-xl">
+                  <video controls preload="none" className='h-[240px] rounded-t-xl'>
+                    <source src={videoItem} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                  <div className='w-full flex justify-between items-center p-3 border-t'>
+                    <div className='flex items-center gap-2 text-sm truncate'>
+                      <VideoIcon className="w-4 h-4" />
+                      <span className='w-[220px] text-white truncate'>
+                        {videoItem.split('/').pop()}
+                      </span>
+                    </div>
+                    <Button variant={'ghost'} size={'zero'} className=''>
+                      <a href={videoItem} target="_blank" rel="noopener noreferrer" className="">
+                        <Download className="w-4 h-4 " />
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {submission?.tasks[index]?.task?.files?.map((fileItem: string, id: number) => (
+                <div key={`file-${id}`} className="flex w-full items-center gap-2 text-sm p-3 border rounded-xl">
+                  <FileIcon className="w-4 h-4" />
+                  <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                    {fileItem.split('/').pop()}
+                  </a>
+                </div>
+              ))}
               </div>
-            ))}
-            {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
-              <div key={`image-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <ImageIcon className="w-4 h-4" />
-                <a href={imageItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {imageItem.split('/').pop()}
-                </a>
-              </div>
-            ))}
-            {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
-              <div key={`video-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <VideoIcon className="w-4 h-4" />
-                <a href={videoItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {videoItem.split('/').pop()}
-                </a>
-              </div>
-            ))}
-            {submission?.tasks[index]?.task?.files?.map((fileItem: string, id: number) => (
-              <div key={`file-${id}`} className="flex items-center gap-2 text-sm mt-2 p-2 border rounded-xl">
-                <FileIcon className="w-4 h-4" />
-                <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                  {fileItem.split('/').pop()}
-                </a>
-              </div>
-            ))}
             </div>
 
           </div>

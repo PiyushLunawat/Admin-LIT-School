@@ -129,7 +129,7 @@ export function EvaluationInsights({ applications }: EvaluationInsightsProps) {
           {Object.keys(weakPerformanceSkills).map((skill) => (
               <div key={skill} className="flex items-start justify-between">
                 <div className="flex items-start gap-2">
-                  <HandMetal className="w-4" />
+                  <HandMetal className="w-4 rotate-90" />
                   <div className="space-y-1">
                     <span className="text-base">{skill}</span>
                     <div className="flex gap-1">

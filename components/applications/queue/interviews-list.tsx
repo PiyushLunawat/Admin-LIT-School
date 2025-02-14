@@ -87,6 +87,29 @@ export function InterviewsList({
     }
   };
 
+  const timeAgo = (timestamp: string) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffInMs = now.getTime() - date.getTime(); // Difference in milliseconds
+    
+    const diffInSecs = Math.floor(diffInMs / 1000); // Seconds
+    const diffInMins = Math.floor(diffInSecs / 60); // Minutes
+    const diffInHours = Math.floor(diffInMins / 60); // Hours
+    const diffInDays = Math.floor(diffInHours / 24); // Days
+    
+    if (diffInDays > 0) {
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    } else if (diffInHours > 0) {
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    } else if (diffInMins > 0) {
+      return `${diffInMins} minute${diffInMins > 1 ? "s" : ""} ago`;
+    } else if (diffInSecs > 0) {
+      return `Just now`;
+    } else {
+      return ``;
+    }
+  };
+
     useEffect(() => {
       if (applications.length > 0) {
         const firstApplication = applications[0];
@@ -151,7 +174,7 @@ export function InterviewsList({
                 {application?.applicationDetails?.applicationStatus === 'accepted' ? 
                 <div className="text-muted-foreground">
                   <div className="text-xs">Waiting for Interview to be scheduled</div>
-                  <div className="text-[10px]">Accepted 2 hours ago</div>
+                  <div className="text-[10px]">Accepted {timeAgo(application?.applicationDetails?.updatedAt)}</div>
                 </div> :
                 <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "--")}>
                   {application?.applicationDetails?.applicationStatus || "--"}

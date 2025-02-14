@@ -326,7 +326,7 @@ export function ApplicationsList({
 
       {/* Dialog to display "Hi" message */}
       <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} />
           )}

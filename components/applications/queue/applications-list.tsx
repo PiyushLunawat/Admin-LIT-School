@@ -11,9 +11,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Clock, CheckCircle, Clock4Icon, Calendar } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Eye, CheckCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
+import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
+import { DocumentsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
 
 interface ApplicationsListProps {
   applications: any;
@@ -31,6 +36,8 @@ export function ApplicationsList({
   onSelectedIdsChange,
 }: ApplicationsListProps) {
 
+  const [open, setOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   const toggleSelectAll = () => {
@@ -49,17 +56,9 @@ export function ApplicationsList({
     }
   };
 
-  const getPriorityColor = (priority: string): BadgeVariant => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "destructive";
-      case "medium":
-        return "warning";
-      case "low":
-        return "secondary";
-      default:
-        return "default";
-    }
+  const handleEyeClick = (student: any) => {
+    setSelectedStudentId(student); // Set the selected student ID
+    setOpen(true); // Open the dialog
   };
 
   const getStatusColor = (status: string): BadgeVariant => {
@@ -164,7 +163,7 @@ export function ApplicationsList({
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onApplicationSelect(application.id);
+                    handleEyeClick(application);
                   }}
                 >
                   <Eye className="h-4 w-4" />
@@ -174,6 +173,28 @@ export function ApplicationsList({
           ))}
         </TableBody>
       </Table>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+          {selectedStudentId && (
+            <StudentApplicationHeader student={selectedStudentId} />
+          )}
+
+            <Tabs defaultValue="personal" className="space-y-6">
+              <TabsList className="w-full">
+                <TabsTrigger value="personal">Personal Details</TabsTrigger>
+                {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
+              </TabsList>
+
+              <TabsContent value="personal">
+                <PersonalDetailsTab student={selectedStudentId} />
+              </TabsContent>
+{/* 
+              <TabsContent value="documents">
+                <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
+              </TabsContent> */}
+            </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
