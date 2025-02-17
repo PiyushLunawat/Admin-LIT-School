@@ -41,7 +41,7 @@ export function InterviewsQueue() {
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-            ['accepted', 'interview scheduled', 'interview cancelled', 'waitlist', 'selected', 'not qualified', 'dropped'].includes(student?.applicationDetails?.applicationStatus)
+            ['accepted', 'Interview Scheduled', 'interview cancelled', 'waitlist', 'selected', 'not qualified', 'dropped'].includes(student?.applicationDetails?.applicationStatus)
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -75,7 +75,7 @@ export function InterviewsQueue() {
       }
     }
     fetchStudents();
-  }, []);
+  }, [refreshKey]);
 
   const filteredAndSortedApplications = useMemo(() => {
     

@@ -85,25 +85,31 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate }
     }
   };
 
-  async function fetchStudent() {
-    try {
 
-      const currentStatus = application?.applicationDetails?.applicationStatus;
-
-      if (currentStatus === "Interview Scheduled") {
-        checkInterviewStatus(application?.applicationDetails?.applicationTestInterviews);
-      }
-
-      
-      if(['Interview Scheduled', 'interview cancelled', 'concluded', 'waitlist', 'selected', 'not qualified'].includes(application?.applicationDetails?.applicationStatus))
-        setInterview(true)
-      else setInterview(false)
-
-      setStatus(application?.applicationDetails?.applicationStatus);
-    } catch (error) {
-      console.error("Failed to fetch student data:", error);
+  useEffect(() => {
+    if (!application?.applicationDetails) return;
+  
+    const currentStatus = application.applicationDetails.applicationStatus;
+  
+    // If interview scheduled, check the time
+    
+    // If status is in certain states, set interview to true
+    if (
+      ["Interview Scheduled", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(
+        currentStatus
+      )
+    ) {
+      setInterview(true);
+    } else {
+      setInterview(false);
     }
-  }
+    
+    setStatus(currentStatus);
+    if (currentStatus === "Interview Scheduled") {
+      checkInterviewStatus(application.applicationDetails.applicationTestInterviews);
+    }
+  }, [application]);
+  
 
   function checkInterviewStatus(interviews: any) {
     if (!interviews || interviews.length === 0) return;
@@ -160,10 +166,8 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
   };
 
   const handleStatusUpdate = (newStatus: string) => {
-    // Update application status locally and reload application data
     setStatus(newStatus);
     onApplicationUpdate();
-    fetchStudent();
   };
 
   return (
@@ -185,7 +189,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Current Status</h4>
-              <Badge className="capitalize" variant={getStatusColor(application?.applicationDetails?.applicationStatus || "")}>{application?.applicationDetails?.applicationStatus}</Badge>
+              <Badge className="capitalize" variant={getStatusColor(status || "")}>{status}</Badge>
             </div>
             {interview ? 
             <div className="space-y-3">  
@@ -200,7 +204,10 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
                         <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
                       </div>
                     </div>
-                    <p className="capitalize">Interview {interview?.meetingStatus}</p>
+                    {status === 'Interview Concluded' ?
+                      <p className="capitalize">Int. Time Elapsed</p> :
+                      <p className="capitalize">Interview {interview?.meetingStatus}</p>
+                    }
                   </div>
               ))}
               </div>
@@ -212,9 +219,9 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {!['not qualified', 'waitlist', 'selected'].includes(application?.applicationDetails?.applicationStatus) &&
-                    <SelectItem className="capitalize" value={application?.applicationDetails?.applicationStatus}>
-                      <span className="capitalize">{application?.applicationDetails?.applicationStatus}</span>
+                  {!['not qualified', 'waitlist', 'selected'].includes(status) &&
+                    <SelectItem className="capitalize" value={status}>
+                      <span className="capitalize">{status}</span>
                     </SelectItem>
                   }
                   <SelectItem value="waitlist">Waitlist</SelectItem>
@@ -222,9 +229,11 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
                   <SelectItem value="not qualified">Rejected</SelectItem>
                 </SelectContent>
               </Select>
-              <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
-                <FileSignature className="w-4 h-4"/>Interview Feedback
-              </Button>
+              {!['selected'].includes(application?.applicationDetails?.applicationStatus) &&
+                <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
+                  <FileSignature className="w-4 h-4"/>Interview Feedback
+                </Button>
+              }
             </div> : 
             (
               <Select 
@@ -276,6 +285,33 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
             </div>
           </div>
 
+          {application?.applicationDetails?.applicationTestInterviews[0]?.feedback.length > 1 &&
+          <>
+          <Separator />
+          
+          <div className="space-y-2">
+          <h5 className="font-medium ">Interview Feedback</h5>
+            {application?.applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
+              interview?.feedback[interview?.feedback.length - 1] && 
+              <Card key={index} className="p-4 space-y-2">
+                  <h5 className="font-medium text-base text-muted-foreground">Feedback:</h5>
+                  {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
+                    <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
+                      <li className="text-sm" key={i}>
+                        {item}
+                      </li>
+                    </ul>
+                  ))}
+                <div className="flex justify-between items-center">
+                  <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
+                  <div className="font-medium text-sm text-muted-foreground">{new Date(interview?.feedback[interview?.feedback.length - 1]?.date).toLocaleDateString()}</div>
+                </div>
+              </Card>
+            ))}
+          </div>
+          </>
+          }
+
           <Separator />
 
           {/* Application Tasks */}
@@ -302,17 +338,18 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
                       .join(", ")}
                   </p>
                 </div>
-                {(status === 'accepted' || status === 'rejected') && 
-                <div className="">
-                <h5 className="font-medium text-muted-foreground">Feedback</h5>
-                {application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
-                  <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
-                    <li className="text-sm" key={i}>
-                      {item}
-                    </li>
-                  </ul>
-                ))}
-                </div>}
+                {application?.applicationDetails?.applicationTasks[application?.applicationDetails?.applicationTestInterviews.length - 1]?.applicationTaskDetail?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 && 
+                  <div className="">
+                    <h5 className="font-medium text-muted-foreground">Feedback</h5>
+                    {application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
+                      <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
+                        <li className="text-sm" key={i}>
+                          {item}
+                        </li>
+                      </ul>
+                    ))}
+                  </div>
+                }
               </div>
             ))} 
 
@@ -337,27 +374,6 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
                 ))}
                 </Card>
               }
-
-            {application?.applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
-              interview?.feedback[interview?.feedback.length - 1] && 
-              <Card key={index} className="p-4 space-y-2">
-                <h5 className="font-medium ">Interview Feedback</h5>
-                <div className="">
-                  <h5 className="font-medium text-base text-muted-foreground">Feedback:</h5>
-                  {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
-                    <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
-                      <li className="text-sm" key={i}>
-                        {item}
-                      </li>
-                    </ul>
-                  ))}
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
-                  <div className="font-medium text-sm text-muted-foreground">{new Date(interview?.feedback[interview?.feedback.length - 1]?.date).toLocaleDateString()}</div>
-                </div>
-              </Card>
-            ))}
           </div>
         </div>
       </ScrollArea>
@@ -372,7 +388,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
             tasks={application?._id}
             initialStatus={status}
             ques={application?.cohort?.applicationFormDetail?.[0]?.task} 
-            submission={application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]}
+            submission={application?.applicationDetails?.applicationTasks[application?.applicationDetails?.applicationTasks.length - 1]?.applicationTaskDetail?.applicationTasks[0]}
             onClose={() => setFeedbackOpen(false)}
             onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />
@@ -394,7 +410,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
             applicationId={application?.applicationDetails?._id}
             initialStatus={status}
             interview={application?.applicationDetails?.applicationTestInterviews?.[application?.applicationDetails?.applicationTestInterviews.length - 1]}
-            onClose={() => setFeedbackOpen(false)}
+            onClose={() => setInterviewFeedbackOpen(false)}
             onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />
         </DialogContent>
@@ -412,7 +428,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
               </div>
             </div>
           </div>
-          <SubmissionView tasks={application?.cohort?.applicationFormDetail?.[0]?.task} submission={application?.applicationDetails?.applicationTasks[0]?.applicationTaskDetail?.applicationTasks[0]}/>
+          <SubmissionView tasks={application?.cohort?.applicationFormDetail?.[0]?.task} submission={application?.applicationDetails?.applicationTasks[application?.applicationDetails?.applicationTasks.length - 1]?.applicationTaskDetail?.applicationTasks[0]}/>
         </DialogContent>
       </Dialog>
 

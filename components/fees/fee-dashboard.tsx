@@ -57,12 +57,12 @@ export function FeeDashboard() {
           <FeesReports />
         </TabsContent>
 
-        <TabsContent value="communication">
-          <FeesCommunication />
-        </TabsContent>
-
+        
         <TabsContent value="settings">
-          <FeesSettings />
+        <FeesSettings />
+        </TabsContent> */}
+        {/* <TabsContent value="communication">
+          <FeesCommunication />
         </TabsContent> */}
       </Tabs>
     </div>

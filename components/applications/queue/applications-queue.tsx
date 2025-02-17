@@ -14,13 +14,18 @@ import { CohortDetails } from "./cohort-details";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
-export function ApplicationsQueue() {
+interface ApplicationsQueueProps {
+  initialApplications: any;
+  setInitialApplications: (apps: any) => void;
+}
+
+export function ApplicationsQueue({ initialApplications, setInitialApplications }: ApplicationsQueueProps) {
+  const [applications, setApplications] = useState<any>(initialApplications);
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [cohorts, setCohorts] = useState<any[]>([]);
   const [currentCohort, setCurrentCohort] = useState<any>();
-  const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState(true);
 
   const [applied, setApplied] = useState(0);
@@ -65,7 +70,8 @@ export function ApplicationsQueue() {
             return 0;
           });
           
-        setApplications(mappedStudents);
+          setApplications(mappedStudents);
+          setInitialApplications(mappedStudents);
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
       } catch (error) {
@@ -75,7 +81,7 @@ export function ApplicationsQueue() {
       }
     }
     fetchStudents();
-  }, []);
+  }, [refreshKey]);
 
   const filteredAndSortedApplications = useMemo(() => {
     
@@ -199,7 +205,7 @@ export function ApplicationsQueue() {
   };
 
   const handleApplicationUpdate = () => {
-    setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   const handleBulkEmail = () => {

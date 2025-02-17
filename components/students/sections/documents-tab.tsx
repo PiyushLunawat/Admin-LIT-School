@@ -276,6 +276,8 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
         </CardContent>
 
         {/* Additional Documents */}
+      {student?.personalDocsDetails?.adminUploadedocuments !== undefined &&
+      <>
         <CardHeader>
           <CardTitle>Additional Documents</CardTitle>
         </CardHeader>
@@ -313,6 +315,8 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
             </div>
           ))}
         </CardContent>
+      </>
+      }
       </Card>
 
       {/* Upload New Document Section */}

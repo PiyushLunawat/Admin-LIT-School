@@ -225,7 +225,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount)}</div>
           {/* <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" /> */}
           <p className="text-xs text-muted-foreground mt-2">
-            {((totalReceivedCount / totalExpectedCount) * 100).toFixed(2)}% collected
+            {(((totalReceivedCount / totalExpectedCount) * 100) || 0).toFixed(2)}% collected
           </p>
         </CardContent>
       </Card>
@@ -264,7 +264,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         <CardContent>
           <div className="text-2xl font-bold">₹{formatAmount(Number(totalScholarshipsAmount))}</div>
           <p className="text-xs text-muted-foreground mt-2">
-            {totalStudentCount} scholarships awarded at an avg of {Number(avgScholarshipsPercentage).toFixed(2)}%
+            {totalStudentCount} scholarships awarded
           </p>
         </CardContent>
       </Card>

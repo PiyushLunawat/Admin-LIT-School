@@ -80,7 +80,7 @@ export function RecentActivity() {
                   </p>
                 <div className="flex gap-1">
                   {activity.cohort.map((id: any, index: any) => (
-                    <div className="text-xs bg-[#FFF552]/10 p-1 rounded">
+                    <div key={index} className="text-xs bg-[#FFF552]/10 p-1 rounded">
                       {id}
                     </div>
                   ))}

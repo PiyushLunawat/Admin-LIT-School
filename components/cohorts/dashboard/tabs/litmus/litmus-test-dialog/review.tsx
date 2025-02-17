@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Download,
   FileIcon,
   FileText,
   HandMetal,
@@ -391,9 +392,9 @@ export function ReviewComponent({
 
           {/* Submission */}
           <div className="">
-            <div className="text-[#FFF552] text-md font-medium">
-              Submission 0{index + 1}
-            </div>
+            <Badge variant={'lemon'} className="px-3 py-1 text-md font-medium">
+              Submission 0{index+1}
+            </Badge>
             {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.text?.map(
               (textItem: string, id: number) => (
                 <div
@@ -408,7 +409,7 @@ export function ReviewComponent({
               (linkItem: string, id: number) => (
                 <div
                   key={`link-${id}`}
-                  className="flex items-center gap-2 mt-2 p-2 border rounded-xl"
+                  className="flex items-center gap-2 mt-2 p-3 border rounded-xl"
                 >
                   <Link2Icon className="w-4 h-4" />
                   <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -419,27 +420,44 @@ export function ReviewComponent({
             )}
             {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.images?.map(
               (imageItem: string, id: number) => (
-                <div
-                  key={`image-${id}`}
-                  className="flex items-center gap-2 mt-2 p-2 border rounded-xl"
-                >
-                  <ImageIcon className="w-4 h-4" />
-                  <a href={imageItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                    {imageItem.split("/").pop()}
-                  </a>
+                <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
+                  <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-contain rounded-t-xl' />
+                  <div className='w-full flex justify-between items-center p-3 border-t'>
+                    <div className='flex items-center gap-2 text-sm truncate'>
+                      <ImageIcon className="w-4 h-4" />
+                      <span className='w-[220px] text-white truncate'>
+                        {imageItem.split('/').pop()}
+                      </span>
+                    </div>
+                    <Button variant={'ghost'} size={'zero'} className=''>
+                      <a href={imageItem} target="_blank" rel="noopener noreferrer" className="">
+                        <Download className="w-4 h-4 " />
+                      </a>
+                    </Button>
+                  </div>
                 </div>
               )
             )}
             {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.videos?.map(
               (videoItem: string, id: number) => (
-                <div
-                  key={`video-${id}`}
-                  className="flex items-center gap-2 mt-2 p-2 border rounded-xl"
-                >
-                  <VideoIcon className="w-4 h-4" />
-                  <a href={videoItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                    {videoItem.split("/").pop()}
-                  </a>
+                <div key={`video-${id}`} className="w-full flex flex-col w-fit items-center text-sm border rounded-xl">
+                  <video controls preload="none" className='h-[420px] rounded-t-xl'>
+                    <source src={videoItem} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                  <div className='w-full flex justify-between items-center p-3 border-t'>
+                    <div className='flex items-center gap-2 text-sm truncate'>
+                      <VideoIcon className="w-4 h-4" />
+                      <span className='w-[220px] text-white truncate'>
+                        {videoItem.split('/').pop()}
+                      </span>
+                    </div>
+                    <Button variant={'ghost'} size={'zero'} className=''>
+                      <a href={videoItem} target="_blank" rel="noopener noreferrer" className="">
+                        <Download className="w-4 h-4 " />
+                      </a>
+                    </Button>
+                  </div>
                 </div>
               )
             )}
@@ -447,7 +465,7 @@ export function ReviewComponent({
               (fileItem: string, id: number) => (
                 <div
                   key={`file-${id}`}
-                  className="flex items-center gap-2 mt-2 p-2 border rounded-xl"
+                  className="flex items-center gap-2 mt-2 p-3 border rounded-xl"
                 >
                   <FileIcon className="w-4 h-4" />
                   <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">

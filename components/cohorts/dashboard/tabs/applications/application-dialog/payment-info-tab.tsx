@@ -59,6 +59,13 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
 
   const lastCourse = student?.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
   let lastStatus = '';
+  if(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'pending' || 
+    student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === undefined
+  ){
+    lastStatus = 'pending';
+  } else {
+    lastStatus = '';
+  }
 
   useEffect(() => {
     if (!student.cohort?.feeStructureDetails) return;
@@ -87,7 +94,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   const installments = (feeStructure || sch?.scholarshipDetails)?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
   const scholarshipAmount = installments.reduce((sum: number, installment: any) => sum + (installment.scholarshipAmount || 0), 0);
-  const totalAmount = tokenAmount + installmentTotal;
+  const totalAmount = Number(tokenAmount) + Number(installmentTotal);
 
   const isTokenPaid =
     student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === "paid";
@@ -311,9 +318,6 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                                   {instalment?.verificationStatus}
                                 </Badge>
                             )}
-                            <div className="hidden">
-                              {lastStatus = instalment?.verificationStatus}
-                            </div>
                             {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url && 
                               <Button variant="ghost" size="sm" onClick={() => handleView(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url)}>
                                 <Eye className="h-4 w-4 mr-2" />
@@ -351,11 +355,14 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                               Download Receipt
                             </Button>
                           ) : 
-                            <Button variant="outline" size="sm" className="w-full ">
+                            lastStatus !== 'pending' && <Button variant="outline" size="sm" className="w-full ">
                               <UploadIcon className="h-4 w-4 mr-2" />
                               Upload Receipt
                             </Button>
                           } 
+                          <div className="hidden">
+                              {lastStatus = instalment?.verificationStatus}
+                            </div>
                       </div>
                     ))}
                   </div>

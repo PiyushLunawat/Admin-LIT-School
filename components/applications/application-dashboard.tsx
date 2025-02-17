@@ -10,6 +10,7 @@ import { ApplicationsQueue } from "./queue/applications-queue";
 import { CommunicationsTab } from "./communications/communications-tab";
 import { SettingsTab } from "./settings/settings-tab";
 import { InterviewsQueue } from "./queue/interviews-queue";
+import { getStudents } from "@/app/api/student";
 
 
 export function ApplicationDashboard() {
@@ -17,6 +18,49 @@ export function ApplicationDashboard() {
   const searchParams = useSearchParams();
   const tabQueryParam = searchParams.get("tab") || "home";
   const [tab, setTab] = useState(tabQueryParam);
+  const [initialApplications, setInitialApplications] = useState<any>([]);
+
+  useEffect(() => {
+    async function fetchAndFilterStudents() {
+      try {
+        // 1) Fetch All Students
+        const response = await getStudents();
+
+        // 2) Filter Out Students with No Application Details
+        const validStudents = response.data.filter(
+          (student: any) => student?.applicationDetails !== undefined
+        );
+
+        validStudents.sort((a: any, b: any) => {
+          const dateA = new Date(a?.updatedAt);
+          const dateB = new Date(b?.updatedAt);
+          
+          if (dateA > dateB) return -1;
+          if (dateA < dateB) return 1;
+          
+          const monthA = dateA.getMonth();
+          const monthB = dateB.getMonth();
+          
+          if (monthA > monthB) return -1;
+          if (monthA < monthB) return 1;
+          
+          const yearA = dateA.getFullYear(); 
+          const yearB = dateB.getFullYear(); 
+          
+          if (yearA > yearB) return -1; 
+          if (yearA < yearB) return 1; 
+          
+          return 0;
+        });
+
+        setInitialApplications(validStudents);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    }
+
+    fetchAndFilterStudents();
+  }, []);
 
   useEffect(() => {
     setTab(tabQueryParam);
@@ -45,7 +89,7 @@ export function ApplicationDashboard() {
         </TabsContent>
 
         <TabsContent value="applications">
-          <ApplicationsQueue />
+          <ApplicationsQueue initialApplications={initialApplications} setInitialApplications={setInitialApplications} />
         </TabsContent>
 
         <TabsContent value="interviews">

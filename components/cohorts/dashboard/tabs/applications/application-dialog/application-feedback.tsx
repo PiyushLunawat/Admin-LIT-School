@@ -308,9 +308,6 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
           </Select>
         </div>
 
-
-       
-          <>
         <div className="space-y-4">
             <h3 className="text-lg font-semibold">Course Dive</h3>
             <div className='space-y-1'>
@@ -329,117 +326,120 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
           <Separator className="my-8" />
 
-        {ques.map((task: any, index: any) => (<>
-          <div key={index} className="space-y-3">
-            <h3 className="text-lg font-semibold">Task 0{index + 1}</h3>
-            <div className='space-y-1'>
-              <h4 className="font-medium text-[#00A3FF]">{task?.title}</h4>
-              <p className="text-sm text-muted-foreground">{task?.description}</p>
-            </div>
+          {ques.map((task: any, index: any) => (
+          <React.Fragment key={index}>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Task 0{index + 1}</h3>
+              <div className="space-y-1">
+                <h4 className="font-medium text-[#00A3FF]">{task?.title}</h4>
+                <p className="text-sm text-muted-foreground">{task?.description}</p>
+              </div>
 
-            <div className="mt-4">
-              <div className='flex justify-between items-center'>
-                <Badge variant="lemon"  className="px-3 py-2 text-sm ">
-                  Submission
-                </Badge>
-                <div className="text-muted-foreground text-sm mt-2">
-                  Type: {task?.config
-                      .map((configItem: any) => configItem?.type)
-                      .join(", ")}
+              <div className="mt-4">
+                <div className="flex justify-between items-center">
+                  <Badge variant="lemon" className="px-3 py-2 text-sm">
+                    Submission
+                  </Badge>
+                  <div className="text-muted-foreground text-sm mt-2">
+                    Type:{" "}
+                    {task?.config.map((configItem: any) => configItem?.type).join(", ")}
+                  </div>
+                </div>
+                <div className='flex flex-wrap gap-2 mt-2'>
+                  {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
+                    <div key={`text-${id}`} className="w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl">
+                      {textItem}
+                    </div>
+                  ))}
+                  {submission?.tasks[index]?.task?.links?.map((linkItem: string, id: number) => (
+                    <div key={`link-${id}`} className="w-full flex items-center gap-2 text-sm p-3 border rounded-xl">
+                      <Link2Icon className="w-4 h-4" />
+                      <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                        {linkItem}
+                      </a>
+                    </div>
+                  ))}
+                  {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
+                    <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
+                      <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-cover rounded-t-xl' />
+                      <div className='w-full flex justify-between items-center p-3 border-t'>
+                        <div className='flex items-center gap-2 text-sm truncate'>
+                          <ImageIcon className="w-4 h-4" />
+                          <span className='w-[220px] text-white truncate'>
+                            {imageItem.split('/').pop()}
+                          </span>
+                        </div>
+                        <Button variant={'ghost'} size={'zero'} className=''>
+                          <a href={imageItem} target="_blank" rel="noopener noreferrer" className="">
+                            <Download className="w-4 h-4 " />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
+                    <div key={`video-${id}`} className="w-full flex flex-col w-fit items-center text-sm border rounded-xl">
+                      <video controls preload="none" className='h-[420px] rounded-t-xl'>
+                        <source src={videoItem} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                      <div className='w-full flex justify-between items-center p-3 border-t'>
+                        <div className='flex items-center gap-2 text-sm truncate'>
+                          <VideoIcon className="w-4 h-4" />
+                          <span className='w-[220px] text-white truncate'>
+                            {videoItem.split('/').pop()}
+                          </span>
+                        </div>
+                        <Button variant={'ghost'} size={'zero'} className=''>
+                          <a href={videoItem} target="_blank" rel="noopener noreferrer" className="">
+                            <Download className="w-4 h-4 " />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {submission?.tasks[index]?.task?.files?.map((fileItem: string, id: number) => (
+                    <div key={`file-${id}`} className="flex w-full items-center gap-2 text-sm p-3 border rounded-xl">
+                      <FileIcon className="w-4 h-4" />
+                      <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                        {fileItem.split('/').pop()}
+                      </a>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className='flex flex-wrap gap-2 mt-2'>
-                {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
-                  <div key={`text-${id}`} className="w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl">
-                    {textItem}
-                  </div>
-                ))}
-                {submission?.tasks[index]?.task?.links?.map((linkItem: string, id: number) => (
-                  <div key={`link-${id}`} className="w-full flex items-center gap-2 text-sm p-3 border rounded-xl">
-                    <Link2Icon className="w-4 h-4" />
-                    <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                      {linkItem}
-                    </a>
-                  </div>
-                ))}
-                {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
-                  <div key={`image-${id}`} className="w-[49%] flex flex-col items-center text-sm border rounded-xl">
-                    <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[240px] object-cover rounded-t-xl' />
-                    <div className='w-full flex justify-between items-center p-3 border-t'>
-                      <div className='flex items-center gap-2 text-sm truncate'>
-                        <ImageIcon className="w-4 h-4" />
-                        <span className='w-[220px] text-white truncate'>
-                          {imageItem.split('/').pop()}
-                        </span>
-                      </div>
-                      <Button variant={'ghost'} size={'zero'} className=''>
-                        <a href={imageItem} target="_blank" rel="noopener noreferrer" className="">
-                          <Download className="w-4 h-4 " />
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
-                  <div key={`video-${id}`} className="w-[49%] flex flex-col w-fit items-center text-sm border rounded-xl">
-                    <video controls preload="none" className='h-[240px] rounded-t-xl'>
-                      <source src={videoItem} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                    <div className='w-full flex justify-between items-center p-3 border-t'>
-                      <div className='flex items-center gap-2 text-sm truncate'>
-                        <VideoIcon className="w-4 h-4" />
-                        <span className='w-[220px] text-white truncate'>
-                          {videoItem.split('/').pop()}
-                        </span>
-                      </div>
-                      <Button variant={'ghost'} size={'zero'} className=''>
-                        <a href={videoItem} target="_blank" rel="noopener noreferrer" className="">
-                          <Download className="w-4 h-4 " />
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {submission?.tasks[index]?.task?.files?.map((fileItem: string, id: number) => (
-                  <div key={`file-${id}`} className="flex w-full items-center gap-2 text-sm p-3 border rounded-xl">
-                    <FileIcon className="w-4 h-4" />
-                    <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                      {fileItem.split('/').pop()}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-        {(status === "accepted" || status === "rejected") && (
-          <>
-            <h4 className="font-medium !mt-4">Feedback</h4>
-            <div key={taskList[index]?._id}>
-              {/* Feedback input for each task */}
-              <div className="w-full grid border rounded-md ">
-              {(feedbacks[taskList[index]?._id] || [""]).map((feedbackItem, idx) => (
-                <div key={idx} className="flex items-center space-x-2 mb-2 w-full">
-                    <Textarea
-                      id="feedbackItem"
-                      value={feedbackItem}
-                      className="px-3 text-base w-full"
-                      onChange={(e) => handleFeedbackChangeForFeedback(taskList[index]?._id, idx, e)}
-                      onKeyDown={(e) => handleFeedbackKeyDownForFeedback(taskList[index]?._id, idx, e)}
-                      placeholder="Type here..."
-                      rows={3}
-                      cols={40}
-                      />
+              {(status === "accepted" || status === "rejected") && (
+                <>
+                  <h4 className="font-medium !mt-4">Feedback</h4>
+                  <div key={taskList[index]?._id}>
+                    <div className="w-full grid border rounded-md ">
+                      {(feedbacks[taskList[index]?._id] || [""]).map((feedbackItem, idx) => (
+                        <div key={idx} className="flex items-center space-x-2 mb-2 w-full">
+                          <Textarea
+                            id="feedbackItem"
+                            value={feedbackItem}
+                            className="px-3 text-base w-full"
+                            onChange={(e) =>
+                              handleFeedbackChangeForFeedback(taskList[index]?._id, idx, e)
+                            }
+                            onKeyDown={(e) =>
+                              handleFeedbackKeyDownForFeedback(taskList[index]?._id, idx, e)
+                            }
+                            placeholder="Type here..."
+                            rows={3}
+                            cols={40}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-              ))}
-              </div>  
+                </>
+              )}
             </div>
-          </>
-        )}
-          </div>
             {index < ques?.length - 1 && <Separator className="my-8" />}
-        </>))}
-        </>  
+          </React.Fragment>
+        ))}
 
         {/* Conditional Reason or Feedback */}
         {(status === "on hold") && (

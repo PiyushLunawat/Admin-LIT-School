@@ -14,6 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
+import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
+import { PaymentInformationTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/payment-info-tab";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
 
@@ -30,6 +35,9 @@ export function EnrolmentList({
   selectedIds,
   onSelectedIdsChange,
 }: EnrolmentListProps) {
+
+  const [open, setOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   const colorClasses = [
@@ -115,6 +123,11 @@ export function EnrolmentList({
       }
     }, [applications]);
 
+    const handleEyeClick = (student: any) => {
+      setSelectedStudentId(student); // Set the selected student ID
+      setOpen(true); // Open the dialog
+    };
+
   return (
     <div className="border rounded-lg">
       <Table>
@@ -191,7 +204,7 @@ export function EnrolmentList({
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onApplicationSelect(application._id);
+                    handleEyeClick(application);
                   }}
                 >
                   <Eye className="h-4 w-4" />
@@ -201,6 +214,32 @@ export function EnrolmentList({
           ))}
         </TableBody>
       </Table>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+          {selectedStudentId && (
+            <StudentApplicationHeader student={selectedStudentId} />
+          )}
+
+            <Tabs defaultValue="personal" className="space-y-6">
+              <TabsList className="w-full">
+                <TabsTrigger value="personal">Personal Details</TabsTrigger>
+                <TabsTrigger value="payment">Payment</TabsTrigger>
+                {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
+              </TabsList>
+
+              <TabsContent value="personal">
+                <PersonalDetailsTab student={selectedStudentId} />
+              </TabsContent>
+              <TabsContent value="payment">
+                <PaymentInformationTab student={selectedStudentId} />
+              </TabsContent>
+             {/* 
+              <TabsContent value="documents">
+                <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
+              </TabsContent> */}
+            </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

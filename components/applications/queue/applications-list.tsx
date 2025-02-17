@@ -91,6 +91,9 @@ export function ApplicationsList({
         const firstApplication = applications[0];
         setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
         onApplicationSelect(firstApplication); // Call the onApplicationSelect function for the first application
+      } else {
+        setSelectedRowId(null);
+        onApplicationSelect(null);
       }
     }, [applications]);
 
@@ -188,7 +191,7 @@ export function ApplicationsList({
               <TabsContent value="personal">
                 <PersonalDetailsTab student={selectedStudentId} />
               </TabsContent>
-{/* 
+             {/* 
               <TabsContent value="documents">
                 <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
               </TabsContent> */}

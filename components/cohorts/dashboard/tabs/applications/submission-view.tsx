@@ -15,6 +15,8 @@ interface SubmissionViewProps {
 
 const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) => {
 
+  console.log("submission",submission);
+  
   return (
     <div className="">
 
@@ -41,8 +43,9 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
           </div>
           <Separator className="my-8" />
 
-        {tasks.map((task: any, index: any) => (<>
-          <div key={index} className="space-y-4">
+        {tasks.map((task: any, index: any) => (
+          <React.Fragment key={index}>
+          <div className="space-y-4">
             <h3 className="text-lg font-semibold">Task 0{index + 1}</h3>
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">{task?.title}</h4>
@@ -95,8 +98,8 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                 </div>
               ))}
               {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
-                <div key={`image-${id}`} className="w-[49%] flex flex-col items-center text-sm border rounded-xl">
-                  <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[240px] object-cover rounded-t-xl' />
+                <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
+                  <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-contain rounded-t-xl' />
                   <div className='w-full flex justify-between items-center p-3 border-t'>
                     <div className='flex items-center gap-2 text-sm truncate'>
                       <ImageIcon className="w-4 h-4" />
@@ -113,8 +116,8 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                 </div>
               ))}
               {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
-                <div key={`video-${id}`} className="w-[49%] flex flex-col w-fit items-center text-sm border rounded-xl">
-                  <video controls preload="none" className='h-[240px] rounded-t-xl'>
+                <div key={`video-${id}`} className="w-full flex flex-col w-fit items-center text-sm border rounded-xl">
+                  <video controls preload="none" className='h-[420px] rounded-t-xl'>
                     <source src={videoItem} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
@@ -146,7 +149,7 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
 
           </div>
             {index < tasks?.length - 1 && <Separator className="my-8" />}
-        </>))}
+        </React.Fragment>))}
     </div>
   );
 };

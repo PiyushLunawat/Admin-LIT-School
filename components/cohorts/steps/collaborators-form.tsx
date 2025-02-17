@@ -231,6 +231,8 @@ export function CollaboratorsForm({
     }
   };
 
+  const anyNotInvited = fields.some((collab) => !collab.isInvited);
+
   return (
     <Form {...form}>
       <form
@@ -404,15 +406,17 @@ export function CollaboratorsForm({
 
         {/* Invite and add collaborator buttons */}
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            type="button"
-            className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
-            onClick={() => handleInvite(form.getValues())}
-          >
-            <Send className="mr-2 h-4 w-4" />
-            {inviteLoading ? 'Sending Invite...' : 'Invite Collaborator'}
-          </Button>
+          {anyNotInvited &&
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
+              onClick={() => handleInvite(form.getValues())}
+            >
+              <Send className="mr-2 h-4 w-4" />
+              {inviteLoading ? 'Sending Invite...' : 'Invite Collaborator'}
+            </Button>
+          }
           <Button
             onClick={() => append({ email: "", role: "", isInvited: false })}
             variant="outline"

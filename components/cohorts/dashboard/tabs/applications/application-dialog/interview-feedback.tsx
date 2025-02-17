@@ -74,7 +74,9 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
 
   async function handleInterviewUpdate(newStatus: string) {
     try {
-      const validReasons = reason.filter((r) => r.trim() !== "");
+      const validReasons = reason
+      .map((line) => line.trim().replace(/^•\s*/, "")) // Remove bullets and trim spaces
+      .filter((r) => r.trim() !== "");
       const meetingId = interview?._id;
   
       // Build a normal object (not FormData)
@@ -118,9 +120,11 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem className="capitalize" value={status}>
-                {status}
-              </SelectItem>
+              {!['not qualified', 'waitlist', 'selected'].includes(status) &&
+                <SelectItem className="capitalize" value={status}>
+                  <span className="capitalize">{status}</span>
+                </SelectItem>
+              }
               <SelectItem value="waitlist">Waitlist</SelectItem>
               <SelectItem value="selected">Accepted</SelectItem>
               <SelectItem value="not qualified">Rejected</SelectItem>

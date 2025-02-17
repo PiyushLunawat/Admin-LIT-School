@@ -15,6 +15,11 @@ import { Calendar, Eye, Award } from "lucide-react";
 import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import student from "@/app/api/student";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
+import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
+import { PaymentInformationTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/payment-info-tab";
 
 type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
 
@@ -31,6 +36,8 @@ export function LitmusList({
   selectedIds,
   onSelectedIdsChange,
 }: LitmusListProps) {
+  const [open, setOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   const toggleSelectAll = () => {
@@ -83,6 +90,11 @@ export function LitmusList({
       default:
         return "default";
     }
+  };
+
+  const handleEyeClick = (student: any) => {
+    setSelectedStudentId(student); // Set the selected student ID
+    setOpen(true); // Open the dialog
   };
 
   return (
@@ -174,7 +186,7 @@ export function LitmusList({
                   className="hover:bg-black"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // handleEyeClick(application);
+                    handleEyeClick(application);
                   }}
                 >
                   <Eye className="h-4 w-4" />
@@ -184,6 +196,32 @@ export function LitmusList({
           ))}
         </TableBody>
       </Table>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+          {selectedStudentId && (
+            <StudentApplicationHeader student={selectedStudentId} />
+          )}
+
+            <Tabs defaultValue="personal" className="space-y-6">
+              <TabsList className="w-full">
+                <TabsTrigger value="personal">Personal Details</TabsTrigger>
+                <TabsTrigger value="payment">Payment</TabsTrigger>
+                {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
+              </TabsList>
+
+              <TabsContent value="personal">
+                <PersonalDetailsTab student={selectedStudentId} />
+              </TabsContent>
+              <TabsContent value="payment">
+                <PaymentInformationTab student={selectedStudentId} />
+              </TabsContent>
+             {/* 
+              <TabsContent value="documents">
+                <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
+              </TabsContent> */}
+            </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

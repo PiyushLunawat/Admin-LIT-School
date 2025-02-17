@@ -202,7 +202,7 @@ export function MetricsGrid({ applications }: MetricGridProps) {
     {
       title: "Total Expected",
       value: (totalExpectedCount),
-      description: `${((totalReceivedCount / totalExpectedCount) * 100).toFixed(2)}% collected from ongoing cohorts`,
+      description: `${(((totalReceivedCount / totalExpectedCount) * 100) || 0).toFixed(2)}% collected from ongoing cohorts`,
       icon: Banknote,
     },
     {
@@ -220,7 +220,7 @@ export function MetricsGrid({ applications }: MetricGridProps) {
     {
       title: "Scholarships",
       value: (Number(totalScholarshipsAmount)),
-      description: `${totalStudentCount} scholarships - avg. of ${Number(avgScholarshipsPercentage).toFixed(2)}%`,
+      description: `${totalStudentCount} scholarships - avg. of ${Number(avgScholarshipsPercentage || 0).toFixed(2)}%`,
       icon: Award,
     },
   ];
