@@ -85,7 +85,7 @@ export function MetricsGrid({ applications }: MetricGridProps) {
           }
         } else {
           // Add to Pending Admission Fee if not paid
-          pendingFee += cohortFeesDetail?.tokenFee || 0;
+          pendingFee += Number(cohortFeesDetail?.tokenFee) || 0;
           notPaidCount += 1;
           cohortNotSet.add(application?.cohort?.cohortId);
         }
