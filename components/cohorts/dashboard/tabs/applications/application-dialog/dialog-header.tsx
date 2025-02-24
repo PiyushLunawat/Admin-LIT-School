@@ -17,13 +17,13 @@ interface StudentHeaderProps {
 }
 
 export function StudentApplicationHeader({ student }: StudentHeaderProps) {
-  const [sch, setSch] = useState<any>(null);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [interviewOpen, setInterviewOpen] = useState(false);
 
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const litmusTestDetails = latestCohort?.litmusTestDetails;
+  const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
 
   const colorClasses = [
     'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
@@ -39,13 +39,6 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
     
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
-
-  useEffect(() => {
-    const schSlab = latestCohort?.cohortId?.feeStructureDetails.find(
-      (slab: any) => slab._id === litmusTestDetails?.scholarshipDetail
-    );
-      setSch(schSlab);
-  }, [student]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -145,8 +138,10 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
-                {sch ? 
-                <Badge className={`capitalize ${getColor(sch?.scholarshipName)}`} variant="secondary">{sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}</Badge> : "--"}
+                {scholarshipDetails ? 
+                <Badge className={`capitalize ${getColor(scholarshipDetails?.scholarshipName)}`} variant="secondary">
+                  {scholarshipDetails?.scholarshipName+' '+(scholarshipDetails?.scholarshipPercentage+'%')}
+                </Badge> : "--"}
               </div> 
               <div>
                 <p className="text-sm text-muted-foreground">Payment Status</p>

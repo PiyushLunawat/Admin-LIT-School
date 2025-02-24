@@ -63,7 +63,7 @@ export async function getStudentApplication(applicationId: string) {
 
 export async function updateStudentData(data: any) {
   const response = await fetch(
-    `http://localhost:4000/admin/update-student-details`,
+    `${process.env.API_URL}/admin/update-student-details`,
     {
       method: "POST",
       headers: {

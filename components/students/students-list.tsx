@@ -24,40 +24,20 @@ import { SendMessage } from "../cohorts/dashboard/tabs/applications/application-
 import { Dialog, DialogContent } from "../ui/dialog";
 import { MarkedAsDialog } from "./sections/drop-dialog";
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "onhold"
-  | "default";
+type BadgeVariant = "lemon" | "destructive" | "warning" | "secondary" | "success" | "onhold" | "default";
 
 interface StudentsListProps {
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
-
-  // Filter props
-  searchQuery: string;
-  selectedProgram: string;
-  selectedCohort: string;
-  selectedAppStatus: string;
-  selectedPaymentStatus: string;
+  applications: any;
 }
 
 export function StudentsList({
   selectedIds,
   onSelectedIdsChange,
-
-  // Filter props
-  searchQuery,
-  selectedProgram,
-  selectedCohort,
-  selectedAppStatus,
-  selectedPaymentStatus,
+  applications,
 }: StudentsListProps) {
   const router = useRouter();
-  const [students, setStudents] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [messageOpen, setMessageOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<any>();
@@ -69,114 +49,33 @@ export function StudentsList({
     setRecipient(recipient)
     setMessageOpen(true);
   };
-
-  // --- FETCH ALL STUDENTS ONCE ---
-  useEffect(() => {
-    async function fetchStudents() {
-      setLoading(true);
-      try {
-        const response = await getStudents();
-        const mappedStudents = response.data.map((student: any) => ({
-          ...student,
-          litmusTestDetails: student.litmusTestDetails || [], // Add default value
-        }));
-        
-        // Sort the students by lastActivity (descending)
-        let sorted = mappedStudents
-        mappedStudents.sort((a: any, b: any) => {
-          const dateA = new Date(a?.updatedAt).getTime();
-          const dateB = new Date(b?.updatedAt).getTime();
-          return dateB - dateA;
-        });
-        
-        setStudents(mappedStudents);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchStudents();
-  }, []);
   
-  // --- FILTERING LOGIC ---
-  const filteredStudents = useMemo(() => {
-    return students.filter((student) => {
-      // 1) Search check: by name OR email OR phone
-      const lowerSearch = searchQuery.toLowerCase();
-      const matchesSearch =
-        (student?.firstName+' '+student?.lastName).toLowerCase().includes(lowerSearch) ||
-        student?.email.toLowerCase().includes(lowerSearch) ||
-        student?.mobileNumber.toLowerCase().includes(lowerSearch);
-
-      if (!matchesSearch) {
-        return false;
-      }
-
-      // 2) Program check
-      if (selectedProgram !== "all-programs") {
-        if (student?.program?.name.toLowerCase() !== selectedProgram.toLowerCase()) {
-          return false;
-        }
-      }
-
-      // 3) Cohort check
-      if (selectedCohort !== "all-cohorts") {
-        if (student?.cohort?.cohortId.toLowerCase() !== selectedCohort.toLowerCase()) {
-          return false;
-        }
-      }
-
-      // 4) Application Status check
-      if (selectedAppStatus !== "all-statuses") {
-        // e.g. "under review" vs. "accepted"
-        if (student?.applicationDetails?.applicationStatus !== selectedAppStatus) {
-          return false;
-        }
-      }
-
-      // 5) Payment Status check
-      if (selectedPaymentStatus !== "all-payments") {
-        if (student?.paymentStatus !== selectedPaymentStatus) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [
-    students,
-    searchQuery,
-    selectedProgram,
-    selectedCohort,
-    selectedAppStatus,
-    selectedPaymentStatus,
-  ]);
-
   // --- BADGE COLOR LOGIC ---
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status) {
       case "initiated":
         return "default";
       case "under review":
+      case "interview scheduled":
+      case "applied":
         return "secondary";
       case "on hold":
+      case "waitlist":
+      case "reviewing":
         return "onhold";
       case "accepted":
         return "success";
       case "rejected":
-        return "destructive";
-      case "completed":
-        return "success";
-      case "not enrolled":
-        return "default";
-      case "dropped":
-        return "destructive";
-      case "token paid":
+      case "not qualified":
+      case "overdue":
+        return "warning";
+      case "accepted":
+      case "selected":
+      case "paid":
         return "success";
       case "pending":
-        return "warning";
-      case "overdue":
+        return "lemon";
+      case "dropped":
         return "destructive";
       default:
         return "secondary";
@@ -185,10 +84,10 @@ export function StudentsList({
 
   // --- SELECTION LOGIC ---
   const toggleSelectAll = () => {
-    if (selectedIds.length === filteredStudents.length) {
+    if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(filteredStudents.map((s) => s.id));
+      onSelectedIdsChange(applications.map((s: any) => s.id));
     }
   };
 
@@ -210,10 +109,6 @@ export function StudentsList({
     setSelectedStudent(student)
   }
 
-  if (loading) {
-    return <div className="p-4">Loading students...</div>;
-  }
-
   return (
     <>
       <div className="border rounded-lg overflow-auto">
@@ -224,11 +119,11 @@ export function StudentsList({
                 {/* Select All checkbox */}
                 <Checkbox
                   checked={
-                    filteredStudents.length > 0 &&
-                    selectedIds.length === filteredStudents.length
+                    applications.length > 0 &&
+                    selectedIds.length === applications.length
                   }
                   onCheckedChange={toggleSelectAll}
-                  disabled={filteredStudents.length === 0}
+                  disabled={applications.length === 0}
                 />
               </TableHead>
               <TableHead>Student</TableHead>
@@ -243,14 +138,20 @@ export function StudentsList({
           </TableHeader>
 
           <TableBody>
-            {filteredStudents.length === 0 ? (
+            {applications.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center py-4">
                   No students found.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredStudents.map((student: any) => {
+              applications.map((student: any) => {
+                const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+                const cohortDetails = latestCohort?.cohortId;
+                const applicationDetails = latestCohort?.applicationDetails;
+                const litmusTestDetails = latestCohort?.litmusTestDetails;
+                const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+                const tokenFeeDetails = latestCohort?.tokenFeeDetails;
                 
                 const colorClasses = [
                   'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
@@ -260,12 +161,12 @@ export function StudentsList({
                 ];
 
                 const getColor = (slabName: string): string => {
-                  const indx = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+                  const index = cohortDetails?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
                     (slab: any) => slab.name === slabName
                   );
-                  return indx !== -1 ? colorClasses[indx % colorClasses.length] : 'text-default';
+                  return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
                 };
-  
+               
                 return(
                 <TableRow key={student?._id}>
                   <TableCell>
@@ -287,26 +188,26 @@ export function StudentsList({
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{student?.program?.name}</p>
+                      <p className="font-medium">{cohortDetails?.programDetail?.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {student?.cohort?.cohortId}
+                        {cohortDetails?.cohortId}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge
                       className="capitalize"
-                      variant={getStatusColor(student?.applicationDetails?.applicationStatus)}
+                      variant={getStatusColor(applicationDetails?.applicationStatus)}
                     >
-                      {student?.applicationDetails?.applicationStatus?.toLowerCase() || "--"}
+                      {applicationDetails?.applicationStatus?.toLowerCase() || "--"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge
                       className="capitalize"
-                      variant={getStatusColor(student?.litmusTestDetails?.[0]?.litmusTaskId?.status || '')}
+                      variant={getStatusColor(latestCohort?.status || '')}
                     >
-                      {student?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() || "not enrolled"}
+                      {latestCohort?.status?.toLowerCase() || "not enrolled"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -318,9 +219,9 @@ export function StudentsList({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipName ? 
-                    <Badge className={`capitalize ${getColor(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipName)}`} variant="secondary">
-                      {student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipName+' ('+student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.semesterFeeDetails?.scholarshipPercentage+'%)'}
+                    {scholarshipDetails ? 
+                    <Badge className={`capitalize ${getColor(scholarshipDetails?.scholarshipName)}`} variant="secondary">
+                      {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
                     </Badge> : 
                     '--'}
                   </TableCell>

@@ -57,6 +57,14 @@ import {
 } from "@aws-sdk/client-s3";
 import { Progress } from "@/components/ui/progress";
 
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+  },
+});
+
 const formSchema = z.object({
   litmusTasks: z.array(
     z.object({

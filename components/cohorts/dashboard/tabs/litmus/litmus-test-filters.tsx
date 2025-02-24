@@ -31,7 +31,7 @@ export function LitmusTestFilters({
 }: LitmusTestFiltersProps) {
   const handleClearFilters = useCallback(() => {
     onSearchTermChange("");
-    onSelectedStatusChange("all");
+    onSelectedStatusChange("all-status");
     onSortByChange("newest");
   }, [onSearchTermChange, onSelectedStatusChange, onSortByChange]);
 
@@ -58,7 +58,7 @@ export function LitmusTestFilters({
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all-status">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="under review">Under Review</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
