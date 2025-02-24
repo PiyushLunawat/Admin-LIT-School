@@ -70,19 +70,9 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
   const getColor = (slabName: string): string => {
     const index = latestCohort?.cohortId?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
       (slab: any) => slab.name === slabName
-    );
-    
+    ); 
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
-
-
-  useEffect(() => {    
-    const schSlab = latestCohort?.cohortId?.feeStructureDetails.find(
-      (slab: any) => slab._id === litmusTestDetails?.scholarshipDetail
-    );
-
-    setSch(schSlab);
-}, [litmusTestDetails?.scholarshipDetail]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -210,10 +200,10 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <Download className="h-4 w-4 mr-2" />
                 Download Files
               </Button>
-                {sch ? 
-                  <Button variant="outline" className={`justify-start ${getColor(sch?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
+                {litmusTestDetails?.scholarshipDetail ? 
+                  <Button variant="outline" className={`justify-start ${getColor(litmusTestDetails?.scholarshipDetail?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
                     <div className="flex gap-2 items-center">
-                      <span className="text-lg pb-[2px]">★ </span> {sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}
+                      <span className="text-lg pb-[2px]">★ </span> {litmusTestDetails?.scholarshipDetail?.scholarshipName+' '+(litmusTestDetails?.scholarshipDetail?.scholarshipPercentage+'%')}
                     </div> 
                   </Button>
                     :

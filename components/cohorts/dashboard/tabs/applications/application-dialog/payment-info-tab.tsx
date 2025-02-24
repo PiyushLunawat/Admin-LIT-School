@@ -30,8 +30,9 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId; 
   const applicationDetails = latestCohort?.applicationDetails;
+  const litmusTestDetails = latestCohort?.litmusTestDetails;
+  const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
   const tokenFeeDetails = latestCohort?.tokenFeeDetails;
-  const studentDetail = applicationDetails?.studentDetails; 
 
   const colorClasses = [
     'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
@@ -80,20 +81,18 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
   useEffect(() => {
     if (!cohortDetails?.feeStructureDetails) return;
 
-    const scholarshipId = latestCohort?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail;
-
-    const matchedScholarship = latestCohort?.semesterFeeDetails
+    const matchedScholarship = litmusTestDetails?.scholarshipDetail;
     const fallbackScholarship = cohortDetails.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );
+    console.log("fee ee", matchedScholarship)
     const finalScholarship = latestCohort?.installmentDetails;
     if (finalScholarship && finalScholarship.length > 0) {
       setFeeStructure(finalScholarship);
     }
 
     setSch((matchedScholarship || fallbackScholarship));
-    console.log("fee ee", fallbackScholarship)
-  }, [student]);
+  }, [student, scholarshipDetails]);
 
   
   const visibleSemesters = showAllSemesters
@@ -129,7 +128,6 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
     const index = cohortDetails?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
       (slab: any) => slab.name === slabName
     );
-    
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
 
@@ -158,12 +156,12 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
               <div className="flex gap-1.5 items-center text-sm font-semibold">
-                {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
+                {scholarshipDetails ? (
                   <>
                     ₹{formatAmount(scholarshipAmount)}{' '}
-                    <Badge className={`capitalize ${getColor(sch?.scholarshipName)}`} variant="secondary">
-                      {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
-                    </Badge>
+                    <Badge className={`capitalize ${getColor(scholarshipDetails?.scholarshipName)}`} variant="secondary">
+                      {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
+                    </Badge> 
                   </>
                 ) : ( <span className="text-muted-foreground">Not Assigned</span> )}
               </div>

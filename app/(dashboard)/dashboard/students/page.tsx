@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCohorts } from "@/app/api/cohorts";
 import { getPrograms } from "@/app/api/programs";
@@ -9,8 +9,11 @@ import { StudentsList } from "@/components/students/students-list";
 import { StudentsFilters } from "@/components/students/students-filters";
 import { Button } from "@/components/ui/button";
 import { Mail, Download } from "lucide-react";
+import { getStudents } from "@/app/api/student";
 
 export default function StudentsPage() {
+  const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<any>([]);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
 
   // --- FILTER STATES ---
@@ -45,6 +48,96 @@ export default function StudentsPage() {
     }
     fetchData();
   }, []);
+
+  useEffect(() => {
+        async function fetchStudents() {
+          try {
+            const response = await getStudents();
+            const mappedStudents = response.data.filter((student: any) => (
+              ['initiated', 'applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+            ));
+                        
+            setApplications(mappedStudents);
+          } catch (error) {
+            console.error("Error fetching students:", error);
+          } finally {
+            setLoading(false);
+          }
+        }
+        fetchStudents();
+      }, []);
+    
+      const filteredAndSortedApplications = useMemo(() => {
+              
+        applications?.sort((a: any, b: any) => {
+          const dateA = new Date(a?.updatedAt);
+          const dateB = new Date(b?.updatedAt);
+      
+          if (dateA > dateB) return -1;
+          if (dateA < dateB) return 1;
+      
+          const monthA = dateA.getMonth();
+          const monthB = dateB.getMonth();
+      
+          if (monthA > monthB) return -1;
+          if (monthA < monthB) return 1;
+      
+          const yearA = dateA.getFullYear(); 
+          const yearB = dateB.getFullYear(); 
+      
+          if (yearA > yearB) return -1; 
+          if (yearA < yearB) return 1; 
+      
+          return 0;
+        });
+        return applications.filter((student: any) => {
+
+          const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+          const cohortDetails = latestCohort?.cohortId;
+          const applicationDetails = latestCohort?.applicationDetails;
+          // 1) Search check: by name OR email OR phone
+          const lowerSearch = searchQuery.toLowerCase();
+          const matchesSearch =
+            (student?.firstName+' '+student?.lastName).toLowerCase().includes(lowerSearch) ||
+            student?.email.toLowerCase().includes(lowerSearch) ||
+            student?.mobileNumber.toLowerCase().includes(lowerSearch);
+    
+          if (!matchesSearch) {
+            return false;
+          }
+    
+          // 2) Program check
+          if (selectedProgram !== "all-programs") {
+            if (cohortDetails?.programDetail?.name.toLowerCase() !== selectedProgram.toLowerCase()) {
+              return false;
+            }
+          }
+    
+          // 3) Cohort check
+          if (selectedCohort !== "all-cohorts") {
+            if (cohortDetails?.cohortId.toLowerCase() !== selectedCohort.toLowerCase()) {
+              return false;
+            }
+          }
+    
+          // 4) Application Status check
+          if (selectedAppStatus !== "all-statuses") {
+            // e.g. "under review" vs. "accepted"
+            if (applicationDetails?.applicationStatus !== selectedAppStatus) {
+              return false;
+            }
+          }
+    
+          // 5) Payment Status check
+          if (selectedPaymentStatus !== "all-payments") {
+            if (latestCohort?.paymentStatus !== selectedPaymentStatus) {
+              return false;
+            }
+          }
+    
+          return true;
+        });
+      }, [applications, searchQuery, selectedProgram, selectedCohort, selectedAppStatus, selectedPaymentStatus]);
 
   // --- ACTION HANDLERS ---
   const handleBulkEmail = () => {
@@ -101,11 +194,7 @@ export default function StudentsPage() {
       <StudentsList
         selectedIds={selectedStudentIds}
         onSelectedIdsChange={setSelectedStudentIds}
-        searchQuery={searchQuery}
-        selectedProgram={selectedProgram}
-        selectedCohort={selectedCohort}
-        selectedAppStatus={selectedAppStatus}
-        selectedPaymentStatus={selectedPaymentStatus}
+        applications={filteredAndSortedApplications}
       />
     </div>
   );
