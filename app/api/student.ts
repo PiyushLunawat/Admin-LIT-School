@@ -78,6 +78,7 @@ export async function updateStudentData(data: any) {
 export async function updateStudentTaskFeedback(
   applicationId: string,
   applicationTaskId: string,
+  subTaskId: string,
   newStatus: string,
   feedback: {
     feedbackData?: string[];
@@ -86,7 +87,7 @@ export async function updateStudentTaskFeedback(
   try {
     console.log("x11", JSON.stringify(feedback));
     const response = await fetch(
-      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&status=${newStatus}`,
+      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${newStatus}`,
       {
         method: "PATCH",
         headers: {
@@ -110,6 +111,7 @@ export async function updateStudentTaskFeedback(
 export async function updateStudentTaskFeedbackAccep(
   applicationId: string,
   applicationTaskId: string,
+  subTaskId: string,
   newStatus: string,
   feedback: {
     feedbackData?: Array<{ taskId: string; feedback: string[] }>;
@@ -118,7 +120,7 @@ export async function updateStudentTaskFeedbackAccep(
   try {
     console.log("x11", JSON.stringify(feedback));
     const response = await fetch(
-      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&status=${newStatus}`,
+      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${newStatus}`,
       {
         method: "PATCH",
         headers: {
@@ -212,24 +214,21 @@ export async function updateScholarship(
 }
 
 // New API for uploading student documents
-export async function uploadStudentDocuments(documentData: {
-  type: string;
-  files: Array<string>;
-}) {
-  const response = await fetch(
-    `${process.env.API_URL}/admin/student/documents`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(documentData),
-    }
-  );
+export async function uploadStudentDocuments(formData: any) {
+  try {
+    const response = await fetch(
+      `${process.env.API_URL}/admin/student-perosnal-docs`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
-  if (!response.ok) {
-    throw new Error("Failed to upload student documents");
+    return await response;
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
   }
-
-  return await response.json();
 }
 
 export async function updateDocumentStatus(

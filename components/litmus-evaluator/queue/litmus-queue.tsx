@@ -44,7 +44,7 @@ export function LitmusQueue() {
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              student?.litmusTestDetails[0]?.litmusTaskId !== undefined
+              ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -68,7 +68,7 @@ export function LitmusQueue() {
             return 0;
           });
           
-        setApplications(mappedStudents);
+          setApplications(mappedStudents);
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
       } catch (error) {
@@ -89,18 +89,18 @@ export function LitmusQueue() {
       }
       const matchedCohort = cohorts.find((cohort) => cohort.cohortId === selectedCohort);
       setCurrentCohort(matchedCohort || null);
-      return app.cohort?.cohortId === selectedCohort;
+      return app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId?.cohortId === selectedCohort;
     });
 
     setApplied(
       applications.filter(
-        (student: any) => student?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );
     
     setIntCleared(
       applications.filter(
-        (student: any) => student?.applicationDetails?.applicationStatus === 'selected' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === 'selected' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );
 
@@ -108,18 +108,10 @@ export function LitmusQueue() {
       applications.filter(
         (student: any) => student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && student?.cohort?.cohortId === selectedCohort
       ).length
-    );   
-    
-    // Filter by date range
-    const filteredByDate = filteredByCohort.filter((app: any) => {
-      if (!dateRange) return true;
-      const appDate = new Date(app.updatedAt);
-      const { from, to } = dateRange;
-      return (!from || appDate >= from) && (!to || appDate <= to);
-    });
+    );
 
     // a) Search filter by applicant name
-    const filteredBySearch = filteredByDate.filter((app: any) => {
+    const filteredBySearch = filteredByCohort.filter((app: any) => {
       if (searchQuery.trim()) {
         const lowerSearch = searchQuery.toLowerCase();
         const name = `${app.firstName ?? ""} ${app.lastName ?? ""}`.toLowerCase();
@@ -131,7 +123,7 @@ export function LitmusQueue() {
     // b) Status filter
     const filteredByStatus = filteredBySearch.filter((app: any) => {
       if (selectedStatus !== "all-status") {
-        const status = app?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() || "pending";
+        const status = app?.appliedCohorts?.[app?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
         return status === selectedStatus;
       }
       return true;
@@ -142,16 +134,16 @@ export function LitmusQueue() {
     switch (sortBy) {
       case "newest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
           return dateB - dateA; // newest first
         });
         break;
 
       case "oldest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
           return dateA - dateB; // oldest first
         });
         break;
@@ -174,32 +166,7 @@ export function LitmusQueue() {
     }
 
     return sortedApplications;
-  }, [applications, searchQuery, selectedStatus, sortBy, dateRange, selectedCohort]);
-
-  const getStatusColor = (status: string): BadgeVariant => {
-    switch (status.toLowerCase()) {
-      case "initiated":
-        return "default";
-      case "under review":
-        return "secondary";
-      case "accepted":
-      case "selected":
-        return "success";
-      case "rejected":
-      case "not qualified":
-        return "warning";
-      case "on hold":
-      case "waitlist":
-        return "onhold";
-      case "interview scheduled":
-        case "interview rescheduled":
-        return "default";
-      case "interview concluded":
-        return "lemon";
-      default:
-        return "secondary";
-    }
-  };
+  }, [applications, searchQuery, selectedStatus, sortBy, selectedCohort]);
 
   const handleApplicationUpdate = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key

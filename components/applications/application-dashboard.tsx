@@ -28,7 +28,8 @@ export function ApplicationDashboard() {
 
         // 2) Filter Out Students with No Application Details
         const validStudents = response.data.filter(
-          (student: any) => student?.applicationDetails !== undefined
+          (student: any) => 
+            ['initiated', 'applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
         );
 
         validStudents.sort((a: any, b: any) => {

@@ -39,10 +39,10 @@ export function InterviewsQueue() {
       try {
         const response = await getStudents();
         const mappedStudents =
-          response.data.filter(
-            (student: any) =>
-            ['accepted', 'Interview Scheduled', 'interview cancelled', 'waitlist', 'selected', 'not qualified', 'dropped'].includes(student?.applicationDetails?.applicationStatus)
-          )    
+        response.data.filter(
+          (student: any) =>
+            ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+        )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
             const dateB = new Date(b?.updatedAt);
@@ -86,18 +86,18 @@ export function InterviewsQueue() {
       }
       const matchedCohort = cohorts.find((cohort) => cohort.cohortId === selectedCohort);
       setCurrentCohort(matchedCohort || null);
-      return app.cohort?.cohortId === selectedCohort;
+      return app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId?.cohortId === selectedCohort;
     });
 
     setApplied(
       applications.filter(
-        (student: any) => student?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );
     
     setIntCleared(
       applications.filter(
-        (student: any) => student?.applicationDetails?.applicationStatus === 'selected' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === 'selected' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );
 
@@ -128,7 +128,7 @@ export function InterviewsQueue() {
     // b) Status filter
     const filteredByStatus = filteredBySearch.filter((app: any) => {
       if (selectedStatus !== "all-status") {
-        const status = app.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
+        const status = app?.appliedCohorts?.[app?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
         return status === selectedStatus;
       }
       return true;
@@ -139,16 +139,16 @@ export function InterviewsQueue() {
     switch (sortBy) {
       case "newest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
           return dateB - dateA; // newest first
         });
         break;
 
       case "oldest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
           return dateA - dateB; // oldest first
         });
         break;

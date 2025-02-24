@@ -31,6 +31,8 @@ import {
 import { updateCohort } from "@/app/api/cohorts";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
+import { Progress } from "@/components/ui/progress";
+import axios from "axios";
 
 const formSchema = z.object({
   applicationFormDetail: z.array(
@@ -49,10 +51,12 @@ const formSchema = z.object({
               allowedTypes: z.array(z.string()).optional(),
             })
           ),
-          resourceLink: z.string().optional(), // Add this line
+          resources: z.object({
+            resourceFiles: z.array(z.string().optional(),),
+            resourceLinks: z.array(z.string().url('Please enter a valid Link URL').optional(),),
+          }),
         })
       ),
-      // calendlyEmbedCode: z.string().optional(),
     })
   ),
 });
@@ -90,10 +94,12 @@ export function ApplicationFormBuilder({
                         allowedTypes: ["All"],
                       },
                     ],
-                    resourceLink: "",
+                    resources: {
+                      resourceFiles: [],
+                      resourceLinks: [],
+                    },
                   },
                 ],
-                // calendlyEmbedCode: "",
               },
             ],
     },
@@ -143,21 +149,6 @@ export function ApplicationFormBuilder({
               control={control}
               form={form}
             />
-
-            {/* Calendly Embed Code */}
-            {/* <FormField
-              control={control}
-              name={`applicationFormDetail.${applicationFormIndex}.calendlyEmbedCode`}
-              render={({ field }) => (
-                <FormItem>
-                  <Label>Interview Scheduler (Calendly)</Label>
-                  <FormControl>
-                    <Textarea className="min-h-4" placeholder="Paste Calendly embed code" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
           </div>
         ))}
 
@@ -195,6 +186,10 @@ function TaskList({ nestIndex, control, form }: any) {
             allowedTypes: ["All"],
           },
         ],
+        resources: {
+          resourceFiles: [],
+          resourceLinks: [],
+        },
       });
     }
   }, [taskFields, appendTask]);
@@ -231,6 +226,10 @@ function TaskList({ nestIndex, control, form }: any) {
                 allowedTypes: ["All"],
               },
             ],
+            resources: {
+              resourceFiles: [],
+              resourceLinks: [],
+            },
           })
         }
       >
@@ -248,6 +247,7 @@ function Task({
   taskField,
   taskIndex,
   removeTask,
+  setValue,
 }: any) {
   const {
     fields: configFields,
@@ -372,72 +372,294 @@ function Task({
           </div>
 
           {/* Resources Section */}
-<div className="grid gap-3">
-  <Label>Resources</Label>
-  {uploadedFile && (
-    <div className="flex items-center justify-between gap-2 mt-2 p-2 border rounded">
-      <div className="flex gap-2 items-center text-sm">
-        <FileIcon className="w-4 h-4" />
-        {uploadedFile.name}
-      </div>
-      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveFile} />
-    </div>
-  )}
-  {!addedLink ? (
-    <div className="relative flex items-center gap-2">
-      <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
-      <Input
-        className="pl-8 text-sm"
-        placeholder="Enter URL here"
-        value={resourceLink}
-        onChange={(e) => setResourceLink(e.target.value)}
-      />
-      <Button
-        type="button"
-        onClick={handleAddLink}
-        disabled={!resourceLink}
-        className="absolute right-2 top-1.5 h-7 rounded-full"
-      >
-        Add
-      </Button>
-    </div>
-  ) : (
-    <div className="flex items-center gap-2 p-2 border rounded">
-      <Link2Icon className="w-4 h-4" />
-      <span className="flex-1">{addedLink}</span>
-      <XIcon className="w-4 h-4 cursor-pointer" onClick={handleRemoveLink} />
-    </div>
-  )}
-  <div className="flex gap-2.5">
-    <Button
-      type="button"
-      variant='secondary'
-      className="flex flex-1 gap-2"
-      onClick={() => document.getElementById(`file-upload-${taskField.id}`)?.click()}
-    >
-      <FileIcon className="w-4 h-4"/> Upload Resource File
-    </Button>
-    <input
-      type="file"
-      id={`file-upload-${taskField.id}`}
-      style={{ display: "none" }}
-      onChange={handleFileUpload}
-    />
-    <Button
-      type="button"
-      variant='secondary'
-      className="flex flex-1 gap-2"
-      onClick={() => setIsLinkInputVisible(true)}
-    >
-      <Link2Icon className="w-4 h-4"/> Attach Resource Link
-    </Button>
-  </div>
-</div>
+          <ResourcesSection
+            control={control}
+            setValue={setValue}
+            nestIndex={nestIndex}
+            taskIndex={taskIndex}
+          />
         </div>
-        
-
       </CardContent>
     </Card>
+  );
+}
+
+function ResourcesSection({
+  control,
+  setValue,
+  nestIndex,
+  taskIndex,
+}: any) {
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [fileName, setFileName] = useState("");
+
+  const {
+    fields: linkFields,
+    append: appendLink,
+    remove: removeLink,
+  } = useFieldArray({
+    control,
+    name: `applicationFormDetail.${nestIndex}.task.${taskIndex}.resources.resourceLinks`,
+  });
+
+  const {
+    fields: fileFields,
+    append: appendFile,
+    remove: removeFile,
+  } = useFieldArray({
+    control,
+    name: `applicationFormDetail.${nestIndex}.task.${taskIndex}.resources.resourceFiles`,
+  });
+  
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    setUploadProgress(0);
+
+    const selectedFiles = e.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+
+    const file = selectedFiles[0];
+    setFileName(file.name);
+
+    // Example size limit for direct vs. multipart: 5MB
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    // Clear the file input so user can re-select if needed
+    e.target.value = "";
+
+    try {
+      setUploading(true);
+
+      let fileUrl = "";
+      if (file.size <= CHUNK_SIZE) {
+        // Use direct upload
+        fileUrl = await uploadDirect(file);
+        console.log("uploadDirect File URL:", fileUrl);
+      } else {
+        // Use multipart upload
+        fileUrl = await uploadMultipart(file, CHUNK_SIZE);
+        console.log("uploadMultipart File URL:", fileUrl);
+      }
+
+      // Append the final S3 URL to resourcesFiles in the form
+      appendFile(fileUrl);
+
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setError(err.message || "Error uploading file");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Direct upload to S3 using a single presigned URL
+  const uploadDirect = async (file: File) => {
+    // Step 1: Get presigned URL from your server
+    // Make sure your endpoint returns something like { url: string }
+    const { data } = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url`, {
+      bucketName: "dev-application-portal",
+      key: generateUniqueFileName(file.name),
+    });
+    const { url, key } = data; // Suppose your API returns both presigned `url` and `key`
+    console.log("whatatata",url.split("?")[0]);
+
+    // Step 2: PUT file to that URL
+      const partResponse = await axios.put(url, file, {
+      headers: { "Content-Type": file.type },
+      onUploadProgress: (evt: any) => {
+        if (!evt.total) return;
+        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+        setUploadProgress(percentComplete);
+      },
+    });
+
+    // Final S3 URL
+    return `${url.split("?")[0]}`;
+  };
+
+  /**
+   * Multipart upload with 5MB chunks, using your server endpoints for:
+   * - initiate-multipart-upload
+   * - generate-presigned-url-part
+   * - complete-multipart-upload
+   */
+  const uploadMultipart = async (file: File, chunkSize: number) => {
+    // Step 1: Initiate
+    const uniqueKey = generateUniqueFileName(file.name);
+    const initiateRes = await axios.post(`${process.env.API_URL}/admin/initiate-multipart-upload`, {
+      bucketName: "dev-application-portal",
+      key: uniqueKey,
+    });
+    const { uploadId } = initiateRes.data;
+
+    // Step 2: Upload each chunk
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    let totalBytesUploaded = 0;
+    const parts: { ETag: string; PartNumber: number }[] = [];
+
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const chunk = file.slice(start, end);
+
+      const partRes = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url-part`, {
+        bucketName: "dev-application-portal",
+        key: uniqueKey,
+        uploadId,
+        partNumber: i + 1,
+      });
+      const { url } = partRes.data;
+
+      // Upload the chunk
+      const uploadRes = await axios.put(url, chunk, {
+        headers: { "Content-Type": file.type },
+        onUploadProgress: (evt: any) => {
+          if (!evt.total) return;
+          totalBytesUploaded += evt.loaded;
+          const percent = Math.round((totalBytesUploaded / file.size) * 100);
+          setUploadProgress(Math.min(percent, 100));
+        },
+      });
+      parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
+    }
+
+    // Step 3: Complete
+    const partRes = await axios.post(`${process.env.API_URL}/admin/complete-multipart-upload`, {
+      bucketName: "dev-application-portal",
+      key: uniqueKey,
+      uploadId,
+      parts,
+    });
+
+    // Return final S3 URL
+    return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
+  };
+
+  // Just a helper to generate a unique file name
+  const generateUniqueFileName = (originalName: string) => {
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    return `${timestamp}-${randomStr}-${originalName}`;
+  };
+
+  return (
+    <div className="grid gap-3">
+      <Label>Resources</Label>
+
+      {/* 1) Render the existing file URLs (resourceFiles) */}
+      {fileFields.map((field, index) => (
+        <div
+          key={field.id}
+          className="border rounded-md flex justify-between items-center py-1.5 px-2"
+        >
+          <div className="flex items-center gap-2">
+            <FileIcon className="w-4 h-4" />
+            {/* If storing the file as a string, we can show a truncated version or full URL */}
+            <FormField
+              control={control}
+              name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.resources.resourceFiles.${index}`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                  <p className="truncate text-sm">
+                    {field.value || "No file URL"}
+                  </p>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 rounded-full"
+            onClick={() => removeFile(index)}
+          >
+            <XIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+
+      {uploading && (
+        <div className="flex items-center justify-between border rounded-md py-1.5 px-2">
+          <div className="flex items-center gap-2">
+            <FileIcon className="w-4 h-4" />
+            <div className="text-sm">{fileName}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Progress className="h-1 w-20" states={[ { value: uploadProgress, widt: uploadProgress, color: '#ffffff' }]} />
+            <span>{uploadProgress}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Handle resource links as before */}
+      {linkFields.map((field, index) => (
+        <div className="flex items-center" key={field.id}>
+          <FormField
+            control={control}
+            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.resources.resourceLinks.${index}`}
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                  <div className="relative flex items-center gap-2">
+                    <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
+                    <Input
+                      type="url"
+                      className="pl-8 text-sm"
+                      placeholder="Enter resource link"
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeLink(index)}
+                      className="absolute right-2 top-1.5 h-7 rounded-full"
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      ))}
+
+      <div className="flex gap-2.5">
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex flex-1 gap-2 items-center"
+          onClick={() => {
+            document.getElementById(`file-upload-${taskIndex}`)?.click();
+          }}
+        >
+          <FileIcon className="w-4 h-4" />
+          Upload Resource File
+        </Button>
+        <input
+          type="file"
+          id={`file-upload-${taskIndex}`}
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+        <Button type="button"
+          variant="secondary"
+          className="flex flex-1 gap-2"
+          onClick={() => appendLink("")}
+        >
+          <Link2Icon className="w-4 h-4" /> Attach Resource Link
+        </Button>
+      </div>
+      {error && <p className="text-red-500">{error}</p>}
+    </div>
   );
 }
 

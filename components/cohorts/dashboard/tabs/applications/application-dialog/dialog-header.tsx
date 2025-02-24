@@ -3,22 +3,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Edit,
-  Mail,
-  Download,
-  UserMinus,
-  RefreshCw,
-  Calendar,
-} from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { UserMinus, Calendar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { getCurrentStudents } from "@/app/api/student";
 import { useEffect, useState } from "react";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -35,6 +21,10 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [interviewOpen, setInterviewOpen] = useState(false);
 
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const applicationDetails = latestCohort?.applicationDetails;
+  const litmusTestDetails = latestCohort?.litmusTestDetails;
+
   const colorClasses = [
     'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
     'text-[#3698FB] !bg-[#3698FB]/20 border-[#3698FB]',
@@ -43,7 +33,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   ];
   
   const getColor = (slabName: string): string => {
-    const index = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+    const index = latestCohort?.cohortId?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
       (slab: any) => slab.name === slabName
     );
     
@@ -51,7 +41,10 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
   };
 
   useEffect(() => {
-      setSch(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
+    const schSlab = latestCohort?.cohortId?.feeStructureDetails.find(
+      (slab: any) => slab._id === litmusTestDetails?.scholarshipDetail
+    );
+      setSch(schSlab);
   }, [student]);
 
   const getStatusColor = (status: string): BadgeVariant => {
@@ -63,20 +56,16 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
       case "enrolled":
       case "token paid":
         return "success";
-        break;
       case "rejected":
         return "warning";
-        break;
       default:
         return "secondary";
     }
   };
 
-
   if (!student) {
     return <p>Student data not available.</p>;
   }
-
 
   return (
     <div>
@@ -88,11 +77,11 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               <AvatarFallback>{student?.firstName?.[0] || "-"}{student?.lastName?.[0] || "-"}</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <h2 className="text-base font-semibold">{student.firstName} {student.lastName}</h2>
+              <h2 className="text-base font-semibold">{student?.firstName} {student?.lastName}</h2>
               <div className="flex gap-4 h-5 items-center">
-                <p className="text-sm text-muted-foreground">{student.email}</p>
+                <p className="text-sm text-muted-foreground">{student?.email}</p>
                 <Separator orientation="vertical" />
-                <p className="text-sm text-muted-foreground">{student.mobileNumber}</p>
+                <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>
               </div>
             </div>
           </div>
@@ -102,8 +91,8 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-muted-foreground">Program & Cohort</p>
-                <p className="font-medium">{student.program.name}</p>
-                <p className="text-sm">{student.cohort.cohortId}</p>
+                <p className="font-medium">{latestCohort?.cohortId?.programDetail.name}</p>
+                <p className="text-sm">{latestCohort?.cohortId?.cohortId}</p>
               </div>
 
               {/* Action Buttons */}
@@ -133,25 +122,25 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
             <div className="flex justify-between items-center py-3 border-t">
               <div>
                 <p className="text-sm text-muted-foreground">Application Status</p>
-                {student.applicationDetails.applicationStatus ?
-                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(student.applicationDetails.applicationStatus) ?
-                  'accepted' : student.applicationDetails.applicationStatus || "--")}>
-                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(student.applicationDetails.applicationStatus) ?
-                  'accepted' : student.applicationDetails.applicationStatus }
+                {applicationDetails?.applicationStatus ?
+                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                  'accepted' : applicationDetails?.applicationStatus || "--")}>
+                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                  'accepted' : applicationDetails?.applicationStatus }
                 </Badge> : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Interview Status</p>
-                {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(student.applicationDetails.applicationStatus) ? 
-                <Badge className="capitalize" variant={getStatusColor(student.applicationDetails.applicationStatus || "--")}>
-                  {student.applicationDetails.applicationStatus}
+                {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ? 
+                <Badge className="capitalize" variant={getStatusColor(applicationDetails?.applicationStatus || "--")}>
+                  {applicationDetails?.applicationStatus}
                 </Badge> : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">LITMUS Status</p>
-                {student?.litmusTestDetails[0]?.litmusTaskId?.status ? 
-                <Badge className="capitalize" variant={getStatusColor(student?.litmusTestDetails[0]?.litmusTaskId?.status || "--")}>
-                  {student?.litmusTestDetails[0]?.litmusTaskId?.status}
+                {litmusTestDetails?.status ? 
+                <Badge className="capitalize" variant={getStatusColor(litmusTestDetails?.status || "--")}>
+                  {litmusTestDetails?.status}
                 </Badge>  : "--"}
               </div>
               <div>
@@ -161,14 +150,12 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               </div> 
               <div>
                 <p className="text-sm text-muted-foreground">Payment Status</p>
-                {student.paymentStatus ? 
+                {student?.paymentStatus ? 
                 <Badge className="capitalize" variant={getStatusColor(student.paymentStatus)}>
-                  {student.paymentStatus}
+                  {student?.paymentStatus}
                 </Badge> : "--"}
               </div>
-            </div> 
-
-            
+            </div>           
           </div>
         </div>
 

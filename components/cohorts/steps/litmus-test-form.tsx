@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { updateCohort } from "@/app/api/cohorts";
 
+import {
+  S3Client,
+  DeleteObjectCommand,
+  AbortMultipartUploadCommand,
+  ListPartsCommand,
+} from "@aws-sdk/client-s3";
+import { Progress } from "@/components/ui/progress";
+
 const formSchema = z.object({
   litmusTasks: z.array(
     z.object({
@@ -73,8 +82,8 @@ const formSchema = z.object({
         })
       ),
       resources: z.object({
-        uploadedFile: z.any().optional(),
-        resourceLink: z.string().optional(),
+        resourceFiles: z.array(z.string().optional(),),
+        resourceLinks: z.array(z.string().url('Please enter a valid Link URL').optional(),),
       }),
     })
   ),
@@ -88,7 +97,6 @@ const formSchema = z.object({
     })
   ),
   litmusTestDuration: z.string().nonempty("Duration is required"),
-  // litmusTestScheduler: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -112,7 +120,6 @@ export function LitmusTestForm({
           litmusTasks: litmusTestDetail.litmusTasks,
           scholarshipSlabs: litmusTestDetail.scholarshipSlabs,
           litmusTestDuration: litmusTestDetail.litmusTestDuration,
-          // litmusTestScheduler: litmusTestDetail.litmusTestScheduler,
         }
       : {
           litmusTasks:  [
@@ -139,8 +146,8 @@ export function LitmusTestForm({
                 },
               ],
               resources: {
-                uploadedFile: null,
-                resourceLink: "",
+                resourceFiles: [],
+                resourceLinks: [],
               },
             },
           ],
@@ -154,9 +161,7 @@ export function LitmusTestForm({
             },
           ],
           litmusTestDuration: "",
-          // litmusTestScheduler: "",
         },
-
   });
   const [loading, setLoading] = useState(false);  
   const { control, handleSubmit, watch, setValue  } = form;
@@ -187,7 +192,6 @@ export function LitmusTestForm({
         const createdCohort = await updateCohort(initialData._id, {
           litmusTestDetail: data,
         });
-        console.log("Cohort updated successfully");
         onCohortCreated(createdCohort.data);
         onNext();
       } else {
@@ -202,10 +206,7 @@ export function LitmusTestForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="max-h-[80vh] space-y-6 py-4"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="max-h-[80vh] space-y-6 py-4" >
         {/* LITMUS Tasks Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">LITMUS Tasks</h3>
@@ -239,8 +240,8 @@ export function LitmusTestForm({
                 ],
                 judgmentCriteria: [],
                 resources: {
-                  uploadedFile: null,
-                  resourceLink: "",
+                  resourceFiles: [],
+                  resourceLinks: [],
                 },
               })
             }
@@ -298,23 +299,6 @@ export function LitmusTestForm({
           />
         </div>
 
-        {/* LITMUS Test Scheduler */}
-        {/* <div className="space-y-2">
-          <FormField
-            control={control}
-            name="litmusTestScheduler"
-            render={({ field }) => (
-              <FormItem>
-                <Label>LITMUS Test Presentation Scheduler</Label>
-                <FormControl>
-                  <Textarea placeholder="Paste Calendly embed code" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div> */}
-
         <Button type="submit" className="w-full" disabled={loading}>
           Next: Fee Structure
         </Button>
@@ -361,9 +345,6 @@ function TaskItem({
     control,
     name: `litmusTasks.${taskIndex}.judgmentCriteria`,
   });
-
-  // Resource state
-  const [isLinkInputVisible, setIsLinkInputVisible] = React.useState(!!task?.resources?.resourceLink);
 
   return (
     <Card key={task.id}>
@@ -578,9 +559,6 @@ function TaskItem({
             control={control}
             setValue={setValue}
             taskIndex={taskIndex}
-            isLinkInputVisible={isLinkInputVisible}
-            setIsLinkInputVisible={setIsLinkInputVisible}
-            link={task?.resources?.resourceLink || ""}
           />
         </div>
       </CardContent>
@@ -753,153 +731,276 @@ function ResourcesSection({
   control,
   setValue,
   taskIndex,
-  isLinkInputVisible,
-  setIsLinkInputVisible,
-  link,
 }: any) {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [resourceLink, setResourceLink] = useState(link || "");
-  const [addedLink, setAddedLink] = useState<string | null>(link || null);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [fileName, setFileName] = useState("");
+
+  const {
+    fields: linkFields,
+    append: appendLink,
+    remove: removeLink,
+  } = useFieldArray({
+    control,
+    name: `litmusTasks.${taskIndex}.resources.resourceLinks`,
+  });
+
+  const {
+    fields: fileFields,
+    append: appendFile,
+    remove: removeFile,
+  } = useFieldArray({
+    control,
+    name: `litmusTasks.${taskIndex}.resources.resourceFiles`,
+  });
   
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    setUploadProgress(0);
+
     const selectedFiles = e.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
 
-    if (selectedFiles && selectedFiles.length > 0) {
-      const file = selectedFiles[0];
+    const file = selectedFiles[0];
+    setFileName(file.name);
 
-      // Set file size limit (e.g., 15MB)
-      const MAX_FILE_SIZE_MB = 15;
-      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-        setError(`File size exceeds ${MAX_FILE_SIZE_MB} MB limit.`);
-        return;
+    // Example size limit for direct vs. multipart: 5MB
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    // Clear the file input so user can re-select if needed
+    e.target.value = "";
+
+    try {
+      setUploading(true);
+
+      let fileUrl = "";
+      if (file.size <= CHUNK_SIZE) {
+        // Use direct upload
+        fileUrl = await uploadDirect(file);
+        console.log("uploadDirect File URL:", fileUrl);
+      } else {
+        // Use multipart upload
+        fileUrl = await uploadMultipart(file, CHUNK_SIZE);
+        console.log("uploadMultipart File URL:", fileUrl);
       }
 
-      setUploadedFile(file);
-      setValue(`litmusTasks.${taskIndex}.resources.uploadedFile`, file); // Update form value
-      setError(null);
+      // Append the final S3 URL to resourcesFiles in the form
+      appendFile(fileUrl);
+
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setError(err.message || "Error uploading file");
+    } finally {
+      setUploading(false);
     }
   };
 
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
-    setValue(`litmusTasks.${taskIndex}.resources.uploadedFile`, null);
+  // Direct upload to S3 using a single presigned URL
+  const uploadDirect = async (file: File) => {
+    // Step 1: Get presigned URL from your server
+    // Make sure your endpoint returns something like { url: string }
+    const { data } = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url`, {
+      bucketName: "dev-application-portal",
+      key: generateUniqueFileName(file.name),
+    });
+    const { url, key } = data; // Suppose your API returns both presigned `url` and `key`
+    console.log("whatatata",url.split("?")[0]);
+
+    // Step 2: PUT file to that URL
+      const partResponse = await axios.put(url, file, {
+      headers: { "Content-Type": file.type },
+      onUploadProgress: (evt: any) => {
+        if (!evt.total) return;
+        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+        setUploadProgress(percentComplete);
+      },
+    });
+
+    // Final S3 URL
+    return `${url.split("?")[0]}`;
   };
-  
-  const handleAddLink = () => {
-    setAddedLink(resourceLink);
+
+  /**
+   * Multipart upload with 5MB chunks, using your server endpoints for:
+   * - initiate-multipart-upload
+   * - generate-presigned-url-part
+   * - complete-multipart-upload
+   */
+  const uploadMultipart = async (file: File, chunkSize: number) => {
+    // Step 1: Initiate
+    const uniqueKey = generateUniqueFileName(file.name);
+    const initiateRes = await axios.post(`${process.env.API_URL}/admin/initiate-multipart-upload`, {
+      bucketName: "dev-application-portal",
+      key: uniqueKey,
+    });
+    const { uploadId } = initiateRes.data;
+
+    // Step 2: Upload each chunk
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    let totalBytesUploaded = 0;
+    const parts: { ETag: string; PartNumber: number }[] = [];
+
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const chunk = file.slice(start, end);
+
+      const partRes = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url-part`, {
+        bucketName: "dev-application-portal",
+        key: uniqueKey,
+        uploadId,
+        partNumber: i + 1,
+      });
+      const { url } = partRes.data;
+
+      // Upload the chunk
+      const uploadRes = await axios.put(url, chunk, {
+        headers: { "Content-Type": file.type },
+        onUploadProgress: (evt: any) => {
+          if (!evt.total) return;
+          totalBytesUploaded += evt.loaded;
+          const percent = Math.round((totalBytesUploaded / file.size) * 100);
+          setUploadProgress(Math.min(percent, 100));
+        },
+      });
+      parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
+    }
+
+    // Step 3: Complete
+    const partRes = await axios.post(`${process.env.API_URL}/admin/complete-multipart-upload`, {
+      bucketName: "dev-application-portal",
+      key: uniqueKey,
+      uploadId,
+      parts,
+    });
+
+    // Return final S3 URL
+    return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
   };
-  
-  const handleRemoveLink = () => {
-    setAddedLink(null);
-    setResourceLink("");
+
+  // Just a helper to generate a unique file name
+  const generateUniqueFileName = (originalName: string) => {
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    return `${timestamp}-${randomStr}-${originalName}`;
   };
 
   return (
     <div className="grid gap-3">
       <Label>Resources</Label>
-      {uploadedFile && (
-        <div className="flex items-center justify-between gap-2 mt-2 p-2 border rounded">
-          <div className="flex gap-2 items-center text-sm">
+
+      {/* 1) Render the existing file URLs (resourceFiles) */}
+      {fileFields.map((field, index) => (
+        <div
+          key={field.id}
+          className="border rounded-md flex justify-between items-center py-1.5 px-2"
+        >
+          <div className="flex items-center gap-2">
             <FileIcon className="w-4 h-4" />
-            {uploadedFile.name}
+            {/* If storing the file as a string, we can show a truncated version or full URL */}
+            <FormField
+              control={control}
+              name={`litmusTasks.${taskIndex}.resources.resourceFiles.${index}`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                  <p className="truncate text-sm">
+                    {field.value || "No file URL"}
+                  </p>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <XIcon
-            className="w-4 h-4 cursor-pointer"
-            onClick={handleRemoveFile}
-          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 rounded-full"
+            onClick={() => removeFile(index)}
+          >
+            <XIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+
+      {uploading && (
+        <div className="flex items-center justify-between border rounded-md py-1.5 px-2">
+          <div className="flex items-center gap-2">
+            <FileIcon className="w-4 h-4" />
+            <div className="text-sm">{fileName}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Progress className="h-1 w-20" states={[ { value: uploadProgress, widt: uploadProgress, color: '#ffffff' }]} />
+            <span>{uploadProgress}%</span>
+          </div>
         </div>
       )}
-     
-     {isLinkInputVisible && (
-  <FormField
-    control={control}
-    name={`litmusTasks.${taskIndex}.resources.resourceLink`}
-    render={({ field }) => (
-      <FormItem>
-        <FormControl>
-          <div className="relative flex items-center gap-2">
-            <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
-            <Input
-              className="pl-8 text-sm"
-              placeholder="Enter URL here"
-              {...field}
-              value={resourceLink}
-              onChange={(e) => {
-                setResourceLink(e.target.value);
-                field.onChange(e.target.value);
-              }}
-            />
-            {addedLink === null ? (
-              <Button
-                type="button"
-                onClick={() => handleAddLink()} // Properly invoking the function
-                disabled={!field.value}
-                className="absolute right-2 top-1.5 h-7 rounded-full"
-              >
-                Add
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                onClick={() => {handleRemoveLink();field.onChange("");}}
-                size={"icon"}
-                variant={"ghost"}
-                className="absolute right-2 top-1.5 h-7 w-7"
-              >
-                <XIcon className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-)}
 
-      {/* {resourceLink && (
-        <div className="flex items-center gap-2 p-2 border rounded">
-          <Link2Icon className="w-4 h-4" />
-          <span className="flex-1">{resourceLink}</span>
-          <XIcon
-            className="w-4 h-4 cursor-pointer"
-            onClick={() =>
-              control.setValue(
-                `litmusTasks.${taskIndex}.resources.resourceLink`,
-                ""
-              )
-            }
+      {/* Handle resource links as before */}
+      {linkFields.map((field, index) => (
+        <div className="flex items-center" key={field.id}>
+          <FormField
+            control={control}
+            name={`litmusTasks.${taskIndex}.resources.resourceLinks.${index}`}
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                  <div className="relative flex items-center gap-2">
+                    <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
+                    <Input
+                      type="url"
+                      className="pl-8 text-sm"
+                      placeholder="Enter resource link"
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeLink(index)}
+                      className="absolute right-2 top-1.5 h-7 rounded-full"
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      )} */}
+      ))}
+
       <div className="flex gap-2.5">
-        <Button type="button"
+        <Button
+          type="button"
           variant="secondary"
-          className="flex flex-1 gap-2"
-          onClick={() =>
-            document
-              .getElementById(`file-upload-${taskIndex}`)
-              ?.click()
-          }
+          className="flex flex-1 gap-2 items-center"
+          onClick={() => {
+            document.getElementById(`file-upload-${taskIndex}`)?.click();
+          }}
         >
-          <FileIcon className="w-4 h-4" /> Upload Resource File
+          <FileIcon className="w-4 h-4" />
+          Upload Resource File
         </Button>
         <input
           type="file"
           id={`file-upload-${taskIndex}`}
           style={{ display: "none" }}
-          onChange={handleFileUpload}
+          onChange={handleFileChange}
         />
         <Button type="button"
           variant="secondary"
           className="flex flex-1 gap-2"
-          disabled={resourceLink}
-          onClick={() => setIsLinkInputVisible(true)}
+          onClick={() => appendLink("")}
         >
           <Link2Icon className="w-4 h-4" /> Attach Resource Link
         </Button>
       </div>
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   );
 }

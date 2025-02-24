@@ -8,20 +8,30 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { verifyTokenAmount } from "@/app/api/student";
+import { Textarea } from "@/components/ui/textarea";
 
-type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = 'onhold' | "lemon" | "warning" | "secondary" | "success" | "default";
 
 interface PaymentInformationTabProps {
   student: any;
+  onUpdateStatus: () => void;
 }
 
-export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
+export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInformationTabProps) {
 
   const [sch, setSch] = useState<any>();
   const [feeStructure, setFeeStructure] = useState<any>();
   const [open, setOpen] = useState(false);
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [reason, setReason] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showAllSemesters, setShowAllSemesters] = useState(false);
+
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const cohortDetails = latestCohort?.cohortId; 
+  const applicationDetails = latestCohort?.applicationDetails;
+  const tokenFeeDetails = latestCohort?.tokenFeeDetails;
+  const studentDetail = applicationDetails?.studentDetails; 
 
   const colorClasses = [
     'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
@@ -52,15 +62,15 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
       }  
       const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
       console.log("Token verification response:", response);
+      onUpdateStatus();
     } catch (error) {
       console.error("Error verifying token amount:", error);
     }
   }
 
-  const lastCourse = student?.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
+  const lastCourse = latestCohort?.cousrseEnrolled?.[latestCohort?.cousrseEnrolled.length - 1];
   let lastStatus = '';
-  if(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'pending' || 
-    student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === undefined
+  if(tokenFeeDetails?.verificationStatus === 'pending' || tokenFeeDetails?.verificationStatus === undefined
   ){
     lastStatus = 'pending';
   } else {
@@ -68,15 +78,15 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   }
 
   useEffect(() => {
-    if (!student.cohort?.feeStructureDetails) return;
+    if (!cohortDetails?.feeStructureDetails) return;
 
-    const scholarshipId = student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail;
+    const scholarshipId = latestCohort?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail;
 
-    const matchedScholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails
-    const fallbackScholarship = student.cohort.feeStructureDetails.find(
+    const matchedScholarship = latestCohort?.semesterFeeDetails
+    const fallbackScholarship = cohortDetails.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );
-    const finalScholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.installmentDetails;
+    const finalScholarship = latestCohort?.installmentDetails;
     if (finalScholarship && finalScholarship.length > 0) {
       setFeeStructure(finalScholarship);
     }
@@ -90,14 +100,13 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   ? (feeStructure || sch?.scholarshipDetails)
   : (feeStructure || sch?.scholarshipDetails)?.slice(0, 1); 
   
-  const tokenAmount = student?.cohort?.cohortFeesDetail?.tokenFee || 0;
+  const tokenAmount = Number(cohortDetails?.cohortFeesDetail?.tokenFee) || 0;
   const installments = (feeStructure || sch?.scholarshipDetails)?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
   const scholarshipAmount = installments.reduce((sum: number, installment: any) => sum + (installment.scholarshipAmount || 0), 0);
   const totalAmount = Number(tokenAmount) + Number(installmentTotal);
 
-  const isTokenPaid =
-    student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === "paid";
+  const isTokenPaid = tokenFeeDetails?.verificationStatus === "paid";
   const paidAmount = isTokenPaid ? tokenAmount : 0;
   
   const getStatusColor = (status: string): BadgeVariant => {
@@ -106,6 +115,8 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
       case "overdue":
         return "warning";
       case "pending":
+        return "onhold";
+      case "verification pending":
         return "lemon";
       case "paid":
         return "success";
@@ -115,7 +126,7 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
   };
 
   const getColor = (slabName: string): string => {
-    const index = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+    const index = cohortDetails?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
       (slab: any) => slab.name === slabName
     );
     
@@ -138,30 +149,35 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
-              <p className="text-sm font-semibold">₹ {formatAmount(totalAmount) || "--"}</p>
+              <p className="text-sm font-semibold">₹{formatAmount(totalAmount) || "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Paid Amount</p>
-              <p className="text-sm font-semibold">{paidAmount ? <>₹ {formatAmount(paidAmount)}</> : "--"}</p>
+              <p className="text-sm font-semibold">{paidAmount ? <>₹{formatAmount(paidAmount)}</> : "--"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <div className="flex gap-1.5 text-sm items-center font-semibold">
+              <div className="flex gap-1.5 items-center text-sm font-semibold">
                 {student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail ? (
                   <>
-                    ₹ {formatAmount(scholarshipAmount)}{' '}
+                    ₹{formatAmount(scholarshipAmount)}{' '}
                     <Badge className={`capitalize ${getColor(sch?.scholarshipName)}`} variant="secondary">
                       {`${sch?.scholarshipName} ${sch?.scholarshipPercentage}%`}
                     </Badge>
                   </>
-                ) : ( '--' )}
+                ) : ( <span className="text-muted-foreground">Not Assigned</span> )}
               </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Admission Fee Status</p>
-              <Badge className="capitalize" variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
-                {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
-              </Badge>
+              <div className="flex gap-2 items-center">
+                <span className="text-sm font-semibold">₹{formatAmount(tokenAmount)}</span>
+                {applicationDetails?.applicationStatus === 'selected' && 
+                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || 'pending')}>
+                    {tokenFeeDetails?.verificationStatus || 'pending'}
+                  </Badge>
+                }
+              </div>
             </div>
           </div>
           <div className="space-y-1">
@@ -187,23 +203,25 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                 <div>
                   <h4 className="font-medium">Token Amount</h4>
                   <p className="text-sm text-muted-foreground">
-                    Amount: ₹{formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}
-                    {student?.cousrseEnrolled?.length > 0 && (
+                    Amount: ₹{formatAmount(tokenAmount)}
+                    {tokenFeeDetails && (
                       <>
                         {" • Uploaded on "}
                         {new Date(
-                          student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.updatedAt
+                          tokenFeeDetails?.updatedAt
                         ).toLocaleDateString()}
                       </>
                     )}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className="capitalize" variant={getStatusColor(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--')}>
-                    {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus || '--'}
-                  </Badge>
-                  {student?.cousrseEnrolled?.length > 0 && 
-                  <Button variant="ghost" size="sm" onClick={() => handleView(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.receiptUrl[0])}>
+                  {applicationDetails?.applicationStatus === 'selected' && 
+                    <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
+                      {tokenFeeDetails?.verificationStatus || 'pending'}
+                    </Badge>
+                  }
+                  {tokenFeeDetails && 
+                  <Button variant="ghost" size="sm" onClick={() => handleView(tokenFeeDetails?.receiptUrl[0])}>
                     <Eye className="h-4 w-4 mr-2" />
                     View
                   </Button>}
@@ -216,25 +234,25 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
                   Upload Receipt
                 </Button>}
               </div>  */}
-              {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'pending' &&
+              {latestCohort?.tokenFeeDetails?.verificationStatus === 'pending' &&
                 <div className="flex gap-4 mt-4">
                   <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
-                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "Upload again", "flagged")}>
-                      <FlagIcon className="w-4 h-4"/> Flag Document
+                    onClick={() => setFlagOpen(true)}>
+                      <FlagIcon className="w-4 h-4"/> Flag Reciept
                   </Button>
                   <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}>
+                    onClick={() => handleVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}>
                       <CircleCheckBig className="w-4 h-4"/> Mark as Verified
                   </Button>
                 </div>
               }
-              {student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && 
+              {tokenFeeDetails?.verificationStatus === 'paid' && 
               <>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Paid: {new Date(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.updatedAt).toLocaleDateString()}
+                  Paid: {new Date(tokenFeeDetails?.updatedAt).toLocaleDateString()}
                 </div>
-                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.receiptUrl[0])}>
+                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receiptUrl[0])}>
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
                 </Button>
@@ -370,10 +388,10 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
               ))}
               {sch?.scholarshipDetails?.length > 1 && (
                 <Button
-                  variant="outline" className="w-full"
+                  variant="ghost" className="w-full underline"
                   onClick={() => setShowAllSemesters(!showAllSemesters)}
                 >
-                  {showAllSemesters ? "Show Less" : "Show More"}
+                  {showAllSemesters ? "View Less" : "View More"}
                 </Button>
               )}
             </div>
@@ -423,6 +441,32 @@ export function PaymentInformationTab({ student }: PaymentInformationTabProps) {
           ) : (
             <p className="text-center text-muted-foreground">No receipt found.</p>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={flagOpen} onOpenChange={setFlagOpen}>
+        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+        <div className="grid gap-3">
+          <div className="flex gap-2 text-2xl items-center justify-start text-destructive">
+            <FlagIcon className="w-6 h-6"/> Flag Reciept
+          </div>
+          <div className="relative bg-[#64748B33] rounded-xl border border-[#2C2C2C] w-full h-[220px]">
+          {imageUrl ? 
+            <img src={imageUrl} alt="Receipt" className="mx-auto h-full object-contain" /> : 
+            <p className="text-center text-muted-foreground">No receipt found.</p>
+          }
+          </div>
+          <div className="space-y-4 ">
+            <div className="mt-2 space-y-2">
+              <label className="text-lg pl-3">Provide Reasons</label>
+              <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+            </div>
+            <div className="flex gap-2" >
+              <Button variant="outline" className="flex-1" onClick={() => setFlagOpen(false)}>Cancel</Button>
+              <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" disabled={!reason.trim()}
+                onClick={() => handleVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
+            </div>
+          </div>
+        </div>
         </DialogContent>
       </Dialog>
     </div>

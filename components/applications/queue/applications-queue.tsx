@@ -46,7 +46,7 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              student?.applicationDetails !== undefined
+              ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -92,18 +92,18 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
       }
       const matchedCohort = cohorts.find((cohort) => cohort.cohortId === selectedCohort);
       setCurrentCohort(matchedCohort || null);
-      return app.cohort?.cohortId === selectedCohort;
+      return app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId?.cohortId === selectedCohort;
     });
 
     setApplied(
       applications.filter(
-        (student: any) => student?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );
     
     setIntCleared(
       applications.filter(
-        (student: any) => student?.applicationDetails?.applicationStatus === 'selected' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === 'selected' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );
 
@@ -134,7 +134,7 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
     // b) Status filter
     const filteredByStatus = filteredBySearch.filter((app: any) => {
       if (selectedStatus !== "all-status") {
-        const status = app.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
+        const status = app?.appliedCohorts?.[app?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
         return status === selectedStatus;
       }
       return true;
@@ -145,16 +145,16 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
     switch (sortBy) {
       case "newest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
           return dateB - dateA; // newest first
         });
         break;
 
       case "oldest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
           return dateA - dateB; // oldest first
         });
         break;
@@ -260,6 +260,7 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
             onApplicationSelect={(application) => setSelectedApplication(application)}
             selectedIds={selectedApplicationIds}
             onSelectedIdsChange={setSelectedApplicationIds}
+            onApplicationUpdate={handleApplicationUpdate} 
           />
         </div>
         <div className="lg:col-span-1">

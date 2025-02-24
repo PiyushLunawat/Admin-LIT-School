@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LitmusTestList } from "./litmus-test-list";
 import { LitmusTestFilters } from "./litmus-test-filters";
 import { LitmusTestDetails } from "./litmus-test-details";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
+import { getStudents } from "@/app/api/student";
 
 interface LitmusTabProps {
   cohortId: string;
@@ -15,24 +16,138 @@ interface LitmusTabProps {
 }
 
 export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
+  const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<any>([]);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<any>(null);
   const [selectedSubmissionIds, setSelectedSubmissionIds] = useState<string[]>([]);
-  const [application, setApplication] = useState<any>(null);  
-  const [refreshKey, setRefreshKey] = useState(0); 
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState<string>(""); // added for search
+  const [selectedStatus, setSelectedStatus] = useState<string>("all-status");
+  const [sortBy, setSortBy] = useState<string>("newest");
+    
+    const [refreshKey, setRefreshKey] = useState(0); 
+
+  useEffect(() => {
+        async function fetchStudents() {
+          try {
+            const response = await getStudents();
+            const mappedStudents = response.data.filter((student: any) => (
+              ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
+              student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?._id == cohortId
+            ));
+                        
+            setApplications(mappedStudents);
+            // setInitialApplications(mappedStudents);
+          } catch (error) {
+            console.error("Error fetching students:", error);
+          } finally {
+            setLoading(false);
+          }
+        }
+        fetchStudents();
+      }, [refreshKey]);
+    
+      const filteredAndSortedApplications = useMemo(() => {
+             
+        const filteredApplications = applications?.filter((app: any) => {
+          if (!selectedDateRange) return true;
+          const appDate = new Date(app.updatedAt);
+          const { from, to } = selectedDateRange;
+          return (!from || appDate >= from) && (!to || appDate <= to);
+        });
+        // 1) Filter
+    
+        filteredApplications?.sort((a: any, b: any) => {
+          const dateA = new Date(a?.updatedAt);
+          const dateB = new Date(b?.updatedAt);
+      
+          if (dateA > dateB) return -1;
+          if (dateA < dateB) return 1;
+      
+          const monthA = dateA.getMonth();
+          const monthB = dateB.getMonth();
+      
+          if (monthA > monthB) return -1;
+          if (monthA < monthB) return 1;
+      
+          const yearA = dateA.getFullYear(); 
+          const yearB = dateB.getFullYear(); 
+      
+          if (yearA > yearB) return -1; 
+          if (yearA < yearB) return 1; 
+      
+          return 0;
+        });
+      
+        let filtered = filteredApplications;
+    
+        // a) Search filter by applicant name
+        if (searchQuery.trim()) {
+          const lowerSearch = searchQuery.toLowerCase();
+          filtered = filtered?.filter((app: any) => {
+            const name = `${app.firstName ?? ""} ${app.lastName ?? ""}`.toLowerCase();
+            return name.includes(lowerSearch);
+          });
+        }
+    
+        // b) Status filter
+        if (selectedStatus !== "all-status") {
+          filtered = filtered?.filter((app: any) => {
+            const status = app?.appliedCohorts[app.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
+            return status === selectedStatus;
+          });
+        }
+    
+        // 2) Sort
+        switch (sortBy) {
+          case "newest":
+            filtered.sort((a: any, b: any) => {
+              const dateA = new Date(
+                a?.appliedCohorts[a.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+              ).getTime();
+              const dateB = new Date(
+                b?.appliedCohorts[b.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+              ).getTime();
+              return dateB - dateA; // newest first
+            });
+            break;
+    
+          case "oldest":
+            filtered.sort((a: any, b: any) => {
+              const dateA = new Date(
+                a?.appliedCohorts[a.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+              ).getTime();
+              const dateB = new Date(
+                b?.appliedCohorts[b.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+              ).getTime();
+              return dateA - dateB; // oldest first
+            });
+            break;
+    
+          case "name-asc":
+            filtered.sort((a: any, b: any) => {
+              const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
+              const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
+              return nameA.localeCompare(nameB);
+            });
+            break;
+    
+          case "name-desc":
+            filtered.sort((a: any, b: any) => {
+              const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
+              const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
+              return nameB.localeCompare(nameA);
+            });
+            break;
+        }
+    
+        return filtered;
+      }, [applications, searchQuery, selectedStatus, sortBy, dateRange]);
 
   const handleApplicationUpdate = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
   };
-
-  useEffect(() => {
-    if (application) {
-      console.log("Fetched application:", application);
-    }
-  }, [application]);
 
   const handleBulkExport = () => {
     console.log("Exporting data for:", selectedSubmissionIds);
@@ -53,8 +168,8 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
       </div>
 
       <LitmusTestFilters
-        searchTerm={searchTerm}
-        onSearchTermChange={setSearchTerm}
+        searchTerm={searchQuery}
+        onSearchTermChange={setSearchQuery}
         selectedStatus={selectedStatus}
         onSelectedStatusChange={setSelectedStatus}
         sortBy={sortBy}
@@ -64,16 +179,11 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <LitmusTestList
-            cohortId={cohortId}
-            key={refreshKey} 
+            applications={filteredAndSortedApplications}
             onSubmissionSelect={(id) => {setSelectedSubmissionId(id);}}
-            selectedDateRange={selectedDateRange}
             selectedIds={selectedSubmissionIds}
             onSelectedIdsChange={setSelectedSubmissionIds}
-            onApplicationUpdate={handleApplicationUpdate} 
-            searchTerm={searchTerm}
-            selectedStatus={selectedStatus}
-            sortBy={sortBy}
+            onApplicationUpdate={handleApplicationUpdate}
           />
         </div>
         <div className="lg:col-span-1">

@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/popover"
 import { Dialog, DialogTrigger, DialogContent,  } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import SubmissionView from "./submission-view";
+import SubmissionView from "./application-dialog/submission-view";
 import ApplicationFeedback from "./application-dialog/application-feedback";
 import { getCurrentStudents } from "@/app/api/student";
 import { log } from "console";
@@ -46,12 +46,12 @@ import { Card } from "@/components/ui/card";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 interface ApplicationDetailsProps {
-  applicationId: any;
+  application: any;
   onClose: () => void;
   onApplicationUpdate: () => void;
 }
 
-export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate  }: ApplicationDetailsProps) {
+export function ApplicationDetails({ application, onClose, onApplicationUpdate  }: ApplicationDetailsProps) {
 
   const [open, setOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
@@ -61,9 +61,11 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [interviewOpen, setInterviewOpen] = useState(false);
   const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
-  const [application, setApplication] = useState<any>(null);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
-  const [status, setStatus] = useState(application?.applicationDetails?.applicationStatus || "under review");
+  const [status, setStatus] = useState(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus || "--");
+
+  const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+  const applicationDetail = latestCohort?.applicationDetails;
  
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -92,35 +94,27 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
   };
 
   useEffect(() => {
-    fetchStudent();
-  }, [applicationId]);
-
-  async function fetchStudent() {
-    try {
-      const student = await getCurrentStudents(applicationId?._id);
-      setApplication(student.data);
-      const currentStatus = student.data?.applicationDetails?.applicationStatus;
-
-      
-      
-      if(['Interview Scheduled', 'interview cancelled', 'concluded', 'waitlist', 'selected', 'not qualified'].includes(student.data?.applicationDetails?.applicationStatus))
-        setInterview(true)
-      else setInterview(false)
-      
-      setStatus(student.data?.applicationDetails?.applicationStatus);
-      if (currentStatus === "Interview Scheduled") {
-        checkInterviewStatus(student.data?.applicationDetails?.applicationTestInterviews);
-      }
-    } catch (error) {
-      console.error("Failed to fetch student data:", error);
+    if (!applicationDetail) return;
+  
+    const currentStatus = applicationDetail?.applicationStatus;
+  
+    if ( ["Interview Scheduled", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(currentStatus) ) {
+      setInterview(true);
+    } else {
+      setInterview(false);
     }
-  }
+    
+    setStatus(currentStatus);
+    if (currentStatus === "Interview Scheduled") {
+      checkInterviewStatus(applicationDetail?.applicationTestInterviews);
+    }
+  }, [application]);
 
   function checkInterviewStatus(interviews: any) {
     if (!interviews || interviews.length === 0) return;
 
     const lastInterview = interviews[interviews.length - 1];
-    const endTime = lastInterview?.endTime; // Assume endTime is a string like "3:00 PM"
+    const endTime = lastInterview?.endTime;
     const currentTime = new Date();
 
     if (endTime) {
@@ -128,7 +122,6 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
       console.log("timee", (endDate < currentTime), endDate, currentTime)
       if (endDate < currentTime) {
         setStatus("Interview Concluded");
-        console.log("Interview Concluded")
       }
     }
   }
@@ -146,7 +139,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
     }
 
     const endTimeDate = new Date(currentDate);
-    endTimeDate.setHours(hoursInt, parseInt(minutes, 10), 0, 0); // Set the time on the current date
+    endTimeDate.setHours(hoursInt, parseInt(minutes, 10), 0, 0); 
 
     return endTimeDate;
   }
@@ -172,12 +165,9 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
   };
 
   const handleStatusUpdate = (newStatus: string) => {
-    // Update application status locally and reload application data
     setStatus(newStatus);
     onApplicationUpdate();
-    fetchStudent();
   };
-
 
   return (
     <div className="h-full flex flex-col">
@@ -201,70 +191,69 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               <Badge className="capitalize" variant={getStatusColor(status || "")}>{status}</Badge>
             </div>
             {interview ? 
-            <div className="space-y-3">  
-            <div className="space-y-1">
-              {application?.applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
-                  <div key={index} className="flex justify-between text-muted-foreground text-sm">
-                    <div className="flex justify-center gap-3 items-center">
-                      <div className="flex gap-1 items-center">
-                        <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+              <div className="space-y-3">  
+                <div className="space-y-1">
+                  {applicationDetail?.applicationTestInterviews.map((interview: any, index: any) => (
+                    <div key={index} className="flex justify-between text-muted-foreground text-sm">
+                      <div className="flex justify-center gap-3 items-center">
+                        <div className="flex gap-1 items-center">
+                          <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+                        </div>
+                        <div className="flex gap-1 items-center">
+                          <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
+                        </div>
                       </div>
-                      <div className="flex gap-1 items-center">
-                        <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
-                      </div>
+                      {status === 'Interview Concluded' ?
+                        <p className="capitalize">Int. Time Elapsed</p> :
+                        <p className="capitalize">Interview {interview?.meetingStatus}</p>
+                      }
                     </div>
-                    {status === 'Interview Concluded' ?
-                      <p className="capitalize">Int. Time Elapsed</p> :
-                      <p className="capitalize">Interview {interview?.meetingStatus}</p>
+                  ))}
+                </div>
+                <Select
+                disabled={['Interview Scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
+                value={status}
+                onValueChange={handleInterviewStatusChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {!['not qualified', 'waitlist', 'selected'].includes(status) &&
+                      <SelectItem className="capitalize" value={status}>
+                        <span className="capitalize">{status}</span>
+                      </SelectItem>
                     }
-                  </div>
-              ))}
-              </div>
-              <Select
-               disabled={['Interview Scheduled','interview cancelled', 'not qualified', 'selected'].includes(application?.applicationDetails?.applicationStatus)}
-               value={status}
-               onValueChange={handleInterviewStatusChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {!['not qualified', 'waitlist', 'selected'].includes(status) &&
-                    <SelectItem className="capitalize" value={status}>
-                      <span className="capitalize">{status}</span>
-                    </SelectItem>
-                  }
-                  <SelectItem value="waitlist">Waitlist</SelectItem>
-                  <SelectItem value="selected">Accepted</SelectItem>
-                  <SelectItem value="not qualified">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-              {!['selected'].includes(application?.applicationDetails?.applicationStatus) &&
-              <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
-                  <FileSignature className="w-4 h-4"/>Interview Feedback
-                </Button>
-              }
-            </div> : 
-            (
-              <Select 
-              disabled={['initiated', 'accepted', 'rejected'].includes(application?.applicationDetails?.applicationStatus)} 
-                value={application?.applicationDetails?.applicationStatus} 
-                onValueChange={handleStatusChange}>
-                <SelectTrigger>
-                  <SelectValue className="" placeholder="Change status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {!['on hold', 'accepted', 'rejected'].includes(application?.applicationDetails?.applicationStatus) &&
-                    <SelectItem className="capitalize" value={application?.applicationDetails?.applicationStatus}>
-                      <span className="capitalize">{application?.applicationDetails?.applicationStatus}</span>
-                    </SelectItem>
-                  }
-                  <SelectItem value="on hold">Put On Hold</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            )
-          }
+                    <SelectItem value="waitlist">Waitlist</SelectItem>
+                    <SelectItem value="selected">Selected</SelectItem>
+                    <SelectItem value="not qualified">Not Qualified</SelectItem>
+                  </SelectContent>
+                </Select>
+                {!['selected', 'not qualified'].includes(applicationDetail?.applicationStatus) &&
+                  <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
+                    <FileSignature className="w-4 h-4"/>Interview Feedback
+                  </Button>
+                }
+              </div> : 
+              (
+                <Select disabled={['initiated', 'accepted', 'rejected', 'on hold'].includes(applicationDetail?.applicationStatus)} 
+                  value={applicationDetail?.applicationStatus} 
+                  onValueChange={handleStatusChange}>
+                  <SelectTrigger>
+                    <SelectValue className="" placeholder="Change status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {!['on hold', 'accepted', 'rejected'].includes(applicationDetail?.applicationStatus) &&
+                      <SelectItem className="capitalize" value={applicationDetail?.applicationStatus}>
+                        <span className="capitalize">{applicationDetail?.applicationStatus}</span>
+                      </SelectItem>
+                    }
+                    <SelectItem value="on hold">Put On Hold</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              )
+            }
           </div>
 
           <Separator />
@@ -281,9 +270,7 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2"/>
                 Send WhatsApp
               </Button> */}
-              <Button variant="outline" className="justify-start" 
-              // onClick={() => setInterviewOpen(true)}
-              >
+              <Button variant="outline" className="justify-start" >
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
@@ -294,33 +281,33 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
             </div>
           </div>
 
-          {application?.applicationDetails?.applicationTestInterviews[0]?.feedback.length > 1 &&
+          {applicationDetail?.applicationTestInterviews?.[0]?.feedback.length > 0 &&
           <>
-          <Separator />
-          
-          <div className="space-y-2">
-          <h5 className="font-medium ">Interview Feedback</h5>
-          {application?.applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
-            interview?.feedback[interview?.feedback.length - 1] && 
-            <Card key={index} className="p-4 space-y-2">
-                <h5 className="font-medium text-base text-muted-foreground">Feedback:</h5>
-                {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
-                  <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
-                    <li className="text-sm" key={i}>
-                      {item}
-                    </li>
-                  </ul>
-                ))}
-              <div className="flex justify-between items-center">
-                <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
-                <div className="font-medium text-sm text-muted-foreground">{new Date(interview?.feedback[interview?.feedback.length - 1]?.date).toLocaleDateString()}</div>
-              </div>
-            </Card>
-          ))}
-          </div>
+            <Separator />
+            
+            <div className="space-y-2">
+              <h5 className="font-medium ">Interview Feedback</h5>
+              {applicationDetail?.applicationTestInterviews.map((interview: any, index: any) => (
+                interview?.feedback[interview?.feedback.length - 1] && 
+                <Card key={index} className="p-4 space-y-2">
+                    <h5 className="font-medium text-base text-muted-foreground">Feedback:</h5>
+                    {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
+                      <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
+                        <li className="text-sm" key={i}>
+                          {item}
+                        </li>
+                      </ul>
+                    ))}
+                  <div className="flex justify-between items-center">
+                    <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
+                    <div className="font-medium text-sm text-muted-foreground">{new Date(interview?.feedback[interview?.feedback.length - 1]?.date).toLocaleDateString()}</div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </>}
-          <Separator />
 
+          <Separator />
 
           {/* Application Tasks */}
           <div className="space-y-4">
@@ -331,12 +318,12 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                 <EyeIcon className="w-4 h-4 text-white"/> View
               </Button>}
             </div>
-            {(!interview && application?.applicationDetails?.applicationStatus==='under review' ) && 
+            {(!interview && applicationDetail?.applicationStatus==='under review' ) && 
               <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setFeedbackOpen(true);}}>
                 <FileSignature className="w-4 h-4"/>Review Submission
               </Button>
             }
-            {application?.cohort?.applicationFormDetail?.[0]?.task.map((task: any, index: any) => (
+            {latestCohort?.cohortId?.applicationFormDetail?.[0]?.task.map((task: any, index: any) => (
               <div key={index} className="border rounded-lg p-4 space-y-2">
                 <div className="">
                   <h5 className="font-medium text-[#00A3FF]">{task.title}</h5>
@@ -347,10 +334,10 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
                       .join(", ")}
                   </p>
                 </div>
-                {application?.applicationDetails?.applicationTasks[application?.applicationDetails?.applicationTestInterviews.length - 1]?.applicationTaskDetail?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 &&
+                {applicationDetail?.applicationTasks[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 &&
                   <div className="">
                     <h5 className="font-medium text-muted-foreground">Feedback</h5>
-                    {application?.applicationDetails?.applicationTasks[application?.applicationDetails?.applicationTestInterviews.length - 1]?.applicationTaskDetail?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
+                    {applicationDetail?.applicationTasks[0]?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
                       <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                         <li className="text-sm" key={i}>
                           {item}
@@ -362,24 +349,25 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               </div>
             ))} 
               
-              {application?.applicationDetails?.applicationTasks.length > 1 && 
+            {(status === 'on hold' || applicationDetail?.applicationTasks[0]?.applicationTasks[0]?.overallFeedback.length > 1) && 
               <Card className="p-4 space-y-2">
                 <h5 className="font-medium ">Application On Hold</h5>
-                {application?.applicationDetails?.applicationTasks.map((feedback: any, index: any) => (
-                  <div key={index} className="">
-                    <h5 className="font-medium text-base text-muted-foreground">Reason:</h5>
-                    {feedback?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.feedback.map((item: any, i: any) => (
-                      <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
-                        <li className="text-sm" key={i}>
-                          {item}
-                        </li>
-                      </ul>
-                    ))}
-                    <div className="flex justify-between items-center mt-2">
-                      <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
-                      <div className="font-medium text-sm text-muted-foreground">{new Date(feedback?.applicationTaskDetail?.applicationTasks[0]?.overallFeedback[0]?.timestamp).toLocaleDateString()}</div>
+                {[...(applicationDetail?.applicationTasks[0]?.applicationTasks[0]?.overallFeedback || [])].reverse().map((feedback: any, index: any) => (
+                  feedback?.feedback.length > 0 &&
+                    <div key={index} className="">
+                      <h5 className="font-medium text-base text-muted-foreground">Reason:</h5>
+                      {feedback?.feedback.map((item: any, i: any) => (
+                        <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
+                          <li className="text-sm" key={i}>
+                            {item}
+                          </li>
+                        </ul>
+                      ))}
+                      <div className="flex justify-between items-center mt-2">
+                        <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
+                        <div className="font-medium text-sm text-muted-foreground">{new Date(feedback?.timestamp).toLocaleDateString()}</div>
+                      </div>
                     </div>
-                  </div>
                 ))}
               </Card>
             }
@@ -391,35 +379,11 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
        <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">
           <ApplicationFeedback
-            name={application?.firstName}
-            email={application?.email}
-            phone={application?.mobileNumber}
-            tasks={application?._id}
+            application={application}
             initialStatus={status}
-            ques={application?.cohort?.applicationFormDetail?.[0]?.task} 
-            submission={application?.applicationDetails?.applicationTasks[application?.applicationDetails?.applicationTasks.length - 1]?.applicationTaskDetail?.applicationTasks[0]}
+            ques={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} 
+            submission={applicationDetail?.applicationTasks[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}
             onClose={() => setFeedbackOpen(false)}
-            onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
-        <DialogContent className="max-w-2xl">
-          <SchedulePresentation student={application} interviewr={['interviewer']}/>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={interviewFeedbackOpen} onOpenChange={setInterviewFeedbackOpen}>
-        <DialogContent className="max-w-4xl py-4 px-6">
-          <InterviewFeedback
-            name={application?.firstName}
-            email={application?.email}
-            phone={application?.mobileNumber}
-            applicationId={application?.applicationDetails?._id}
-            initialStatus={status}
-            interview={application?.applicationDetails?.applicationTestInterviews?.[application?.applicationDetails?.applicationTestInterviews.length - 1]}
-            onClose={() => setInterviewFeedbackOpen(false)}
             onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />
         </DialogContent>
@@ -437,7 +401,28 @@ export function ApplicationDetails({ applicationId, onClose, onApplicationUpdate
               </div>
             </div>
           </div>
-          <SubmissionView tasks={application?.cohort?.applicationFormDetail?.[0]?.task} submission={application?.applicationDetails?.applicationTasks[application?.applicationDetails?.applicationTasks.length - 1]?.applicationTaskDetail?.applicationTasks[0]}/>
+          <SubmissionView tasks={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} submission={applicationDetail?.applicationTasks[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}/>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={interviewFeedbackOpen} onOpenChange={setInterviewFeedbackOpen}>
+        <DialogContent className="max-w-4xl py-4 px-6">
+          <InterviewFeedback
+            name={application?.firstName}
+            email={application?.email}
+            phone={application?.mobileNumber}
+            applicationId={applicationDetail?._id}
+            initialStatus={status}
+            interview={applicationDetail?.applicationTestInterviews?.[applicationDetail?.applicationTestInterviews.length - 1]}
+            onClose={() => setInterviewFeedbackOpen(false)}
+            onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+        <DialogContent className="max-w-2xl">
+          <SchedulePresentation student={application} interviewr={['interviewer']}/>
         </DialogContent>
       </Dialog>
 

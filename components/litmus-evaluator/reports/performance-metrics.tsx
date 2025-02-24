@@ -41,24 +41,24 @@ export function PerformanceMetrics({ applications }: PerformanceMetricsProps) {
       let high = 0, good = 0, average = 0, weak = 0;
 
       applications.forEach((application: any) => {
-        const litmusTest = application?.litmusTestDetails?.[0]?.litmusTaskId;
-        if (litmusTest?.status === "completed") {
+        const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+        const litmusTestDetails = latestCohort?.litmusTestDetails;
+        if (litmusTestDetails?.status === "completed") {
           evaluatedCount += 1;
           
           // Calculate Feedback Time (difference between updatedAt and createdAt)
-          const createdAt = new Date(litmusTest?.createdAt);
-          const updatedAt = new Date(litmusTest?.updatedAt);
+          const createdAt = new Date(litmusTestDetails?.createdAt);
+          const updatedAt = new Date(litmusTestDetails?.updatedAt);
           const feedbackTime = (updatedAt.getTime() - createdAt.getTime()) / 1000 / 60 / 60; // in hours
           totalFeedbackTime += feedbackTime;
 
           // Calculate Avg Performance
-          const taskScores = litmusTest?.results || [];
+          const taskScores = litmusTestDetails?.results || [];
           let totalScore = 0;
-          let maxScore = 0;
 
           taskScores.forEach((task: any) => {
             const taskScore = task?.score?.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
-            const taskMaxScore = task?.score?.reduce((acc: any, criterion: any) => acc + criterion.totalScore, 0);
+            const taskMaxScore = task?.score?.reduce((acc: any, criterion: any) => acc + Number(criterion.totalScore), 0);
             const taskPercentage = taskMaxScore ? (taskScore / taskMaxScore) * 100 : 0;
             totalScore += taskPercentage;
           });

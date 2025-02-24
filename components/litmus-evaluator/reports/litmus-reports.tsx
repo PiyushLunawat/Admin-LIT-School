@@ -27,8 +27,8 @@ export function LitmusReports() {
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              student?.litmusTestDetails[0]?.litmusTaskId !== undefined
-          )    
+              ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+          )     
         setApplications(mappedStudents);
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
@@ -50,7 +50,7 @@ export function LitmusReports() {
       }
       const matchedCohort = cohorts.find((cohort) => cohort.cohortId === selectedCohort);
       setCurrentCohort(matchedCohort || null);
-      return app.cohort?.cohortId === selectedCohort;
+      return app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId?.cohortId === selectedCohort;
     });
 
     // Filter by date range

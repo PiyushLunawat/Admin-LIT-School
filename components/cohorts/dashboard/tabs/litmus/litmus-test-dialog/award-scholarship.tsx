@@ -35,6 +35,11 @@ interface AwardScholarshipProps {
 }
 
 export function AwardScholarship({ student }: AwardScholarshipProps) {
+
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const cohortDetails = latestCohort?.cohortId;
+  const litmusTestDetails = latestCohort?.litmusTestDetails;
+
   const [sch, setSch] = useState<any>(null);
   const [selectedSch, setSelectedSch] = useState<any>(null);
 
@@ -54,18 +59,16 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
   };
   
   useEffect(() => {
-    if (
-      student?.cohort?.feeStructureDetails &&
-      student?.litmusTestDetails?.[0]?.litmusTaskId?.scholarshipDetail
-    ) {
-      const scholarship = student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails
-      setSch(scholarship);
-      setSelectedSch(scholarship)
-    }
-  }, [student]);
+    const schSlab = latestCohort?.cohortId?.feeStructureDetails.find(
+      (slab: any) => slab._id === litmusTestDetails?.scholarshipDetail
+    );
+
+    setSch(schSlab);
+    setSelectedSch(schSlab);
+}, [litmusTestDetails?.scholarshipDetail]);
 
   const handleSelect = (slabName: string) => {
-    const matchedScholarship = student.cohort.feeStructureDetails.find(
+    const matchedScholarship = cohortDetails.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === slabName
     );
     if (matchedScholarship) {
@@ -74,10 +77,10 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
   };
 
   const handleScholarship = async () => {
-console.log("award",student._id, selectedSch._id);
+console.log("award",latestCohort._id, selectedSch._id);
 
     try {
-      const result = await updateScholarship(student._id, selectedSch._id);
+      const result = await updateScholarship(latestCohort._id, selectedSch._id);
       console.log("Scholarship updated successfully:", result);
     } catch (error) {
       console.error("Failed to update scholarship:", error);
@@ -118,7 +121,7 @@ console.log("award",student._id, selectedSch._id);
                 <div className=" space-y-2 h-full">
                     <h4 className="font-medium">Select Scholarship Slab</h4>
                     <div className="w-full grid grid-cols sm:grid-cols-2 gap-3">
-                        {student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.map((slab: any, index: number) => ( 
+                        {cohortDetails?.litmusTestDetail?.[0]?.scholarshipSlabs.map((slab: any, index: number) => ( 
                             <div key={index} className={`flex flex-col p-4 bg-[#09090B] ${selectedSch?.scholarshipName === slab.name ? getBorderColor(index) : ''} border rounded-xl text-white space-y-6 w-full`}
                               onClick={() => handleSelect(slab.name)}>
                                 <div className="flex flex-col gap-2">
@@ -148,7 +151,7 @@ console.log("award",student._id, selectedSch._id);
                     <div className="flex space-x-1 bg-[#262626] p-2 rounded-lg justify-center mx-auto">
                     {[...Array(5)].map((_, index) => (
                       <span key={index} className={`text-2xl transition-colors ${
-                        index < student?.litmusTestDetails[0]?.litmusTaskId?.performanceRating ? 'text-[#F8E000]' : 'text-[#A3A3A366]'}`}>
+                        index < litmusTestDetails?.performanceRating ? 'text-[#F8E000]' : 'text-[#A3A3A366]'}`}>
                         ★
                       </span>
                     ))}
@@ -160,7 +163,7 @@ console.log("award",student._id, selectedSch._id);
                 {/* Tasks Evaluation */}
                 <div className="space-y-4">
                   <Card className="max-h-[calc(100vh-23rem)] h-full overflow-y-auto">
-                    {student?.cohort?.litmusTestDetail[0]?.litmusTasks.map((task: any, taskIndex: any) => (
+                    {cohortDetails?.litmusTestDetail[0]?.litmusTasks.map((task: any, taskIndex: any) => (
                     <div key={taskIndex} className="border-b mx-2 py-4 px-2 space-y-2">
                         <div className="grid">
                         <h5 className="text-[#00A3FF] font-medium">{task.title}</h5>
@@ -175,7 +178,7 @@ console.log("award",student._id, selectedSch._id);
                             <div key={criterionIndex} className="space-y-1">
                             <div className="flex justify-between">
                                 <Label>{criterion?.name}</Label>
-                                <span className="text-sm">{student?.litmusTestDetails[0]?.litmusTaskId?.results[taskIndex]?.score[criterionIndex]?.score || "--"}/{criterion?.points}</span>
+                                <span className="text-sm">{litmusTestDetails?.results[taskIndex]?.score[criterionIndex]?.score || "--"}/{criterion?.points}</span>
                             </div>
                             </div>
                         ))}
@@ -184,8 +187,8 @@ console.log("award",student._id, selectedSch._id);
                             <Label className="font-semibold">Total</Label>
                             <div className="">
                                 {(() => {
-                                const totalScore = student?.litmusTestDetails[0]?.litmusTaskId?.results[taskIndex]?.score.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
-                                const maxScore = task?.judgmentCriteria.reduce((acc: any, criterion: any) => acc + criterion.points, 0);
+                                const totalScore = litmusTestDetails?.results[taskIndex]?.score.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
+                                const maxScore = task?.judgmentCriteria.reduce((acc: any, criterion: any) => acc + Number(criterion.points), 0);
                                 const percentage = totalScore ? ((totalScore / maxScore) * 100).toFixed(0) : '--';
                                 return (
                                     <>
@@ -201,7 +204,7 @@ console.log("award",student._id, selectedSch._id);
                     ))}
                     <div className="mx-2 py-4 px-2 space-y-2">               
                     <p className="text-sm text-muted-foreground">Feedback:</p>
-                    {student?.litmusTestDetails[0]?.litmusTaskId?.overAllfeedback[0]?.feedback.map((feedback: any, feedbackIndex: any) => (
+                    {litmusTestDetails?.overAllfeedback[0]?.feedback.map((feedback: any, feedbackIndex: any) => (
                         <div key={feedbackIndex} className="space-y-1">
                         <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
                         {feedback?.data.map((criterion: any, criterionIndex: any) => (

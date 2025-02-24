@@ -25,6 +25,7 @@ interface ApplicationsListProps {
   onApplicationSelect: (id: any) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
+  onApplicationUpdate: () => void;
 }
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
@@ -34,6 +35,7 @@ export function ApplicationsList({
   onApplicationSelect,
   selectedIds,
   onSelectedIdsChange,
+  onApplicationUpdate,
 }: ApplicationsListProps) {
 
   const [open, setOpen] = useState(false);
@@ -61,6 +63,10 @@ export function ApplicationsList({
     setOpen(true); // Open the dialog
   };
 
+  const handleStatusUpdate = () => {
+    onApplicationUpdate();
+  };
+
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "initiated":
@@ -77,8 +83,8 @@ export function ApplicationsList({
       case "waitlist":
         return "onhold";
       case "interview scheduled":
-        case "interview rescheduled":
         return "default";
+      case "interview rescheduled":
       case "interview concluded":
         return "lemon";
       default:
@@ -116,7 +122,11 @@ export function ApplicationsList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {applications.map((application: any) => (
+          {applications.map((application: any) => {
+            const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+            const applicationDetails = latestCohort?.applicationDetails;
+           
+           return (
             <TableRow 
               key={application._id}
               className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
@@ -142,20 +152,20 @@ export function ApplicationsList({
                   </Tooltip>
                 </TooltipProvider>
                 <div className="w-fit px-1.5 py-0.5 text-xs font-normal bg-[#FFFFFF]/10 rounded-sm">
-                  {application?.cohort?.cohortId}
+                  {latestCohort?.cohortId?.cohortId}
                 </div>
               </TableCell>
               <TableCell>
-                {new Date(application?.applicationDetails?.updatedAt).toLocaleDateString() || "--"}
+                {new Date(applicationDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
-                {application?.applicationDetails?.applicationStatus ?
-                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(application?.applicationDetails?.applicationStatus) ?
-                  'accepted' : application?.applicationDetails?.applicationStatus || "--")}>
-                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(application?.applicationDetails?.applicationStatus) ?
-                  'accepted' : application?.applicationDetails?.applicationStatus }
+                {applicationDetails?.applicationStatus ?
+                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                  'accepted' : applicationDetails?.applicationStatus || "--")}>
+                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                  'accepted' : applicationDetails?.applicationStatus }
                 </Badge> : "--"}
-                {(application?.applicationDetails?.applicationStatus === 'under review' && application?.applicationDetails?.applicationTasks?.length > 1) &&
+                {(applicationDetails?.applicationStatus === 'under review' && applicationDetails?.applicationTasks?.length > 1) &&
                 <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
                   <CheckCircle className="w-3 h-3"/> App. Revised
                 </Badge>}
@@ -173,7 +183,7 @@ export function ApplicationsList({
                 </Button>
               </TableCell>
             </TableRow>
-          ))}
+          )})}
         </TableBody>
       </Table>
       <Dialog open={open} onOpenChange={setOpen}>

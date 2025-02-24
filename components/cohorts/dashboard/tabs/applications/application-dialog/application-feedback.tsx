@@ -26,10 +26,7 @@ interface Task {
 }
 
 interface ApplicationFeedbackProps {
-  name: string;
-  email: string;
-  phone: string;
-  tasks: string;
+  application: any;
   initialStatus: string;
   ques: any;
   submission: any;
@@ -38,24 +35,20 @@ interface ApplicationFeedbackProps {
 }
 
 const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
-  name,
-  email,
-  phone,
-  tasks,
-  initialStatus,
-  ques,
-  submission,
-  onClose,
-  onUpdateStatus,
+  application, initialStatus, ques, submission, onClose, onUpdateStatus,
 }) => {
+  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string>(initialStatus);
-  const [feedbacks, setFeedbacks] = useState<{
-    [taskId: string]: string[];
-  }>({});
+  const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[]; }>({});
   const [reason, setReason] = useState<string[]>([""]);
   const [taskList, setTaskList] = useState<Task[]>([]);
   const [feedbackId, setFeedbackId] = useState("");
   const [reasonItemValue, setReasonItemValue] = useState("• ");
+
+  const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+  const applicationId = latestCohort?.applicationDetails?._id;
+  const applicationTaskId = latestCohort?.applicationDetails?.applicationTasks?.[latestCohort?.applicationDetails?.applicationTasks.length - 1]?._id;
+  const subTaskId = latestCohort?.applicationDetails?.applicationTasks?.[latestCohort?.applicationDetails?.applicationTasks.length - 1]?.applicationTasks[0]?._id;
 
   useEffect(() => {
     if (taskList && taskList.length > 0) {
@@ -67,13 +60,11 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
       setFeedbacks(initialFeedbacks);
     }
   }, [taskList]);
-  
-
 
   useEffect(() => {
     async function fetchApplicationDetails() {
       try {
-        const applicationDetails = await getStudentApplication(tasks);
+        const applicationDetails = await getStudentApplication(application?._id);
         console.log("Application Details:", applicationDetails.data.applicationTasks[0]?._id);
         setTaskList(applicationDetails.data.applicationTasks[0]?.tasks || []);
         setFeedbackId(applicationDetails.data?.applicationTasks[0]?._id)
@@ -82,7 +73,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
       }
     }
     fetchApplicationDetails();
-  }, [tasks]);
+  }, [application]);
 
   const handleStatusChange = (value: string) => {
     setStatus(value);
@@ -180,17 +171,15 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   };
 
   async function handleApplicationUpdate(
-    applicationId: string,
     newStatus: string
   ) {
     try {
+      setLoading(true)
       if (newStatus === "under review") {
-
         const res = await updateStudentApplicationStatus(
           applicationId,
           newStatus,
         );
-
         console.log(
           `Feedback for application ${applicationId} submitted successfully`,
           res
@@ -205,7 +194,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         .filter((r) => r.trim() !== ""); // Filter out empty lines
 
         console.log("Sending feedback:", {
-          feedbackId,
+          applicationTaskId,
           newStatus,
           feedbackData: validReasons,
         });
@@ -217,7 +206,8 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
         const res = await updateStudentTaskFeedback(
           applicationId,
-          feedbackId,
+          applicationTaskId,
+          subTaskId,
           newStatus,
           feedback,
         );
@@ -249,7 +239,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
         console.log("Accepted feedback:", {
           applicationId,
-          feedbackId,
+          applicationTaskId,
           newStatus,
           feedbackData,
         });
@@ -257,7 +247,8 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         // Send feedback data to backend
         const res = await updateStudentTaskFeedbackAccep(
           applicationId,
-          feedbackId,
+          applicationTaskId,
+          subTaskId,
           newStatus,
           { feedbackData }
         );
@@ -267,17 +258,12 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         );
       }
 
-      // // Update application status
-      // const result = await updateStudentApplicationStatus(
-      //   applicationId,
-      //   newStatus
-      // );
-      // console.log("Application status updated successfully:", result);
-
       onUpdateStatus(newStatus, feedbacks);
       onClose();
     } catch (error) {
       console.error("Failed to update application status or feedback:", error);
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -285,9 +271,9 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
     <div className="">
       <div className="flex justify-between items-center pb-4 border-b border-gray-700 mb-4">
         <div>
-          <h3 className="text-lg font-semibold">{name}</h3>
-          <p className="text-sm text-muted-foreground">{email}</p>
-          <p className="text-sm text-muted-foreground">{phone}</p>
+          <h3 className="text-lg font-semibold">{application?.firstName+' '+application?.lastName}</h3>
+          <p className="text-sm text-muted-foreground">{application?.email}</p>
+          <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
         </div>
       </div>
 
@@ -361,8 +347,8 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                   ))}
                   {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
                     <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
-                      <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-cover rounded-t-xl' />
-                      <div className='w-full flex justify-between items-center p-3 border-t'>
+                      <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-contain rounded-t-xl' />
+                      <div className='w-full flex justify-between items-center p-3'>
                         <div className='flex items-center gap-2 text-sm truncate'>
                           <ImageIcon className="w-4 h-4" />
                           <span className='w-[220px] text-white truncate'>
@@ -383,7 +369,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                         <source src={videoItem} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
-                      <div className='w-full flex justify-between items-center p-3 border-t'>
+                      <div className='w-full flex justify-between items-center p-3'>
                         <div className='flex items-center gap-2 text-sm truncate'>
                           <VideoIcon className="w-4 h-4" />
                           <span className='w-[220px] text-white truncate'>
@@ -460,10 +446,10 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         
         <Button
           className="w-full mt-4"
-          onClick={() => handleApplicationUpdate(tasks, status)}
-          disabled={!canUpdate()}
+          onClick={() => handleApplicationUpdate(status)}
+          disabled={!canUpdate() || loading}
         >
-          Update Status
+          {loading ? 'Updating...' : 'Update Status'}
         </Button>
       </div>
     </div>

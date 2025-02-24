@@ -16,11 +16,9 @@ export function LitmusHome() {
     async function fetchStudents() {
       try {
         const response = await getStudents();
-        const mappedStudents =
-          response.data.filter(
-            (student: any) =>
-              student?.litmusTestDetails[0]?.litmusTaskId !== undefined
-          )    
+        const mappedStudents = response.data.filter((student: any) => (
+          ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+        ));
           
         setApplications(mappedStudents);
       } catch (error) {

@@ -63,7 +63,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       // Under Review Count
       const underReview = applications.filter(
         (application) =>
-          application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+          application?.appliedCohorts?.[0]?.applicationDetails?.applicationStatus?.toLowerCase() ===
           "under review"
       );
       setUnderReviewCount(underReview.length);
