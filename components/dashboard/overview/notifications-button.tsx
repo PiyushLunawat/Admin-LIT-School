@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-const socket = io("http://localhost:4000");
+const socket = io(`${process.env.API_URL}`);
 
 interface Notification {
   id: string;
