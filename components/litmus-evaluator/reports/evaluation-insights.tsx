@@ -27,9 +27,11 @@ export function EvaluationInsights({ applications }: EvaluationInsightsProps) {
       const weakPerformanceMap: any = {};  // To map skills to weak performance students
 
       applications.forEach((application: any) => {
-        const litmusTest = application?.litmusTestDetails?.[0]?.litmusTaskId;
-        if (litmusTest?.status === "completed") {
-          const taskScores = litmusTest?.results || [];
+        const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+        const litmusTestDetails = latestCohort?.litmusTestDetails;
+
+        if (litmusTestDetails?.status === "completed") {
+          const taskScores = litmusTestDetails?.results || [];
 
           taskScores.forEach((task: any) => {
             task?.score?.forEach((criterion: any) => {

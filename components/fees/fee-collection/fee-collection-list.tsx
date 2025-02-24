@@ -314,7 +314,7 @@ export function FeeCollectionList({
                 <PersonalDetailsTab student={selectedStudentId} />
               </TabsContent>
               <TabsContent value="payment">
-                <PaymentInformationTab student={selectedStudentId} />
+                {/* <PaymentInformationTab student={selectedStudentId} /> */}
               </TabsContent>
              {/* 
               <TabsContent value="documents">

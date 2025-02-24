@@ -31,7 +31,7 @@ export function ApplicationFilters({
 }: ApplicationFiltersProps) {
   const handleClearFilters = useCallback(() => {
       onSearchTermChange("");
-      onSelectedStatusChange("all");
+      onSelectedStatusChange("all-status");
       onSortByChange("newest");
     }, [onSearchTermChange, onSelectedStatusChange, onSortByChange]);
 
@@ -53,7 +53,7 @@ export function ApplicationFilters({
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all-status">All Status</SelectItem>
             <SelectItem value="initiated">Initiated</SelectItem>
             <SelectItem value="under review">Under Review</SelectItem>
             <SelectItem value="accepted">Accepted</SelectItem>

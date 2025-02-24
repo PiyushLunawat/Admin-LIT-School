@@ -47,9 +47,9 @@ export function MetricsGrid() {
     
             // 2) Filter Out Students with No Application Details
             const validStudents = response.data.filter(
-              (student: any) => student?.applicationDetails !== undefined
+              (student: any) => 
+                ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
             );
-    
             setApplications(validStudents);
           } catch (error) {
             console.error("Error fetching students:", error);
@@ -57,7 +57,6 @@ export function MetricsGrid() {
             setLoading(false);
           }
         }
-    
         fetchAndFilterStudents();
       }, []);
 
@@ -69,7 +68,7 @@ export function MetricsGrid() {
                   // Under Review Count
                   const underReview = applications.filter(
                     (application) =>
-                      application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+                      application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
                       "under review"
                   );
                   setUnderReviewCount(underReview.length);
@@ -85,15 +84,15 @@ export function MetricsGrid() {
                   // Reviewed Count
                   const reviewed = applications.filter(
                     (application) =>
-                      ['on hold', 'accepted', 'rejected'].includes(application?.litmusTestDetails?.[0]?.litmusTaskId?.status) &&
+                      ['on hold', 'accepted', 'rejected'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.[0]?.litmusTaskId?.status) &&
                     new Date(application?.updatedAt) === new Date()
                   );
                   setReviewTodayCount(reviewed.length);
 
                   const revised = applications.filter(
                     (application) =>
-                      application?.applicationDetails?.applicationStatus?.toLowerCase() === "under review" &&
-                    application?.applicationDetails?.applicationTasks?.length > 1
+                      application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "under review" &&
+                    application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationTasks?.length > 1
                   );
                   setRevisedApplicationsCount(underReview.length);
         

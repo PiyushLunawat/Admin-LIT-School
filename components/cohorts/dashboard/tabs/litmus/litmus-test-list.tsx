@@ -26,55 +26,24 @@ import { DateRange } from "react-day-picker";
 type BadgeVariant = "destructive" | "onhold" | "lemon" | "success" | "default";
 
 interface LitmusTestListProps {
-  cohortId: string;
+  applications: any
   onSubmissionSelect: (id: any) => void;
   selectedIds: string[];
   onApplicationUpdate: () => void;
-  selectedDateRange: DateRange | undefined;
   onSelectedIdsChange: (ids: string[]) => void;
-  searchTerm: string;
-  selectedStatus: string;
-  sortBy: string;
 }
 
 export function LitmusTestList({
-  cohortId,
+  applications,
   onSubmissionSelect,
   selectedIds,
   onApplicationUpdate,
-  selectedDateRange,
   onSelectedIdsChange,
-  searchTerm,
-  selectedStatus,
-  sortBy,
 }: LitmusTestListProps) {
+
   const [open, setOpen] = useState(false);
-  const [applications, setApplications] = useState<any>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchStudents() {
-      try {
-        const response = await getStudents();
-        const mappedStudents =
-          response.data.filter(
-            (student: any) =>
-              student?.litmusTestDetails[0]?.litmusTaskId !== undefined &&
-              student.cohort?._id === cohortId
-          );
-
-        setApplications(mappedStudents);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStudents();
-  }, [cohortId]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -88,80 +57,6 @@ export function LitmusTestList({
         return "default";
     }
   };
-
-  const filteredAndSortedApplications = useMemo(() => {
-    // 1) Filter
-    const filteredApplications = applications.filter((app: any) => {
-      if (!selectedDateRange) return true;
-      const appDate = new Date(app.updatedAt);
-      const { from, to } = selectedDateRange;
-      return (!from || appDate >= from) && (!to || appDate <= to);
-    });
-    let filtered = filteredApplications;
-
-    // a) Search filter by applicant name
-    if (searchTerm.trim()) {
-      const lowerSearch = searchTerm.toLowerCase();
-      filtered = filtered.filter((app: any) => {
-        const name = `${app.firstName ?? ""} ${app.lastName ?? ""}`.toLowerCase();
-        return name.includes(lowerSearch);
-      });
-    }
-
-    // b) Status filter
-    if (selectedStatus !== "all") {
-      filtered = filtered.filter((app: any) => {
-        const status =
-          app.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() || "pending";
-        return status === selectedStatus;
-      });
-    }
-
-    // 2) Sort
-    switch (sortBy) {
-      case "newest":
-        filtered.sort((a: any, b: any) => {
-          const dateA = new Date(
-            a.litmusTestDetails[0]?.litmusTaskId?.updatedAt
-          ).getTime();
-          const dateB = new Date(
-            b.litmusTestDetails[0]?.litmusTaskId?.updatedAt
-          ).getTime();
-          return dateB - dateA; // newest first
-        });
-        break;
-
-      case "oldest":
-        filtered.sort((a: any, b: any) => {
-          const dateA = new Date(
-            a.litmusTestDetails[0]?.litmusTaskId?.updatedAt
-          ).getTime();
-          const dateB = new Date(
-            b.litmusTestDetails[0]?.litmusTaskId?.updatedAt
-          ).getTime();
-          return dateA - dateB; // oldest first
-        });
-        break;
-
-      case "name-asc":
-        filtered.sort((a: any, b: any) => {
-          const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
-          const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
-          return nameA.localeCompare(nameB);
-        });
-        break;
-
-      case "name-desc":
-        filtered.sort((a: any, b: any) => {
-          const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
-          const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
-          return nameB.localeCompare(nameA);
-        });
-        break;
-    }
-
-    return filtered;
-  }, [applications, searchTerm, selectedStatus, sortBy, selectedDateRange]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === applications.length) {
@@ -189,18 +84,19 @@ export function LitmusTestList({
   };
 
   useEffect(() => {
-    if (filteredAndSortedApplications.length > 0) {
-      const firstApplication = filteredAndSortedApplications[0];
-      setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
-      onSubmissionSelect(firstApplication); // Call the onApplicationSelect function for the first application
+    if (applications.length > 0) {
+      console.log("dd",applications);
+      
+      const firstApplication = applications[0];
+      setSelectedRowId(firstApplication._id); 
+      onSubmissionSelect(firstApplication); 
+    } else {
+      setSelectedRowId(null);
+      onSubmissionSelect(null);
     }
-  }, [filteredAndSortedApplications]);
+  }, [applications]);
 
   return (
-    loading ?
-    <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
-      <div >Loading... </div>
-    </div> :
     applications.length === 0 ?
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
       <div >All your students will appear here</div>
@@ -224,7 +120,10 @@ export function LitmusTestList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAndSortedApplications.map((application: any) => (
+          {applications.map((application: any) => {
+            const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+            const litmusTestDetails = latestCohort?.litmusTestDetails;
+            return(
             <TableRow
               key={application._id}
               className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
@@ -243,27 +142,27 @@ export function LitmusTestList({
                 {`${application?.firstName || ""} ${application?.lastName || ""}`.trim()}
               </TableCell>
               <TableCell>
-                {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.updatedAt).toLocaleDateString() || "--"}
+                {new Date(litmusTestDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
                 <Badge
                   className="capitalize"
-                  variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending")}
+                  variant={getStatusColor(litmusTestDetails?.status || "pending")}
                 >
-                  {application?.litmusTestDetails[0]?.litmusTaskId?.status || "pending"}
+                  {litmusTestDetails?.status || "pending"}
                 </Badge>
               </TableCell>
               <TableCell>
-                {application?.cohort?.collaborators
+                {latestCohort?.cohortId?.collaborators
                   ?.filter((collaborator: any) => collaborator.role === "evaluator")
                   .map((collaborator: any) => collaborator.email)
                   .join(", ") || "--"}
               </TableCell>
               <TableCell>
-                {application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate ? (
+                {litmusTestDetails?.litmusTestInterviews?.presentationDate ? (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate).toLocaleDateString() || "--"}
+                    {new Date(litmusTestDetails?.litmusTestInterviews?.presentationDate).toLocaleDateString() || "--"}
                   </div>
                 ) : (
                   "--"
@@ -283,7 +182,7 @@ export function LitmusTestList({
                 </Button>
               </TableCell>
             </TableRow>
-          ))}
+          )})}
         </TableBody>
       </Table>
 
@@ -305,7 +204,7 @@ export function LitmusTestList({
         </TabsContent>
 
         <TabsContent value="payment">
-          <PaymentInformationTab student={selectedStudentId} />
+          <PaymentInformationTab student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
         </TabsContent>
 
         <TabsContent value="documents">

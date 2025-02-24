@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CircleCheckBig, Download, Eye, FlagIcon, Upload } from "lucide-react";
-import { updateDocumentStatus } from "@/app/api/student";
+import { updateDocumentStatus, uploadStudentDocuments } from "@/app/api/student";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -26,7 +26,10 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   const [open, setOpen] = useState(false);
   const [viewDoc, setViewDoc] = useState("");
 
-  const [document, setDocument] = useState<any>(student?.personalDocsDetails);
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const personalDocsDetails = latestCohort?.personalDocsDetails; 
+
+  const [document, setDocument] = useState<any>(personalDocsDetails);
   
   const documents = [
       {
@@ -81,18 +84,25 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   
     // Upload required document (API logic to be added)
     const handleRequiredDocUpload = async (docId: string, file: File) => {
-      console.log("Uploading document:", file);
-      // Implement your API upload logic here.
-      // Example:
-      // const formData = new FormData();
-      // formData.append("studentId", studentId);
-      // formData.append("docType", docId);
-      // formData.append("document", file);
-      // const response = await uploadDocumentAPI(formData);
-      // console.log("Upload successful:", response);
-      // handleRequiredDocFileChange(docId, null);
-      // fetchStudent();
-    };
+      try {
+        console.log("Uploading document:",student._id, docId, file);
+        const formData = new FormData();
+        formData.append("studentId", student._id); 
+        formData.append("documentType", docId);
+        formData.append("docFile", file);
+    
+        const response = await uploadStudentDocuments(formData);
+        console.log("Upload successful:", response);
+    
+        // Clear the file input after successful upload
+        handleRequiredDocFileChange(docId, null);
+        
+        // Optionally, re-fetch the student document details to update the UI
+        // fetchStudent();
+      } catch (error) {
+        console.error("Error uploading document:", error);
+      }
+    };    
   
     // Handle file selection for a new document
     const handleNewDocFileChange = (file: File | null) => {
@@ -232,7 +242,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
               <CardTitle>Additional Documents</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {student?.personalDocsDetails?.adminUploadedocuments?.map((doc: any) => (
+              {personalDocsDetails?.adminUploadedocuments?.map((doc: any) => (
                 <div key={doc._id} className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -268,11 +278,11 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
           </>
           }
         </Card>
-      <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
-          <div>hello</div>
-        </DialogContent>
-      </Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+            <div>hello</div>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 }

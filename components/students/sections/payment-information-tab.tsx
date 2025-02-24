@@ -273,10 +273,10 @@ const [sch, setSch] = useState<any>();
           {/* Show More / Show Less button, only if more than 1 semester */}
           {sch?.scholarshipDetails?.length > 1 && (
             <Button
-              variant="outline" className="w-full"
+              variant="ghost" className="w-full underline"
               onClick={() => setShowAllSemesters(!showAllSemesters)}
             >
-              {showAllSemesters ? "Show Less" : "Show More"}
+              {showAllSemesters ? "View Less" : "View More"}
             </Button>
           )}
 

@@ -17,14 +17,12 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
   if (!student) {
     return <p>Student data not available.</p>;
   }
-
-  const firstNameInitial = student?.firstName?.[0] || "-";
-  const lastNameInitial = student?.lastName?.[0] || "-";
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
 
   return (
     <div>
         <div className="grid gap-3">
-          <div className="flex gap-2 text-2xl border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive">
+          <div className="flex gap-2 text-2xl items-center justify-start text-destructive">
             <UserMinus className="h-6 w-6 text-red-500" />
             Mark as Dropped
           </div>
@@ -46,8 +44,8 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
             <div className="flex justify-between items-center text-right">
               <div>
                 <p className="text-sm text-muted-foreground">Program & Cohort</p>
-                <p className="font-medium">{student?.program?.name}</p>
-                <p className="text-sm">{student?.cohort?.cohortId}</p>
+                <p className="font-medium">{latestCohort?.cohortId?.programDetail.name}</p>
+                <p className="text-sm">{latestCohort?.cohortId?.cohortId}</p>
               </div>
             </div>
           </div>

@@ -34,14 +34,16 @@ export function ReviewComponent({
   onApplicationUpdate,
 }: ReviewComponentProps) {
 
-  const litmusTestDetails = application?.litmusTestDetails[0];
+  const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+  const cohortDetails = latestCohort?.cohortId;
+  const litmusTestDetails = latestCohort?.litmusTestDetails;
   
   const [rating, setRating] = useState<number>(
-    litmusTestDetails?.litmusTaskId?.performanceRating || 0
+    litmusTestDetails?.performanceRating || 0
   );
   const [hoverRating, setHoverRating] = useState<number>(0);
   const max = 5;
-    const [sch, setSch] = useState<any>(application?.cohort?.feeStructureDetails || null);
+    const [sch, setSch] = useState<any>(cohortDetails?.feeStructureDetails || null);
 
   const handleClick = (value: number) => {
     setRating(value);
@@ -57,25 +59,25 @@ export function ReviewComponent({
     {
       title: "Strengths",
       data:
-        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
+      litmusTestDetails?.overAllfeedback[0]
           ?.feedback[0]?.data || [],
     },
     {
       title: "Weakness",
       data:
-        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
+      litmusTestDetails?.overAllfeedback[0]
           ?.feedback[1]?.data || [],
     },
     {
       title: "Opportunities",
       data:
-        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
+      litmusTestDetails?.overAllfeedback[0]
           ?.feedback[2]?.data || [],
     },
     {
       title: "Threats",
       data:
-        litmusTestDetails?.litmusTaskId?.overAllfeedback[0]
+      litmusTestDetails?.overAllfeedback[0]
           ?.feedback[3]?.data || [],
     },
   ];
@@ -153,14 +155,14 @@ export function ReviewComponent({
     }));
   };
 
-  const tasks = application?.cohort?.litmusTestDetail[0]?.litmusTasks || [];
+  const tasks = cohortDetails?.litmusTestDetail[0]?.litmusTasks || [];
 
   // For each task => array of scores for each criteria
   const [taskScores, setTaskScores] = useState<number[][]>(
     tasks.map((task: any, index: number) =>
       task.judgmentCriteria.map((criteria: any, cIndex: number) => {
         const initialScore =
-          application?.litmusTestDetails?.[0]?.litmusTaskId?.results?.[index]
+          litmusTestDetails?.results?.[index]
             ?.score?.[cIndex]?.score || 0;
         return initialScore;
       })
@@ -181,9 +183,6 @@ export function ReviewComponent({
       return newScores;
     });
   };
-
-  const studentId = application?._id;
-  const litmusTaskId = litmusTestDetails?.litmusTaskId?._id;
 
   /**
    * This function checks:
@@ -247,7 +246,7 @@ export function ReviewComponent({
     results.forEach((taskResult: any) => {
       taskResult.score.forEach((criterion: any) => {
         totalScore += criterion.score;       // the actual score
-        maxScore += criterion.totalScore;    // the possible max
+        maxScore += Number(criterion.totalScore);    // the possible max
       });
     });
 
@@ -294,7 +293,7 @@ export function ReviewComponent({
 
     const performanceRating = rating;
 
-    console.log("hello", litmusTaskId,
+    console.log("hello", litmusTestDetails?._id,
       "completed",
       results,
       feedbackData,
@@ -305,7 +304,7 @@ export function ReviewComponent({
     try {
       console.log("Submitting to updateLitmusTaskStatus...");
       const response = await updateLitmusTaskStatus(
-        litmusTaskId,
+        litmusTestDetails?._id,
         "completed",
         results,
         feedbackData,
@@ -361,16 +360,16 @@ export function ReviewComponent({
               <h4 className="font-medium pl-3">Resources</h4>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  {Task?.resources?.resourceFile && (
+                  {/* {Task?.resources?.resourceFile && (
                     <div className="border rounded-md p-2 flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <FileText className="w-4" />
                         <span>{Task?.resources?.resourceFile}</span>
                       </div>
                     </div>
-                  )}
+                  )} */}
 
-                  {Task?.resources?.resourceLink && (
+                  {/* {Task?.resources?.resourceLink && (
                     <div className="border rounded-md p-2 flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <Link2Icon className="w-4" />
@@ -384,18 +383,18 @@ export function ReviewComponent({
                         </a>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Submission */}
-          <div className="">
+          <div className="space-y-2">
             <Badge variant={'lemon'} className="px-3 py-1 text-md font-medium">
               Submission 0{index+1}
             </Badge>
-            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.text?.map(
+            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.text?.map(
               (textItem: string, id: number) => (
                 <div
                   key={`text-${id}`}
@@ -405,7 +404,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.links?.map(
+            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.links?.map(
               (linkItem: string, id: number) => (
                 <div
                   key={`link-${id}`}
@@ -418,7 +417,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.images?.map(
+            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.images?.map(
               (imageItem: string, id: number) => (
                 <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
                   <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-contain rounded-t-xl' />
@@ -438,7 +437,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.videos?.map(
+            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.videos?.map(
               (videoItem: string, id: number) => (
                 <div key={`video-${id}`} className="w-full flex flex-col w-fit items-center text-sm border rounded-xl">
                   <video controls preload="none" className='h-[420px] rounded-t-xl'>
@@ -461,7 +460,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmusTaskId?.litmustasks[litmusTestDetails?.litmusTaskId?.litmustasks.length - 1]?.[index]?.task?.files?.map(
+            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.files?.map(
               (fileItem: string, id: number) => (
                 <div
                   key={`file-${id}`}

@@ -27,94 +27,60 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCentre, setSelectedCentre] = useState("");
+
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const applicationDetails = latestCohort?.applicationDetails;
+  const studentDetail = applicationDetails?.studentDetails;
+
   
   // Initialize formData with the new structure.
   const [formData, setFormData] = useState({
-    studentDetailsId: student?.studentDetails,
+    studentDetailsId: studentDetail?._id,
     studenDetails: {
       currentAddress: {
-        streetAddress:
-          student?.applicationDetails?.studenDetails?.currentAddress?.streetAddress || "",
-        city: student?.applicationDetails?.studenDetails?.currentAddress?.city || "",
-        state: student?.applicationDetails?.studenDetails?.currentAddress?.state || "",
-        postalCode:
-          student?.applicationDetails?.studenDetails?.currentAddress?.postalCode || "",
+        streetAddress: studentDetail?.currentAddress?.streetAddress || "",
+        city: studentDetail?.currentAddress?.city || "",
+        state: studentDetail?.currentAddress?.state || "",
+        postalCode: studentDetail?.currentAddress?.postalCode || "",
       },
       previousEducation: {
-        highestLevelOfEducation:
-          student?.applicationDetails?.studenDetails?.previousEducation
-            ?.highestLevelOfEducation || "",
-        fieldOfStudy:
-          student?.applicationDetails?.studenDetails?.previousEducation?.fieldOfStudy ||
-          "",
-        nameOfInstitution:
-          student?.applicationDetails?.studenDetails?.previousEducation
-            ?.nameOfInstitution || "",
-        yearOfGraduation:
-          student?.applicationDetails?.studenDetails?.previousEducation
-            ?.yearOfGraduation || "",
+        highestLevelOfEducation: studentDetail?.previousEducation?.highestLevelOfEducation || "",
+        fieldOfStudy: studentDetail?.previousEducation?.fieldOfStudy || "",
+        nameOfInstitution: studentDetail?.previousEducation?.nameOfInstitution || "",
+        yearOfGraduation: studentDetail?.previousEducation?.yearOfGraduation || "",
       },
       workExperience: {
-        isExperienced:
-          student?.applicationDetails?.studenDetails?.workExperience?.isExperienced ||
-          false,
-        experienceType:
-          student?.applicationDetails?.studenDetails?.workExperience?.experienceType || "",
-        nameOfCompany:
-          student?.applicationDetails?.studenDetails?.workExperience?.nameOfCompany || "",
-        duration:
-          student?.applicationDetails?.studenDetails?.workExperience?.duration || "",
-        jobDescription:
-          student?.applicationDetails?.studenDetails?.workExperience?.jobDescription || "",
+        isExperienced: studentDetail?.workExperience?.isExperienced || false,
+        experienceType: studentDetail?.workExperience?.experienceType || "",
+        nameOfCompany: studentDetail?.workExperience?.nameOfCompany || "",
+        duration: studentDetail?.workExperience?.duration || "",
+        jobDescription: studentDetail?.workExperience?.jobDescription || "",
       },
       emergencyContact: {
-        firstName:
-          student?.applicationDetails?.studenDetails?.emergencyContact?.firstName || "",
-        lastName:
-          student?.applicationDetails?.studenDetails?.emergencyContact?.lastName || "",
-        contactNumber:
-          student?.applicationDetails?.studenDetails?.emergencyContact?.contactNumber || "",
-        relationshipWithStudent:
-          student?.applicationDetails?.studenDetails?.emergencyContact
-            ?.relationshipWithStudent || "",
+        firstName: studentDetail?.emergencyContact?.firstName || "",
+        lastName: studentDetail?.emergencyContact?.lastName || "",
+        contactNumber: studentDetail?.emergencyContact?.contactNumber || "",
+        relationshipWithStudent: studentDetail?.emergencyContact?.relationshipWithStudent || "",
       },
       parentInformation: {
         father: {
-          firstName:
-            student?.applicationDetails?.studenDetails?.parentInformation?.father?.firstName || "",
-          lastName:
-            student?.applicationDetails?.studenDetails?.parentInformation?.father?.lastName || "",
-          contactNumber:
-            student?.applicationDetails?.studenDetails?.parentInformation?.father
-              ?.contactNumber || "",
-          occupation:
-            student?.applicationDetails?.studenDetails?.parentInformation?.father
-              ?.occupation || "",
-          email:
-            student?.applicationDetails?.studenDetails?.parentInformation?.father?.email || "",
+          firstName: studentDetail?.parentInformation?.father?.firstName || "",
+          lastName: studentDetail?.parentInformation?.father?.lastName || "",
+          contactNumber: studentDetail?.parentInformation?.father?.contactNumber || "",
+          occupation: studentDetail?.parentInformation?.father?.occupation || "",
+          email: studentDetail?.parentInformation?.father?.email || "",
         },
         mother: {
-          firstName:
-            student?.applicationDetails?.studenDetails?.parentInformation?.mother?.firstName || "",
-          lastName:
-            student?.applicationDetails?.studenDetails?.parentInformation?.mother?.lastName || "",
-          contactNumber:
-            student?.applicationDetails?.studenDetails?.parentInformation?.mother
-              ?.contactNumber || "",
-          occupation:
-            student?.applicationDetails?.studenDetails?.parentInformation?.mother
-              ?.occupation || "",
-          email:
-            student?.applicationDetails?.studenDetails?.parentInformation?.mother?.email || "",
+          firstName: studentDetail?.parentInformation?.mother?.firstName || "",
+          lastName: studentDetail?.parentInformation?.mother?.lastName || "",
+          contactNumber: studentDetail?.parentInformation?.mother?.contactNumber || "",
+          occupation: studentDetail?.parentInformation?.mother?.occupation || "",
+          email: studentDetail?.parentInformation?.mother?.email || "",
         },
       },
       financialInformation: {
-        isFinanciallyIndependent:
-          student?.applicationDetails?.studenDetails?.financialInformation
-            ?.isFinanciallyIndependent || false,
-        hasAppliedForFinancialAid:
-          student?.applicationDetails?.studenDetails?.financialInformation
-            ?.hasAppliedForFinancialAid || false,
+        isFinanciallyIndependent: studentDetail?.financialInformation?.isFinanciallyIndependent || false,
+        hasAppliedForFinancialAid: studentDetail?.financialInformation?.hasAppliedForFinancialAid || false,
       },
     },
   });
@@ -125,8 +91,10 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
       try {
         const centresData = await getCentres();
         const center = centresData.data.find(
-          (c: any) => c._id === student?.cohort?.centerDetail
+          (c: any) => c._id === student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.centerDetail
         );
+        console.log("logg",center?.name);
+        
         setSelectedCentre(center?.name || "--");
       } catch (error) {
         console.error("Error fetching centres:", error);
@@ -138,6 +106,9 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   // Helper function to format dates (for cohort display).
   function formatDateToMonthYear(dateString: string): string {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return "";
+    }
     return format(date, "MMMM, yyyy");
   }
 
@@ -200,6 +171,10 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
     }
   };
 
+  if (!latestCohort || !applicationDetails || !studentDetail) {
+    return <div>No student details available</div>;
+  }
+  
   return (
     <div className="space-y-6">
       {/* Basic Information (non-editable fields) */}
@@ -274,15 +249,15 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Program of Interest</Label>
-              <Input defaultValue={student?.program?.name} disabled />
+              <Input defaultValue={student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.programDetail?.name} disabled />
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Cohort</Label>
               <Input
                 value={
-                  formatDateToMonthYear(student?.cohort?.startDate) +
+                  formatDateToMonthYear(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.startDate) +
                   " " +
-                  student?.cohort?.timeSlot +
+                  student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.timeSlot +
                   ", " +
                   selectedCentre
                 }
@@ -506,7 +481,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </> : 
             formData.studenDetails.emergencyContact?.firstName && formData.studenDetails.emergencyContact?.lastName && (
             <div className="space-y-2">
-              <Label>Father&apos;s Name</Label>
+              <Label className="pl-3">Contact&apos;s Name</Label>
               <Input
                 defaultValue={formData.studenDetails.emergencyContact?.firstName + ' ' + formData.studenDetails.emergencyContact?.lastName}
                 disabled
@@ -514,7 +489,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </div>)
             }
             <div className="space-y-2">
-              <Label className="pl-3">Contact Number</Label>
+              <Label className="pl-3">Contact&apos;s Number</Label>
               <Input
                 value={formData.studenDetails.emergencyContact.contactNumber}
                 onChange={(e) =>
@@ -574,7 +549,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </> : 
             formData.studenDetails.parentInformation.father?.firstName && formData.studenDetails.parentInformation.father?.lastName && (
               <div className="space-y-2">
-                <Label>Father&apos;s Name</Label>
+                <Label className="pl-3">Father&apos;s Name</Label>
                 <Input
                   defaultValue={formData.studenDetails.parentInformation.father?.firstName + ' ' + formData.studenDetails.parentInformation.father?.lastName}
                   disabled
@@ -610,7 +585,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
               </> : 
               formData.studenDetails.parentInformation.mother?.firstName && formData.studenDetails.parentInformation.mother?.lastName && (
                 <div className="space-y-2">
-                  <Label>Mother&apos;s Name</Label>
+                  <Label className="pl-3">Mother&apos;s Name</Label>
                   <Input
                     defaultValue={formData.studenDetails.parentInformation.mother?.firstName + ' ' + formData.studenDetails.parentInformation.mother?.lastName}
                     disabled

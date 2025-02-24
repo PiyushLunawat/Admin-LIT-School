@@ -117,7 +117,12 @@ export function LitmusList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {applications.map((application: any) => (
+          {applications.map((application: any) => {
+            const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+            const litmusTestDetails = latestCohort?.litmusTestDetails;
+            const tokenFeeDetails = latestCohort?.tokenFeeDetails;
+            
+            return (
             <TableRow
               key={application._id}
               className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
@@ -145,35 +150,35 @@ export function LitmusList({
                   </Tooltip>
                 </TooltipProvider>
                 <div className="w-fit px-1.5 py-0.5 text-xs font-normal bg-[#FFFFFF]/10 rounded-sm">
-                  {application?.cohort?.cohortId}
+                  {latestCohort?.cohortId?.cohortId}
                 </div>
               </TableCell>
               <TableCell>
-                {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.updatedAt).toLocaleDateString() || "--"}
+                {new Date(litmusTestDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell className="space-y-1 ">
-                {['under review', 'submitted', 'interview cancelled'].includes(application?.litmusTestDetails[0]?.litmusTaskId?.status) &&
+                {['under review', 'submitted', 'interview cancelled'].includes(litmusTestDetails?.status) &&
                   <div className="text-sm text-muted-foreground w-[140px]">
                     Waiting for Interview to be scheduled...
                   </div>
                 }
                 <Badge
                   className="capitalize"
-                  variant={getStatusColor(application?.litmusTestDetails[0]?.litmusTaskId?.status || "")}
+                  variant={getStatusColor(litmusTestDetails?.status || "")}
                 >
-                  {application?.litmusTestDetails[0]?.litmusTaskId?.status || ""}
+                  {litmusTestDetails?.status || ""}
                 </Badge>
-                {application?.litmusTestDetails[0]?.litmusTaskId?.status === "pending" &&
+                {litmusTestDetails?.status === "pending" &&
                   <div className="text-xs text-muted-foreground w-[110px] ">
-                    Admission Fee Paid {timeAgo(application?.cousrseEnrolled?.[application.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.updatedAt)}
+                    Admission Fee Paid {timeAgo(tokenFeeDetails?.updatedAt)}
                   </div>
                 }
               </TableCell>
               <TableCell>
-                {application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate ? (
+                {litmusTestDetails?.presentationDate ? (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(application?.litmusTestDetails[0]?.litmusTaskId?.presentationDate).toLocaleDateString() || "--"}
+                    {new Date(litmusTestDetails?.presentationDate).toLocaleDateString() || "--"}
                   </div>
                 ) : (
                   "--"
@@ -193,7 +198,7 @@ export function LitmusList({
                 </Button>
               </TableCell>
             </TableRow>
-          ))}
+          )})}
         </TableBody>
       </Table>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -213,7 +218,7 @@ export function LitmusList({
                 <PersonalDetailsTab student={selectedStudentId} />
               </TabsContent>
               <TabsContent value="payment">
-                <PaymentInformationTab student={selectedStudentId} />
+                {/* <PaymentInformationTab student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/> */}
               </TabsContent>
              {/* 
               <TabsContent value="documents">

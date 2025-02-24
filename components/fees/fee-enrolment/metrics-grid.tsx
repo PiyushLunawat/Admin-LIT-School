@@ -74,12 +74,12 @@ export function MetricsGrid({ applications }: MetricGridProps) {
           enrolledCount += 1;
           cohortSet.add(application?.cohort?.cohortId);
           // Add to Paid Admission Fee
-          paidFee += cohortFeesDetail?.tokenFee || 0;
+          paidFee += Number(cohortFeesDetail?.tokenFee) || 0;
           paidCount += 1;
           // Check if the fee was paid today
           const updatedAt = new Date(lastTokenFeeDetail?.updatedAt).toISOString().split('T')[0];
           if (updatedAt === today) {
-            paidTodayFee += cohortFeesDetail?.tokenFee || 0;
+            paidTodayFee += Number(cohortFeesDetail?.tokenFee) || 0;
             paidTodayCount += 1;
             cohortTodaySet.add(application?.cohort?.cohortId);
           }
