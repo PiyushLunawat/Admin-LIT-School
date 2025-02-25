@@ -46,11 +46,20 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
   
           // 2) Filter Out Students with No Application Details
           const validStudents = response.data.filter(
-            (student: any) => student?.applicationDetails !== undefined
+            (student: any) =>
+              ['initiated', 'applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           );
   
           // 3) Filter Based on Date Range, Search Query, Program, Cohort
           const filteredApplications = validStudents.filter((app: any) => {
+            
+            const latestCohort = app?.appliedCohorts?.[app?.appliedCohorts.length - 1];
+            const cohortDetails = latestCohort?.cohortId;
+            const applicationDetails = latestCohort?.applicationDetails;
+            const litmusTestDetails = latestCohort?.litmusTestDetails;
+            const tokenFeeDetails = latestCohort?.tokenFeeDetails;
+            const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+
             // --- Date Range Check ---
             if (selectedDateRange) {
               const appDate = new Date(app.updatedAt);
@@ -66,8 +75,8 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
               // Adjust fields as needed (name, email, phone, etc.)
               const matchesSearch =
                 ((app.firstName+' '+app.lastName) || "").toLowerCase().includes(lowerSearch) ||
-                (app.program.name || "").toLowerCase().includes(lowerSearch) ||
-                (app.program.name || "").toLowerCase().includes(lowerSearch);;
+                (cohortDetails.programDetail.name || "").toLowerCase().includes(lowerSearch) ||
+                (cohortDetails.cohortId || "").toLowerCase().includes(lowerSearch);;
   
               if (!matchesSearch) return false;
             }
@@ -75,7 +84,7 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
             // --- Program Check ---
             if (selectedProgram !== "all-programs") {
               // Suppose 'app.program' is how you store it
-              if ((app.program.name || "").toLowerCase() !== selectedProgram.toLowerCase()) {
+              if ((cohortDetails.programDetail.name || "").toLowerCase() !== selectedProgram.toLowerCase()) {
                 return false;
               }
             }
@@ -83,7 +92,7 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
             // --- Cohort Check ---
             if (selectedCohort !== "all-cohorts") {
               // Suppose 'app.cohort' is how you store it
-              if ((app.program.name || "").toLowerCase() !== selectedCohort.toLowerCase()) {
+              if ((cohortDetails.cohortId || "").toLowerCase() !== selectedCohort.toLowerCase()) {
                 return false;
               }
             }
@@ -109,7 +118,7 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
           // Applied Count
           const applied = applications.filter(
             (application) =>
-              application?.applicationDetails?.applicationStatus?.toLowerCase() !==
+              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() !==
               undefined
           );
           setAppliedCount(applied.length);
@@ -117,7 +126,7 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
           // Under Review Count
           const underReview = applications.filter(
             (application) =>
-              application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
               "under review"
           );
           setUnderReviewCount(underReview.length);
@@ -125,21 +134,21 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
           // Interviews Scheduled Count
           const onhold = applications.filter(
             (application) =>
-              application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
               "complete"
           );
           setInterviewedCount(onhold.length);
   
           const litmus = applications.filter(
             (application) =>
-            (application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== "pending" &&
-            application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== undefined)
+            (application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() !== "pending" &&
+            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() !== undefined)
           );
           setLitmusCompleteCount(litmus.length);
     
           const enrolled = applications.filter(
             (application) =>
-              application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() ===
+              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() ===
               "completed"
           );
           setEnrolledCount(enrolled.length);

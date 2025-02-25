@@ -9,7 +9,9 @@ const processScholarships = (applications: any) => {
   const scholarshipMap: any = {};
 
   applications.forEach((application: any) => {
-    const semester = application?.cousrseEnrolled?.[application?.cousrseEnrolled.length - 1]?.semesterFeeDetails;
+
+    const semester = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
+console.log("bfd",application);
 
     if (!semester) return;
 
