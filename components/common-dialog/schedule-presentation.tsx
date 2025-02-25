@@ -65,7 +65,7 @@ export function SchedulePresentation({ student, interviewr }: SchedulePresentati
             <div className="flex gap-4 h-5 items-center">
                 <p className="text-sm text-muted-foreground">Program Application</p>
                 <Separator orientation="vertical" />
-                <p className="text-sm text-muted-foreground"> Submitted application on {new Date(student?.litmusTestDetails[0]?.litmusTaskId?.createdAt).toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground"> Submitted application on {new Date(student?.litmusTestDetails?.[0]?.litmusTaskId?.createdAt).toLocaleDateString()}</p>
             </div>
         </div>
 

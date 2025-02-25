@@ -35,7 +35,7 @@ export function FeeCollection() {
           const mappedStudents =
             response.data.filter(
               (student: any) =>
-                student?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed'
+                ['enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
             )    
             mappedStudents.sort((a: any, b: any) => {
               const dateA = new Date(a?.updatedAt);
@@ -80,7 +80,7 @@ export function FeeCollection() {
         }
         const matchedCohort = cohorts.find((cohort) => cohort.cohortId === selectedCohort);
         setCurrentCohort(matchedCohort || null);
-        return app.cohort?.cohortId === selectedCohort;
+        return app?.appliedCohorts?.[app?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort;
       });
   
       // a) Search filter by applicant name
@@ -96,7 +96,7 @@ export function FeeCollection() {
       // b) Status filter
       const filteredByStatus = filteredBySearch.filter((app: any) => {
         if (selectedStatus !== "all-status") {
-          const status = app?.cousrseEnrolled?.[app.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus?.toLowerCase() || "pending";
+          const status = app?.appliedCohorts?.[app?.appliedCohorts.length - 1]?.litmusTestDetails?.tokenFeeDetails?.verificationStatus?.toLowerCase() || "pending";
           return status === selectedStatus;
         }
         return true;

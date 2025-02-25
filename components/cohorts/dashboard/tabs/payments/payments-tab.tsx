@@ -57,7 +57,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         const response = await getStudents();
         const mappedStudents: any[] = response.data.filter(
           (student: any) =>
-            student?.litmusTestDetails[0]?.litmusTaskId?.status === 'completed' &&
+            student?.litmusTestDetails?.[0]?.litmusTaskId?.status === 'completed' &&
             student.cohort?._id === cohortId
         );
 

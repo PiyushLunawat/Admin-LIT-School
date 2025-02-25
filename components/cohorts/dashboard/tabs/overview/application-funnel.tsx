@@ -45,14 +45,14 @@ export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
 
         const litmus = applications.filter(
           (application) =>
-          (application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== "pending" &&
-          application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() !== undefined)
+          (application?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() !== "pending" &&
+          application?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() !== undefined)
         );
         setLitmusCompleteCount(litmus.length);
   
         const enrolled = applications.filter(
           (application) =>
-            application?.litmusTestDetails[0]?.litmusTaskId?.status?.toLowerCase() ===
+            application?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() ===
             "completed"
         );
         setEnrolledCount(enrolled.length);
