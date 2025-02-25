@@ -34,6 +34,23 @@ import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
 
+
+import {
+  S3Client,
+  DeleteObjectCommand,
+  AbortMultipartUploadCommand,
+  ListPartsCommand,
+} from "@aws-sdk/client-s3";
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+  },
+});
+
+
 const formSchema = z.object({
   applicationFormDetail: z.array(
     z.object({

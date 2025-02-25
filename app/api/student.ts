@@ -112,15 +112,14 @@ export async function updateStudentTaskFeedbackAccep(
   applicationId: string,
   applicationTaskId: string,
   subTaskId: string,
-  newStatus: string,
+  status: string,
   feedback: {
     feedbackData?: Array<{ taskId: string; feedback: string[] }>;
   }
 ) {
   try {
-    console.log("x11", JSON.stringify(feedback));
     const response = await fetch(
-      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${newStatus}`,
+      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${status}`,
       {
         method: "PATCH",
         headers: {

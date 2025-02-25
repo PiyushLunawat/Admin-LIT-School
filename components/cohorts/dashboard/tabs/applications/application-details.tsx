@@ -235,7 +235,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                 }
               </div> : 
               (
-                <Select disabled={['initiated', 'accepted', 'rejected', 'on hold'].includes(applicationDetail?.applicationStatus)} 
+                <Select disabled={['initiated', 'rejected', 'on hold'].includes(applicationDetail?.applicationStatus)} 
                   value={applicationDetail?.applicationStatus} 
                   onValueChange={handleStatusChange}>
                   <SelectTrigger>
@@ -334,7 +334,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                       .join(", ")}
                   </p>
                 </div>
-                {applicationDetail?.applicationTasks[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 &&
+                {applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 &&
                   <div className="">
                     <h5 className="font-medium text-muted-foreground">Feedback</h5>
                     {applicationDetail?.applicationTasks[0]?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
@@ -349,7 +349,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
               </div>
             ))} 
               
-            {(status === 'on hold' || applicationDetail?.applicationTasks[0]?.applicationTasks[0]?.overallFeedback.length > 1) && 
+            {(applicationDetail?.applicationTasks?.[0]?.applicationTasks[0]?.overallFeedback.length > 1) && 
               <Card className="p-4 space-y-2">
                 <h5 className="font-medium ">Application On Hold</h5>
                 {[...(applicationDetail?.applicationTasks[0]?.applicationTasks[0]?.overallFeedback || [])].reverse().map((feedback: any, index: any) => (
@@ -382,7 +382,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
             application={application}
             initialStatus={status}
             ques={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} 
-            submission={applicationDetail?.applicationTasks[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}
+            submission={applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}
             onClose={() => setFeedbackOpen(false)}
             onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />
@@ -401,7 +401,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
               </div>
             </div>
           </div>
-          <SubmissionView tasks={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} submission={applicationDetail?.applicationTasks[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}/>
+          <SubmissionView tasks={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} submission={applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}/>
         </DialogContent>
       </Dialog>
 

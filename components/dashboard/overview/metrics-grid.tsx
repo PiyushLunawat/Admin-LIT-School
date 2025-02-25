@@ -240,7 +240,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             let percentageCount = 0;
         
             applications.forEach((application) => {
-              const scholarships = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.flatMap((semester: any) => semester.installments) || [];
+              const scholarships = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipDetail?.flatMap((semester: any) => semester.installments) || [];
               scholarships.forEach((installment: any) => {
                 if (installment?.scholarshipAmount) {
                   totalScholarship += installment.scholarshipAmount;

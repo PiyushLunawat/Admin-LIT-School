@@ -171,14 +171,14 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   };
 
   async function handleApplicationUpdate(
-    newStatus: string
+    status: string
   ) {
     try {
       setLoading(true)
-      if (newStatus === "under review") {
+      if (status === "under review") {
         const res = await updateStudentApplicationStatus(
           applicationId,
-          newStatus,
+          status,
         );
         console.log(
           `Feedback for application ${applicationId} submitted successfully`,
@@ -186,29 +186,31 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         );
       }
 
-      else if (newStatus === "on hold") {
+      else if (status === "on hold") {
         // Filter out empty reasons
         const validReasons = reasonItemValue
         .split('\n') // Split the string into individual lines
         .map((line) => line.trim().replace(/^•\s*/, "")) // Remove bullets and trim spaces
         .filter((r) => r.trim() !== ""); // Filter out empty lines
 
-        console.log("Sending feedback:", {
-          applicationTaskId,
-          newStatus,
-          feedbackData: validReasons,
-        });
-
+        
         const feedback = {
           feedbackData: validReasons
         };
-      
+        
+        console.log("Sending feedback:", {
+          applicationId,
+          applicationTaskId,
+          subTaskId,
+          status,
+          feedback,
+        });
 
         const res = await updateStudentTaskFeedback(
           applicationId,
           applicationTaskId,
           subTaskId,
-          newStatus,
+          status,
           feedback,
         );
 
@@ -218,7 +220,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         );
       }
       
-      else if (newStatus === "rejected" || newStatus === "accepted") {
+      else if (status === "rejected" || status === "accepted") {
         // Prepare an array of task feedback
         console.log("cons",feedbacks)
         const feedbackData = Object.keys(feedbacks).map((taskId) => {
@@ -240,8 +242,9 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         console.log("Accepted feedback:", {
           applicationId,
           applicationTaskId,
-          newStatus,
-          feedbackData,
+          subTaskId,
+          status,
+           feedbackData
         });
 
         // Send feedback data to backend
@@ -249,7 +252,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
           applicationId,
           applicationTaskId,
           subTaskId,
-          newStatus,
+          status,
           { feedbackData }
         );
         console.log(
@@ -258,7 +261,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         );
       }
 
-      onUpdateStatus(newStatus, feedbacks);
+      onUpdateStatus(status, feedbacks);
       onClose();
     } catch (error) {
       console.error("Failed to update application status or feedback:", error);
