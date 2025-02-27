@@ -14,7 +14,12 @@ import { CohortDetails } from "./cohort-details";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
 
-export function LitmusQueue() {
+interface LitmusQueueProps {
+  initialApplications: any;
+  setInitialApplications: (apps: any) => void;
+}
+
+export function LitmusQueue({ initialApplications, setInitialApplications }: LitmusQueueProps) {
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const [selectedSubmissionIds, setSelectedSubmissionIds] = useState<string[]>([]);
 
@@ -23,7 +28,7 @@ export function LitmusQueue() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [cohorts, setCohorts] = useState<any[]>([]);
   const [currentCohort, setCurrentCohort] = useState<any>();
-  const [applications, setApplications] = useState<any>([]);
+  const [applications, setApplications] = useState<any>(initialApplications);
   const [loading, setLoading] = useState(true);
 
   const [applied, setApplied] = useState(0);
@@ -69,6 +74,7 @@ export function LitmusQueue() {
           });
           
           setApplications(mappedStudents);
+          setInitialApplications(mappedStudents)
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
       } catch (error) {

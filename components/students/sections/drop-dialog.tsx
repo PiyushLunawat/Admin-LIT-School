@@ -1,10 +1,12 @@
 "use client";
 
+import { MarkAsdropped } from "@/app/api/student";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { UserMinus } from "lucide-react";
+import { useState } from "react";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
 
@@ -13,11 +15,48 @@ interface MarkedAsDialogProps {
 }
 
 export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
+  const [notes, setNotes] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   if (!student) {
     return <p>Student data not available.</p>;
   }
+
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  
+  const handleMarkAsDropped = async () => {
+    if (!notes.trim()) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("studentId", student?._id);
+      formData.append("status", "dropped");
+      
+      const notesArray = notes.split("\n").map((note) => note.trim()).filter((note) => note.length > 0);
+
+      formData.append("notes", JSON.stringify(notesArray)); // 🔹 Send as a JSON string
+  
+      // 🔹 Log FormData before sending
+      console.log("🔹 FormData to be sent:");
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      
+      const response = await MarkAsdropped(formData);
+
+      if (response.ok) {
+        console.log("Student successfully marked as dropped.");
+      } else {
+        console.error("Failed to mark as dropped.");
+      }
+    } catch (error) {
+      console.error("Error marking as dropped:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -52,11 +91,21 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
           <div className="space-y-4 ">
             <div className="mt-2 space-y-2">
               <label className="text-lg pl-3">Provide Reasons</label>
-              <Textarea className="h-[150px]"/>
+              <Textarea className="h-[150px]"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Enter the reason for marking as dropped"
+              />
             </div>
             <div className="flex gap-2 ">
               <Button variant="outline" className="flex-1" >Cancel</Button>
-              <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Mark as Dropped</Button>
+              <Button
+              className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1"
+              onClick={handleMarkAsDropped}
+              disabled={loading || notes === ""}
+            >
+              {loading ? "Processing..." : "Mark as Dropped"}
+            </Button>
             </div>
           </div>
         </div>

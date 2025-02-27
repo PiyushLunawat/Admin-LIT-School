@@ -4,8 +4,41 @@ import { MetricsGrid } from "./metrics-grid";
 import { RecentActivity } from "./recent-activity";
 import { UpcomingDeadlines } from "./upcoming-deadlines";
 import { QuickActions } from "./quick-actions";
+import { useEffect, useState } from "react";
+import { getStudents } from "@/app/api/student";
 
-export function ApplicationsHome() {
+interface ApplicationsHomeProps {
+  initialApplications: any;
+  setInitialApplications: (apps: any) => void;
+}
+
+export function ApplicationsHome({ initialApplications, setInitialApplications }: ApplicationsHomeProps) {
+  const [applications, setApplications] = useState<any>(initialApplications);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchAndFilterStudents() {
+      setLoading(true);
+      try {
+        // 1) Fetch All Students
+        const response = await getStudents();
+
+        // 2) Filter Out Students with No Application Details
+        const validStudents = response.data.filter(
+          (student: any) => 
+            ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+        );
+        setApplications(validStudents);
+        setInitialApplications(validStudents);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAndFilterStudents();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -13,7 +46,7 @@ export function ApplicationsHome() {
         <p className="text-muted-foreground">Here&apos;s an overview of your review queue</p>
       </div>
 
-      <MetricsGrid />
+      <MetricsGrid applications={applications}/>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">

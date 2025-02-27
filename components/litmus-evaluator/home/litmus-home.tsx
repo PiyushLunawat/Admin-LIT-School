@@ -8,9 +8,14 @@ import { QuickActions } from "@/components/litmus-evaluator/home/quick-actions";
 import { useEffect, useState } from "react";
 import { getStudents } from "@/app/api/student";
 
-export function LitmusHome() {
+interface LitmusHomeProps {
+  initialApplications: any;
+  setInitialApplications: (apps: any) => void;
+}
+
+export function LitmusHome({ initialApplications, setInitialApplications }: LitmusHomeProps) {
   const [loadint, setLoading] = useState(false);
-  const [applications, setApplications] = useState<any>([]);
+  const [applications, setApplications] = useState<any>(initialApplications);
 
   useEffect(() => {
     async function fetchStudents() {
@@ -21,6 +26,7 @@ export function LitmusHome() {
         ));
           
         setApplications(mappedStudents);
+        setInitialApplications(mappedStudents)
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {

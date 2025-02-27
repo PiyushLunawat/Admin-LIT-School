@@ -28,10 +28,10 @@ import { useToast } from "@/hooks/use-toast";
 
 // Roles array (as before)
 const roles = [
-  { value: "reviewer", label: "Application Reviewer" },
+  { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
-  { value: "collector", label: "Fee Collector" },
-  { value: "evaluator", label: "LITMUS Test Evaluator" },
+  { value: "fee_collector", label: "Fee Collector" },
+  { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
 ];
 
 // Zod schema (as before)
@@ -41,6 +41,7 @@ const formSchema = z.object({
       email: z.string().email("Invalid email address"),
       role: z.string().nonempty("Role is required"),
       isInvited: z.boolean().optional(),
+      isAccepted: z.boolean().optional(),
     })
   ),
 });
@@ -56,11 +57,26 @@ export function CollaboratorsForm({
   onCohortCreated,
   initialData,
 }: CollaboratorsFormProps) {
+
+  const formatCollaborators = (collaborators: any[] = []) => {
+    return collaborators.flatMap(collab =>
+      (collab.roles || []).map((roleObj: any) => ({
+        email: collab.email || "",
+        role: roleObj.role || "Unknown Role",
+        isInvited: roleObj.isInvited || false,
+        isAccepted: roleObj.isAccepted || false,
+      }))
+    );
+  };
+  
+  // Usage
+  const formattedCollaborators = formatCollaborators(initialData?.collaborators || []);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      collaborators: initialData?.collaborators || [
-        { email: "", role: "", isInvited: false },
+      collaborators: formatCollaborators(initialData?.collaborators || []) || [
+        { email: "", role: "", isInvited: false, isAccepted: false },
       ],
     },
   });
@@ -77,19 +93,19 @@ export function CollaboratorsForm({
 
   useEffect(() => {
     if (fields.length === 0) {
-      append({ email: "", role: "", isInvited: false });
+      append({ email: "", role: "", isInvited: false, isAccepted: false });
     }
   }, [fields, append]);
 
   const getRole = (role: string) => {
     switch (role) {
-      case "reviewer":
+      case "application_reviewer":
         return "Application Reviewer";
       case "interviewer":
         return "Application Interviewer";
-      case "collector":
+      case "fee_collector":
         return "Fee Collector";
-      case "evaluator":
+      case "Litmus_test_reviewer":
         return "LITMUS Test Evaluator";
       default:
         return "--";
@@ -100,7 +116,7 @@ export function CollaboratorsForm({
     form.setValue(`collaborators.${index}.role`, value);  // Directly set the role value
     form.clearErrors(`collaborators.${index}.email`);  // Clear email errors
   
-    if (['interviewer', 'evaluator'].includes(value)) {
+    if (['interviewer', 'Litmus_test_reviewer'].includes(value)) {
       const emailVal = form.getValues(`collaborators.${index}.email`).trim();
   
       // Check if email exists if the role is interviewer or evaluator
@@ -128,7 +144,7 @@ export function CollaboratorsForm({
     form.setValue(`collaborators.${index}.email`, emailVal);
     form.clearErrors(`collaborators.${index}.email`);
 
-    if (emailVal && ['interviewer', 'evaluator'].includes(role)) {
+    if (emailVal && ['interviewer', 'Litmus_test_reviewer'].includes(role)) {
       const result = await checkEmailExists(emailVal);
       if (!result.success) {
         form.setError(`collaborators.${index}.email`, {
@@ -149,7 +165,6 @@ export function CollaboratorsForm({
       const collaboratorsToUpdate = data.collaborators.map((collab) => ({
         email: collab.email,
         role: collab.role,
-        isInvited: collab.isInvited ?? false,
       }));
     
       const savedCohort = await updateCohort(initialData._id, {
@@ -174,7 +189,6 @@ export function CollaboratorsForm({
         const collaboratorsToUpdate = data.collaborators.map((collab) => ({
           email: collab.email,
           role: collab.role,
-          isInvited: collab.isInvited ?? false,
         }));
 
         console.log("Collaborators data to send:", collaboratorsToUpdate);
@@ -202,7 +216,6 @@ export function CollaboratorsForm({
         const collaboratorsToUpdate = data.collaborators.map((collab) => ({
           email: collab.email,
           role: collab.role,
-          isInvited: collab.isInvited ?? false,
         }));
 
         const createdCohort = await updateCohort(initialData._id, {
@@ -375,7 +388,7 @@ export function CollaboratorsForm({
                                 value={role.value}
                                 disabled={
                                   // Example logic: only one "collector" allowed
-                                  role.value === "collector" &&
+                                  role.value === "fee_collector" &&
                                   fields.some(
                                     (f) => f.role === role.value && f.id !== collaborator.id
                                   )

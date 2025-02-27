@@ -160,7 +160,7 @@ export function ApplicationsList({
                   <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(applicationDetail?.applicationStatus || "--")}>
                     {applicationDetail?.applicationStatus || "--"}
                   </Badge>
-                  {(applicationDetail?.applicationStatus === 'under review' && applicationDetail?.applicationTasks?.[0]?.applicationTasks?.[0]?.overallFeedback?.length > 1) &&
+                  {(applicationDetail?.applicationStatus === 'under review' && applicationDetail?.applicationTasks?.[0]?.applicationTasks?.[0]?.overallFeedback.length > 0) &&
                     <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
                       <CheckCircle className="w-3 h-3"/> App. Revised
                     </Badge>

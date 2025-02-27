@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, GripVertical, XIcon, FolderPlus, Link2Icon, FileIcon } from "lucide-react";
+import { Plus, Trash2, GripVertical, XIcon, FolderPlus, Link2Icon, FileIcon, LoaderCircle } from "lucide-react";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,15 +38,13 @@ import axios from "axios";
 import {
   S3Client,
   DeleteObjectCommand,
-  AbortMultipartUploadCommand,
-  ListPartsCommand,
 } from "@aws-sdk/client-s3";
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
+  region: process.env.NEXT_PUBLIC_AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY as string,
   },
 });
 
@@ -441,7 +439,7 @@ function ResourcesSection({
     setFileName(file.name);
 
     // Example size limit for direct vs. multipart: 5MB
-    const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB
+    const CHUNK_SIZE = 100 * 1024 * 1024; // 5 MB
 
     // Clear the file input so user can re-select if needed
     e.target.value = "";
@@ -470,6 +468,33 @@ function ResourcesSection({
       setUploading(false);
     }
   };
+
+    const handleDeleteFile = async (fileUrl: string, index: number) => {
+      try {
+        const fileKey = fileUrl.split("/").pop(); // Extract file key from URL
+        console.log("fuckey", fileKey)
+  
+        if (!fileKey) {
+          console.error("Invalid file URL:", fileUrl);
+          return;
+        }
+  
+        // AWS S3 DeleteObject Command
+        const deleteCommand = new DeleteObjectCommand({
+          Bucket: "dev-application-portal", // Replace with your bucket name
+          Key: fileKey, // Key extracted from file URL
+        });
+  
+        await s3Client.send(deleteCommand);
+        console.log("File deleted successfully from S3:", fileUrl);
+  
+        // Remove from UI
+        removeFile(index);
+      } catch (error) {
+        console.error("Error deleting file:", error);
+        setError("Failed to delete file. Try again.");
+      }
+    };
 
   // Direct upload to S3 using a single presigned URL
   const uploadDirect = async (file: File) => {
@@ -567,37 +592,38 @@ function ResourcesSection({
 
       {/* 1) Render the existing file URLs (resourceFiles) */}
       {fileFields.map((field, index) => (
-        <div
-          key={field.id}
-          className="border rounded-md flex justify-between items-center py-1.5 px-2"
-        >
-          <div className="flex items-center gap-2">
-            <FileIcon className="w-4 h-4" />
-            {/* If storing the file as a string, we can show a truncated version or full URL */}
-            <FormField
-              control={control}
-              name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.resources.resourceFiles.${index}`}
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                  <p className="truncate text-sm">
-                    {field.value || "No file URL"}
-                  </p>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-7 rounded-full"
-            onClick={() => removeFile(index)}
-          >
-            <XIcon className="h-4 w-4" />
-          </Button>
+        <div className="flex items-center" key={field.id}>
+          {/* If storing the file as a string, we can show a truncated version or full URL */}
+          <FormField
+            control={control}
+            name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.resources.resourceFiles.${index}`}
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                <div className="relative flex items-center gap-2">
+                  <FileIcon className="absolute left-2 top-3 w-4 h-4" />
+                  <Input
+                    type="url"
+                    className="pl-8 pr-12 text-sm truncate text-white w-full" 
+                    placeholder="Enter resource link"
+                    {...field}
+                    readOnly
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1.5 h-7 rounded-full"
+                    onClick={() => handleDeleteFile(field.value, index)}
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       ))}
 
@@ -605,11 +631,23 @@ function ResourcesSection({
         <div className="flex items-center justify-between border rounded-md py-1.5 px-2">
           <div className="flex items-center gap-2">
             <FileIcon className="w-4 h-4" />
-            <div className="text-sm">{fileName}</div>
+            <div className="text-sm truncate">{fileName}</div>
           </div>
           <div className="flex items-center gap-2">
-            <Progress className="h-1 w-20" states={[ { value: uploadProgress, widt: uploadProgress, color: '#ffffff' }]} />
-            <span>{uploadProgress}%</span>
+            {uploadProgress === 100 ? 
+              <LoaderCircle className="h-4 w-4 animate-spin" /> : 
+            <>
+              <Progress className="h-1 w-20" states={[ { value: uploadProgress, widt: uploadProgress, color: '#ffffff' }]} />
+              <span>{uploadProgress}%</span>
+            </>}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 rounded-full"
+            >
+              <XIcon className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}
@@ -627,7 +665,7 @@ function ResourcesSection({
                     <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
                     <Input
                       type="url"
-                      className="pl-8 text-sm"
+                      className="pl-8 text-sm pl-8 pr-12 text-sm truncate"
                       placeholder="Enter resource link"
                       {...field}
                     />
@@ -651,6 +689,7 @@ function ResourcesSection({
 
       <div className="flex gap-2.5">
         <Button
+          disabled={uploading}
           type="button"
           variant="secondary"
           className="flex flex-1 gap-2 items-center"

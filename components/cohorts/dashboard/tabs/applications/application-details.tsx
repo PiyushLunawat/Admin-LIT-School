@@ -349,7 +349,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
               </div>
             ))} 
               
-            {(applicationDetail?.applicationTasks?.[0]?.applicationTasks[0]?.overallFeedback.length > 1) && 
+            {(applicationDetail?.applicationTasks?.[0]?.applicationTasks[0]?.overallFeedback.length > 0) && 
               <Card className="p-4 space-y-2">
                 <h5 className="font-medium ">Application On Hold</h5>
                 {[...(applicationDetail?.applicationTasks[0]?.applicationTasks[0]?.overallFeedback || [])].reverse().map((feedback: any, index: any) => (

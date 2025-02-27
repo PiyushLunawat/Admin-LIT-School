@@ -164,11 +164,11 @@ export function LitmusList({
                 }
                 <Badge
                   className="capitalize"
-                  variant={getStatusColor(litmusTestDetails?.status || "")}
+                  variant={getStatusColor(litmusTestDetails?.status || "pending")}
                 >
-                  {litmusTestDetails?.status || ""}
+                  {litmusTestDetails?.status || "pending"}
                 </Badge>
-                {litmusTestDetails?.status === "pending" &&
+                {litmusTestDetails?.status === "" &&
                   <div className="text-xs text-muted-foreground w-[110px] ">
                     Admission Fee Paid {timeAgo(tokenFeeDetails?.updatedAt)}
                   </div>

@@ -112,10 +112,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
         default:
           installmentPercents = Array.from({ length: installmentsPerSemester }, () => 1 / installmentsPerSemester);
           break;
-      }
-
-      console.log("installments Per Semester", installmentsPerSemester);
-      
+      }    
 
     const startDate = new Date(initialData?.startDate);
     const endDate = new Date(initialData?.endDate);

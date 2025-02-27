@@ -11,12 +11,17 @@ import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
 import { getCohorts } from "@/app/api/cohorts";
 
-export function LitmusReports() {
+interface LitmusReportsProps {
+  initialApplications: any;
+  setInitialApplications: (apps: any) => void;
+}
+
+export function LitmusReports({ initialApplications, setInitialApplications }: LitmusReportsProps) {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [cohorts, setCohorts] = useState<any[]>([]);
   const [currentCohort, setCurrentCohort] = useState<any>();
-  const [applications, setApplications] = useState<any>([]);
+  const [applications, setApplications] = useState<any>(initialApplications);
 
   const [selectedCohort, setSelectedCohort] = useState<string>("all-cohorts");
 
@@ -30,6 +35,7 @@ export function LitmusReports() {
               ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           )     
         setApplications(mappedStudents);
+        setInitialApplications(mappedStudents);
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
       } catch (error) {

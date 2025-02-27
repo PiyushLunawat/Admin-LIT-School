@@ -362,3 +362,21 @@ export async function updateInterviewStatus(jsonString: string) {
 
   return response.json();
 }
+
+// API for Mark-as-dropped
+export async function MarkAsdropped(formData: any) {
+  try {
+    const response = await fetch(
+      `${process.env.API_URL}/admin/mark-as-dropped`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    return await response;
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+}

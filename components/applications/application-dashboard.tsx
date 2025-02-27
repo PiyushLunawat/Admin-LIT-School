@@ -29,7 +29,7 @@ export function ApplicationDashboard() {
         // 2) Filter Out Students with No Application Details
         const validStudents = response.data.filter(
           (student: any) => 
-            ['initiated', 'applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+            ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
         );
 
         validStudents.sort((a: any, b: any) => {
@@ -86,7 +86,7 @@ export function ApplicationDashboard() {
         </TabsList>
 
         <TabsContent value="home">
-          <ApplicationsHome />
+          <ApplicationsHome initialApplications={initialApplications} setInitialApplications={setInitialApplications}/>
         </TabsContent>
 
         <TabsContent value="applications">
@@ -97,13 +97,13 @@ export function ApplicationDashboard() {
           <InterviewsQueue />
         </TabsContent>
 
-        <TabsContent value="communications">
+        {/* <TabsContent value="communications">
           <CommunicationsTab />
         </TabsContent>
 
         <TabsContent value="settings">
           <SettingsTab />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );

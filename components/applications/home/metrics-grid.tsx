@@ -29,77 +29,57 @@ function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) 
   );
 }
 
-export function MetricsGrid() {
+interface MetricsGridProps {
+  applications: any;
+}
 
-  const [loading, setLoading] = useState<boolean>(true);
-    const [applications, setApplications] = useState<any>([]);
+export function MetricsGrid({ applications }: MetricsGridProps) {
+
     const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
     const [underReviewCount, setUnderReviewCount] = useState(0);
     const [ReviewTodayCount, setReviewTodayCount] = useState(0);
     const [revisedApplicationsCount, setRevisedApplicationsCount] = useState(0);
 
     useEffect(() => {
-        async function fetchAndFilterStudents() {
-          setLoading(true);
-          try {
-            // 1) Fetch All Students
-            const response = await getStudents();
-    
-            // 2) Filter Out Students with No Application Details
-            const validStudents = response.data.filter(
-              (student: any) => 
-                ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
-            );
-            setApplications(validStudents);
-          } catch (error) {
-            console.error("Error fetching students:", error);
-          } finally {
-            setLoading(false);
-          }
-        }
-        fetchAndFilterStudents();
-      }, []);
+      if (applications && Array.isArray(applications)) {
+        // Total Applications
+        setTotalApplicationsCount(applications.length);
+  
+        // Under Review Count
+        const underReview = applications.filter(
+          (application) =>
+            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
+            "under review"
+        );
+        setUnderReviewCount(underReview.length);
+  
+        // Interviews Scheduled Count
+        // const interviewsScheduled = applications.filter(
+        //   (application) =>
+        //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+        //     "interviews scheduled"
+        // );
+        // setInterviewsScheduledCount(interviewsScheduled.length);
 
-      useEffect(() => {
-                if (applications && Array.isArray(applications)) {
-                  // Total Applications
-                  setTotalApplicationsCount(applications.length);
-            
-                  // Under Review Count
-                  const underReview = applications.filter(
-                    (application) =>
-                      application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
-                      "under review"
-                  );
-                  setUnderReviewCount(underReview.length);
-            
-                  // Interviews Scheduled Count
-                  // const interviewsScheduled = applications.filter(
-                  //   (application) =>
-                  //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-                  //     "interviews scheduled"
-                  // );
-                  // setInterviewsScheduledCount(interviewsScheduled.length);
-      
-                  // Reviewed Count
-                  const reviewed = applications.filter(
-                    (application) =>
-                      ['on hold', 'accepted', 'rejected'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.[0]?.litmusTaskId?.status) &&
-                    new Date(application?.updatedAt) === new Date()
-                  );
-                  setReviewTodayCount(reviewed.length);
+        // Reviewed Count
+        const reviewed = applications.filter(
+          (application) =>
+            ['on hold', 'accepted', 'rejected'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus) &&
+          new Date(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).toDateString() === new Date().toDateString()
+        );
+        setReviewTodayCount(reviewed.length);
 
-                  const revised = applications.filter(
-                    (application) =>
-                      application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "under review" &&
-                    application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationTasks?.length > 1
-                  );
-                  setRevisedApplicationsCount(underReview.length);
-        
-                } else {
-                  console.log("Applications data is not an array or is undefined.");
-                }
-              }, [applications]);
+        const revised = applications.filter(
+          (application) =>
+            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "under review" &&
+            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationTasks?.length > 1
+        );
+        setRevisedApplicationsCount(underReview.length);
+
+      } else {
+        console.log("Applications data is not an array or is undefined.");
+      }
+    }, [applications]);
   
   const metrics = [
     {

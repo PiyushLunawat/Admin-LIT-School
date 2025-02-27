@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Award
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface MetricCardProps {
   title: string;
@@ -38,10 +39,54 @@ interface MetricGridProps {
 }
 
 export function MetricsGrid({ applications }: MetricGridProps) {
+
+  const [totalAssignedCount, setTotalAssignedCount] = useState(0);
+  const [underReviewCount, setUnderReviewCount] = useState(0);
+  const [ReviewCount, setReviewCount] = useState(0);
+  const [revisedApplicationsCount, setRevisedApplicationsCount] = useState(0);
+
+  useEffect(() => {
+    if (applications && Array.isArray(applications)) {
+
+      // Assigned Count
+      const assigned = applications.filter(
+        (application) =>
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() === "Interview Scheduled" ||
+        application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() === "submitted" 
+      );
+      setTotalAssignedCount(assigned.length);
+
+      // Interviews Scheduled Count
+      // const interviewsScheduled = applications.filter(
+      //   (application) =>
+      //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+      //     "interviews scheduled"
+      // );
+      // setInterviewsScheduledCount(interviewsScheduled.length);
+
+      // Reviewed Count
+      const reviewed = applications.filter(
+        (application) =>
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() === "completed" 
+      );
+      setReviewCount(reviewed.length);
+
+      const revised = applications.filter(
+        (application) =>
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "under review" &&
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationTasks?.length > 1
+      );
+      setRevisedApplicationsCount(reviewed.length);
+
+    } else {
+      console.log("Applications data is not an array or is undefined.");
+    }
+  }, [applications]);
+      
   const metrics = [
     {
       title: "Total Assigned",
-      value: "45",
+      value: `${totalAssignedCount}`,
       description: "Submissions in your queue",
       icon: ClipboardList,
     },
@@ -59,13 +104,13 @@ export function MetricsGrid({ applications }: MetricGridProps) {
     },
     {
       title: "Completed This Week",
-      value: "12",
+      value: `${ReviewCount}`,
       description: "Evaluations processed",
       icon: CheckCircle,
     },
     {
       title: "Scholarships Awarded",
-      value: "8",
+      value: `${ReviewCount}`,
       description: "This month",
       icon: Award,
     },

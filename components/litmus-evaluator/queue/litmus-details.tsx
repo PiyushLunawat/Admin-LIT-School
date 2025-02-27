@@ -57,7 +57,6 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
   const [interviewOpen, setInterviewOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [status, setStatus] = useState(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status);
-  const [sch, setSch] = useState<any>(null);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false)
 
   const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
@@ -73,13 +72,6 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
     
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
-
-  useEffect(() => {
-    const schSlab = latestCohort?.cohortId?.feeStructureDetails.find(
-      (slab: any) => slab._id === litmusTestDetails?.scholarshipDetail
-    );
-    setSch(schSlab);
-}, [application]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -206,10 +198,10 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
                 <Download className="h-4 w-4 mr-2" />
                 Download Files
               </Button>
-                {sch ? 
-                  <Button variant="outline" className={`justify-start ${getColor(sch?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
+                {litmusTestDetails?.scholarshipDetail ? 
+                  <Button variant="outline" className={`justify-start ${getColor(litmusTestDetails?.scholarshipDetail?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
                     <div className="flex gap-2 items-center">
-                      <span className="text-lg pb-[2px]">★ </span> {sch?.scholarshipName+' '+(sch?.scholarshipPercentage+'%')}
+                      <span className="text-lg pb-[2px]">★ </span> {litmusTestDetails?.scholarshipDetail?.scholarshipName+' '+(litmusTestDetails?.scholarshipDetail?.scholarshipPercentage+'%')}
                     </div> 
                   </Button>
                     :
