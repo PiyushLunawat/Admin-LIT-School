@@ -11,7 +11,6 @@ const processScholarships = (applications: any) => {
   applications.forEach((application: any) => {
 
     const semester = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
-console.log("bfd",application);
 
     if (!semester) return;
 

@@ -144,7 +144,7 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
       }
   
       return filtered;
-    }, [applications, searchQuery, selectedStatus, sortBy, dateRange]);
+    }, [applications, searchQuery, selectedStatus, sortBy, selectedDateRange]);
 
   const handleApplicationUpdate = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key

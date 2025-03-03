@@ -55,26 +55,27 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
         const mappedStudents =
         response.data.filter(
           (student: any) =>
-            student?.applicationDetails !== undefined &&
-            student.cohort?._id === cohortId
+            ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
+            student?.appliedCohorts?.[student?.appliedCohorts.length - 1].cohortId?._id === cohortId
         )    
-            setApplied(
-              mappedStudents.filter(
-                (student: any) => student?.applicationDetails?.applicationFeeDetail?.status === 'paid'
-              ).length
-            );
-            
-            setIntCleared(
-              mappedStudents.filter(
-                (student: any) => student?.applicationDetails?.applicationStatus === 'selected'
-              ).length
-            );
-
-            setFeePaid(
-              mappedStudents.filter(
-                (student: any) => student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid'
-              ).length
-            );       
+        setApplied(
+          mappedStudents.filter(
+            (student: any) => ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+          ).length
+        );
+        
+        setIntCleared(
+          mappedStudents.filter(
+            (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === 'selected'
+          ).length
+        );
+    
+        setFeePaid(
+          mappedStudents.filter(
+            (student: any) => ['enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+          ).length
+        );   
+        
       } catch (error) {
         console.error("Error fetching programs:", error);
       }
@@ -145,8 +146,8 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
             <Progress
               states={[
                 { value: feePaid, widt: (feePaid / cohort.totalSeats) * 100, color: '#2EB88A' },
-                { value: intCleared, widt: ((intCleared) / cohort.totalSeats) * 100, color: '#00A3FF' },
-                { value: applied, widt: ((applied-intCleared-feePaid) / cohort.totalSeats) * 100, color: '#FF791F' },
+                { value: intCleared, widt: ((intCleared-feePaid) / cohort.totalSeats) * 100, color: '#00A3FF' },
+                { value: applied, widt: ((applied-intCleared) / cohort.totalSeats) * 100, color: '#FF791F' },
               ]}
             />
               <div className="flex gap-3">

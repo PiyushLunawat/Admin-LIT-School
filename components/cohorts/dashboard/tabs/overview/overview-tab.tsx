@@ -27,8 +27,8 @@ export function OverviewTab({ cohortId, selectedDateRange }: OverviewTabProps) {
           const mappedStudents =
             response.data.filter(
               (student: any) =>
-                student?.appliedCohorts?.[0]?.status === 'initiated' &&
-                student?.appliedCohorts?.[0]?.cohortId === cohortId
+                ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
+                student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?._id == cohortId
             )
             const filteredApplications = mappedStudents.filter((app: any) => {
               if (!selectedDateRange) return true;

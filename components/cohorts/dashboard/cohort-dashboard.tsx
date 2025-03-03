@@ -42,8 +42,8 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
         <TabsList className="w-full">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="litmus">LITMUS Test</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="litmus">LITMUS Test</TabsTrigger>
           {/* <TabsTrigger value="communication">Communication</TabsTrigger> */}
         </TabsList>
 
@@ -53,15 +53,15 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
         <TabsContent value="applications">
           <ApplicationsTab cohortId={cohortId} selectedDateRange={dateRange} />
         </TabsContent>
-        <TabsContent value="litmus">
-          <LitmusTab cohortId={cohortId} selectedDateRange={dateRange} />
-        </TabsContent>
         <TabsContent value="payments">
           <PaymentsTab cohortId={cohortId} selectedDateRange={dateRange} />
         </TabsContent>
-        <TabsContent value="communication">
-          <CommunicationsTab cohortId={cohortId} />
+        <TabsContent value="litmus">
+          <LitmusTab cohortId={cohortId} selectedDateRange={dateRange} />
         </TabsContent>
+        {/* <TabsContent value="communication">
+          <CommunicationsTab cohortId={cohortId} />
+        </TabsContent> */}
       </Tabs>
     </div>
   );

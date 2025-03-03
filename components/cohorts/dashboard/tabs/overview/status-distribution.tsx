@@ -20,30 +20,26 @@ export function StatusDistribution({ applications }: StatusDistributionProps) {
         // Under Review Count
         const underReview = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-            "under review"
+            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === "under review"
         );
         setUnderReviewCount(underReview.length);
   
         // Interviews Scheduled Count
         const onhold = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-            "on hold"
+            ['on hold', 'waitlist'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus)
         );
         setOnHoldCount(onhold.length);
   
         const accepted = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-            "accepted"
+            ['accepted', 'waitlist', 'selected'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus)
         );
         setAcceptedCount(accepted.length);
 
         const rejected = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-            "rejected"
+            ['rejected', 'not qualified'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus)
         );
         setRejectedCount(rejected.length);
 

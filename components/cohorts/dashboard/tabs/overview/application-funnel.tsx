@@ -22,38 +22,33 @@ export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
         // Applied Count
         const applied = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() !==
-            undefined
+            ['applied', 'reviewing', 'enrolled'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status)
         );
         setAppliedCount(applied.length);
   
         // Under Review Count
         const underReview = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-            "under review"
+            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === "under review"
         );
         setUnderReviewCount(underReview.length);
   
         // Interviews Scheduled Count
         const onhold = applications.filter(
           (application) =>
-            application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-            "complete"
+            ['waitlist', 'selected', 'not qualified'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus)
         );
         setInterviewedCount(onhold.length);
 
         const litmus = applications.filter(
           (application) =>
-          (application?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() !== "pending" &&
-          application?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() !== undefined)
+            ![undefined, 'pending'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status)
         );
         setLitmusCompleteCount(litmus.length);
   
         const enrolled = applications.filter(
           (application) =>
-            application?.litmusTestDetails?.[0]?.litmusTaskId?.status?.toLowerCase() ===
-            "completed"
+            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status === 'enrolled'
         );
         setEnrolledCount(enrolled.length);
 

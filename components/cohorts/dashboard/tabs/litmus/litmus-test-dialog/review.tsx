@@ -289,14 +289,13 @@ export function ReviewComponent({
 
     const performanceRating = rating;
 
-    console.log("hello", litmusTestDetails?._id,
+    console.log("results", litmusTestDetails?._id,
       "completed",
       results,
       feedbackData,
       assignedScholarshipId,
       performanceRating);
     
-
     try {
       console.log("Submitting to updateLitmusTaskStatus...");
       const response = await updateLitmusTaskStatus(

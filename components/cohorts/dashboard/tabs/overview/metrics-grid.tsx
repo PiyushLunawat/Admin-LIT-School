@@ -63,7 +63,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       // Under Review Count
       const underReview = applications.filter(
         (application) =>
-          application?.appliedCohorts?.[0]?.applicationDetails?.applicationStatus?.toLowerCase() ===
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
           "under review"
       );
       setUnderReviewCount(underReview.length);
@@ -71,7 +71,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       // Interviews Scheduled Count
       const interviewsScheduled = applications.filter(
         (application) =>
-          application?.applicationDetails?.applicationStatus?.toLowerCase() ===
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
           "interviews scheduled"
       );
       setInterviewsScheduledCount(interviewsScheduled.length);
@@ -79,14 +79,14 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       // Admission Fee Count
       const admissionFee = applications.filter(
         (application) =>
-          application?.cousrseEnrolled?.[application.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid'
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status === 'enrolled'
       );
       setAdmissionFeeCount(admissionFee.length);
 
       // Litmus Tests Count
       const litmusTests = applications.filter(
         (application) =>
-          application?.litmusTestDetails?.[0]?.litmusTaskId !== undefined
+          ![undefined, 'pending'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status)
       );
       setLitmusTestsCount(litmusTests.length);
       
@@ -97,16 +97,16 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       let percentageCount = 0;
   
       applications.forEach((application) => {
-        const scholarships = application.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipDetails?.flatMap((semester: any) => semester.installments) || [];
+        const scholarships = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.semesterFeeDetails?.flatMap((semester: any) => semester.installments) || [];
         scholarships.forEach((installment: any) => {
           if (installment?.scholarshipAmount) {
             totalScholarship += installment.scholarshipAmount;
             scholarshipCount += 1;
           }
         });
-        const percentage = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+        const percentage = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
         if (percentage) {
-          totalPercentage += application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+          totalPercentage += application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
           percentageCount += 1;
         }
       });
@@ -116,8 +116,8 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
   
       // Total Token Amount Paid
       const tokensPaid = applications.reduce((sum, application) => {
-        const tokenAmount = application?.cohort?.cohortFeesDetail?.tokenFee || 0;
-        const lastEnrollment = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+        const tokenAmount = Number(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
+        const lastEnrollment = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
         if (lastEnrollment?.tokenFeeDetails?.verificationStatus === 'paid') {
           return sum + (tokenAmount || 0);
         }
@@ -130,7 +130,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       let installmentAmountPaid = 0;
 
       applications.forEach((application) => {
-        const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+        const lastEnrolled = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
         if (!lastEnrolled) return;
 
         // One-Shot Payment Processing

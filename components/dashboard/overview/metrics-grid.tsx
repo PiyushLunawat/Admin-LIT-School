@@ -116,10 +116,6 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
 
           const latestCohort = app?.appliedCohorts?.[app?.appliedCohorts.length - 1];
           const cohortDetails = latestCohort?.cohortId;
-          const applicationDetails = latestCohort?.applicationDetails;
-          const litmusTestDetails = latestCohort?.litmusTestDetails;
-          const tokenFeeDetails = latestCohort?.tokenFeeDetails;
-          const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
 
           // --- Date Range Check ---
           if (selectedDateRange) {
@@ -145,7 +141,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
           // --- Program Check ---
           if (selectedProgram !== "all-programs") {
             // Suppose 'app.program' is how you store it
-            if ((cohortDetails.programDetail.name || "").toLowerCase() !== selectedProgram.toLowerCase()) {
+            if ((cohortDetails?.programDetail?.name) !== selectedProgram) {
               return false;
             }
           }
@@ -153,7 +149,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
           // --- Cohort Check ---
           if (selectedCohort !== "all-cohorts") {
             // Suppose 'app.cohort' is how you store it
-            if ((cohortDetails.cohortId || "").toLowerCase() !== selectedCohort.toLowerCase()) {
+            if ((cohortDetails?.cohortId) !== selectedCohort) {
               return false;
             }
           }

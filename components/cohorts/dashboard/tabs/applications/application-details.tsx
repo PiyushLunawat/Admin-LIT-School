@@ -270,11 +270,13 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                 <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2"/>
                 Send WhatsApp
               </Button> */}
-              <Button variant="outline" className="justify-start" >
+              <Button variant="outline" className="justify-start min-px-2" disabled
+              // onClick={() => setInterviewOpen(true)}
+              >
                 <Calendar className="h-4 w-4 mr-2" />
-                Schedule Interview
+                <span className="truncate w-[170px]">Schedule Presentation</span>
               </Button>
-              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+              <Button variant="outline" className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                 <UserMinus className="h-4 w-4 mr-2" />
                 Mark as Dropped
               </Button>
@@ -329,9 +331,13 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                   <h5 className="font-medium text-[#00A3FF]">{task.title}</h5>
                   <p className="text-muted-foreground text-sm capitalize">
                     Submission Type:{" "}
-                    {task.config
-                      .map((configItem: any) => configItem.type)
-                      .join(", ")}
+                    {task.config.map((configItem: any) => {
+                      const type = configItem.type.toLowerCase();
+                      return (type === "long" || type === "short") 
+                        ? `${configItem.type} Text`
+                        : `${configItem.type}s`;
+                    })
+                    .join(", ")}
                   </p>
                 </div>
                 {applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 &&

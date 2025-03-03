@@ -122,11 +122,16 @@ export default function StudentsPage() {
     
           // 4) Application Status check
           if (selectedAppStatus !== "all-statuses") {
-            // e.g. "under review" vs. "accepted"
-            if (applicationDetails?.applicationStatus !== selectedAppStatus) {
-              return false;
+            if (["under review", "accepted", "rejected"].includes(selectedAppStatus.toLowerCase())) {
+              if (applicationDetails?.applicationStatus?.toLowerCase() !== selectedAppStatus.toLowerCase()) {
+                return false;
+              }
+            } else {
+              if (latestCohort?.status?.toLowerCase() !== selectedAppStatus.toLowerCase()) {
+                return false;
+              }
             }
-          }
+          }          
     
           // 5) Payment Status check
           if (selectedPaymentStatus !== "all-payments") {
