@@ -712,7 +712,7 @@ function ResourcesSection({
           <Link2Icon className="w-4 h-4" /> Attach Resource Link
         </Button>
       </div>
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 text-sm">{error}</p>}
     </div>
   );
 }
