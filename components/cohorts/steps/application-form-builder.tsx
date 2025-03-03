@@ -34,7 +34,6 @@ import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
 
-
 import {
   S3Client,
   DeleteObjectCommand,
@@ -47,7 +46,6 @@ const s3Client = new S3Client({
     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY as string,
   },
 });
-
 
 const formSchema = z.object({
   applicationFormDetail: z.array(
@@ -583,7 +581,7 @@ function ResourcesSection({
   const generateUniqueFileName = (originalName: string) => {
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 8);
-    return `${timestamp}-${randomStr}-${originalName}`;
+    return `${timestamp}-${originalName}`;
   };
 
   return (

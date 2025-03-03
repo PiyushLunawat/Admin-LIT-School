@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ApplicationDetails } from "./application-details";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getCohorts } from "@/app/api/cohorts";
 import { DateRange } from "react-day-picker";
@@ -35,6 +35,7 @@ export function InterviewsQueue() {
   const [refreshKey, setRefreshKey] = useState(0); 
 
   useEffect(() => {
+    setLoading(true);
     async function fetchStudents() {
       try {
         const response = await getStudents();
@@ -103,7 +104,7 @@ export function InterviewsQueue() {
 
     setFeePaid(
       applications.filter(
-        (student: any) => student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );   
     
@@ -222,6 +223,14 @@ export function InterviewsQueue() {
           >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
+          </Button>
+          <Button
+            variant="outline"
+            size={'icon'}
+            onClick={handleApplicationUpdate}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>

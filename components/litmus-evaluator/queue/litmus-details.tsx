@@ -268,7 +268,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
               <FileSignature className=""/>Review Submission
             </Button>}
             <Card>
-            {latestCohort?.cohortId?.litmusTestDetail[0]?.litmusTasks.map((task: any, taskIndex: any) => (
+            {latestCohort?.cohortId?.litmusTestDetail?.[0]?.litmusTasks.map((task: any, taskIndex: any) => (
               <div key={taskIndex} className="border-b mx-2 py-4 px-2 space-y-2">
                 <div className="grid">
                   <h5 className="text-[#00A3FF] font-medium">{task.title}</h5>
@@ -286,8 +286,8 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
                         <span className="text-sm">
                           {
                             // Check if the score exists and display the score, otherwise display a default value
-                            litmusTestDetails?.results[taskIndex]?.score[criterionIndex]?.score
-                              ? (litmusTestDetails?.results[taskIndex]?.score[criterionIndex]?.score+'/')
+                            litmusTestDetails?.results?.[taskIndex]?.score?.[criterionIndex]?.score
+                              ? (litmusTestDetails?.results?.[taskIndex]?.score?.[criterionIndex]?.score+'/')
                               : "" 
                           }
                           {criterion?.points}
@@ -296,7 +296,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
                     </div>
                   ))}
                   {(() => {
-                      const totalScore = litmusTestDetails?.results[taskIndex]?.score.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
+                      const totalScore = litmusTestDetails?.results?.[taskIndex]?.score.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
                       const maxScore = task?.judgmentCriteria.reduce((acc: any, criterion: any) => acc + Number(criterion.points), 0);
                       const percentage = totalScore ? ((totalScore / maxScore) * 100).toFixed(0) : '--';
                       
@@ -319,7 +319,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
             ))}
             <div className="mx-2 py-4 px-2 space-y-2">               
               <p className="text-sm text-muted-foreground">Feedback:</p>
-              {litmusTestDetails?.overAllfeedback[litmusTestDetails?.overAllfeedback.length - 1]?.feedback.map((feedback: any, feedbackIndex: any) => (
+              {litmusTestDetails?.overAllfeedback?.[litmusTestDetails?.overAllfeedback.length - 1]?.feedback.map((feedback: any, feedbackIndex: any) => (
                 <div key={feedbackIndex} className="space-y-1">
                 <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
                   {feedback?.data.map((criterion: any, criterionIndex: any) => (

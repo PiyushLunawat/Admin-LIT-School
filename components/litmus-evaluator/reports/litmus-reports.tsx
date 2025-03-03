@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { PerformanceMetrics } from "./performance-metrics";
 import { EvaluationInsights } from "./evaluation-insights";
 import { ReportFilters } from "./report-filters";
@@ -26,6 +26,7 @@ export function LitmusReports({ initialApplications, setInitialApplications }: L
   const [selectedCohort, setSelectedCohort] = useState<string>("all-cohorts");
 
   useEffect(() => {
+    setLoading(true);
     async function fetchStudents() {
       try {
         const response = await getStudents();
@@ -91,6 +92,14 @@ export function LitmusReports({ initialApplications, setInitialApplications }: L
           <Button variant="outline" onClick={() => handleExport("excel")}>
             <Download className="h-4 w-4 mr-2" />
             Export Excel
+          </Button>
+          <Button
+            variant="outline"
+            size={'icon'}
+            // onClick={handleApplicationUpdate}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>

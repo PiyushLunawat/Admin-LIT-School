@@ -5,7 +5,7 @@ import { LitmusTestList } from "./litmus-test-list";
 import { LitmusTestFilters } from "./litmus-test-filters";
 import { LitmusTestDetails } from "./litmus-test-details";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
@@ -30,6 +30,7 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
 
   useEffect(() => {
         async function fetchStudents() {
+          setLoading(true);
           try {
             const response = await getStudents();
             const mappedStudents = response.data.filter((student: any) => (
@@ -157,14 +158,32 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">LITMUS Test Submissions</h2>
-        <Button
-          variant="outline"
-          onClick={handleBulkExport}
-          disabled={selectedSubmissionIds.length === 0}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export Selected
-        </Button>
+        <div className="flex gap-2">
+          {/* <Button
+            variant="outline"
+            onClick={handleBulkEmail}
+            disabled={selectedApplicationIds.length === 0}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Bulk Email
+          </Button> */}
+          <Button
+            variant="outline"
+            onClick={handleBulkExport}
+            disabled={selectedSubmissionIds.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Selected
+          </Button>
+          <Button
+            variant="outline"
+            size={'icon'}
+            onClick={handleApplicationUpdate}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </div>
 
       <LitmusTestFilters

@@ -5,7 +5,7 @@ import { ApplicationsList } from "./applications-list";
 import { ApplicationFilters } from "./application-filters";
 import { ApplicationDetails } from "./application-details";
 import { Button } from "@/components/ui/button";
-import { Mail, Download } from "lucide-react";
+import { Mail, Download, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getCurrentStudents, getStudents } from "@/app/api/student";
 import { DateRange } from "react-day-picker";
@@ -29,6 +29,7 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
   const [refreshKey, setRefreshKey] = useState(0); 
 
   useEffect(() => {
+      setLoading(true);
       async function fetchStudents() {
         try {
           const response = await getStudents();
@@ -177,6 +178,14 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
           >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
+          </Button>
+          <Button
+            variant="outline"
+            size={'icon'}
+            onClick={handleApplicationUpdate}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>

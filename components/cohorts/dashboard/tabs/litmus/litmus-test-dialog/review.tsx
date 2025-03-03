@@ -59,26 +59,22 @@ export function ReviewComponent({
     {
       title: "Strengths",
       data:
-      litmusTestDetails?.overAllfeedback[0]
-          ?.feedback[0]?.data || [],
+      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[0]?.data || [],
     },
     {
       title: "Weakness",
       data:
-      litmusTestDetails?.overAllfeedback[0]
-          ?.feedback[1]?.data || [],
+      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[1]?.data || [],
     },
     {
       title: "Opportunities",
       data:
-      litmusTestDetails?.overAllfeedback[0]
-          ?.feedback[2]?.data || [],
+      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[2]?.data || [],
     },
     {
       title: "Threats",
       data:
-      litmusTestDetails?.overAllfeedback[0]
-          ?.feedback[3]?.data || [],
+      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[3]?.data || [],
     },
   ];
 
@@ -394,7 +390,7 @@ export function ReviewComponent({
             <Badge variant={'lemon'} className="px-3 py-1 text-md font-medium">
               Submission 0{index+1}
             </Badge>
-            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.text?.map(
+            {litmusTestDetails?.litmustasks?.[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.text?.map(
               (textItem: string, id: number) => (
                 <div
                   key={`text-${id}`}
@@ -404,7 +400,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.links?.map(
+            {litmusTestDetails?.litmustasks?.[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.links?.map(
               (linkItem: string, id: number) => (
                 <div
                   key={`link-${id}`}
@@ -417,7 +413,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.images?.map(
+            {litmusTestDetails?.litmustasks?.[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.images?.map(
               (imageItem: string, id: number) => (
                 <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
                   <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-contain rounded-t-xl' />
@@ -437,7 +433,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.videos?.map(
+            {litmusTestDetails?.litmustasks?.[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.videos?.map(
               (videoItem: string, id: number) => (
                 <div key={`video-${id}`} className="w-full flex flex-col w-fit items-center text-sm border rounded-xl">
                   <video controls preload="none" className='h-[420px] rounded-t-xl'>
@@ -460,7 +456,7 @@ export function ReviewComponent({
                 </div>
               )
             )}
-            {litmusTestDetails?.litmustasks[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.files?.map(
+            {litmusTestDetails?.litmustasks?.[litmusTestDetails?.litmustasks.length - 1]?.[index]?.task?.files?.map(
               (fileItem: string, id: number) => (
                 <div
                   key={`file-${id}`}

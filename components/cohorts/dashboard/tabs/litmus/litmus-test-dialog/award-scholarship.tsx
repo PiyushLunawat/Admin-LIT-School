@@ -64,7 +64,7 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
     );
 
     setSch(schSlab);
-    setSelectedSch(schSlab);
+    setSelectedSch(litmusTestDetails?.scholarshipDetail);
 }, [litmusTestDetails?.scholarshipDetail]);
 
   const handleSelect = (slabName: string) => {
@@ -77,10 +77,10 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
   };
 
   const handleScholarship = async () => {
-console.log("award",latestCohort._id, selectedSch._id);
+console.log("award",student?._id, selectedSch._id, litmusTestDetails?._id);
 
     try {
-      const result = await updateScholarship(latestCohort._id, selectedSch._id);
+      const result = await updateScholarship(student?._id, selectedSch._id, litmusTestDetails?._id);
       console.log("Scholarship updated successfully:", result);
     } catch (error) {
       console.error("Failed to update scholarship:", error);

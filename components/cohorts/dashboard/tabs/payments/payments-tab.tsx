@@ -6,7 +6,7 @@ import { PaymentsList } from "./payments-list";
 import { PaymentsFilters } from "./payments-filters";
 import { PaymentDetails } from "./payment-details";
 import { Button } from "@/components/ui/button";
-import { Mail, Download } from "lucide-react";
+import { Mail, Download, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
@@ -159,6 +159,14 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
           >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
+          </Button>
+          <Button
+            variant="outline"
+            size={'icon'}
+            onClick={handleApplicationUpdate}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>

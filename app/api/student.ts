@@ -182,7 +182,8 @@ export async function updateLitmusTaskStatus(
 
 export async function updateScholarship(
   studentId: string,
-  scholarshipId: string
+  scholarshipId: string,
+  litmusDocId: string
 ) {
   try {
     const response = await fetch(
@@ -190,7 +191,7 @@ export async function updateScholarship(
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, scholarshipId }),
+        body: JSON.stringify({ studentId, scholarshipId, litmusDocId }),
       }
     );
 
@@ -303,7 +304,7 @@ export async function verifyTokenAmount(
       );
     }
 
-    return await response; // Parse and return the response JSON
+    return await response.json(); // Parse and return the response JSON
   } catch (error) {
     console.error("Error in verifyTokenAmount:", error);
     throw error;

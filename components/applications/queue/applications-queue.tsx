@@ -5,7 +5,7 @@ import { ApplicationsList } from "./applications-list";
 import { ApplicationFilters } from "./application-filters";
 import { ApplicationDetails } from "./application-details";
 import { Button } from "@/components/ui/button";
-import { Mail, Download } from "lucide-react";
+import { Mail, Download, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getCohorts } from "@/app/api/cohorts";
 import { DateRange } from "react-day-picker";
@@ -40,6 +40,7 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
   const [refreshKey, setRefreshKey] = useState(0); 
 
   useEffect(() => {
+    setLoading(true);
     async function fetchStudents() {
       try {
         const response = await getStudents();
@@ -109,7 +110,7 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
 
     setFeePaid(
       applications.filter(
-        (student: any) => student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && student?.cohort?.cohortId === selectedCohort
+        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
       ).length
     );   
     
@@ -228,6 +229,14 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
           >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
+          </Button>
+          <Button
+            variant="outline"
+            size={'icon'}
+            onClick={handleApplicationUpdate}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>

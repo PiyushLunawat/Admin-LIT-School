@@ -274,7 +274,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         <CardHeader>
           <CardTitle>Instalment Breakdown</CardTitle>
         </CardHeader>
-        <CardContent className="flex gap-4 ">
+        <CardContent className={`grid grid-cols-${instalmentBreakdown.length <= 4 ? instalmentBreakdown.length : 3} gap-4 `}>
           {instalmentBreakdown.map((semester, semesterIndex) => (
             <div key={semesterIndex} className="space-y-2 flex-1">
               <Badge variant="blue" className="py-1">Semester {semester.semester}</Badge>

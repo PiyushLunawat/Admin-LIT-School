@@ -62,7 +62,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
         return;
       }  
       const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
-      console.log("Token verification response:", response);
+      console.log("Token verification response:", response.data);
       onUpdateStatus();
     } catch (error) {
       console.error("Error verifying token amount:", error);

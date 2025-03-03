@@ -72,6 +72,7 @@ export function StudentsList({
       case "accepted":
       case "selected":
       case "paid":
+      case "enrolled":
         return "success";
       case "pending":
         return "lemon";

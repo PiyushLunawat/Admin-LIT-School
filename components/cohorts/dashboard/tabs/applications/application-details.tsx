@@ -382,7 +382,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
             application={application}
             initialStatus={status}
             ques={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} 
-            submission={applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}
+            submission={applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks?.[0]}
             onClose={() => setFeedbackOpen(false)}
             onUpdateStatus={(newStatus) => handleStatusUpdate(newStatus)}
           />
@@ -401,7 +401,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
               </div>
             </div>
           </div>
-          <SubmissionView tasks={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} submission={applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks[0]}/>
+          <SubmissionView tasks={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task} submission={applicationDetail?.applicationTasks?.[applicationDetail?.applicationTasks.length - 1]?.applicationTasks?.[0]}/>
         </DialogContent>
       </Dialog>
 

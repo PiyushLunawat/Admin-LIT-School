@@ -119,7 +119,7 @@ export function CohortDetails({ cohort, applied, intCleared, feePaid }: CohortDe
             <Progress
               states={[
                 { value: feePaid, widt: (feePaid / cohort.totalSeats) * 100, color: '#2EB88A' },
-                { value: intCleared, widt: ((intCleared) / cohort.totalSeats) * 100, color: '#00A3FF' },
+                { value: intCleared, widt: ((intCleared-feePaid) / cohort.totalSeats) * 100, color: '#00A3FF' },
                 { value: applied, widt: ((applied-intCleared-feePaid) / cohort.totalSeats) * 100, color: '#FF791F' },
               ]}
             />

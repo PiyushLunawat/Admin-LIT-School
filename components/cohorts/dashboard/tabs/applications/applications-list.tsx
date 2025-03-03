@@ -95,9 +95,7 @@ export function ApplicationsList({
   };
 
   useEffect(() => {
-    if (applications.length > 0) {
-      console.log("dd",applications);
-      
+    if (applications.length > 0) {      
       const firstApplication = applications[0];
       setSelectedRowId(firstApplication._id); 
       onApplicationSelect(firstApplication); 
@@ -139,6 +137,7 @@ export function ApplicationsList({
                 key={application._id}
                 className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
                 onClick={() => {
+                  console.log("dubbs",application)
                   onApplicationSelect(application)
                   setSelectedRowId(application._id);
                 }}

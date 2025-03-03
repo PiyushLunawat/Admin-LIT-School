@@ -41,8 +41,6 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   const [status, setStatus] = useState<string>(initialStatus);
   const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[]; }>({});
   const [reason, setReason] = useState<string[]>([""]);
-  const [taskList, setTaskList] = useState<Task[]>([]);
-  const [feedbackId, setFeedbackId] = useState("");
   const [reasonItemValue, setReasonItemValue] = useState("• ");
 
   const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
@@ -50,30 +48,30 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   const applicationTaskId = latestCohort?.applicationDetails?.applicationTasks?.[latestCohort?.applicationDetails?.applicationTasks.length - 1]?._id;
   const subTaskId = latestCohort?.applicationDetails?.applicationTasks?.[latestCohort?.applicationDetails?.applicationTasks.length - 1]?.applicationTasks[0]?._id;
 
-  useEffect(() => {
-    if (taskList && taskList.length > 0) {
-      // Build an object with each task’s _id => ["• "]
-      const initialFeedbacks: { [taskId: string]: string[] } = {};
-      taskList.forEach((task) => {
-        initialFeedbacks[task._id] = ["• "];
-      });
-      setFeedbacks(initialFeedbacks);
-    }
-  }, [taskList]);
+  const taskList = (latestCohort?.applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks || []);
 
-  useEffect(() => {
-    async function fetchApplicationDetails() {
-      try {
-        const applicationDetails = await getStudentApplication(application?._id);
-        console.log("Application Details:", applicationDetails.data.applicationTasks[0]?._id);
-        setTaskList(applicationDetails.data.applicationTasks[0]?.tasks || []);
-        setFeedbackId(applicationDetails.data?.applicationTasks[0]?._id)
-      } catch (error) {
-        console.error("Error fetching application details:", error);
-      }
-    }
-    fetchApplicationDetails();
-  }, [application]);
+    // if (taskList && taskList.length > 0) {
+    //   // Build an object with each task’s _id => ["• "]
+    //   const initialFeedbacks: { [taskId: string]: string[] } = {};
+    //   taskList.forEach((task: any) => {
+    //     initialFeedbacks[task._id] = ["• "];
+    //   });
+    //   setFeedbacks(initialFeedbacks);
+    // }
+
+  // useEffect(() => {
+  //   async function fetchApplicationDetails() {
+  //     try {
+  //       const applicationDetails = await getStudentApplication(application?._id);
+  //       console.log("Application Details:", applicationDetails.data.applicationTasks[0]?._id);
+  //       setTaskList(applicationDetails.data.applicationTasks[0]?.tasks || []);
+  //       setFeedbackId(applicationDetails.data?.applicationTasks[0]?._id)
+  //     } catch (error) {
+  //       console.error("Error fetching application details:", error);
+  //     }
+  //   }
+  //   fetchApplicationDetails();
+  // }, [application]);
 
   const handleStatusChange = (value: string) => {
     setStatus(value);
@@ -86,7 +84,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
       setFeedbacks((prevFeedbacks) => {
         const newFeedbacks = { ...prevFeedbacks };
         // For each task, if there is no feedback or it's empty, init with ["• "]
-        taskList.forEach((task) => {
+        taskList.forEach((task: any) => {
           const existing = newFeedbacks[task._id];
           if (!existing || existing.length === 0) {
             newFeedbacks[task._id] = ["• "];
@@ -244,7 +242,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
           applicationTaskId,
           subTaskId,
           status,
-           feedbackData
+          feedbackData
         });
 
         // Send feedback data to backend
@@ -302,13 +300,13 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">Why are you interested in joining The LIT School?</h4>
               <div className="mt-2">
-                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text1}</div> 
+                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.[0]}</div> 
               </div>
             </div>
             <div className='space-y-1'>
               <h4 className="font-medium text-[#00A3FF]">What are your career goals or aspirations??</h4>
               <div className="mt-2">
-                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.text2}</div> 
+                <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">{submission?.courseDive?.[1]}</div> 
               </div>
             </div>
           </div>
@@ -335,12 +333,12 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                   </div>
                 </div>
                 <div className='flex flex-wrap gap-2 mt-2'>
-                  {submission?.tasks[index]?.task?.text?.map((textItem: string, id: number) => (
+                  {submission?.tasks[index]?.text?.map((textItem: string, id: number) => (
                     <div key={`text-${id}`} className="w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl">
                       {textItem}
                     </div>
                   ))}
-                  {submission?.tasks[index]?.task?.links?.map((linkItem: string, id: number) => (
+                  {submission?.tasks[index]?.links?.map((linkItem: string, id: number) => (
                     <div key={`link-${id}`} className="w-full flex items-center gap-2 text-sm p-3 border rounded-xl">
                       <Link2Icon className="w-4 h-4" />
                       <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
@@ -348,7 +346,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                       </a>
                     </div>
                   ))}
-                  {submission?.tasks[index]?.task?.images?.map((imageItem: string, id: number) => (
+                  {submission?.tasks[index]?.images?.map((imageItem: string, id: number) => (
                     <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
                       <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-contain rounded-t-xl' />
                       <div className='w-full flex justify-between items-center p-3'>
@@ -366,7 +364,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                       </div>
                     </div>
                   ))}
-                  {submission?.tasks[index]?.task?.videos?.map((videoItem: string, id: number) => (
+                  {submission?.tasks[index]?.videos?.map((videoItem: string, id: number) => (
                     <div key={`video-${id}`} className="w-full flex flex-col w-fit items-center text-sm border rounded-xl">
                       <video controls preload="none" className='h-[420px] rounded-t-xl'>
                         <source src={videoItem} type="video/mp4" />
@@ -387,7 +385,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                       </div>
                     </div>
                   ))}
-                  {submission?.tasks[index]?.task?.files?.map((fileItem: string, id: number) => (
+                  {submission?.tasks[index]?.files?.map((fileItem: string, id: number) => (
                     <div key={`file-${id}`} className="flex w-full items-center gap-2 text-sm p-3 border rounded-xl">
                       <FileIcon className="w-4 h-4" />
                       <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">

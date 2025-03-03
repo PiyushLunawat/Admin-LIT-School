@@ -266,7 +266,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                   </>
                 );
               })()}
-            {litmusTestDetails?.status === 'under review' && <Button className="w-full flex gap-2" onClick={() => {setOpen(true);}}>
+            {litmusTestDetails?.status === 'submitted' && <Button className="w-full flex gap-2" onClick={() => {setOpen(true);}}>
               <FileSignature className=""/>Review Submission
             </Button>}
             <Card>
@@ -321,7 +321,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
             ))}
             <div className="mx-2 py-4 px-2 space-y-2">               
               <p className="text-sm text-muted-foreground">Feedback:</p>
-              {litmusTestDetails?.overAllfeedback[litmusTestDetails?.overAllfeedback.length - 1]?.feedback.map((feedback: any, feedbackIndex: any) => (
+              {litmusTestDetails?.overAllfeedback?.[litmusTestDetails?.overAllfeedback.length - 1]?.feedback.map((feedback: any, feedbackIndex: any) => (
                 <div key={feedbackIndex} className="space-y-1">
                 <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
                   {feedback?.data.map((criterion: any, criterionIndex: any) => (
