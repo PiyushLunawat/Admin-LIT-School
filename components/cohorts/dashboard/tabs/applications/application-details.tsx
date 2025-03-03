@@ -365,7 +365,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                       ))}
                       <div className="flex justify-between items-center mt-2">
                         <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
-                        <div className="font-medium text-sm text-muted-foreground">{new Date(feedback?.timestamp).toLocaleDateString()}</div>
+                        <div className="font-medium text-sm text-muted-foreground">{new Date(feedback?.date).toLocaleDateString()}</div>
                       </div>
                     </div>
                 ))}

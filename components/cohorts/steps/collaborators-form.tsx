@@ -28,9 +28,9 @@ import { useToast } from "@/hooks/use-toast";
 
 // Roles array (as before)
 const roles = [
-  { value: "application_reviewer", label: "Application Reviewer" },
+  // { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
-  { value: "fee_collector", label: "Fee Collector" },
+  // { value: "fee_collector", label: "Fee Collector" },
   { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
 ];
 

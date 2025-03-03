@@ -434,7 +434,8 @@ function ResourcesSection({
     if (!selectedFiles || selectedFiles.length === 0) return;
 
     const file = selectedFiles[0];
-    setFileName(file.name);
+    const fileKey = generateUniqueFileName(file.name)
+    setFileName(fileKey);
 
     // Example size limit for direct vs. multipart: 5MB
     const CHUNK_SIZE = 100 * 1024 * 1024; // 5 MB
@@ -448,11 +449,11 @@ function ResourcesSection({
       let fileUrl = "";
       if (file.size <= CHUNK_SIZE) {
         // Use direct upload
-        fileUrl = await uploadDirect(file);
+        fileUrl = await uploadDirect(file, fileKey);
         console.log("uploadDirect File URL:", fileUrl);
       } else {
         // Use multipart upload
-        fileUrl = await uploadMultipart(file, CHUNK_SIZE);
+        fileUrl = await uploadMultipart(file, CHUNK_SIZE, fileKey);
         console.log("uploadMultipart File URL:", fileUrl);
       }
 
@@ -467,13 +468,11 @@ function ResourcesSection({
     }
   };
 
-    const handleDeleteFile = async (fileUrl: string, index: number) => {
+    const handleDeleteFile = async (fileKey: string, index?: number) => {
       try {
-        const fileKey = fileUrl.split("/").pop(); // Extract file key from URL
-        console.log("fuckey", fileKey)
   
         if (!fileKey) {
-          console.error("Invalid file URL:", fileUrl);
+          console.error("Invalid file URL:", fileKey);
           return;
         }
   
@@ -484,7 +483,7 @@ function ResourcesSection({
         });
   
         await s3Client.send(deleteCommand);
-        console.log("File deleted successfully from S3:", fileUrl);
+        console.log("File deleted successfully from S3:", fileKey);
   
         // Remove from UI
         removeFile(index);
@@ -495,12 +494,12 @@ function ResourcesSection({
     };
 
   // Direct upload to S3 using a single presigned URL
-  const uploadDirect = async (file: File) => {
+  const uploadDirect = async (file: File, fileKey:string) => {
     // Step 1: Get presigned URL from your server
     // Make sure your endpoint returns something like { url: string }
     const { data } = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url`, {
       bucketName: "dev-application-portal",
-      key: generateUniqueFileName(file.name),
+      key: fileKey,
     });
     const { url, key } = data; // Suppose your API returns both presigned `url` and `key`
     console.log("whatatata",url.split("?")[0]);
@@ -525,9 +524,9 @@ function ResourcesSection({
    * - generate-presigned-url-part
    * - complete-multipart-upload
    */
-  const uploadMultipart = async (file: File, chunkSize: number) => {
+  const uploadMultipart = async (file: File, chunkSize: number, fileKey:string) => {
     // Step 1: Initiate
-    const uniqueKey = generateUniqueFileName(file.name);
+    const uniqueKey = fileKey;
     const initiateRes = await axios.post(`${process.env.API_URL}/admin/initiate-multipart-upload`, {
       bucketName: "dev-application-portal",
       key: uniqueKey,
@@ -612,7 +611,7 @@ function ResourcesSection({
                     variant="ghost"
                     size="icon"
                     className="absolute right-2 top-1.5 h-7 rounded-full"
-                    onClick={() => handleDeleteFile(field.value, index)}
+                    onClick={() => handleDeleteFile(field.value.split("/").pop(), index)}
                   >
                     <XIcon className="h-4 w-4" />
                   </Button>
@@ -643,6 +642,7 @@ function ResourcesSection({
               variant="ghost"
               size="icon"
               className="h-7 rounded-full"
+              onClick={() => handleDeleteFile(fileName)}
             >
               <XIcon className="h-4 w-4" />
             </Button>
