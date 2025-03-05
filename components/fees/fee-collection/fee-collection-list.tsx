@@ -21,7 +21,7 @@ import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applicat
 import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
 import { PaymentInformationTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/payment-info-tab";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "pending" | "default";
 
 interface FeeCollectionListProps {
   applications: any;
@@ -72,7 +72,7 @@ export function FeeCollectionList({
             return "warning";
           case "verification pending":
           case "pending":
-            return "lemon";
+            return "pending";
           case "complete":
             return "default";
           default:

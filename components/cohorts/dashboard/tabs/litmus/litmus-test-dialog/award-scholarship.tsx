@@ -202,20 +202,23 @@ console.log("award",student?._id, selectedSch._id, litmusTestDetails?._id);
                         </div>
                     </div>
                     ))}
-                    <div className="mx-2 py-4 px-2 space-y-2">               
-                    <p className="text-sm text-muted-foreground">Feedback:</p>
-                    {litmusTestDetails?.overAllfeedback[0]?.feedback.map((feedback: any, feedbackIndex: any) => (
-                        <div key={feedbackIndex} className="space-y-1">
-                        <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
-                        {feedback?.data.map((criterion: any, criterionIndex: any) => (
-                            <li key={criterionIndex} className="text-sm pl-3">
-                            {criterion}
-                            </li>
+                    {(litmusTestDetails?.overallFeedback && litmusTestDetails.overallFeedback.length > 0) &&
+                      <div className="mx-2 py-4 px-2 space-y-2">
+                        <p className="text-sm text-muted-foreground">Feedback:</p>
+                        {litmusTestDetails.overallFeedback[litmusTestDetails.overallFeedback.length - 1]?.feedback
+                          .filter((feedback: any) => feedback?.data && feedback.data.length > 0)
+                          .map((feedback: any, feedbackIndex: any) => (
+                            <div key={feedbackIndex} className="space-y-1">
+                              <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
+                              {feedback?.data.map((criterion: any, criterionIndex: any) => (
+                                <li key={criterionIndex} className="text-sm pl-3">
+                                  {criterion}
+                                </li>
+                              ))}
+                            </div>
                         ))}
-                        </div>
-                    ))}
-                </div>
-
+                      </div>
+                    }
                     </Card>
                 </div>
             </div>

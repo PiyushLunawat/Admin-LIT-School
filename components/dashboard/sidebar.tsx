@@ -34,26 +34,26 @@ const routes = [
     icon: Users,
     href: "/dashboard/students",
   },
-  {
-    label: "Applications",
-    icon: ClipboardList,
-    href: "/dashboard/applications",
-  },
+  // {
+  //   label: "Applications",
+  //   icon: ClipboardList,
+  //   href: "/dashboard/applications",
+  // },
   // {
   //   label: "Interviews",
   //   icon: Calendar,
   //   href: "/dashboard/interviews",
   // },
-  {
-    label: "LITMUS Test",
-    icon: GraduationCap,
-    href: "/dashboard/litmus-evaluator",
-  },
-  {
-    label: "Fees",
-    icon: CreditCard,
-    href: "/dashboard/fees",
-  },
+  // {
+  //   label: "LITMUS Test",
+  //   icon: GraduationCap,
+  //   href: "/dashboard/litmus-evaluator",
+  // },
+  // {
+  //   label: "Fees",
+  //   icon: CreditCard,
+  //   href: "/dashboard/fees",
+  // },
 ];
 
 export function Sidebar() {

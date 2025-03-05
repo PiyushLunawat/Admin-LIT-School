@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { log } from "console";
-import { Download, FileIcon, FileText, HandMetal, ImageIcon, Link, Link2Icon, VideoIcon } from "lucide-react";
+import { ArrowUpRight, Download, File, FileIcon, FileText, FileTextIcon, HandMetal, ImageIcon, Link, Link2, Link2Icon, VideoIcon } from "lucide-react";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { boolean } from "zod";
 
@@ -244,37 +244,46 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
       </div>
 
       <div className="space-y-1">
-        <h4 className="font-medium pl-3">Resources</h4>
+        <h4 className="font-medium">Resources</h4>
         <div className="space-y-2">
-          <div className="flex gap-2">
-          {/* {Task?.resources?.resourceFile && 
-          <div className="border rounded-md p-2 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <FileText className="w-4" />
-              <span>{Task?.resources?.resourceFile}</span>
-            </div>
-          </div>} */}
-          
-          {/* {Task?.resources?.resourceLink && 
-          <div className="border rounded-md p-2 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Link2Icon className="w-4" />
-              <a href={Task?.resources?.resourceLink} target="_blank" rel="noopener noreferrer" className="text-white">
-                {Task?.resources?.resourceLink}
-              </a>
-            </div>
-          </div>} */}
+          <div className='w-full space-y-2'>
+            {Task?.resources?.resourceFiles.map((file: any, index: number) => (
+              <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                <div className="flex items-center gap-2">
+                  <FileIcon className="w-4 h-4" />
+                  <span className="text-white text-sm truncate max-w-[700px]">{file.split('/').pop()}</span>
+                </div>
+                <Button variant="ghost" size="icon" type='button'
+                  className="text-white rounded-xl">
+                  <Download className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+
+            {Task?.resources?.resourceLinks.map((link: any, index: number) => (
+              <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                <div className="flex items-center gap-2 ">
+                  <Link2 className="w-4 h-4" />
+                  <div className="text-white text-sm truncate max-w-[700px]">{link}</div>
+                </div>
+                <Button
+                  variant="ghost" size="icon" type='button'
+                  className="text-white rounded-xl">
+                  <ArrowUpRight className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-      </div>
+    </div>
 
-     {litmusTestDetails?.litmusTasks?.[litmusTestDetails?.litmusTasks.length - 1]?.tasks && 
+    {litmusTestDetails?.litmusTasks?.[litmusTestDetails?.litmusTasks.length - 1]?.tasks && 
      <div className="space-y-2">
-        <Badge variant={'lemon'} className="px-3 py-1 text-md font-medium">
+        <Badge variant={'pending'} className="px-3 py-1 text-md font-medium">
           Submission 0{index+1}
         </Badge>
-        {litmusTestDetails?.litmusTasks?.[litmusTestDetails?.litmusTasks.length - 1]?.tasks?.[index]?.text?.map((textItem: string, id: number) => (
+            {litmusTestDetails?.litmusTasks?.[litmusTestDetails?.litmusTasks.length - 1]?.tasks?.[index]?.texts?.map((textItem: string, id: number) => (
               <div key={`text-${id}`} className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl">
                 {textItem}
               </div>

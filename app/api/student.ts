@@ -21,7 +21,7 @@ export async function getCurrentStudents(id: string) {
     throw new Error("Failed to fetch students");
   }
 
-  return response.json(); // Returns parsed JSON data
+  return response.json();
 }
 
 export async function updateStudentApplicationStatus(
@@ -157,27 +157,19 @@ export async function updateLitmusTaskStatus(
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        status,
-        results,
-        feedbackData,
         scholarshipDetail,
+        status,
         performanceRating,
+        feedbackData,
+        results,
       }),
     }
   );
-
   if (!response.ok) {
-    const errorDetails = await response.json().catch(() => null); // Handle cases where the response is not JSON
-    throw new Error(
-      `${
-        errorDetails
-          ? `${errorDetails.message || JSON.stringify(errorDetails)}`
-          : ""
-      }`
-    );
+    throw new Error("Failed to update document status");
   }
 
-  return response;
+  return await response.json();
 }
 
 export async function updateScholarship(
@@ -283,32 +275,20 @@ export async function verifyTokenAmount(
   comment: string,
   verificationStatus: string
 ) {
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/admin/verify-token-amount`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tokenId, comment, verificationStatus }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
-      throw new Error(
-        `Failed to verify token amount. ${
-          errorDetails
-            ? `${errorDetails.message || JSON.stringify(errorDetails)}`
-            : ""
-        }`
-      );
+  const response = await fetch(
+    `${process.env.API_URL}/admin/verify-token-amount`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tokenId, comment, verificationStatus }),
     }
+  );
 
-    return await response.json(); // Parse and return the response JSON
-  } catch (error) {
-    console.error("Error in verifyTokenAmount:", error);
-    throw error;
+  if (!response.ok) {
+    throw new Error("Failed to update document status");
   }
+
+  return await response.json();
 }
 
 export default async function internalNotes(studentId: string) {
@@ -365,13 +345,16 @@ export async function updateInterviewStatus(jsonString: string) {
 }
 
 // API for Mark-as-dropped
-export async function MarkAsdropped(formData: any) {
+export async function MarkAsdropped(payload: any) {
   try {
     const response = await fetch(
       `${process.env.API_URL}/admin/mark-as-dropped`,
       {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json", // The correct header for JSON
+        },
+        body: JSON.stringify(payload),
       }
     );
 

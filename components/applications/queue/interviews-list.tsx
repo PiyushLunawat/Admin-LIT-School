@@ -26,7 +26,7 @@ interface InterviewsListProps {
   onSelectedIdsChange: (ids: string[]) => void;
 }
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "pending" | "default";
 
 export function InterviewsList({
   applications,
@@ -87,7 +87,7 @@ export function InterviewsList({
         case "interview rescheduled":
         return "default";
       case "interview concluded":
-        return "lemon";
+        return "pending";
       default:
         return "secondary";
     }

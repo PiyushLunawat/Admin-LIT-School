@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { getCurrentStudents, verifyTokenAmount } from "@/app/api/student";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "pending" | "warning" | "secondary" | "success" | "default";
 
 interface PaymentInformationTabProps {
   studentId: string;
@@ -104,7 +104,7 @@ const [sch, setSch] = useState<any>();
       case "flagged":
         return "warning";
       case "pending":
-        return "lemon";
+        return "pending";
       case "paid":
         return "success";
       default:

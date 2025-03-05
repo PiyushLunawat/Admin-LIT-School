@@ -40,7 +40,7 @@ import InterviewFeedback from "@/components/cohorts/dashboard/tabs/applications/
 import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
 import ApplicationFeedback from "@/components/cohorts/dashboard/tabs/applications/application-dialog/application-feedback";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
 interface ApplicationDetailsProps {
   application: any;
   onClose: () => void;
@@ -80,9 +80,9 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate }
       case "interview scheduled":
         return "default";
       case "interview rescheduled":
-        return "lemon";
+        return "pending";
       case "interview concluded":
-        return "lemon";
+        return "pending";
       default:
         return "secondary";
     }

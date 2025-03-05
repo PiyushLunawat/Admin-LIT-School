@@ -22,7 +22,7 @@ import { DocumentsTab } from "./application-dialog/document-tab";
 import { getStudents } from "@/app/api/student";
 import { DateRange } from "react-day-picker";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "pending" | "onhold" | "default";
 
 interface ApplicationsListProps {
   applications: any;
@@ -59,15 +59,40 @@ export function ApplicationsList({
       case "on hold":
       case "waitlist":
         return "onhold";
+      case "interview concluded":
+        return "pending";
       case "interview scheduled":
         return "default";
       case "interview rescheduled":
-      case "interview concluded":
         return "lemon";
       default:
         return "secondary";
     }
   };
+
+  function checkInterviewStatus(interviews: any): string {
+    let status = 'interview scheduled';
+  
+    if (interviews.length > 1) {
+      status = 'interview rescheduled';
+    }
+  
+    const lastInterview = interviews[interviews.length - 1];
+    const currentTime = new Date();
+  
+    if (lastInterview?.meetingDate && lastInterview?.endTime) {
+      const meetingEnd = new Date(
+        new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime
+      );
+  
+      console.log("timee", meetingEnd < currentTime, meetingEnd, currentTime);
+      if (meetingEnd < currentTime) {
+        status = "interview concluded";
+      }
+    }
+    return status;
+  }
+  
 
   const toggleSelectAll = () => {
     if (selectedIds.length === applications.length) {
@@ -137,7 +162,7 @@ export function ApplicationsList({
                 key={application._id}
                 className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
                 onClick={() => {
-                  console.log("dubbs",application)
+                  console.log("student -",application)
                   onApplicationSelect(application)
                   setSelectedRowId(application._id);
                 }}
@@ -156,9 +181,14 @@ export function ApplicationsList({
                   {new Date(applicationDetail?.updatedAt).toLocaleDateString() || "--"}
                 </TableCell>
                 <TableCell className="space-y-1">
-                  <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(applicationDetail?.applicationStatus || "--")}>
-                    {applicationDetail?.applicationStatus || "--"}
-                  </Badge>
+                  {applicationDetail?.applicationStatus === 'Interview Scheduled' ?
+                    <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(checkInterviewStatus(applicationDetail?.applicationTestInterviews))}>
+                      {checkInterviewStatus(applicationDetail?.applicationTestInterviews)}
+                    </Badge> :
+                    <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(applicationDetail?.applicationStatus || "--")}>
+                      {applicationDetail?.applicationStatus || "--"}
+                    </Badge>
+                  } 
                   {(applicationDetail?.applicationStatus === 'under review' && applicationDetail?.applicationTasks?.[0]?.applicationTasks?.[0]?.overallFeedback.length > 0) &&
                     <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
                       <CheckCircle className="w-3 h-3"/> App. Revised

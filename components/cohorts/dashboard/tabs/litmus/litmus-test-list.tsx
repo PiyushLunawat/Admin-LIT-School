@@ -23,7 +23,7 @@ import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getStudents } from "@/app/api/student";
 import { DateRange } from "react-day-picker";
 
-type BadgeVariant = "destructive" | "onhold" | "lemon" | "success" | "default";
+type BadgeVariant = "destructive" | "onhold" | "pending" | "success" | "default";
 
 interface LitmusTestListProps {
   applications: any
@@ -48,7 +48,7 @@ export function LitmusTestList({
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "lemon";
+        return "pending";
       case "under review":
         return "onhold";
       case "completed":

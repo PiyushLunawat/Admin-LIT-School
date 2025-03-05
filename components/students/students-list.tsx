@@ -24,7 +24,7 @@ import { SendMessage } from "../cohorts/dashboard/tabs/applications/application-
 import { Dialog, DialogContent } from "../ui/dialog";
 import { MarkedAsDialog } from "./sections/drop-dialog";
 
-type BadgeVariant = "lemon" | "destructive" | "warning" | "secondary" | "success" | "onhold" | "default";
+type BadgeVariant = "pending" | "destructive" | "warning" | "secondary" | "success" | "onhold" | "default";
 
 interface StudentsListProps {
   selectedIds: string[];
@@ -75,7 +75,7 @@ export function StudentsList({
       case "enrolled":
         return "success";
       case "pending":
-        return "lemon";
+        return "pending";
       case "dropped":
         return "destructive";
       default:

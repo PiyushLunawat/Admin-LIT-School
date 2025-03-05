@@ -239,7 +239,7 @@ export default function CentresPage() {
                 <TableCell>{centre.status ? "Active" : "Inactive"}</TableCell>
                 <TableCell className="flex justify-start items-center">
                   <Button variant="ghost" size="icon" onClick={() => handleEditCentre(centre)}>
-                    <SquarePen className="w-4 h-4"/>
+                    Edit
                   </Button>
                   <AlertDialog>
               <AlertDialogTrigger asChild>

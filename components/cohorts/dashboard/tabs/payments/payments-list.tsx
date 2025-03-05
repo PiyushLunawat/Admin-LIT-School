@@ -21,7 +21,7 @@ import { PersonalDetailsTab } from "../applications/application-dialog/personal-
 import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
 import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
 
-type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "pending" | "warning" | "secondary" | "success" | "default";
 interface PaymentRecord {
   id: string;
   studentName: string;
@@ -62,7 +62,7 @@ export function PaymentsList({
       case "overdue":
         return "warning";
       case "verification pending":
-        return "lemon";
+        return "pending";
       case "verification pending":
         return "default";
       default:

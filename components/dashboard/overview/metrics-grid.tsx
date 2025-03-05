@@ -203,8 +203,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             // Interviews Scheduled Count
             const interviewsScheduled = applications.filter(
               (application) =>
-                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
-                "Interviews Scheduled"
+                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "interview scheduled"
             );
             setInterviewsScheduledCount(interviewsScheduled.length);
       
@@ -358,7 +357,10 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
         }, [applications]);
 
         function KLsystem(amount: number): string {
-          if (amount >= 100000) {
+
+          if (amount === 0) {
+            return `--`; // Converts to 'L' format with two decimal places
+          } else if (amount >= 100000) {
             return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
           } else {
             return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
@@ -413,7 +415,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
     {
       title: "Revenue Collected",
       value: `${KLsystem(revenueCollected)}`,
-      // description: "This month",
+      description: `${KLsystem(totalTokenAmountPaid)} Admission Fee Paid`,
       icon: IndianRupee,
       // trend: { value: 8, isPositive: true },
     },

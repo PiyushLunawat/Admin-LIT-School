@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { AwardScholarship } from "@/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/award-scholarship";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "pending" | "default";
 
 interface FeeCollectionDetailsProps {
   application: any;
@@ -96,7 +96,7 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
       case "overdue":
         return "warning";
       case "verification pending":
-        return "lemon";
+        return "pending";
       default:
         return "default";
     }

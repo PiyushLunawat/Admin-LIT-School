@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "pending" | "default";
 
 interface EnrolmentDetailsProps {
   application: any;
@@ -36,7 +36,7 @@ export function EnrolmentDetails({ application, onClose, onApplicationUpdate }: 
     switch (status.toLowerCase()) {
       case "pending":
         case "verification-pending":
-        return "lemon";
+        return "pending";
       case "paid":
         return "success";
       case "dropped":

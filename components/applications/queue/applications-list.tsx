@@ -28,7 +28,7 @@ interface ApplicationsListProps {
   onApplicationUpdate: () => void;
 }
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "lemon" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "pending" | "default";
 
 export function ApplicationsList({
   applications,
@@ -86,7 +86,7 @@ export function ApplicationsList({
         return "default";
       case "interview rescheduled":
       case "interview concluded":
-        return "lemon";
+        return "pending";
       default:
         return "secondary";
     }

@@ -12,7 +12,7 @@ import { CohortDetails } from "./cohort-details";
 import { InterviewsList } from "./interviews-list";
 import { InterviewsFilters } from "./interviews-filters";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
 
 export function InterviewsQueue() {
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
@@ -193,7 +193,7 @@ export function InterviewsQueue() {
         case "interview rescheduled":
         return "default";
       case "interview concluded":
-        return "lemon";
+        return "pending";
       default:
         return "secondary";
     }

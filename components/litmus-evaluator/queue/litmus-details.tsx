@@ -42,7 +42,7 @@ import { AwardScholarship } from "@/components/cohorts/dashboard/tabs/litmus/lit
 import { ViewComponent } from "@/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/view";
 import { ReviewComponent } from "@/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/review";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
 
 interface LitmusDetailsProps {
   application: any;
@@ -353,7 +353,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl">
-          <ReviewComponent application={application} onApplicationUpdate={onApplicationUpdate}/>
+          <ReviewComponent application={application} onApplicationUpdate={onApplicationUpdate} onClose={() => setOpen(false)}/>
         </DialogContent>
       </Dialog>
       <Dialog open={vopen} onOpenChange={setVopen}>

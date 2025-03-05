@@ -15,7 +15,7 @@ import {
   updateStudentTaskFeedbackAccep,
 } from "@/app/api/student";
 import { Separator } from "@/components/ui/separator";
-import { Download, FileIcon, ImageIcon, Link2Icon, MinusIcon, PlusIcon, VideoIcon } from "lucide-react";
+import { ArrowUpRight, Download, FileIcon, ImageIcon, Link2, Link2Icon, MinusIcon, PlusIcon, VideoIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { log } from "console";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,29 +49,6 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   const subTaskId = latestCohort?.applicationDetails?.applicationTasks?.[latestCohort?.applicationDetails?.applicationTasks.length - 1]?.applicationTasks[0]?._id;
 
   const taskList = (latestCohort?.applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks || []);
-
-    // if (taskList && taskList.length > 0) {
-    //   // Build an object with each task’s _id => ["• "]
-    //   const initialFeedbacks: { [taskId: string]: string[] } = {};
-    //   taskList.forEach((task: any) => {
-    //     initialFeedbacks[task._id] = ["• "];
-    //   });
-    //   setFeedbacks(initialFeedbacks);
-    // }
-
-  // useEffect(() => {
-  //   async function fetchApplicationDetails() {
-  //     try {
-  //       const applicationDetails = await getStudentApplication(application?._id);
-  //       console.log("Application Details:", applicationDetails.data.applicationTasks[0]?._id);
-  //       setTaskList(applicationDetails.data.applicationTasks[0]?.tasks || []);
-  //       setFeedbackId(applicationDetails.data?.applicationTasks[0]?._id)
-  //     } catch (error) {
-  //       console.error("Error fetching application details:", error);
-  //     }
-  //   }
-  //   fetchApplicationDetails();
-  // }, [application]);
 
   const handleStatusChange = (value: string) => {
     setStatus(value);
@@ -322,9 +299,43 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                 <p className="text-sm text-muted-foreground">{task?.description}</p>
               </div>
 
+              <div className="space-y-1">
+                <h4 className="font-medium">Resources</h4>
+                <div className="space-y-2">
+                  <div className='w-full space-y-2'>
+                    {task?.resources?.resourceFiles.map((file: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                        <div className="flex items-center gap-2">
+                          <FileIcon className="w-4 h-4" />
+                          <span className="text-white text-sm truncate max-w-[700px]">{file.split('/').pop()}</span>
+                        </div>
+                        <Button variant="ghost" size="icon" type='button'
+                          className="text-white rounded-xl">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+  
+                    {task?.resources?.resourceLinks.map((link: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                        <div className="flex items-center gap-2 truncate">
+                          <Link2 className="w-4 h-4" />
+                          <span className="text-white text-sm truncate max-w-[700px]">{link}</span>
+                        </div>
+                        <Button
+                          variant="ghost" size="icon" type='button'
+                          className="text-white rounded-xl">
+                          <ArrowUpRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-4">
                 <div className="flex justify-between items-center">
-                  <Badge variant="lemon" className="px-3 py-2 text-sm">
+                  <Badge variant="pending" className="px-3 py-2 text-sm">
                     Submission
                   </Badge>
                   <div className="text-muted-foreground text-sm mt-2">

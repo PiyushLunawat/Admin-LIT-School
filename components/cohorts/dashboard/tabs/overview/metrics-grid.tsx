@@ -71,8 +71,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       // Interviews Scheduled Count
       const interviewsScheduled = applications.filter(
         (application) =>
-          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
-          "interviews scheduled"
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "interview scheduled"
       );
       setInterviewsScheduledCount(interviewsScheduled.length);
 

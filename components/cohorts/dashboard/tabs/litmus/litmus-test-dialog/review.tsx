@@ -9,11 +9,14 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  ArrowUpRight,
   Download,
+  File,
   FileIcon,
   FileText,
   HandMetal,
   ImageIcon,
+  Link2,
   Link2Icon,
   VideoIcon,
 } from "lucide-react";
@@ -21,7 +24,8 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 
 interface ReviewComponentProps {
   application: any;
-  onApplicationUpdate: () => void; // callback
+  onApplicationUpdate: () => void;
+  onClose: () => void;
 }
 
 interface Section {
@@ -32,6 +36,7 @@ interface Section {
 export function ReviewComponent({
   application,
   onApplicationUpdate,
+  onClose
 }: ReviewComponentProps) {
 
   const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
@@ -170,11 +175,25 @@ export function ReviewComponent({
     criteriaIndex: number,
     values: number[]
   ) => {
-    const val = values[0]; // slider returns an array
+    const val = values[0];
     setTaskScores((prev) => {
       const newScores = [...prev];
       const criteriaScores = [...newScores[taskIndex]];
       criteriaScores[criteriaIndex] = val;
+      newScores[taskIndex] = criteriaScores;
+      return newScores;
+    });
+  };
+
+  const handleInputChange = (
+    taskIndex: number,
+    criteriaIndex: number,
+    value: number
+  ) => {
+    setTaskScores((prev) => {
+      const newScores = [...prev];
+      const criteriaScores = [...newScores[taskIndex]];
+      criteriaScores[criteriaIndex] = value;
       newScores[taskIndex] = criteriaScores;
       return newScores;
     });
@@ -294,7 +313,8 @@ export function ReviewComponent({
       results,
       feedbackData,
       assignedScholarshipId,
-      performanceRating);
+      performanceRating,
+    );
     
     try {
       console.log("Submitting to updateLitmusTaskStatus...");
@@ -308,6 +328,7 @@ export function ReviewComponent({
       );
       console.log("Update Successful:", response);
       onApplicationUpdate();
+      onClose();
     } catch (error) {
       console.error("Update Failed:", error);
     }
@@ -352,44 +373,46 @@ export function ReviewComponent({
 
             {/* Resources */}
             <div className="space-y-1">
-              <h4 className="font-medium pl-3">Resources</h4>
+              <h4 className="font-medium">Resources</h4>
               <div className="space-y-2">
-                <div className="flex gap-2">
-                  {/* {Task?.resources?.resourceFile && (
-                    <div className="border rounded-md p-2 flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="w-4" />
-                        <span>{Task?.resources?.resourceFile}</span>
+                <div className='w-full space-y-2'>
+                  {Task?.resources?.resourceFiles.map((file: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                      <div className="flex items-center gap-2">
+                        <FileIcon className="w-4 h-4" />
+                        <span className="text-white text-sm truncate max-w-[700px]">{file.split('/').pop()}</span>
                       </div>
+                      <Button variant="ghost" size="icon" type='button'
+                        className="text-white rounded-xl">
+                        <Download className="w-4 h-4" />
+                      </Button>
                     </div>
-                  )} */}
-
-                  {/* {Task?.resources?.resourceLink && (
-                    <div className="border rounded-md p-2 flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Link2Icon className="w-4" />
-                        <a
-                          href={Task?.resources?.resourceLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-white"
-                        >
-                          {Task?.resources?.resourceLink}
-                        </a>
+                  ))}
+      
+                  {Task?.resources?.resourceLinks.map((link: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                      <div className="flex items-center gap-2 truncate">
+                        <Link2 className="w-4 h-4" />
+                        <span className="text-white text-sm truncate max-w-[700px]">{link}</span>
                       </div>
+                      <Button
+                        variant="ghost" size="icon" type='button'
+                        className="text-white rounded-xl">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Button>
                     </div>
-                  )} */}
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
+      </div>
 
           {/* Submission */}
           <div className="space-y-2">
-            <Badge variant={'lemon'} className="px-3 py-1 text-md font-medium">
+            <Badge variant={'pending'} className="px-3 py-1 text-md font-medium">
               Submission 0{index+1}
             </Badge>
-            {litmusTestDetails?.litmusTasks?.[litmusTestDetails?.litmusTasks.length - 1]?.tasks?.[index]?.text?.map(
+            {litmusTestDetails?.litmusTasks?.[litmusTestDetails?.litmusTasks.length - 1]?.tasks?.[index]?.texts?.map(
               (textItem: string, id: number) => (
                 <div
                   key={`text-${id}`}
@@ -477,8 +500,16 @@ export function ReviewComponent({
               <div className="space-y-2 pl-3" key={cIndex}>
                 <div className="flex justify-between">
                   <Label>{criteria.name}</Label>
-                  <span className="text-sm">
-                    {taskScores[index][cIndex]}/{criteria.points}
+                  <span className="flex gap-1 text-sm">
+                    <input
+                      type="number"
+                      value={taskScores[index][cIndex]}
+                      onChange={(e) => handleInputChange(index, cIndex, Number(e.target.value))}
+                      className="w-fit text-sm bg-transparent border-b-2 p-0 text-center"
+                      min={0}
+                      max={criteria.points}
+                    />
+                    /{criteria.points}
                   </span>
                 </div>
                 <Slider

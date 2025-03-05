@@ -21,7 +21,7 @@ import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applicat
 import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
 import { PaymentInformationTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/payment-info-tab";
 
-type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "pending" | "warning" | "secondary" | "success" | "default";
 
 interface LitmusListProps {
   applications: any;
@@ -82,7 +82,7 @@ export function LitmusList({
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "lemon";
+        return "pending";
       case "under review":
         return "secondary";
       case "completed":

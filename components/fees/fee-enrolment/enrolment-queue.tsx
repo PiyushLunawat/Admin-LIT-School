@@ -12,7 +12,7 @@ import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
 import { getCohorts } from "@/app/api/cohorts";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
 
 export function EnrolmentQueue() {
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
@@ -161,7 +161,7 @@ export function EnrolmentQueue() {
         case "interview rescheduled":
         return "default";
       case "interview concluded":
-        return "lemon";
+        return "pending";
       default:
         return "secondary";
     }

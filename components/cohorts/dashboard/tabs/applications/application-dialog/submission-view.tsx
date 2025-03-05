@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowUpRight, Download, FileIcon, FileText, ImageIcon, Link2Icon, VideoIcon } from 'lucide-react';
+import { ArrowUpRight, Download, FileIcon, FileText, ImageIcon, Link2, Link2Icon, VideoIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getStudentApplication } from '@/app/api/student';
 import { Button } from '@/components/ui/button';
@@ -50,28 +50,44 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
               <p className="text-sm text-muted-foreground">{task?.description}</p>
             </div>
 
-            {/* <div className="space-y-2">
-              <h5 className="text-base font-medium">Resources</h5>
-                <div className='flex gap-2'>
-                  {task.resources.filename && <div className="flex items-center w-fit gap-2 mt-2 p-2 border rounded-xl">
-                    <div className="flex gap-2 items-center text-sm">
-                      <FileIcon className="w-4 h-4" />
-                      {task.resources.filename}
+            <div className="space-y-1">
+              <h4 className="font-medium">Resources</h4>
+              <div className="space-y-2">
+                <div className='w-full space-y-2'>
+                  {task?.resources?.resourceFiles.map((file: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                      <div className="flex items-center gap-2">
+                        <FileIcon className="w-4 h-4" />
+                        <span className="text-white text-sm truncate max-w-[700px]">{file.split('/').pop()}</span>
+                      </div>
+                      <Button variant="ghost" size="icon" type='button'
+                        className="text-white rounded-xl">
+                        <Download className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </div>}
-                  {task.resources.link && <div className="flex items-center w-fit gap-2 mt-2 p-2 border rounded-xl">
-                    <div className="flex gap-2 items-center text-sm">
-                      <Link2Icon className="w-4 h-4" />
-                      {task.resources.link}
+                  ))}
+
+                  {task?.resources?.resourceLinks.map((link: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl ">
+                      <div className="flex items-center gap-2 truncate">
+                        <Link2 className="w-4 h-4" />
+                        <span className="text-white text-sm truncate max-w-[700px]">{link}</span>
+                      </div>
+                      <Button
+                        variant="ghost" size="icon" type='button'
+                        className="text-white rounded-xl">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </div>}
+                  ))}
                 </div>
-            </div> */}
+              </div>
+            </div>
 
             <div className="mt-4">
             {submission && 
               <div className='flex justify-between items-center'>
-                <Badge variant="lemon"  className="px-3 py-2 text-sm bg-[#FFF552]/[0.2] border-[#FFF552]">
+                <Badge variant="pending"  className="px-3 py-2 text-sm bg-[#FFF552]/[0.2] border-[#FFF552]">
                   Submission
                 </Badge>
                 <div className="text-muted-foreground text-sm mt-2">

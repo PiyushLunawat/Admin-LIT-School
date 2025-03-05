@@ -252,7 +252,7 @@ export default function ProgramsPage() {
                 <TableCell>{program.status ? "Active" : "Inactive"}</TableCell>
                 <TableCell className="flex justify-start items-center">
                   <Button variant="ghost" size="icon" onClick={() => handleEditProgram(program)}>
-                    <SquarePen className="w-4 h-4"/>
+                    Edit
                   </Button>
                   <AlertDialog>
               <AlertDialogTrigger asChild>

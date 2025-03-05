@@ -43,7 +43,7 @@ import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
 import { AwardScholarship } from "./litmus-test-dialog/award-scholarship";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
 
 interface LitmusTestDetailsProps {
   application: any;
@@ -176,6 +176,11 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <SelectValue placeholder="Change status" />
               </SelectTrigger>
               <SelectContent>
+                {!['pending', 'under review', 'completed'].includes(litmusTestDetails?.status) &&
+                  <SelectItem className="capitalize" value={litmusTestDetails?.status}>
+                    <span className="capitalize">{litmusTestDetails?.status}</span>
+                  </SelectItem>
+                }
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="under review">Under Review</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
@@ -298,9 +303,10 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                       </div>
                     ))}
                     {(() => {
-                      const totalScore = litmusTestDetails?.results?.[taskIndex]?.score.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
-                      const maxScore = task?.judgmentCriteria.reduce((acc: any, criterion: any) => acc + Number(criterion.points), 0);
-                      const percentage = totalScore ? ((totalScore / maxScore) * 100).toFixed(0) : '--';
+                        const scores = litmusTestDetails?.results?.[taskIndex]?.score || [];
+                        const totalScore = scores.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
+                        const maxScore = task?.judgmentCriteria.reduce((acc: any, criterion: any) => acc + Number(criterion.points), 0);
+                        const percentage = totalScore ? ((totalScore / maxScore) * 100).toFixed(0) : '--';
                       
                       if(totalScore)
                       return (
@@ -319,20 +325,22 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </div>
               </div>
             ))}
-            {litmusTestDetails?.overAllfeedback?.[litmusTestDetails?.overAllfeedback.length - 1]?.feedback &&
-              <div className="mx-2 py-4 px-2 space-y-2">               
+            {(litmusTestDetails?.overallFeedback && litmusTestDetails.overallFeedback.length > 0) &&
+              <div className="mx-2 py-4 px-2 space-y-2">
                 <p className="text-sm text-muted-foreground">Feedback:</p>
-                {litmusTestDetails?.overAllfeedback?.[litmusTestDetails?.overAllfeedback.length - 1]?.feedback.map((feedback: any, feedbackIndex: any) => (
-                  <div key={feedbackIndex} className="space-y-1">
-                  <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
-                    {feedback?.data.map((criterion: any, criterionIndex: any) => (
-                      <li key={criterionIndex} className="text-sm pl-3">
-                        {criterion}
-                      </li>
-                    ))}
-                  </div>
+                {litmusTestDetails.overallFeedback[litmusTestDetails.overallFeedback.length - 1]?.feedback
+                  .filter((feedback: any) => feedback?.data && feedback.data.length > 0)
+                  .map((feedback: any, feedbackIndex: any) => (
+                    <div key={feedbackIndex} className="space-y-1">
+                      <p className="text-sm font-semibold">{feedback?.feedbackTitle}:</p>
+                      {feedback?.data.map((criterion: any, criterionIndex: any) => (
+                        <li key={criterionIndex} className="text-sm pl-3">
+                          {criterion}
+                        </li>
+                      ))}
+                    </div>
                 ))}
-            </div>
+              </div>
             }
 
             </Card>
@@ -359,7 +367,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl">
-          <ReviewComponent application={application} onApplicationUpdate={onApplicationUpdate}/>
+          <ReviewComponent application={application} onApplicationUpdate={onApplicationUpdate} onClose={() => setOpen(false)}/>
         </DialogContent>
       </Dialog>
       <Dialog open={vopen} onOpenChange={setVopen}>

@@ -29,8 +29,10 @@ import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { AwardScholarship } from "../litmus/litmus-test-dialog/award-scholarship";
+import { Textarea } from "@/components/ui/textarea";
+import { verifyTokenAmount } from "@/app/api/student";
 
-type BadgeVariant = "lemon" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "pending" | "warning" | "secondary" | "success" | "default";
 interface PaymentDetailsProps {
   student: any;
   onClose: () => void;
@@ -50,6 +52,46 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   };
 
   const lastCourse = student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
+
+
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const applicationDetails = latestCohort?.applicationDetails;
+  
+    ////////////////////////////
+    const [flagOpen, setFlagOpen] = useState(false);
+    const [reason, setReason] = useState("");
+
+    
+    const handleDownload = (url: string) => {
+        const link = document.createElement("a");
+          link.href = url;
+          link.download = "Receipt.pdf"; // Default filename for the download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      };
+    
+      async function handleVerify(tokenId: any, comment: string, verificationStatus: string) {
+        try {
+          if (!tokenId) {
+            console.error("Admission Fee ID is not available");
+            return;
+          }  
+          const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
+          tokenFeeDetails = response.token;
+          setFlagOpen(false);
+          // onUpdateStatus();
+        } catch (error) {
+          console.error("Error verifying token amount:", error);
+        }
+      }
+      
+    const cohortDetails = latestCohort?.cohortId; 
+    let tokenFeeDetails = latestCohort?.tokenFeeDetails;
+    const tokenAmount = Number(cohortDetails?.cohortFeesDetail?.tokenFee) || 0;
+  
+
+    ////////////////////////
   let lastStatus = '';
 
   const visibleSemesters = showAllSemesters
@@ -99,7 +141,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
       case "overdue":
         return "warning";
       case "verification pending":
-        return "lemon";
+        return "pending";
       default:
         return "default";
     }
@@ -216,6 +258,98 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
           {/* Instalments */}
           <div className="space-y-4">
             <h4 className="font-medium">Payment Schedule</h4>
+
+            <div className="border rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <h4 className="font-medium">Admission Fee</h4>
+                <p className="text-sm ">Amount Payable: ₹{formatAmount(tokenAmount)}</p>
+                
+                  {tokenFeeDetails && (
+                    <p className="flex text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Uploaded on {new Date( tokenFeeDetails?.updatedAt ).toLocaleDateString()}
+                    </p>
+                  )}
+              </div>
+              <div className="flex items-center gap-2">
+                {applicationDetails?.applicationStatus === 'selected' && 
+                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
+                    {tokenFeeDetails?.verificationStatus || 'pending'}
+                  </Badge>
+                }
+                {tokenFeeDetails?.verificationStatus === 'paid' && 
+                <Button variant="ghost" size="sm" className="px-0 py-1 text-white text-xs" onClick={() => handleView(tokenFeeDetails?.receiptUrl[0])}>
+                  <Eye className="h-3 w-3 mr-2" />
+                  View
+                </Button>}
+              </div>                
+            </div>
+            {/* <div className="flex justify-between items-center">
+              {payment.tokenPaid !== "Paid" && <Button variant="outline" size="sm" className="">
+                <UploadIcon className="h-4 w-4 mr-2" />
+                Upload Receipt
+              </Button>}
+            </div>  */}
+
+            
+            {tokenFeeDetails?.verificationStatus === 'verification pending' &&
+              <div className="space-y-4">
+                <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
+                  <img src={tokenFeeDetails?.receiptUrl[0]} alt={tokenFeeDetails?.receiptUrl[0].split('/').pop()} className='w-full h-[160px] object-contain rounded-t-xl' />
+                </div>
+                {flagOpen ?
+                <div className="space-y-4 ">
+                  <div className="mt-2 space-y-2">
+                    <label className="text-sm">Provide Reasons</label>
+                    <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+                  </div>
+                  <div className="flex gap-2" >
+                    <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
+                    <Button className="flex-1" disabled={!reason.trim()}
+                      onClick={() => handleVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
+                  </div>
+                </div> :
+                <div className="flex gap-2 mt-4">
+                  <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
+                    onClick={() => setFlagOpen(true)}> Reject
+                  </Button>
+                  <Button variant="outline" className="flex-1 bg-[#2EB88A]"
+                    onClick={() => handleVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}> Approve
+                  </Button>
+                </div>}
+              </div>
+            }
+            {tokenFeeDetails?.verificationStatus === 'paid' && 
+            <>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 mr-2" />
+                Paid: {new Date(tokenFeeDetails?.updatedAt).toLocaleDateString()}
+              </div>
+              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receiptUrl[0])}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Receipt
+              </Button>
+            </>
+            }
+            {(tokenFeeDetails?.comment && tokenFeeDetails?.comment.length > 0) && <div className="space-y-3">
+              <Separator />
+                {tokenFeeDetails?.comment.slice().reverse().map((reason: any, index: any) => (
+                  <div key={index} className="sapce-y-4 text-muted-foreground text-xs">
+                    <div className="flex justify-between items-center">
+                      <div className="">
+                        Reason:
+                      </div>
+                      <div className="text-[#FF503D] text-[10px]">Rejected on {new Date(reason?.date).toLocaleDateString()}</div>
+                    </div>
+                    <div className="mt-1">{reason?.text}</div>
+                    <Button variant="ghost" className="px-0 py-1 text-white text-xs" size="sm" onClick={() => handleView(tokenFeeDetails?.receiptUrl[index])}>
+                      <Eye className="h-3 w-3 mr-2" /> Acknowledgement Receipt
+                    </Button>
+                  </div>
+                ))}
+            </div >}
+          </div>
 
             {lastCourse?.feeSetup?.installmentType === 'one shot payment' ? 
             <Card className="p-4 space-y-2">

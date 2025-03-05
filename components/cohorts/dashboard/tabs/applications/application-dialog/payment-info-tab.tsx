@@ -9,8 +9,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { verifyTokenAmount } from "@/app/api/student";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 
-type BadgeVariant = 'onhold' | "lemon" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = 'onhold' | "pending" | "warning" | "secondary" | "success" | "default";
 
 interface PaymentInformationTabProps {
   student: any;
@@ -32,7 +33,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
   const applicationDetails = latestCohort?.applicationDetails;
   const litmusTestDetails = latestCohort?.litmusTestDetails;
   const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
-  const tokenFeeDetails = latestCohort?.tokenFeeDetails;
+  let tokenFeeDetails = latestCohort?.tokenFeeDetails;
 
   const colorClasses = [
     'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
@@ -62,7 +63,8 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
         return;
       }  
       const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
-      console.log("Token verification response:", response.data);
+      tokenFeeDetails = response.token;
+      setFlagOpen(false);
       onUpdateStatus();
     } catch (error) {
       console.error("Error verifying token amount:", error);
@@ -115,7 +117,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
       case "pending":
         return "onhold";
       case "verification pending":
-        return "lemon";
+        return "pending";
       case "paid":
         return "success";
       default:
@@ -217,13 +219,12 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                       {tokenFeeDetails?.verificationStatus || 'pending'}
                     </Badge>
                   }
-                  {tokenFeeDetails && 
+                  {tokenFeeDetails?.verificationStatus === 'paid' && 
                   <Button variant="ghost" size="sm" onClick={() => handleView(tokenFeeDetails?.receiptUrl[0])}>
                     <Eye className="h-4 w-4 mr-2" />
                     View
                   </Button>}
-                </div>
-                
+                </div>                
               </div>
               {/* <div className="flex justify-between items-center">
                 {payment.tokenPaid !== "Paid" && <Button variant="outline" size="sm" className="">
@@ -231,16 +232,35 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                   Upload Receipt
                 </Button>}
               </div>  */}
-              {latestCohort?.tokenFeeDetails?.verificationStatus === 'pending' &&
-                <div className="flex gap-4 mt-4">
-                  <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
-                    onClick={() => setFlagOpen(true)}>
-                      <FlagIcon className="w-4 h-4"/> Flag Reciept
-                  </Button>
-                  <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                    onClick={() => handleVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}>
-                      <CircleCheckBig className="w-4 h-4"/> Mark as Verified
-                  </Button>
+
+              
+              {tokenFeeDetails?.verificationStatus === 'verification pending' &&
+                <div className="space-y-4">
+                  <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
+                    <img src={tokenFeeDetails?.receiptUrl[0]} alt={tokenFeeDetails?.receiptUrl[0].split('/').pop()} className='w-full h-[200px] object-contain rounded-t-xl' />
+                  </div>
+                  {flagOpen ?
+                  <div className="space-y-4 ">
+                    <div className="mt-2 space-y-2">
+                      <label className="text-lg pl-3">Provide Reasons</label>
+                      <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+                    </div>
+                    <div className="flex gap-2" >
+                      <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
+                      <Button className="flex-1" disabled={!reason.trim()}
+                        onClick={() => handleVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
+                    </div>
+                  </div> :
+                  <div className="flex gap-4 mt-4">
+                    <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
+                      onClick={() => setFlagOpen(true)}>
+                        <FlagIcon className="w-4 h-4"/> Flag Reciept
+                    </Button>
+                    <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
+                      onClick={() => handleVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}>
+                        <CircleCheckBig className="w-4 h-4"/> Mark as Verified
+                    </Button>
+                  </div>}
                 </div>
               }
               {tokenFeeDetails?.verificationStatus === 'paid' && 
@@ -255,6 +275,24 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                 </Button>
               </>
               }
+              {(tokenFeeDetails?.comment && tokenFeeDetails?.comment.length > 0) && 
+              <div className="space-y-3">
+                <Separator />
+                  {tokenFeeDetails?.comment.slice().reverse().map((reason: any, index: any) => (
+                    <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
+                      <div className="flex justify-between items-center">
+                        <div className="">
+                          Reason:
+                        </div>
+                        <div className="text-[#FF503D]">Rejected on {new Date(reason?.date).toLocaleDateString()}</div>
+                      </div>
+                      <div className="">{reason?.text}</div>
+                      <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receiptUrl[index])}>
+                        <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
+                      </Button>
+                    </div>
+                  ))}
+              </div>}
             </div>
 
             {lastCourse?.feeSetup?.installmentType === 'one shot payment' ? 
@@ -438,32 +476,6 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
           ) : (
             <p className="text-center text-muted-foreground">No receipt found.</p>
           )}
-        </DialogContent>
-      </Dialog>
-      <Dialog open={flagOpen} onOpenChange={setFlagOpen}>
-        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
-        <div className="grid gap-3">
-          <div className="flex gap-2 text-2xl items-center justify-start text-destructive">
-            <FlagIcon className="w-6 h-6"/> Flag Reciept
-          </div>
-          <div className="relative bg-[#64748B33] rounded-xl border border-[#2C2C2C] w-full h-[220px]">
-          {imageUrl ? 
-            <img src={imageUrl} alt="Receipt" className="mx-auto h-full object-contain" /> : 
-            <p className="text-center text-muted-foreground">No receipt found.</p>
-          }
-          </div>
-          <div className="space-y-4 ">
-            <div className="mt-2 space-y-2">
-              <label className="text-lg pl-3">Provide Reasons</label>
-              <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
-            </div>
-            <div className="flex gap-2" >
-              <Button variant="outline" className="flex-1" onClick={() => setFlagOpen(false)}>Cancel</Button>
-              <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" disabled={!reason.trim()}
-                onClick={() => handleVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
-            </div>
-          </div>
-        </div>
         </DialogContent>
       </Dialog>
     </div>

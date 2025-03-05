@@ -12,7 +12,7 @@ import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
 import { CohortDetails } from "./cohort-details";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
 
 interface ApplicationsQueueProps {
   initialApplications: any;
@@ -199,7 +199,7 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
         case "interview rescheduled":
         return "default";
       case "interview concluded":
-        return "lemon";
+        return "pending";
       default:
         return "secondary";
     }

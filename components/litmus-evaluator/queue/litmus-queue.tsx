@@ -12,7 +12,7 @@ import { getStudents } from "@/app/api/student";
 import { DateRange } from "react-day-picker";
 import { CohortDetails } from "./cohort-details";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "lemon" | "onhold" | "default";
+type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
 
 interface LitmusQueueProps {
   initialApplications: any;
