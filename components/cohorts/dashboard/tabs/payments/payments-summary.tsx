@@ -45,7 +45,8 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
   useEffect(() => {
     if (applications && Array.isArray(applications) && cohort) {
-      let tokenPaid = 0;
+      let tokenAmountPending = 0;
+      let tokenAmountPaid = 0;
       let oneShot = 0;
       let oneShotPaid = 0;
       let oneShotAmount = 0;
@@ -77,36 +78,39 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
       }
 
       applications.forEach((application) => {
-        const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
-
-        if (!lastEnrolled) return;
-
-          const tokenAmount = application?.cohort?.cohortFeesDetail?.tokenFee || 0;
-          const lastEnrollment = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
-          if (lastEnrollment?.tokenFeeDetails?.verificationStatus === 'paid') {
-             tokenPaid += (tokenAmount || 0);
-          }
+        const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+        const litmusTestDetails = latestCohort?.litmusTestDetails;
+        const tokenFeeDetails = latestCohort?.tokenFeeDetails;
+        const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+        const paymentDetails = latestCohort?.paymentDetails;
+        const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
+          
+        if (tokenFeeDetails?.verificationStatus === 'paid') {
+            tokenAmountPaid += (tokenAmount || 0);
+        } else {
+          tokenAmountPending += (tokenAmount || 0);
+          pending += 1;
+        }
     
 
         // One-Shot Payment Processing
-        if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
+        if (paymentDetails?.paymentPlan === 'one-shot') {
           oneShot += 1;
-          const oneShotDetails = lastEnrolled?.oneShotPayment;
+          const oneShotDetails = paymentDetails?.oneShotPayment;
           if (oneShotDetails) {
             oneShotAmount += oneShotDetails?.amountPayable;
             if (oneShotDetails?.verificationStatus === 'paid') {
               oneShotPaid += 1;
               oneShotAmountPaid += oneShotDetails?.amountPayable;
-            }
-            if (oneShotDetails?.verificationStatus === 'pending') {
+            } else {
               pending += 1;
             }
           }
         }
 
         // Installments Processing
-        if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-          lastEnrolled?.installmentDetails.forEach((semesterDetail: any, semIndex: any) => {
+        if (paymentDetails?.paymentPlan === 'instalments') {
+          paymentDetails?.installments.forEach((semesterDetail: any, semIndex: any) => {
             const semesterNumber = semesterDetail?.semester;
             const installments = semesterDetail?.installments;
             installments.forEach((installment: any, instIndex: any) => {
@@ -123,7 +127,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           });
 
           // Calculate total installments expected and received
-          lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+          paymentDetails?.installments.forEach((semesterDetail: any) => {
             const installments = semesterDetail?.installments;
             installments.forEach((installment: any) => {
               installmentAmount += installment?.amountPayable;
@@ -152,21 +156,21 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           });
         }
 
-        const scholarships = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.installmentDetails?.flatMap((semester: any) => semester.installments) || [];
+        const scholarships = scholarshipDetails?.installmentDetails?.flatMap((semester: any) => semester.installments) || [];
          scholarships.forEach((installment: any) => {
            if (installment?.scholarshipAmount) {
              totalScholarship += installment?.scholarshipAmount;
              scholarshipCount += 1;
            }
          });
-         const percentage = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+         const percentage = scholarshipDetails?.scholarshipPercentage;
          if (percentage) {
-           totalPercentage += application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipPercentage;
+           totalPercentage += scholarshipDetails?.scholarshipPercentage;
            percentageCount += 1;
          }        
       });
       
-      setTokenAmountCount(tokenPaid);
+      setTokenAmountCount(tokenAmountPaid);
 
       // Update One-Shot Metrics
       setTotalOneShotCount(oneShot);
@@ -179,8 +183,8 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
       setTotalInstallmentAmountPaidCount(installmentAmountPaid);
 
       // Update Expected and Received Counts
-      setTotalExpectedCount(oneShotAmount + installmentAmount + tokenPaid);
-      setTotalReceivedCount(oneShotAmountPaid + installmentAmountPaid + tokenPaid);
+      setTotalExpectedCount(oneShotAmount + installmentAmount + tokenAmountPaid);
+      setTotalReceivedCount(oneShotAmountPaid + installmentAmountPaid + tokenAmountPaid);
       setPendingPayments(pending);
 
       // Update Scholarships Metrics

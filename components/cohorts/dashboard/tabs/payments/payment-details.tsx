@@ -40,7 +40,6 @@ interface PaymentDetailsProps {
 
 export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
-  const [sch, setSch] = useState<any>(null);
   const [schOpen, setSchOpen] = useState(false);
   const [showAllSemesters, setShowAllSemesters] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -51,10 +50,13 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
     setOpen(true);
   };
 
-  const lastCourse = student.cousrseEnrolled?.[student.cousrseEnrolled.length - 1];
-
-
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const cohortDetails = latestCohort?.cohortId; 
+  const litmusTestDetails = latestCohort?.litmusTestDetails;
+  let tokenFeeDetails = latestCohort?.tokenFeeDetails;
+  const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+  const paymentDetails = latestCohort?.paymentDetails;
+  const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
   const applicationDetails = latestCohort?.applicationDetails;
   
     ////////////////////////////
@@ -84,19 +86,14 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
         } catch (error) {
           console.error("Error verifying token amount:", error);
         }
-      }
-      
-    const cohortDetails = latestCohort?.cohortId; 
-    let tokenFeeDetails = latestCohort?.tokenFeeDetails;
-    const tokenAmount = Number(cohortDetails?.cohortFeesDetail?.tokenFee) || 0;
-  
+      } 
 
     ////////////////////////
   let lastStatus = '';
 
   const visibleSemesters = showAllSemesters
-  ? lastCourse?.installmentDetails
-  : lastCourse?.installmentDetails?.slice(0, 1); 
+  ? paymentDetails?.installments
+  : paymentDetails?.installments?.slice(0, 1); 
 
 
   const colorClasses = ['text-emerald-600', 'text-[#3698FB]', 'text-[#FA69E5]', 'text-orange-600'];
@@ -104,9 +101,8 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   let paidAmount = 0;
   let notPaidAmount = 0;
 
-  const lastEnrolled = lastCourse;
-  if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
-    const oneShotDetails = lastEnrolled?.oneShotPayment;
+  if (paymentDetails?.paymentPlan === 'one-shot') {
+    const oneShotDetails = paymentDetails?.oneShotPayment;
     if (oneShotDetails) {
       if (oneShotDetails?.verificationStatus === 'paid') {
         paidAmount += oneShotDetails?.amountPayable;
@@ -115,8 +111,8 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
       }
     }
   }
-  if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-    lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+  if (paymentDetails?.paymentPlan === 'instalments') {
+    paymentDetails?.installments.forEach((semesterDetail: any) => {
       const installments = semesterDetail?.installments;
       installments.forEach((instalment: any) => {
         if (instalment?.verificationStatus === 'paid') {
@@ -127,10 +123,6 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
       });
     });
   }
-
-  useEffect(() => {
-    setSch(student?.cousrseEnrolled?.[student?.cousrseEnrolled?.length - 1]?.semesterFeeDetails);
-}, [student]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -156,14 +148,14 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   };
 
 
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
+  const formatAmount = (value: number) =>
+    value === 0
+      ? "--" :
+      new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value));
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b flex items-center justify-between">
+      <div className="p-4 border-b flex items-start justify-between ">
         <div>
           <h3 className="font-semibold">{student?.firstName+" "+student?.lastName}</h3>
           <p className="text-sm text-muted-foreground">{student?.email}</p>
@@ -189,15 +181,15 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
-                <p className={`font-medium ${getColor(sch?.scholarshipName)}`}>
-                  {sch?.scholarshipName+' ('+sch?.scholarshipPercentage+'%)'}
+                <p className={`font-medium ${getColor(scholarshipDetails?.scholarshipName)}`}>
+                  {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Admission Fee Status</p>
-                <span className="text-base mr-2">₹{formatAmount(student?.cohort?.cohortFeesDetail?.tokenFee)}</span>
-                <Badge className="capitalize" variant={getStatusColor(lastCourse?.tokenFeeDetails?.verificationStatus || '')}>
-                  {lastCourse?.tokenFeeDetails?.verificationStatus}
+                <span className="text-base mr-2">₹{formatAmount(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee)}</span>
+                <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
+                  {tokenFeeDetails?.verificationStatus}
                 </Badge>
               </div>
             </div>
@@ -226,10 +218,10 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                 <DownloadIcon className="h-4 w-4 mr-2" />
                 Download Files
               </Button>
-              {sch ? 
-                  <Button variant="outline" className={`justify-start ${getColor(sch?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
+              {scholarshipDetails ? 
+                  <Button variant="outline" className={`justify-start ${getColor(scholarshipDetails?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
                     <div className="flex gap-2 items-center">
-                      <span className="text-lg pb-[2px]">★ </span> {sch?.scholarshipName+' ('+sch?.scholarshipPercentage+'%)'}
+                      <span className="text-lg pb-[2px]">★ </span> {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
                     </div> 
                   </Button>
                     :
@@ -351,24 +343,24 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
             </div >}
           </div>
 
-            {lastCourse?.feeSetup?.installmentType === 'one shot payment' ? 
+            {paymentDetails?.paymentPlan === 'one-shot' ? 
             <Card className="p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
                   <h5 className="font-medium">One Shot Payement</h5>
                 </div>
                 <div className="flex items-center gap-2">
-                  {(new Date(lastCourse?.oneShotPayment?.installmentDate) < new Date() && lastCourse?.oneShotPayment?.verificationStatus === 'pending' ) ?
+                  {(new Date(paymentDetails?.oneShotPayment?.installmentDate) < new Date() && paymentDetails?.oneShotPayment?.verificationStatus === 'pending' ) ?
                     <Badge variant={getStatusColor('overdue')}>
                       overdue
                     </Badge>
                   :
-                  <Badge variant={getStatusColor(lastCourse?.oneShotPayment?.verificationStatus || '')}>
-                    {lastCourse?.oneShotPayment?.verificationStatus}
+                  <Badge variant={getStatusColor(paymentDetails?.oneShotPayment?.verificationStatus || '')}>
+                    {paymentDetails?.oneShotPayment?.verificationStatus}
                   </Badge>
                   }
-                  {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url && 
-                    <Button variant="ghost" size="sm" onClick={() => handleView(lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url)}>
+                  {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url && 
+                    <Button variant="ghost" size="sm" onClick={() => handleView(paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url)}>
                       <Eye className="h-4 w-4 mr-2" />
                       View
                     </Button>
@@ -376,24 +368,24 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                 </div>
               </div>
               <div>
-                <p className="text-sm ">Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.amountPayable)}</p>
-                <p className="text-sm text-muted-foreground">Base Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.baseFee)}</p>
-                <p className="text-sm text-muted-foreground">One Shot Discount: ₹{formatAmount(lastCourse?.oneShotPayment?.OneShotPaymentAmount)}</p>
-                <p className="text-sm text-muted-foreground">Scholarship Waiver: ₹{formatAmount(lastCourse?.oneShotPayment?.baseFee*sch?.scholarshipPercentage*0.01)}</p>
+                <p className="text-sm ">Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.amountPayable)}</p>
+                <p className="text-sm text-muted-foreground">Base Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee)}</p>
+                <p className="text-sm text-muted-foreground">One Shot Discount: ₹{formatAmount(paymentDetails?.oneShotPayment?.OneShotPaymentAmount)}</p>
+                <p className="text-sm text-muted-foreground">Scholarship Waiver: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee*scholarshipDetails?.scholarshipPercentage*0.01)}</p>
               </div>
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Due: {new Date(lastCourse?.oneShotPayment?.installmentDate).toLocaleDateString()}
+                  Due: {new Date(paymentDetails?.oneShotPayment?.installmentDate).toLocaleDateString()}
                 </div>
-                {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate && (
+                {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate && (
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4 mr-2" />
-                    Paid: {new Date(lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()}
+                    Paid: {new Date(paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()}
                   </div>
                 )}
               </div>
-              {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
+              {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
                 <Button variant="outline" size="sm" className="w-full mt-2">
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
@@ -479,7 +471,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                 </div>
               )
             )}
-              {sch?.scholarshipDetails?.length > 1 && (
+              {paymentDetails?.paymentPlan === 'instalments' && (
                 <Button
                   variant="ghost" className="w-full underline"
                   onClick={() => setShowAllSemesters(!showAllSemesters)}

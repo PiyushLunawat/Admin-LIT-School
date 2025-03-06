@@ -192,7 +192,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
       scholarshipName: slab.name,
       scholarshipPercentage: slab.percentage,
       scholarshipClearance: slab.clearance,
-      scholarshipDetails: Array.from({
+      installmentDetails: Array.from({
         length: initialData?.cohortFeesDetail?.semesters || 0,
       }).map((_, semesterIndex) => ({
         semester: semesterIndex + 1,

@@ -57,7 +57,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         const response = await getStudents();
         const mappedStudents: any[] = response.data.filter(
           (student: any) =>
-            ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
+            ['selected'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus) &&
             student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?._id == cohortId
         );
 
@@ -90,8 +90,8 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
 
           // --- Payment Plan Check ---
           if (selectedPaymentPlan !== "all") {
-            const lastCourse = app.cousrseEnrolled?.[app.cousrseEnrolled.length - 1];
-            const installmentType = lastCourse?.feeSetup?.installmentType || "";
+            const lastCohort = app?.appliedCohorts?.[app?.appliedCohorts.length - 1];
+            const installmentType = lastCohort?.paymentDetails?.paymentPlan || "";
             
             if (installmentType.toLowerCase() !== selectedPaymentPlan.toLowerCase()) {
               return false;
@@ -100,14 +100,12 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
 
           // --- Scholarship Check ---
           if (selectedScholarship !== "all") {
-            const scholarships = app.cousrseEnrolled?.[app.cousrseEnrolled.length - 1]?.semesterFeeDetails?.scholarshipName;
+            const scholarships = app?.appliedCohorts?.[app?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipName;
             // console.log("installmentType",scholarships,selectedScholarship);
-            
             if (scholarships?.toLowerCase() !== selectedScholarship.toLowerCase()) {
               return false;
             }
           }
-
           return true;
         });
 

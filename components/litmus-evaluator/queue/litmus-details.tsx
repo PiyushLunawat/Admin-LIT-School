@@ -356,6 +356,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
           <ReviewComponent application={application} onApplicationUpdate={onApplicationUpdate} onClose={() => setOpen(false)}/>
         </DialogContent>
       </Dialog>
+      
       <Dialog open={vopen} onOpenChange={setVopen}>
         <DialogContent className="max-w-4xl">
           <ViewComponent application={application} onApplicationUpdate={onApplicationUpdate}/>

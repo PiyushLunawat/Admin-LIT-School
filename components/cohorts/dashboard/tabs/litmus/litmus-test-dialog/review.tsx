@@ -64,22 +64,22 @@ export function ReviewComponent({
     {
       title: "Strengths",
       data:
-      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[0]?.data || [],
+      litmusTestDetails.overallFeedback[litmusTestDetails.overallFeedback.length - 1]?.feedback?.[0]?.data || [],
     },
     {
       title: "Weakness",
       data:
-      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[1]?.data || [],
+      litmusTestDetails.overallFeedback[litmusTestDetails.overallFeedback.length - 1]?.feedback?.[1]?.data || [],
     },
     {
       title: "Opportunities",
       data:
-      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[2]?.data || [],
+      litmusTestDetails.overallFeedback[litmusTestDetails.overallFeedback.length - 1]?.feedback?.[2]?.data || [],
     },
     {
       title: "Threats",
       data:
-      litmusTestDetails?.overAllfeedback?.[0]?.feedback?.[3]?.data || [],
+      litmusTestDetails.overallFeedback[litmusTestDetails.overallFeedback.length - 1]?.feedback?.[3]?.data || [],
     },
   ];
 

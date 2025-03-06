@@ -95,13 +95,13 @@ export function PaymentsList({
     onApplicationUpdate();
   };
 
-  useEffect(() => {
-    if (applications.length > 0) {
-      const firstApplication = applications[0];
-      setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
-      onStudentSelect(firstApplication); // Call the onApplicationSelect function for the first application
-    }
-  }, [applications]);
+  // useEffect(() => {
+  //   if (applications.length > 0) {
+  //     const firstApplication = applications[0];
+  //     setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
+  //     onStudentSelect(firstApplication); // Call the onApplicationSelect function for the first application
+  //   }
+  // }, [applications]);
 
   return (
     <div className="border rounded-lg">
@@ -129,11 +129,15 @@ export function PaymentsList({
             let notPaidCount = 0;
             let dueDate = "--";
             let paymentStatus = "pending";
-            const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
+            const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+            const litmusTestDetails = latestCohort?.litmusTestDetails;
+            let tokenFeeDetails = latestCohort?.tokenFeeDetails;
+            const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+            const paymentDetails = latestCohort?.paymentDetails;
 
             
-            if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
-              const oneShotDetails = lastEnrolled?.oneShotPayment;
+            if (paymentDetails?.paymentPlan === 'one-shot') {
+              const oneShotDetails = paymentDetails?.oneShotPayment;
               if (oneShotDetails) {
                 if (oneShotDetails?.verificationStatus === 'paid') {
                   paidCount += 1;
@@ -151,12 +155,12 @@ export function PaymentsList({
 
               }
             }
-            if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-
-              let earliestUnpaid= lastEnrolled?.installmentDetails[0]?.installments[0];
+            if (paymentDetails?.paymentPlan === 'instalments') {
+              const installmentsDetails = paymentDetails?.installments
+              let earliestUnpaid= installmentsDetails?.[0]?.installments[0];
               let allPaid = true;
 
-              outer: for (const semesterDetail of lastEnrolled?.installmentDetails || []) {
+              outer: for (const semesterDetail of installmentsDetails || []) {
                 for (const installment of semesterDetail.installments || []) {
                   if (installment.verificationStatus !== "paid") {
                     allPaid = false;
@@ -178,7 +182,7 @@ export function PaymentsList({
                 paymentStatus = earliestUnpaid.verificationStatus;
               }
 
-              lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+              installmentsDetails.forEach((semesterDetail: any) => {
                 const installments = semesterDetail?.installments;
                 installments.forEach((installment: any) => {
                   if (installment?.verificationStatus === 'paid') {
@@ -208,22 +212,24 @@ export function PaymentsList({
               <TableCell className="font-medium">
                 {`${application?.firstName || ""} ${application?.lastName || ""}`.trim()}
               </TableCell>
-              <TableCell className="capitalize">{application?.cousrseEnrolled[application.cousrseEnrolled.length-1]?.feeSetup?.installmentType}</TableCell>
+              <TableCell className="capitalize">{paymentDetails?.paymentPlan || "--"}</TableCell>
               <TableCell>
-                {paidCount}/{(paidCount + notPaidCount)} Instalments
+                {paymentDetails?.paymentPlan ? 
+                  `${paidCount}/${(paidCount + notPaidCount)} Instalments` : 'Admission Fee'
+                }
               </TableCell>
               <TableCell>
-                {dueDate ? (
-                  <div className="flex items-center text-sm">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {dueDate}
-                  </div>
-                ) : "--"}
+                {dueDate ? `${dueDate}` : "--"}
               </TableCell>
               <TableCell>
-                <Badge className="capitalize" variant={getStatusColor(paymentStatus)}>
-                  {paymentStatus}
-                </Badge>
+                {paymentDetails?.paymentPlan ? 
+                  <Badge className="capitalize" variant={getStatusColor(paymentStatus)}>
+                    {paymentStatus}
+                  </Badge> : 
+                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus)}>
+                    {tokenFeeDetails?.verificationStatus}
+                  </Badge>
+                }
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
