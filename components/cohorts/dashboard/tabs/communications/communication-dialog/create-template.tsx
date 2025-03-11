@@ -48,7 +48,7 @@ export function CreateTemplate() {
                 <SelectItem value="applicants">All Applicants</SelectItem>
                 <SelectItem value="payment-pending">Payment Pending</SelectItem>
                 <SelectItem value="token-fee-pending">Admission Fee Pending</SelectItem>
-                <SelectItem value="interview-scheduled">Interview Scheduled</SelectItem>
+                <SelectItem value="interview-scheduled">interview scheduled</SelectItem>
                 <SelectItem value="presentation-scheduled">Presentation Scheduled</SelectItem>
               </SelectContent>
             </Select>

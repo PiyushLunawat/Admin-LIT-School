@@ -98,7 +98,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate }
     
     // If status is in certain states, set interview to true
     if (
-      ["Interview Scheduled", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(
+      ["interview scheduled", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(
         currentStatus
       )
     ) {
@@ -108,7 +108,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate }
     }
     
     setStatus(currentStatus);
-    if (currentStatus === "Interview Scheduled") {
+    if (currentStatus === "interview scheduled") {
       checkInterviewStatus(applicationDetails.applicationTestInterviews);
     }
   }, [application]);
@@ -215,7 +215,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
               ))}
               </div>
               <Select
-               disabled={['Interview Scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
+               disabled={['interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
                value={status}
                onValueChange={handleInterviewStatusChange}>
                 <SelectTrigger>

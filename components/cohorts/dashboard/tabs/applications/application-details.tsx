@@ -102,14 +102,14 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
   
     const currentStatus = applicationDetails?.applicationStatus;
   
-    if ( ["Interview Scheduled", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(currentStatus) ) {
+    if ( ["interview scheduled", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(currentStatus) ) {
       setInterview(true);
     } else {
       setInterview(false);
     }
     
     setStatus(currentStatus);
-    if (currentStatus === "Interview Scheduled") {
+    if (currentStatus === "interview scheduled") {
       checkInterviewStatus(applicationDetails?.applicationTestInterviews);
     }
   }, [application]);
@@ -217,7 +217,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                   ))}
                 </div>
                 <Select
-                disabled={['Interview Scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
+                disabled={['interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
                 value={status}
                 onValueChange={handleInterviewStatusChange}>
                   <SelectTrigger>

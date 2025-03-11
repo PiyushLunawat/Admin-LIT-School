@@ -51,7 +51,7 @@ export function MetricsGrid({ applications }: MetricGridProps) {
       // Assigned Count
       const assigned = applications.filter(
         (application) =>
-          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() === "Interview Scheduled" ||
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() === "interview scheduled" ||
         application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() === "submitted" 
       );
       setTotalAssignedCount(assigned.length);

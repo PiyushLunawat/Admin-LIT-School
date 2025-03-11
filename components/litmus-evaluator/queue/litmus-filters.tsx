@@ -81,7 +81,7 @@ export function LitmusFilters({
               <SelectItem value="all-status">All Status</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="submitted">Submitted</SelectItem>
-              <SelectItem value="interview scheduled">Interview Scheduled</SelectItem>
+              <SelectItem value="interview scheduled">interview scheduled</SelectItem>
               <SelectItem value="interview cancelleed">Interview Cancelled</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="dropped">Dropped</SelectItem>

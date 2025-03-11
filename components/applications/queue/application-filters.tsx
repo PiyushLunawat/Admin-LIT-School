@@ -85,7 +85,7 @@ export function ApplicationFilters({
               <SelectItem value="on hold">On Hold</SelectItem>
               <SelectItem value="accepted">Accepted</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
-              <SelectItem value="interview scheduled">Interview Scheduled</SelectItem>
+              <SelectItem value="interview scheduled">interview scheduled</SelectItem>
               <SelectItem value="dropped">Dropped</SelectItem>
             </SelectContent>
           </Select>

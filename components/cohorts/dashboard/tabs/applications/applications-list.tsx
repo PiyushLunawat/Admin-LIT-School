@@ -181,7 +181,7 @@ export function ApplicationsList({
                   {new Date(applicationDetail?.updatedAt).toLocaleDateString() || "--"}
                 </TableCell>
                 <TableCell className="space-y-1">
-                  {applicationDetail?.applicationStatus === 'Interview Scheduled' ?
+                  {applicationDetail?.applicationStatus === 'interview scheduled' ?
                     <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(checkInterviewStatus(applicationDetail?.applicationTestInterviews))}>
                       {checkInterviewStatus(applicationDetail?.applicationTestInterviews)}
                     </Badge> :

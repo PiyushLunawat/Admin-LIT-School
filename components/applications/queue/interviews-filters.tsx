@@ -80,7 +80,7 @@ export function InterviewsFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-status">All Status</SelectItem>
-              <SelectItem value="interview scheduled">Interview Scheduled</SelectItem>
+              <SelectItem value="interview scheduled">interview scheduled</SelectItem>
               <SelectItem value="interview cancelled">Interview Cancelled</SelectItem>
               <SelectItem value="under review">Interview Concluded</SelectItem>
               <SelectItem value="waitlist">Waitlist</SelectItem>

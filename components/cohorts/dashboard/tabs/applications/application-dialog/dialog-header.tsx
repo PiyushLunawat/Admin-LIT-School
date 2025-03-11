@@ -116,15 +116,15 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Application Status</p>
                 {applicationDetails?.applicationStatus ?
-                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                <Badge className="capitalize" variant={getStatusColor(['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
                   'accepted' : applicationDetails?.applicationStatus || "--")}>
-                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                  {['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
                   'accepted' : applicationDetails?.applicationStatus }
                 </Badge> : "--"}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Interview Status</p>
-                {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ? 
+                {['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ? 
                 <Badge className="capitalize" variant={getStatusColor(applicationDetails?.applicationStatus || "--")}>
                   {applicationDetails?.applicationStatus}
                 </Badge> : "--"}

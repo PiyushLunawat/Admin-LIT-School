@@ -160,9 +160,9 @@ export function ApplicationsList({
               </TableCell>
               <TableCell>
                 {applicationDetails?.applicationStatus ?
-                <Badge className="capitalize" variant={getStatusColor(['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                <Badge className="capitalize" variant={getStatusColor(['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
                   'accepted' : applicationDetails?.applicationStatus || "--")}>
-                  {['Interview Scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
+                  {['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
                   'accepted' : applicationDetails?.applicationStatus }
                 </Badge> : "--"}
                 {(applicationDetails?.applicationStatus === 'under review' && applicationDetails?.applicationTasks?.length > 1) &&

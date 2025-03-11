@@ -52,7 +52,7 @@ export function AutomationSettings({ cohortId }: AutomationSettingsProps) {
       settings: [
         {
           id: "interview-scheduled",
-          label: "Interview Scheduled",
+          label: "interview scheduled",
           description: "Send confirmation when interview is scheduled",
           enabled: true,
           template: "interview-confirmation",
