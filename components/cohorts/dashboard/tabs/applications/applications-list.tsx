@@ -196,7 +196,7 @@ export function ApplicationsList({
                   }
                 </TableCell>
                 <TableCell>
-                  {applicationDetail?.applicationTestInterviews[applicationDetail?.applicationTestInterviews.length - 1] ? (
+                  {applicationDetail?.applicationTestInterviews?.[applicationDetail?.applicationTestInterviews.length - 1] ? (
                     <div className="space-y-0.5">
                       <div className="flex items-center text-xs">
                         <Clock4Icon className="h-3 w-3 mr-1" />

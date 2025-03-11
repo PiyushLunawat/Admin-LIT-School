@@ -420,8 +420,8 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                           <div className="hidden">
                             {lastStatus = instalment.verificationStatus}
                           </div>
-                          {instalment.receiptUrls[instalment.receiptUrls.length - 1]?.url && 
-                            <Button variant="ghost" size="sm" onClick={() => handleView(instalment.receiptUrls[instalment.receiptUrls.length - 1]?.url)}>
+                          {instalment.receiptUrls?.[instalment.receiptUrls.length - 1]?.url && 
+                            <Button variant="ghost" size="sm" onClick={() => handleView(instalment.receiptUrls?.[instalment.receiptUrls.length - 1]?.url)}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </Button>}
@@ -450,7 +450,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                           </div>
                         )}
                       </div>
-                      {instalment.receiptUrls[instalment.receiptUrls.length - 1]?.url ? (
+                      {instalment.receiptUrls?.[instalment.receiptUrls.length - 1]?.url ? (
                         <Button
                           variant="outline"
                           size="sm"
