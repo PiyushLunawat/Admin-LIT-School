@@ -32,6 +32,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
   const [selectedScholarship, setSelectedScholarship] = useState("all");
 
   const handleApplicationUpdate = () => {
+    console.log("prevKey",refreshKey)
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
   };
 
@@ -119,14 +120,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
     }
 
     fetchAndFilterStudents();
-  }, [
-    selectedDateRange,
-    searchQuery,
-    selectedPaymentStatus,
-    selectedPaymentPlan,
-    selectedScholarship,
-    cohortId,
-  ]);
+  }, [ refreshKey, selectedDateRange, searchQuery, selectedPaymentStatus, selectedPaymentPlan, selectedScholarship, cohortId,]);
 
   const handleBulkReminder = () => {
     console.log("Sending payment reminders to:", selectedStudentIds);
@@ -161,7 +155,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
           <Button
             variant="outline"
             size={'icon'}
-            onClick={handleApplicationUpdate}
+            onClick={() => handleApplicationUpdate()}
             disabled={loading}
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -203,6 +197,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
                 <PaymentDetails
                   student={selectedStudent}
                   onClose={() => setSelectedStudent(null)}
+                  onApplicationUpdate={handleApplicationUpdate}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center p-6 text-muted-foreground">

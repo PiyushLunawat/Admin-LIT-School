@@ -5,24 +5,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
-  Mail,
-  MessageSquare,
   UserMinus,
   X,
-  Upload,
   Download,
   Calendar,
   UploadIcon,
-  StarIcon,
   DownloadIcon,
   Star,
   Eye,
+  EyeIcon,
+  ArrowLeft,
 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
@@ -30,24 +23,37 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { AwardScholarship } from "../litmus/litmus-test-dialog/award-scholarship";
 import { Textarea } from "@/components/ui/textarea";
-import { verifyTokenAmount } from "@/app/api/student";
+import { verifyFeeStatus, verifyTokenAmount } from "@/app/api/student";
 
-type BadgeVariant = "pending" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "lemon" | "pending" | "warning" | "secondary" | "success" | "default";
 interface PaymentDetailsProps {
   student: any;
   onClose: () => void;
+  onApplicationUpdate: () => void;
 }
 
-export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
+export function PaymentDetails({ student, onClose, onApplicationUpdate }: PaymentDetailsProps) {
+  const [loading, setLoading] = useState(false);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [schOpen, setSchOpen] = useState(false);
   const [showAllSemesters, setShowAllSemesters] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [instalment, setInstalment] = useState<any>();
+  const [instalmentNo, setInstalmentNo] = useState<any>();
+  const [semesterNo, setSemesterNo] = useState<any>();
   const [open, setOpen] = useState(false);
+  const [vopen, setVopen] = useState(false);
 
   const handleView = (url: string) => {
     setImageUrl(url);
     setOpen(true);
+  };
+
+  const handleVerifyDialog = (instalment: any, insIndex: any, semIndex: any) => {
+    setInstalment(instalment);
+    setInstalmentNo(insIndex);
+    setSemesterNo(semIndex);
+    setVopen(true);
   };
 
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
@@ -55,7 +61,12 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
   const litmusTestDetails = latestCohort?.litmusTestDetails;
   let tokenFeeDetails = latestCohort?.tokenFeeDetails;
   const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
-  const paymentDetails = latestCohort?.paymentDetails;
+  const [paymentDetails, setPaymentDetails] = useState<any>(latestCohort?.paymentDetails);
+
+  useEffect(() => {
+    setPaymentDetails(latestCohort?.paymentDetails);
+  }, [student]);
+
   const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
   const applicationDetails = latestCohort?.applicationDetails;
   
@@ -73,18 +84,51 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
           document.body.removeChild(link);
       };
     
-      async function handleVerify(tokenId: any, comment: string, verificationStatus: string) {
+      async function handleTokenVerify(tokenId: any, comment: string, verificationStatus: string) {
         try {
           if (!tokenId) {
             console.error("Admission Fee ID is not available");
             return;
           }  
+          setLoading(true)
           const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
           tokenFeeDetails = response.token;
           setFlagOpen(false);
-          // onUpdateStatus();
+          onApplicationUpdate();
         } catch (error) {
           console.error("Error verifying token amount:", error);
+        } finally {
+          setLoading(false)
+        }
+      } 
+
+      async function handleFeeVerify(ins: any, sem: any,  comment: string, verificationStatus: string) {
+        
+        const payload = {
+          studentPaymentId: paymentDetails?._id,
+          semesterNumber: sem,
+          installmentNumber: ins,
+          feedbackData: comment,
+          verificationStatus: verificationStatus,
+         };
+        console.log("payloadvdvd", payload);
+        
+        try {
+          if (!payload) {
+            console.error("Fee ID is not available");
+            return;
+          }  
+          setLoading(true)
+          const response = await verifyFeeStatus(payload);
+          console.log("response", response);
+          setPaymentDetails(response.updatedPayment); 
+          setFlagOpen(false);
+          setVopen(false)
+          onApplicationUpdate();
+        } catch (error) {
+          console.error("Error verifying token amount:", error);
+        } finally {
+          setLoading(false)
         }
       } 
 
@@ -131,9 +175,10 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
       case "pending":
         return "default";
       case "overdue":
+      case "flagged":
         return "warning";
-      case "verification pending":
-        return "pending";
+      case "verifying":
+        return "lemon";
       default:
         return "default";
     }
@@ -297,17 +342,17 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                     <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
                   </div>
                   <div className="flex gap-2" >
-                    <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
-                    <Button className="flex-1" disabled={!reason.trim()}
-                      onClick={() => handleVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
+                    <Button variant="outline" className="flex" disabled={loading} onClick={() => setFlagOpen(false)}>Back</Button>
+                    <Button className="flex-1" disabled={!reason.trim() || loading}
+                      onClick={() => handleTokenVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
                   </div>
                 </div> :
                 <div className="flex gap-2 mt-4">
                   <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
-                    onClick={() => setFlagOpen(true)}> Reject
+                    onClick={() => setFlagOpen(true)}> Reject disabled={loading}
                   </Button>
-                  <Button variant="outline" className="flex-1 bg-[#2EB88A]"
-                    onClick={() => handleVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}> Approve
+                  <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading}
+                    onClick={() => handleTokenVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}> Approve
                   </Button>
                 </div>}
               </div>
@@ -408,7 +453,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                         </div>
                         <div className="flex items-center gap-2">
                           {lastStatus !== 'pending' && (
-                            (new Date(instalment?.installmentDate) < new Date() && instalment?.verificationStatus === 'pending' && !(instalment.receiptUrls[0]?.uploadedDate)) ?
+                            (new Date(instalment?.installmentDate) < new Date() && instalment?.verificationStatus === 'pending' && !(instalment.receiptUrls?.[instalment?.receiptUrls.length - 1]?.uploadedDate)) ?
                               <Badge variant={getStatusColor('overdue')}>
                                 overdue
                               </Badge>
@@ -420,7 +465,7 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                           <div className="hidden">
                             {lastStatus = instalment.verificationStatus}
                           </div>
-                          {instalment.receiptUrls?.[instalment.receiptUrls.length - 1]?.url && 
+                          {instalment.verificationStatus === 'paid' && 
                             <Button variant="ghost" size="sm" onClick={() => handleView(instalment.receiptUrls?.[instalment.receiptUrls.length - 1]?.url)}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
@@ -438,27 +483,29 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
                           Scholarship Waiver: ₹{formatAmount(instalment.scholarshipAmount)}
                         </p>
                       </div>
-                      <div className="flex justify-between items-center gap-2">
+                      <div className="justify-between items-center gap-2">
                         <div className="flex items-center text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4 mr-2" />
                           Due: {new Date(instalment.installmentDate).toLocaleDateString()}
                         </div>
-                        {instalment.receiptUrls?.[0]?.uploadedDate && (
+                        {instalment?.receiptUrls?.[instalment?.receiptUrls.length - 1]?.uploadedAt && (
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4 mr-2" />
-                            Paid: {new Date(instalment.receiptUrls[0]?.uploadedDate).toLocaleDateString()}
+                            Paid: {new Date(instalment.receiptUrls[instalment.receiptUrls.length - 1]?.uploadedAt).toLocaleDateString()}
                           </div>
                         )}
                       </div>
-                      {instalment.receiptUrls?.[instalment.receiptUrls.length - 1]?.url ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full mt-2"
-                          onClick={() => window.open(instalment.receiptUrls[0]?.url, "_blank")}
-                        >
+                      {instalment.verificationStatus === 'paid' ? (
+                        <Button variant="outline" size="sm" className="w-full mt-2"
+                          onClick={() => window.open(instalment.receiptUrls?.[instalment?.receiptUrls.length - 1]?.url, "_blank")}>
                           <Download className="h-4 w-4 mr-2" />
                           Download Receipt
+                        </Button>
+                      ) : instalment.verificationStatus === 'verifying' ? (
+                        <Button variant="outline" size="sm" className="w-full mt-2"
+                          onClick={() => handleVerifyDialog(instalment, installmentIndex + 1,semesterDetail.semester)}>
+                          <EyeIcon className="h-4 w-4 mr-2" />
+                          Acknowledgement Receipt
                         </Button>
                       ) : (
                         <Button variant="outline" size="sm" className="w-full mt-2">
@@ -511,14 +558,90 @@ export function PaymentDetails({ student, onClose }: PaymentDetailsProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="Receipt"
-              className="mx-auto h-[50vh] object-contain"
-            />
+            <img src={imageUrl} alt="Receipt" className="mx-auto h-[50vh] object-contain"/>
           ) : (
             <p className="text-center text-muted-foreground">No receipt found.</p>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={vopen} onOpenChange={setVopen}>
+        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+          <div className="flex items-center gap-4">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold">{student?.firstName} {student?.lastName}</h2>
+              <div className="flex gap-4 h-5 items-center">
+                <p className="text-sm text-muted-foreground">{student?.email}</p>
+                <Separator orientation="vertical" />
+                <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>
+              </div>
+            </div>
+          </div>
+          {flagOpen && 
+            <Button variant="outline" className="flex gap-2 items-center" onClick={() => setFlagOpen(false)} disabled={loading}>
+              <ArrowLeft className="w-4 h-4" />Back to Payment Approval
+            </Button>
+          }
+          <Card className="p-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <div>
+                <h5 className="font-medium">Instalment {instalmentNo}</h5>
+                <p className="text-xs text-[#00A3FF]">Semester {semesterNo}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm ">
+                Amount Payable: ₹{formatAmount(instalment?.amountPayable)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Base Amount: ₹{formatAmount(instalment?.baseFee + instalment?.scholarshipAmount)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Scholarship Waiver: ₹{formatAmount(instalment?.scholarshipAmount)}
+              </p>
+            </div>
+            <div className="flex justify-start items-center gap-2">
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 mr-2" />
+                Due: {new Date(instalment?.installmentDate).toLocaleDateString()}
+              </div>
+              {instalment?.receiptUrls?.[instalment?.receiptUrls.length - 1]?.uploadedAt && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Paid: {new Date(instalment?.receiptUrls?.[instalment.receiptUrls.length - 1]?.uploadedAt).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+            {instalment ? (
+                <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
+                  <img src={instalment?.receiptUrls?.[instalment?.receiptUrls.length - 1]?.url} alt={'Fee_Receipt'} className='w-full h-[160px] object-contain rounded-t-xl' />
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground">No receipt found.</p>
+              )}
+          </Card>
+
+          {flagOpen ?
+            <div className="space-y-4 ">
+              <div className="mt-2 space-y-2">
+                <label className="text-sm">Provide Reasons for Rejection</label>
+                <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+              </div>
+              <Button className="flex-1" disabled={!reason.trim() || loading}
+                onClick={() => handleFeeVerify(instalmentNo, semesterNo , reason, "flagged")}
+                >
+                Confirm and Update Status
+              </Button>
+            </div> :
+            <div className="flex gap-2 mt-2">
+              <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] " disabled={loading}
+                onClick={() => setFlagOpen(true)}> Reject
+              </Button>
+              <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading}
+                onClick={() => handleFeeVerify(instalmentNo, semesterNo, "", "paid")}> Approve
+              </Button>
+            </div>
+          }
         </DialogContent>
       </Dialog>
     </div>
