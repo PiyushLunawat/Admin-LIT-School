@@ -60,7 +60,7 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                         <FileIcon className="w-4 h-4" />
                         <span className="text-white text-sm truncate max-w-[700px]">{file.split('/').pop()}</span>
                       </div>
-                      <Button variant="ghost" size="icon" type='button'
+                      <Button variant="ghost" size="icon" type='button' onClick={() => window.open(file, "_blank")}
                         className="text-white rounded-xl">
                         <Download className="w-4 h-4" />
                       </Button>
@@ -73,7 +73,7 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                         <Link2 className="w-4 h-4" />
                         <span className="text-white text-sm truncate max-w-[700px]">{link}</span>
                       </div>
-                      <Button
+                      <Button onClick={() => window.open(link, "_blank")}
                         variant="ghost" size="icon" type='button'
                         className="text-white rounded-xl">
                         <ArrowUpRight className="w-4 h-4" />
@@ -104,11 +104,17 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                 </div>
               ))}
               {submission?.tasks[index]?.links?.map((linkItem: string, id: number) => (
-                <div key={`link-${id}`} className="w-full flex items-center gap-2 text-sm p-3 border rounded-xl">
-                  <Link2Icon className="w-4 h-4" />
-                  <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                    {linkItem}
-                  </a>
+                <div key={`link-${id}`} className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl">
+                  <div className='flex items-center gap-2 text-sm truncate'>
+                    <Link2Icon className="w-4 h-4" />
+                    <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                      {linkItem}
+                    </a>
+                  </div>
+                  <Button variant="ghost" size="icon" type='button' className="text-white rounded-xl"
+                    onClick={() => window.open(linkItem, "_blank")}>
+                    <Download className="w-4 h-4 " />
+                  </Button>
                 </div>
               ))}
               {submission?.tasks[index]?.images?.map((imageItem: string, id: number) => (
@@ -151,11 +157,18 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                 </div>
               ))}
               {submission?.tasks[index]?.files?.map((fileItem: string, id: number) => (
-                <div key={`file-${id}`} className="flex w-full items-center gap-2 text-sm p-3 border rounded-xl">
-                  <FileIcon className="w-4 h-4" />
-                  <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                    {fileItem.split('/').pop()}
-                  </a>
+                <div key={`file-${id}`} className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl">
+                  <div className='flex items-center gap-2 text-sm truncate'>
+                    <FileIcon className="w-4 h-4" />
+                    <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                      {fileItem.split('/').pop()}
+                    </a>
+                  </div>
+                  <Button variant={'ghost'} size={'zero'} className=''>
+                    <a href={fileItem} target="_blank" rel="noopener noreferrer" className="">
+                      <Download className="w-4 h-4 " />
+                    </a>
+                  </Button>
                 </div>
               ))}
               </div>

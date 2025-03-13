@@ -309,7 +309,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                           <FileIcon className="w-4 h-4" />
                           <span className="text-white text-sm truncate max-w-[700px]">{file.split('/').pop()}</span>
                         </div>
-                        <Button variant="ghost" size="icon" type='button'
+                        <Button variant="ghost" size="icon" type='button' onClick={() => window.open(file, "_blank")}
                           className="text-white rounded-xl">
                           <Download className="w-4 h-4" />
                         </Button>
@@ -323,7 +323,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                           <span className="text-white text-sm truncate max-w-[700px]">{link}</span>
                         </div>
                         <Button
-                          variant="ghost" size="icon" type='button'
+                          variant="ghost" size="icon" type='button' onClick={() => window.open(link, "_blank")}
                           className="text-white rounded-xl">
                           <ArrowUpRight className="w-4 h-4" />
                         </Button>
@@ -350,17 +350,23 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                     </div>
                   ))}
                   {submission?.tasks[index]?.links?.map((linkItem: string, id: number) => (
-                    <div key={`link-${id}`} className="w-full flex items-center gap-2 text-sm p-3 border rounded-xl">
-                      <Link2Icon className="w-4 h-4" />
-                      <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                        {linkItem}
-                      </a>
+                    <div key={`link-${id}`} className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl">
+                      <div className='flex items-center gap-2 text-sm truncate'>
+                        <Link2Icon className="w-4 h-4" />
+                        <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                          {linkItem}
+                        </a>
+                      </div>
+                      <Button variant="ghost" size="icon" type='button' className="text-white rounded-xl"
+                        onClick={() => window.open(linkItem, "_blank")}>
+                        <Download className="w-4 h-4 " />
+                      </Button>
                     </div>
                   ))}
                   {submission?.tasks[index]?.images?.map((imageItem: string, id: number) => (
                     <div key={`image-${id}`} className="w-full flex flex-col items-center text-sm border rounded-xl">
                       <img src={imageItem} alt={imageItem.split('/').pop()} className='w-full h-[420px] object-contain rounded-t-xl' />
-                      <div className='w-full flex justify-between items-center p-3'>
+                      <div className='w-full flex justify-between items-center p-3 border-t'>
                         <div className='flex items-center gap-2 text-sm truncate'>
                           <ImageIcon className="w-4 h-4" />
                           <span className='w-[220px] text-white truncate'>
@@ -381,7 +387,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                         <source src={videoItem} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
-                      <div className='w-full flex justify-between items-center p-3'>
+                      <div className='w-full flex justify-between items-center p-3 border-t'>
                         <div className='flex items-center gap-2 text-sm truncate'>
                           <VideoIcon className="w-4 h-4" />
                           <span className='w-[220px] text-white truncate'>
@@ -397,11 +403,18 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                     </div>
                   ))}
                   {submission?.tasks[index]?.files?.map((fileItem: string, id: number) => (
-                    <div key={`file-${id}`} className="flex w-full items-center gap-2 text-sm p-3 border rounded-xl">
-                      <FileIcon className="w-4 h-4" />
-                      <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
-                        {fileItem.split('/').pop()}
-                      </a>
+                    <div key={`file-${id}`} className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl">
+                      <div className='flex items-center gap-2 text-sm truncate'>
+                        <FileIcon className="w-4 h-4" />
+                        <a href={fileItem} target="_blank" rel="noopener noreferrer" className="text-white">
+                          {fileItem.split('/').pop()}
+                        </a>
+                      </div>
+                      <Button variant={'ghost'} size={'zero'} className=''>
+                        <a href={fileItem} target="_blank" rel="noopener noreferrer" className="">
+                          <Download className="w-4 h-4 " />
+                        </a>
+                      </Button>
                     </div>
                   ))}
                 </div>

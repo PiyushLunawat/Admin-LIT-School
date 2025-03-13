@@ -60,8 +60,9 @@ export function PaymentsList({
       case "paid":
         return "success";
       case "overdue":
+        case "flagged":
         return "warning";
-      case "verification pending":
+      case "verifying":
         return "pending";
       case "verification pending":
         return "default";

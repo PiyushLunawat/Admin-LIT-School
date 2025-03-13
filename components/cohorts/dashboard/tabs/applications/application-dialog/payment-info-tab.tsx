@@ -200,7 +200,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
             <div className="border rounded-lg p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-medium">Token Amount</h4>
+                  <h4 className="font-medium">Admission Fee</h4>
                   <p className="text-sm text-muted-foreground">
                     Amount: ₹{formatAmount(tokenAmount)}
                     {tokenFeeDetails && (

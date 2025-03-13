@@ -60,6 +60,11 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
   const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
 
+  console.log('application =>', application);
+console.log('latestCohort =>', latestCohort);
+console.log('applicationDetails =>', applicationDetails);
+
+
   const [open, setOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState('');
