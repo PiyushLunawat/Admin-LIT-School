@@ -382,7 +382,7 @@ export function ReviewComponent({
                         <FileIcon className="w-4 h-4" />
                         <span className="text-white text-sm truncate max-w-[700px]">{file.split('/').pop()}</span>
                       </div>
-                      <Button variant="ghost" size="icon" type='button'
+                      <Button variant="ghost" size="icon" type='button' onClick={() => window.open(file, "_blank")}
                         className="text-white rounded-xl">
                         <Download className="w-4 h-4" />
                       </Button>
@@ -396,7 +396,7 @@ export function ReviewComponent({
                         <span className="text-white text-sm truncate max-w-[700px]">{link}</span>
                       </div>
                       <Button
-                        variant="ghost" size="icon" type='button'
+                        variant="ghost" size="icon" type='button' onClick={() => window.open(link, "_blank")}
                         className="text-white rounded-xl">
                         <ArrowUpRight className="w-4 h-4" />
                       </Button>

@@ -59,11 +59,12 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId; 
   const litmusTestDetails = latestCohort?.litmusTestDetails;
-  let tokenFeeDetails = latestCohort?.tokenFeeDetails;
   const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+  const [tokenFeeDetails, setTokenFeeDetails] = useState<any>(latestCohort?.tokenFeeDetails);
   const [paymentDetails, setPaymentDetails] = useState<any>(latestCohort?.paymentDetails);
 
   useEffect(() => {
+    setTokenFeeDetails(latestCohort?.tokenFeeDetails)
     setPaymentDetails(latestCohort?.paymentDetails);
   }, [student]);
 
@@ -92,7 +93,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           }  
           setLoading(true)
           const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
-          tokenFeeDetails = response.token;
+          setTokenFeeDetails(response.token);
           setFlagOpen(false);
           onApplicationUpdate();
         } catch (error) {
@@ -227,21 +228,29 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
               <div>
                 <p className="text-sm text-muted-foreground">Scholarship</p>
                 <p className={`font-medium ${getColor(scholarshipDetails?.scholarshipName)}`}>
-                  {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
+                  {scholarshipDetails ? 
+                  `${scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}` : 
+                  '--'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Admission Fee Status</p>
                 <span className="text-base mr-2">₹{formatAmount(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee)}</span>
-                <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
-                  {tokenFeeDetails?.verificationStatus}
-                </Badge>
+                {tokenFeeDetails?.verificationStatus &&
+                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
+                    {tokenFeeDetails?.verificationStatus}
+                  </Badge>
+                }
               </div>
             </div>
             <div className="space-y-1 mt-2">
               <div className="flex justify-between text-sm">
                 <span>Payment Progress</span>
-                <span>{((paidAmount / notPaidAmount) * 100).toFixed(0)}%</span>
+                <span className="pr-3">
+                  {notPaidAmount ? 
+                  `${((paidAmount / (paidAmount+notPaidAmount)) * 100).toFixed(0)}%` :
+                  '--'}
+                </span>
               </div>
               <Progress states={[
                 { value: (paidAmount), widt: ((paidAmount / notPaidAmount) * 100), color: '#2EB88A' }
@@ -255,11 +264,11 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           <div className="space-y-2">
             <h4 className="font-medium">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start" disabled>
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Presen...
               </Button>
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start" disabled>
                 <DownloadIcon className="h-4 w-4 mr-2" />
                 Download Files
               </Button>
@@ -270,7 +279,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                     </div> 
                   </Button>
                     :
-                  <Button variant="outline" className="justify-start">
+                  <Button variant="outline" className="justify-start" disabled>
                     <div className="flex gap-2 items-center">
                       <Star className="h-4 w-4" />
                       Award Scholarship
@@ -348,11 +357,11 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   </div>
                 </div> :
                 <div className="flex gap-2 mt-4">
-                  <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
-                    onClick={() => setFlagOpen(true)}> Reject disabled={loading}
+                  <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] hover:bg-[#FF503D]/[0.1] " disabled={loading}
+                    onClick={() => setFlagOpen(true)}> Reject
                   </Button>
-                  <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading}
-                    onClick={() => handleTokenVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}> Approve
+                  <Button variant="outline" className="flex-1 bg-[#2EB88A] hover:bg-[#2EB88A]/90" disabled={loading}
+                    onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")}> Approve
                   </Button>
                 </div>}
               </div>

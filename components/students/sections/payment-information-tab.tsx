@@ -213,7 +213,7 @@ const [sch, setSch] = useState<any>();
                       <FlagIcon className="w-4 h-4"/> Flag Document
                   </Button>
                   <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}>
+                    onClick={() => handleVerify(student?.cousrseEnrolled?.[student.cousrseEnrolled?.length - 1]?.tokenFeeDetails?._id, "", "paid")}>
                       <CircleCheckBig className="w-4 h-4"/> Mark as Verified
                   </Button>
                 </div>

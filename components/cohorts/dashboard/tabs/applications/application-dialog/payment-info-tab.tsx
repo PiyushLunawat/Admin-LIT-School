@@ -33,7 +33,13 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
   const applicationDetails = latestCohort?.applicationDetails;
   const litmusTestDetails = latestCohort?.litmusTestDetails;
   const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
-  let tokenFeeDetails = latestCohort?.tokenFeeDetails;
+  const [tokenFeeDetails, setTokenFeeDetails] = useState<any>(latestCohort?.tokenFeeDetails);
+  const [paymentDetails, setPaymentDetails] = useState<any>(latestCohort?.paymentDetails);
+
+  useEffect(() => {
+    setTokenFeeDetails(latestCohort?.tokenFeeDetails)
+    setPaymentDetails(latestCohort?.paymentDetails);
+  }, [student]);
 
   const colorClasses = [
     'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
@@ -63,7 +69,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
         return;
       }  
       const response = await verifyTokenAmount(tokenId, comment, verificationStatus);
-      tokenFeeDetails = response.token;
+      setTokenFeeDetails(response.token);
       setFlagOpen(false);
       onUpdateStatus();
     } catch (error) {
@@ -257,7 +263,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                         <FlagIcon className="w-4 h-4"/> Flag Reciept
                     </Button>
                     <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                      onClick={() => handleVerify(tokenFeeDetails?._id, "Admission Fee is verfied", "paid")}>
+                      onClick={() => handleVerify(tokenFeeDetails?._id, "", "paid")}>
                         <CircleCheckBig className="w-4 h-4"/> Mark as Verified
                     </Button>
                   </div>}

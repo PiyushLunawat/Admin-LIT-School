@@ -267,7 +267,7 @@ export function PaymentsList({
         </TabsContent>
 
         <TabsContent value="payment">
-          {/* <PaymentInformationTab student={selectedStudentId} /> */}
+          <PaymentInformationTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
         </TabsContent>
 
         <TabsContent value="documents">
