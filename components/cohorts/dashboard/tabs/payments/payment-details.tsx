@@ -179,7 +179,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
       case "flagged":
         return "warning";
       case "verifying":
-        return "lemon";
+      case "verification pending":
+        return "pending";
       default:
         return "default";
     }

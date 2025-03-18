@@ -60,12 +60,11 @@ export function PaymentsList({
       case "paid":
         return "success";
       case "overdue":
-        case "flagged":
         return "warning";
+      case "flagged":
       case "verifying":
-        return "pending";
       case "verification pending":
-        return "default";
+        return "pending";
       default:
         return "default";
     }
@@ -228,7 +227,7 @@ export function PaymentsList({
                     {paymentStatus}
                   </Badge> : 
                   <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus)}>
-                    {tokenFeeDetails?.verificationStatus}
+                    {tokenFeeDetails?.verificationStatus === 'flagged' ? 'pending' : tokenFeeDetails?.verificationStatus}
                   </Badge>
                 }
               </TableCell>

@@ -196,68 +196,71 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
             </div>
             {interview ? 
             <div className="space-y-3">  
-            <div className="space-y-1">
-              {applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
-                  <div key={index} className="flex justify-between text-muted-foreground text-sm">
-                    <div className="flex justify-center gap-3 items-center">
-                      <div className="flex gap-1 items-center">
-                        <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+              <div className="space-y-1">
+                {applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
+                    <div key={index} className="flex justify-between text-muted-foreground text-sm">
+                      <div className="flex justify-center gap-3 items-center">
+                        <div className="flex gap-1 items-center">
+                          <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+                        </div>
+                        <div className="flex gap-1 items-center">
+                          <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
+                        </div>
                       </div>
-                      <div className="flex gap-1 items-center">
-                        <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
-                      </div>
+                      {/* {
+                        (index !== 0 && interview?.meetingStatus === 'Interview confirmed') ?
+                        <p className="capitalize">Int. Time Elapsed</p> :
+                        (index === 0 && status === 'interview concluded') ?
+                        <p className="capitalize">Int. Time Elapsed</p> :
+                        <p className="capitalize">Interview fsf {interview?.meetingStatus}</p>
+                      } */}
                     </div>
-                    {status === 'Interview Concluded' ?
-                      <p className="capitalize">Int. Time Elapsed</p> :
-                      <p className="capitalize">Interview {interview?.meetingStatus}</p>
+                ))}
+                </div>
+                <Select
+                disabled={['interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
+                value={status}
+                onValueChange={handleInterviewStatusChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {!['not qualified', 'waitlist', 'selected'].includes(status) &&
+                      <SelectItem className="capitalize" value={status}>
+                        <span className="capitalize">{status}</span>
+                      </SelectItem>
                     }
-                  </div>
-              ))}
-              </div>
-              <Select
-               disabled={['interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
-               value={status}
-               onValueChange={handleInterviewStatusChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {!['not qualified', 'waitlist', 'selected'].includes(status) &&
-                    <SelectItem className="capitalize" value={status}>
-                      <span className="capitalize">{status}</span>
-                    </SelectItem>
-                  }
-                  <SelectItem value="waitlist">Waitlist</SelectItem>
-                  <SelectItem value="selected">Accepted</SelectItem>
-                  <SelectItem value="not qualified">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-              {!['selected'].includes(status) &&
-                <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
-                  <FileSignature className="w-4 h-4"/>Interview Feedback
-                </Button>
-              }
-            </div> : 
-            (
-              <Select 
-              disabled={['initiated', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus)} 
-                value={applicationDetails?.applicationStatus} 
-                onValueChange={handleStatusChange}>
-                <SelectTrigger>
-                  <SelectValue className="" placeholder="Change status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {!['on hold', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus) &&
-                    <SelectItem className="capitalize" value={applicationDetails?.applicationStatus}>
-                      <span className="capitalize">{applicationDetails?.applicationStatus}</span>
-                    </SelectItem>
-                  }
-                  <SelectItem value="on hold">Put On Hold</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            )
+                    <SelectItem value="waitlist">Waitlist</SelectItem>
+                    <SelectItem value="selected">Accepted</SelectItem>
+                    <SelectItem value="not qualified">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                {['interview concluded'].includes(status) &&
+                  <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
+                    <FileSignature className="w-4 h-4"/>Interview Feedback
+                  </Button>
+                }
+              </div> : 
+              (
+                <Select 
+                disabled={['initiated', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus)} 
+                  value={applicationDetails?.applicationStatus} 
+                  onValueChange={handleStatusChange}>
+                  <SelectTrigger>
+                    <SelectValue className="" placeholder="Change status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {!['on hold', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus) &&
+                      <SelectItem className="capitalize" value={applicationDetails?.applicationStatus}>
+                        <span className="capitalize">{applicationDetails?.applicationStatus}</span>
+                      </SelectItem>
+                    }
+                    <SelectItem value="on hold">Put On Hold</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              )
           }
           </div>
 
