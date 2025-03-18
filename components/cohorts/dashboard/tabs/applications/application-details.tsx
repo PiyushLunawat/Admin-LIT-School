@@ -219,7 +219,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                   ))}
                 </div>
                 <Select
-                disabled={['interview sheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
+                disabled={['interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
                 value={status}
                 onValueChange={handleInterviewStatusChange}>
                   <SelectTrigger>

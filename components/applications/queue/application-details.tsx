@@ -207,13 +207,13 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
                           <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
                         </div>
                       </div>
-                      {/* {
+                      {
                         (index !== 0 && interview?.meetingStatus === 'Interview confirmed') ?
                         <p className="capitalize">Int. Time Elapsed</p> :
                         (index === 0 && status === 'interview concluded') ?
                         <p className="capitalize">Int. Time Elapsed</p> :
                         <p className="capitalize">Interview fsf {interview?.meetingStatus}</p>
-                      } */}
+                      }
                     </div>
                 ))}
                 </div>
