@@ -104,7 +104,7 @@ console.log("award",student?._id, selectedSch._id, litmusTestDetails?._id);
             <h2 className="text-base font-semibold">
               {student.firstName} {student.lastName}
             </h2>
-            <div className="flex gap-4 h-5 items-center">
+            <div className="flex gap-2 h-5 items-center">
               <p className="text-sm text-muted-foreground">{student.email}</p>
               <Separator orientation="vertical" />
               <p className="text-sm text-muted-foreground">

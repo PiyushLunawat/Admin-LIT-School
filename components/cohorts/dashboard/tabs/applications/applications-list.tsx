@@ -65,6 +65,8 @@ export function ApplicationsList({
         return "default";
       case "interview rescheduled":
         return "lemon";
+      case "dropped":
+        return "destructive";
       default:
         return "secondary";
     }
@@ -181,7 +183,11 @@ export function ApplicationsList({
                   {new Date(applicationDetail?.updatedAt).toLocaleDateString() || "--"}
                 </TableCell>
                 <TableCell className="space-y-1">
-                  {applicationDetail?.applicationStatus === 'interview scheduled' ?
+                  {latestCohort?.status === 'dropped' ?
+                    <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(latestCohort?.status)}>
+                      {latestCohort?.status}
+                    </Badge> :
+                    applicationDetail?.applicationStatus === 'interview scheduled' ?
                     <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(checkInterviewStatus(applicationDetail?.applicationTestInterviews))}>
                       {checkInterviewStatus(applicationDetail?.applicationTestInterviews)}
                     </Badge> :
@@ -230,7 +236,7 @@ export function ApplicationsList({
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
             {selectedStudent && (
-              <StudentApplicationHeader student={selectedStudent} />
+              <StudentApplicationHeader student={selectedStudent} onUpdateStatus={() => onApplicationUpdate()}/>
             )}
 
               <Tabs defaultValue="personal" className="space-y-6">

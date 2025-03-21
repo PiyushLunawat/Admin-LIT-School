@@ -34,8 +34,8 @@ const tabsTriggerVariants = cva(
         destructive: "text-red-500 dark:text-red-900",
         outline: "border border-slate-200 text-slate-900 dark:border-slate-800 dark:text-slate-50",
         secondary: "text-white dark:text-slate-50 data-[state=active]:bg-[#212936] ",
-        xs: "h-7 rounded-full text-white text-[13px] data-[state=active]:bg-[#6808FE]",
-        sm: "h-8 rounded-full text-white text-sm data-[state=active]:bg-[#27272A]"
+        sm: "h-8 rounded-full data-[state=active]:text-white text-sm data-[state=active]:bg-[#27272A]",
+        xs: "h-7 rounded-full data-[state=active]:text-white text-[13px] data-[state=active]:bg-[#6808FE]",
       },
     },
     defaultVariants: {

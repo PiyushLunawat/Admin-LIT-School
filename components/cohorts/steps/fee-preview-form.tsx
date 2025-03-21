@@ -24,7 +24,7 @@ export const scholarshipSchema = z.object({
       scholarshipName: z.string(),
       scholarshipPercentage: z.number(),
       scholarshipClearance: z.string(),
-      scholarshipDetails: z.array(
+      installmentDetails: z.array(
         z.object({
           semester: z.number(),
           installments: z.array(
@@ -221,7 +221,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
       scholarshipName: "No Scholarship",
       scholarshipPercentage: 0,
       scholarshipClearance: "N/A",
-      scholarshipDetails: Array.from({
+      installmentDetails: Array.from({
         length: initialData?.cohortFeesDetail?.semesters || 0,
       }).map((_, semesterIndex) => ({
         semester: semesterIndex + 1,
@@ -245,7 +245,36 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
         feedback: [],
       },
     });
-  
+
+    console.log("zero",({
+      scholarshipName: "No Scholarship",
+      scholarshipPercentage: 0,
+      scholarshipClearance: "N/A",
+      installmentDetails: Array.from({
+        length: initialData?.cohortFeesDetail?.semesters || 0,
+      }).map((_, semesterIndex) => ({
+        semester: semesterIndex + 1,
+        installments: calculateInstallments(semesterIndex, { percentage: 0 }).map((installment) => ({
+          installmentDate: installment.installmentDate,
+          baseFee: installment.amountPayable,
+          scholarshipAmount: 0, // No scholarship for this case
+          amountPayable: installment.amountPayable * GSTAmount,
+          verificationStatus: "pending",
+          receiptUrls: [],
+          feedback: [],
+        })),
+      })),
+      oneShotPaymentDetails: {
+        installmentDate: initialData?.startDate,
+        baseFee: newBaseFee,
+        OneShotPaymentAmount: newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0), // No scholarship discount
+        amountPayable: (newBaseFee - newBaseFee * 0.01 * (initialData?.cohortFeesDetail?.oneShotDiscount || 0)) * GSTAmount,
+        verificationStatus: "pending",
+        receiptUrls: [],
+        feedback: [],
+      },
+    }));
+      
       const updated = await updateCohort(initialData._id, {
         feeStructureDetails: feeStructureDetails,
       });

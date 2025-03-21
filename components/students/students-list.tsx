@@ -30,12 +30,14 @@ interface StudentsListProps {
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
   applications: any;
+  onApplicationUpdate: () => void;
 }
 
 export function StudentsList({
   selectedIds,
   onSelectedIdsChange,
   applications,
+  onApplicationUpdate
 }: StudentsListProps) {
   const router = useRouter();
   const [messageOpen, setMessageOpen] = useState(false);
@@ -231,22 +233,18 @@ export function StudentsList({
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleViewDetails(student._id)}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleViewDetails(student._id)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       {/* <Button variant="ghost" size="icon" onClick={() => handleSendMessage('email', student?.email)}>
                         <Mail className="h-4 w-4" />
                       </Button> */}
-                      <Button variant="ghost" size="icon" className="justify-start text-destructive" onClick={()=>handleDrop(student)}>
+                      <Button variant="ghost" size="icon" className="justify-start text-destructive" onClick={()=>handleDrop(student)} disabled={latestCohort?.status === 'dropped'}>
                         <UserMinus className="h-4 w-4 mr-2" />
                       </Button>
                       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
                         <DialogContent className="max-w-4xl py-4 px-6">
-                          <MarkedAsDialog student={selectedStudent}/>
+                          <MarkedAsDialog student={selectedStudent} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
                         </DialogContent>
                       </Dialog>
                     </div>

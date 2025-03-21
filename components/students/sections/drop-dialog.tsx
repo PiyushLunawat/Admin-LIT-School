@@ -10,9 +10,11 @@ import { UserMinus } from "lucide-react";
 
 interface MarkedAsDialogProps {
   student: any;
+  onUpdateStatus: () => void;
+  onClose: () => void;
 }
 
-export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
+export function MarkedAsDialog({ student, onUpdateStatus, onClose }: MarkedAsDialogProps) {
   const [notes, setNotes] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -44,9 +46,12 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
       console.log("payload", payload);
 
       const response = await MarkAsdropped(payload);
+      
 
       if (response.ok) {
         console.log("Student successfully marked as dropped.");
+        onUpdateStatus();
+        onClose();
       } else {
         console.error("Failed to mark as dropped.");
       }
@@ -76,7 +81,7 @@ export function MarkedAsDialog({ student }: MarkedAsDialogProps) {
             <h2 className="text-base font-semibold">
               {student.firstName} {student.lastName}
             </h2>
-            <div className="flex gap-4 h-5 items-center">
+            <div className="flex gap-2 h-5 items-center">
               <p className="text-sm text-muted-foreground">{student?.email}</p>
               <Separator orientation="vertical" />
               <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>

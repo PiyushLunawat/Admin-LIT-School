@@ -42,7 +42,7 @@ export function InterviewsQueue() {
         const mappedStudents =
         response.data.filter(
           (student: any) =>
-            ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+            ['reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
         )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -263,6 +263,7 @@ export function InterviewsQueue() {
             onApplicationSelect={(id) => setSelectedApplication(id)}
             selectedIds={selectedApplicationIds}
             onSelectedIdsChange={setSelectedApplicationIds}
+            onApplicationUpdate={handleApplicationUpdate} 
           />
         </div>
         <div className="lg:col-span-1">

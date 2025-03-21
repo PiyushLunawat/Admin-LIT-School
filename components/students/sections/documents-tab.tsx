@@ -20,13 +20,13 @@ import {
 } from "@/app/api/student";
 
 interface DocumentsTabProps {
-  studentId: string;
+  student: any;
+  onApplicationUpdate: () => void;
 }
 
-export function DocumentsTab({ studentId }: DocumentsTabProps) {
+export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps) {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
-  const [student, setStudent] = useState<any>(null);
   const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
   
   // State for "Upload New Document" section
@@ -36,22 +36,6 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
   // State for the dialog (to preview the PDF)
   const [open, setOpen] = useState(false);
   const [viewDoc, setViewDoc] = useState("");
-
-  // Fetch student data when studentId changes
-  useEffect(() => {
-    if (studentId) {
-      fetchStudent();
-    }
-  }, [studentId]);
-
-  async function fetchStudent() {
-    try {
-      const application = await getCurrentStudents(studentId);
-      setStudent(application?.data || null);
-    } catch (error) {
-      console.error("Failed to fetch student data:", error);
-    }
-  }
 
   // Define your required documents here
   const documents = [
@@ -96,7 +80,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
       const response = await updateDocumentStatus(studentId, docType, docId, "", status);
       console.log("Updated document status:", response);
       // Optionally refetch student data
-      fetchStudent();
+      onApplicationUpdate();
     } catch (error) {
       console.error("Error updating document status:", error);
     }
@@ -133,7 +117,7 @@ export function DocumentsTab({ studentId }: DocumentsTabProps) {
 
     try {
       const formData = new FormData();
-      formData.append("studentId", studentId);
+      formData.append("studentId", student?.Id);
       formData.append("fieldName", newDocName);
       formData.append("document", newDocFile);
       

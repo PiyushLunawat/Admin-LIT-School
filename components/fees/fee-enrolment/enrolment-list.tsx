@@ -27,6 +27,7 @@ interface EnrolmentListProps {
   onApplicationSelect: (id: any) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
+  onApplicationUpdate: () => void;
 }
 
 export function EnrolmentList({
@@ -34,6 +35,7 @@ export function EnrolmentList({
   onApplicationSelect,
   selectedIds,
   onSelectedIdsChange,
+  onApplicationUpdate,
 }: EnrolmentListProps) {
 
   const [open, setOpen] = useState(false);
@@ -217,7 +219,7 @@ export function EnrolmentList({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
-            <StudentApplicationHeader student={selectedStudentId} />
+            <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}
 
             <Tabs defaultValue="personal" className="space-y-6">

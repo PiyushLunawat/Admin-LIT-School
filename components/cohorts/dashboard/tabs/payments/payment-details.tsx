@@ -146,6 +146,12 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
   let paidAmount = 0;
   let notPaidAmount = 0;
 
+  if(tokenFeeDetails?.verificationStatus === 'paid'){
+    paidAmount += tokenAmount;
+  } else {
+    notPaidAmount += tokenAmount;
+  }
+
   if (paymentDetails?.paymentPlan === 'one-shot') {
     const oneShotDetails = paymentDetails?.oneShotPayment;
     if (oneShotDetails) {
@@ -155,8 +161,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
         notPaidAmount += oneShotDetails?.amountPayable;
       }
     }
-  }
-  if (paymentDetails?.paymentPlan === 'instalments') {
+  } else if (paymentDetails?.paymentPlan === 'instalments') {
     paymentDetails?.installments.forEach((semesterDetail: any) => {
       const installments = semesterDetail?.installments;
       installments.forEach((instalment: any) => {
@@ -167,6 +172,13 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
         }    
       });
     });
+  } else {
+    const matchedScholarship = litmusTestDetails?.scholarshipDetail;
+    const fallbackScholarship = cohortDetails.feeStructureDetails.find(
+      (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
+    );
+    const installments = (matchedScholarship?.installmentDetails || fallbackScholarship?.installmentDetails)?.flatMap((semester: any) => semester.installments) || [];
+    notPaidAmount += installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
   }
 
   const getStatusColor = (status: string): BadgeVariant => {
@@ -254,7 +266,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 </span>
               </div>
               <Progress states={[
-                { value: (paidAmount), widt: ((paidAmount / notPaidAmount) * 100), color: '#2EB88A' }
+                { value: (paidAmount), widt: ((paidAmount / (paidAmount+notPaidAmount)) * 100), color: '#2EB88A' }
               ]} />
             </div>
           </div>
@@ -262,43 +274,60 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           <Separator />
 
           {/* Quick Actions */}
-          <div className="space-y-2">
-            <h4 className="font-medium">Quick Actions</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start" disabled>
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule Presen...
-              </Button>
-              <Button variant="outline" className="justify-start" disabled>
-                <DownloadIcon className="h-4 w-4 mr-2" />
-                Download Files
-              </Button>
-              {scholarshipDetails ? 
-                  <Button variant="outline" className={`justify-start ${getColor(scholarshipDetails?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
-                    <div className="flex gap-2 items-center">
-                      <span className="text-lg pb-[2px]">★ </span> {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
-                    </div> 
-                  </Button>
-                    :
-                  <Button variant="outline" className="justify-start" disabled>
-                    <div className="flex gap-2 items-center">
-                      <Star className="h-4 w-4" />
-                      Award Scholarship
-                    </div>
-                  </Button>
-                }
-              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
-                <UserMinus className="h-4 w-4 mr-2" />
-                Mark as Dropped
-              </Button>
+          {latestCohort?.status === 'dropped' ?
+            <div className="bg-[#FF503D1A] px-4 py-3 rounded-lg space-y-2">
+              <div className="flex justify-between gap-2">
+                <div className="flex gap-2 items-center justify-start text-destructive">
+                  <UserMinus className="h-4 w-4 text-red-500" />
+                  Mark as Dropped
+                </div>
+                <div className="">By Admin</div>
+              </div>
+              <div className="">
+                {latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes && 
+                latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes.map((reason: any, index: any) => (
+                  <div key={index} className="text-sm">{reason}</div>
+                ))} 
+              </div>  
+            </div> :
+            <div className="space-y-2">
+              <h4 className="font-medium">Quick Actions</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="justify-start" disabled>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule Presen...
+                </Button>
+                <Button variant="outline" className="justify-start" disabled>
+                  <DownloadIcon className="h-4 w-4 mr-2" />
+                  Download Files
+                </Button>
+                {scholarshipDetails ? 
+                    <Button variant="outline" className={`justify-start ${getColor(scholarshipDetails?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
+                      <div className="flex gap-2 items-center">
+                        <span className="text-lg pb-[2px]">★ </span> {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
+                      </div> 
+                    </Button>
+                      :
+                    <Button variant="outline" className="justify-start" disabled>
+                      <div className="flex gap-2 items-center">
+                        <Star className="h-4 w-4" />
+                        Award Scholarship
+                      </div>
+                    </Button>
+                  }
+                <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                  <UserMinus className="h-4 w-4 mr-2" />
+                  Mark as Dropped
+                </Button>
 
-              <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
-                <DialogContent className="max-w-4xl py-4 px-6">
-                  <MarkedAsDialog student={student}/>
-                </DialogContent>
-              </Dialog>
+                <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+                  <DialogContent className="max-w-4xl py-4 px-6">
+                    <MarkedAsDialog student={student} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
-          </div>
+          }
 
           <Separator />
 
@@ -580,7 +609,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           <div className="flex items-center gap-4">
             <div className="space-y-1">
               <h2 className="text-base font-semibold">{student?.firstName} {student?.lastName}</h2>
-              <div className="flex gap-4 h-5 items-center">
+              <div className="flex gap-2 h-5 items-center">
                 <p className="text-sm text-muted-foreground">{student?.email}</p>
                 <Separator orientation="vertical" />
                 <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>

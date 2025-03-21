@@ -14,23 +14,25 @@ const processScholarships = (applications: any) => {
 
     if (!semester) return;
 
-      const scholarshipName = semester?.scholarshipName;
-      const scholarshipPercentage = semester?.scholarshipPercentage || 0;
+    
+    const scholarshipName = semester?.scholarshipName;
+    const scholarshipPercentage = semester?.scholarshipPercentage || 0;
+    const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
+    console.log(scholarshipName, scholarshipPercentage, baseFee);
 
       // Calculate total scholarship amount from installments
-      const scholarshipAmount = semester?.scholarshipDetails?.flatMap((semesterInstallment: any) =>
-        semesterInstallment?.installments
-      ).reduce((acc: number, curr: any) => acc + (curr.scholarshipAmount || 0), 0) || 0;
+      const scholarshipAmount = baseFee * scholarshipPercentage * 0.01 || 0;
 
       if (!scholarshipMap[scholarshipName]) {
         scholarshipMap[scholarshipName] = {
           name: scholarshipName,
           value: scholarshipPercentage,
+          count: 1,
           amount: scholarshipAmount,
           color: `hsl(var(--chart-${Object.keys(scholarshipMap).length + 1}))`, // Assign color dynamically
         };
       } else {
-        scholarshipMap[scholarshipName].value += 1;
+        scholarshipMap[scholarshipName].count += 1;
         scholarshipMap[scholarshipName].amount += scholarshipAmount;
       }
   });
@@ -52,11 +54,11 @@ export function ScholarshipDistribution({ applications }: ScholarshipDistributio
     }
   }, [applications]);
 
-  const totalStudents = scholarshipsData.reduce((acc, curr) => acc + curr.value, 0);
+  const totalStudents = scholarshipsData.reduce((acc, curr) => acc + curr.count, 0);
   const totalAmount = scholarshipsData.reduce((acc, curr) => acc + curr.amount, 0);
 
   const averageValue = scholarshipsData && scholarshipsData.length > 0
-  ? scholarshipsData.reduce((acc, curr) => acc + curr.value, 0) / scholarshipsData.length
+  ? scholarshipsData.reduce((acc, curr) => acc + curr.value * curr.count, 0) / totalStudents
   : 0;
 
 

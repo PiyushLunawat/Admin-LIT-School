@@ -31,6 +31,7 @@ interface EnrolmentDetailsProps {
 }
 
 export function EnrolmentDetails({ application, onClose, onApplicationUpdate }: EnrolmentDetailsProps) {
+  const latestCohort = application.appliedCohort?.[application.appliedCohort.length - 1];
   
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -114,40 +115,57 @@ export function EnrolmentDetails({ application, onClose, onApplicationUpdate }: 
           <Separator />
 
           {/* Quick Actions */}
-          <div className="space-y-2">
-            <h4 className="font-medium">Quick Actions</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Record Payment
-              </Button>
-              <Button variant="outline" className="border-none bg-[#FF791F]/90 hover:bg-[#FF791F] justify-start text-destructivejustify-start">
-                <Mail className="h-4 w-4 mr-2" />
-                Share Reminder
-              </Button>
-              <Button variant="outline" className="justify-start">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Receipt
-              </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive">
-                    <UserMinus className="h-4 w-4 mr-2" />
-                    Mark as Dropped
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
-                  <div className="text-base font-medium mb-2">
-                    {`Are you sure you would like to drop ${application?.studentName}`}
-                  </div>
-                  <div className="flex gap-2 ">
-                    <Button variant="outline" className="flex-1" >Cancel</Button>
-                    <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+          {latestCohort?.status === 'dropped' ?
+            <div className="bg-[#FF503D1A] px-4 py-3 rounded-lg space-y-2">
+              <div className="flex justify-between gap-2">
+                <div className="flex gap-2 items-center justify-start text-destructive">
+                  <UserMinus className="h-4 w-4 text-red-500" />
+                  Mark as Dropped
+                </div>
+                <div className="">By Admin</div>
+              </div>
+              <div className="">
+                {latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes && 
+                latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes.map((reason: any, index: any) => (
+                  <div key={index} className="text-sm">{reason}</div>
+                ))} 
+              </div>  
+            </div> :
+            <div className="space-y-2">
+              <h4 className="font-medium">Quick Actions</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="justify-start">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Record Payment
+                </Button>
+                <Button variant="outline" className="border-none bg-[#FF791F]/90 hover:bg-[#FF791F] justify-start text-destructivejustify-start">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Share Reminder
+                </Button>
+                <Button variant="outline" className="justify-start">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Receipt
+                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive">
+                      <UserMinus className="h-4 w-4 mr-2" />
+                      Mark as Dropped
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                    <div className="text-base font-medium mb-2">
+                      {`Are you sure you would like to drop ${application?.studentName}`}
+                    </div>
+                    <div className="flex gap-2 ">
+                      <Button variant="outline" className="flex-1" >Cancel</Button>
+                      <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D] flex-1" >Drop</Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-          </div>
+          }
 
           <Separator />
 

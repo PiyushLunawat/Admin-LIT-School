@@ -47,7 +47,7 @@ export function ApplicationsQueue({ initialApplications, setInitialApplications 
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+              ['applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);

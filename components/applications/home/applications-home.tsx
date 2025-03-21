@@ -26,7 +26,7 @@ export function ApplicationsHome({ initialApplications, setInitialApplications }
         // 2) Filter Out Students with No Application Details
         const validStudents = response.data.filter(
           (student: any) => 
-            ['applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+            ['applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
         );
         setApplications(validStudents);
         setInitialApplications(validStudents);

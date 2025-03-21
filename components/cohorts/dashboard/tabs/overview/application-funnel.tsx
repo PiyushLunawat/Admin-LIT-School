@@ -22,7 +22,7 @@ export function ApplicationFunnel({ applications }: ApplicationFunnelProps) {
         // Applied Count
         const applied = applications.filter(
           (application) =>
-            ['applied', 'reviewing', 'enrolled'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status)
+            ['applied', 'reviewing', 'enrolled', 'dropped'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status)
         );
         setAppliedCount(applied.length);
   

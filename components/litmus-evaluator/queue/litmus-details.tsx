@@ -184,40 +184,57 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
           <Separator />
 
           {/* Quick Actions */}
-          <div className="space-y-2">
-            <h4 className="font-medium">Quick Actions</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="justify-start " 
-              // onClick={() => setInterviewOpen(true)}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                <span className="truncate w-[170px]">Schedule Presentation</span>
-              </Button>
-              <Button variant="outline" className="justify-start" onClick={handleDownloadAll}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download Files
-              </Button>
-                {litmusTestDetails?.scholarshipDetail ? 
-                  <Button variant="outline" className={`justify-start ${getColor(litmusTestDetails?.scholarshipDetail?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
-                    <div className="flex gap-2 items-center">
-                      <span className="text-lg pb-[2px]">★ </span> {litmusTestDetails?.scholarshipDetail?.scholarshipName+' '+(litmusTestDetails?.scholarshipDetail?.scholarshipPercentage+'%')}
-                    </div> 
-                  </Button>
-                    :
-                  <Button variant="outline" className="justify-start">
-                    <div className="flex gap-2 items-center text-muted-foreground">
-                      <Star className="h-4 w-4" />
-                      Award Scholarship
-                    </div>
-                  </Button>
-                }
-              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
-                <UserMinus className="h-4 w-4 mr-2" />
-                Mark as Dropped
-              </Button>
+          {latestCohort?.status === 'dropped' ?
+            <div className="bg-[#FF503D1A] px-4 py-3 rounded-lg space-y-2">
+              <div className="flex justify-between gap-2">
+                <div className="flex gap-2 items-center justify-start text-destructive">
+                  <UserMinus className="h-4 w-4 text-red-500" />
+                  Mark as Dropped
+                </div>
+                <div className="">By Admin</div>
+              </div>
+              <div className="">
+                {latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes && 
+                latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes.map((reason: any, index: any) => (
+                  <div key={index} className="text-sm">{reason}</div>
+                ))} 
+              </div>  
+            </div> :
+            <div className="space-y-2">
+              <h4 className="font-medium">Quick Actions</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="justify-start " 
+                // onClick={() => setInterviewOpen(true)}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className="truncate w-[170px]">Schedule Presentation</span>
+                </Button>
+                <Button variant="outline" className="justify-start" onClick={handleDownloadAll}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Files
+                </Button>
+                  {litmusTestDetails?.scholarshipDetail ? 
+                    <Button variant="outline" className={`justify-start ${getColor(litmusTestDetails?.scholarshipDetail?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
+                      <div className="flex gap-2 items-center">
+                        <span className="text-lg pb-[2px]">★ </span> {litmusTestDetails?.scholarshipDetail?.scholarshipName+' '+(litmusTestDetails?.scholarshipDetail?.scholarshipPercentage+'%')}
+                      </div> 
+                    </Button>
+                      :
+                    <Button variant="outline" className="justify-start">
+                      <div className="flex gap-2 items-center text-muted-foreground">
+                        <Star className="h-4 w-4" />
+                        Award Scholarship
+                      </div>
+                    </Button>
+                  }
+                <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                  <UserMinus className="h-4 w-4 mr-2" />
+                  Mark as Dropped
+                </Button>
+              </div>
             </div>
-          </div>
+          }
 
           <Separator />
 
@@ -377,7 +394,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">
-          <MarkedAsDialog student={application}/>
+          <MarkedAsDialog student={application} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
         </DialogContent>
       </Dialog>
 

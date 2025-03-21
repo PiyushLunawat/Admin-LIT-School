@@ -220,7 +220,7 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
         </Avatar>
         <div className="space-y-1">
           <h2 className="text-base font-semibold">{application?.firstName+" "+application?.lastName}</h2>
-          <div className="flex gap-4 h-5 items-center">
+          <div className="flex gap-2 h-5 items-center">
             <p className="text-sm text-muted-foreground">{application?.email}</p>
             <Separator orientation="vertical" />
             <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>

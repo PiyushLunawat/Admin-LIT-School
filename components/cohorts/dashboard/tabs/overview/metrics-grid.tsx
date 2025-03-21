@@ -88,6 +88,13 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
           ![undefined, 'pending'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status)
       );
       setLitmusTestsCount(litmusTests.length);
+
+      const dropped = applications.filter(
+        (application) =>
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status?.toLowerCase() ===
+          "dropped"
+      );
+      setDroppedCount(dropped.length);
       
       // Total Scholarship and Average Scholarships Percentage
       let totalScholarship = 0;
@@ -96,13 +103,14 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       let percentageCount = 0;
   
       applications.forEach((application) => {
-        const scholarships = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.semesterFeeDetails?.flatMap((semester: any) => semester.installments) || [];
-        scholarships.forEach((installment: any) => {
-          if (installment?.scholarshipAmount) {
-            totalScholarship += installment.scholarshipAmount;
-            scholarshipCount += 1;
-          }
-        });
+        const scholarship = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
+        const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
+        console.log(baseFee,scholarship?.scholarshipPercentage );
+        
+        if (scholarship && baseFee) {
+          totalScholarship += scholarship?.scholarshipPercentage * baseFee * 0.01;
+          scholarshipCount += 1;
+        }
         const percentage = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
         if (percentage) {
           totalPercentage += application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;

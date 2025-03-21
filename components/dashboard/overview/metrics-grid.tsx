@@ -108,7 +108,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
         // 2) Filter Out Students with No Application Details
         const validStudents = response.data.filter(
           (student: any) =>
-            ['initiated', 'applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+            ['initiated', 'applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
         );
 
         // 3) Filter Based on Date Range, Search Query, Program, Cohort
@@ -227,6 +227,13 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
                 application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status === 'completed'
             );
             setReviewedCount(reviewed.length);
+
+            const dropped = applications.filter(
+              (application) =>
+                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status?.toLowerCase() ===
+                "dropped"
+            );
+            setDroppedCount(dropped.length);
             
             // Total Scholarship and Average Scholarships Percentage
             let totalScholarship = 0;

@@ -14,10 +14,11 @@ import {
 import { MessageSquare, Plus } from "lucide-react";
 
 interface InternalNotesTabProps {
-  studentId: string;
+  student: any;
+  onApplicationUpdate: () => void;
 }
 
-export function InternalNotesTab({ studentId }: InternalNotesTabProps) {
+export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotesTabProps) {
   // In a real application, this data would be fetched based on the studentId
   const notes = [
     {

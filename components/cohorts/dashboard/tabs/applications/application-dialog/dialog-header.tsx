@@ -14,9 +14,10 @@ type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "defau
 
 interface StudentHeaderProps {
   student: any;
+  onUpdateStatus: () => void;
 }
 
-export function StudentApplicationHeader({ student }: StudentHeaderProps) {
+export function StudentApplicationHeader({ student, onUpdateStatus }: StudentHeaderProps) {
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [interviewOpen, setInterviewOpen] = useState(false);
 
@@ -71,7 +72,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
             </Avatar>
             <div className="space-y-1">
               <h2 className="text-base font-semibold">{student?.firstName} {student?.lastName}</h2>
-              <div className="flex gap-4 h-5 items-center">
+              <div className="flex gap-2 h-5 items-center">
                 <p className="text-sm text-muted-foreground">{student?.email}</p>
                 <Separator orientation="vertical" />
                 <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>
@@ -104,10 +105,11 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Interview
               </Button>
-              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
-                    <UserMinus className="h-4 w-4 mr-2" />
-                    Mark as Dropped
-                  </Button>
+              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
+                onClick={()=>setMarkedAsDialogOpen(true)} disabled={latestCohort?.status === 'dropped'}>
+                <UserMinus className="h-4 w-4 mr-2" />
+                Mark as Dropped
+              </Button>
             </div>
           </div>
           
@@ -161,7 +163,7 @@ export function StudentApplicationHeader({ student }: StudentHeaderProps) {
         </Dialog>
         <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">
-          <MarkedAsDialog student={student}/>
+          <MarkedAsDialog student={student} onUpdateStatus={() => onUpdateStatus()} onClose={() => setMarkedAsDialogOpen(false)}/>
         </DialogContent>
       </Dialog>
       </div>

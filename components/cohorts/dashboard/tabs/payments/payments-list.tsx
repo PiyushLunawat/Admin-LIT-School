@@ -21,7 +21,7 @@ import { PersonalDetailsTab } from "../applications/application-dialog/personal-
 import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
 import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
 
-type BadgeVariant = "pending" | "warning" | "secondary" | "success" | "default";
+type BadgeVariant = "pending" | "warning" | "secondary" | "success" | "default" | "destructive";
 interface PaymentRecord {
   id: string;
   studentName: string;
@@ -65,6 +65,8 @@ export function PaymentsList({
       case "verifying":
       case "verification pending":
         return "pending";
+      case "dropped":
+      return "destructive";
       default:
         return "default";
     }
@@ -222,13 +224,17 @@ export function PaymentsList({
                 {dueDate ? `${dueDate}` : "--"}
               </TableCell>
               <TableCell>
-                {paymentDetails?.paymentPlan ? 
-                  <Badge className="capitalize" variant={getStatusColor(paymentStatus)}>
-                    {paymentStatus}
-                  </Badge> : 
-                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus)}>
-                    {tokenFeeDetails?.verificationStatus === 'flagged' ? 'pending' : tokenFeeDetails?.verificationStatus}
-                  </Badge>
+                {latestCohort?.status === 'dropped' ?
+                  <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(latestCohort?.status)}>
+                    {latestCohort?.status}
+                  </Badge> :
+                  paymentDetails?.paymentPlan ? 
+                    <Badge className="capitalize" variant={getStatusColor(paymentStatus)}>
+                      {paymentStatus}
+                    </Badge> : 
+                    <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus)}>
+                      {tokenFeeDetails?.verificationStatus === 'flagged' ? 'pending' : tokenFeeDetails?.verificationStatus}
+                    </Badge>
                 }
               </TableCell>
               <TableCell>
@@ -251,7 +257,7 @@ export function PaymentsList({
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
-            <StudentApplicationHeader student={selectedStudentId} />
+            <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}
 
       <Tabs defaultValue="personal" className="space-y-6">

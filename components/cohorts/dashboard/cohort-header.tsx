@@ -153,15 +153,15 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
               <div className="flex gap-3">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 bg-[#2EB88A] rounded-full"></div>
-                  <span className="text-xs text-muted-foreground">Admission Fee Paid</span>
+                  <span className="text-xs text-muted-foreground">Admission Fee Paid ({feePaid})</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 bg-[#00A3FF] rounded-full"></div>
-                  <span className="text-xs text-muted-foreground">Interview Cleared</span>
+                  <span className="text-xs text-muted-foreground">Interview Cleared ({intCleared})</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 bg-[#FF791F] rounded-full"></div>
-                  <span className="text-xs text-muted-foreground">Applied</span>
+                  <span className="text-xs text-muted-foreground">Applied ({applied})</span>
                 </div>
               </div>
 

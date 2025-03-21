@@ -36,7 +36,7 @@ export function EnrolmentQueue() {
         const mappedStudents =
           response.data.filter(
             (student: any) =>
-              ['enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+              ['enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           )    
           mappedStudents.sort((a: any, b: any) => {
             const dateA = new Date(a?.updatedAt);
@@ -224,6 +224,7 @@ export function EnrolmentQueue() {
             onApplicationSelect={(application) => setSelectedApplication(application)}
             selectedIds={selectedApplicationIds}
             onSelectedIdsChange={setSelectedApplicationIds}
+            onApplicationUpdate={handleApplicationUpdate} 
           />
         </div>
         <div className="lg:col-span-1">

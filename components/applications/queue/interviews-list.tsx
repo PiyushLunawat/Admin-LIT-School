@@ -24,6 +24,7 @@ interface InterviewsListProps {
   onApplicationSelect: (id: string) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
+  onApplicationUpdate: () => void;
 }
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "pending" | "default";
@@ -33,6 +34,7 @@ export function InterviewsList({
   onApplicationSelect,
   selectedIds,
   onSelectedIdsChange,
+  onApplicationUpdate,
 }: InterviewsListProps) {
   const [open, setOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -236,7 +238,7 @@ export function InterviewsList({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
-            <StudentApplicationHeader student={selectedStudentId} />
+            <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}
 
             <Tabs defaultValue="personal" className="space-y-6">

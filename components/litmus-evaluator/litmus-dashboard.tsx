@@ -28,7 +28,7 @@ export function LitmusEvaluatorDashboard() {
           // 2) Filter Out Students with No Application Details
           const validStudents = response.data.filter(
             (student: any) => 
-              ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+              ['reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           );
   
           validStudents.sort((a: any, b: any) => {

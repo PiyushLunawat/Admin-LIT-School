@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
 import { getCohortById } from "@/app/api/cohorts";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface PaymentsTabProps {
   cohortId: string;
@@ -186,7 +187,14 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
       </div>
 
       {/* Payments Summary */}
-      <PaymentsSummary applications={applications} cohortId={cohortId} />
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <AccordionTrigger className="-mt-4">Payment Breakdown</AccordionTrigger>
+          <AccordionContent>
+            <PaymentsSummary applications={applications} cohortId={cohortId} />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Payments Filters */}
       <PaymentsFilters

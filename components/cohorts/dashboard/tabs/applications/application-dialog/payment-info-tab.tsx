@@ -93,23 +93,26 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
     const fallbackScholarship = cohortDetails.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );
-    const finalScholarship = latestCohort?.installmentDetails;
+    const finalScholarship = latestCohort?.litmusTestDetails?.scholarshipDetail;
     if (finalScholarship && finalScholarship.length > 0) {
       setFeeStructure(finalScholarship);
     }
 
+    console.log("matchedScholarship", matchedScholarship);
+    console.log("fallbackScholarship", fallbackScholarship);
+    console.log("finalScholarship", finalScholarship);
+    
     setSch((matchedScholarship || fallbackScholarship));
   }, [student]);
-
   
   const visibleSemesters = showAllSemesters
-  ? (feeStructure || sch?.scholarshipDetails)
-  : (feeStructure || sch?.scholarshipDetails)?.slice(0, 1); 
+  ? (feeStructure || sch?.installmentDetails)
+  : (feeStructure || sch?.installmentDetails)?.slice(0, 1); 
   
   const tokenAmount = Number(cohortDetails?.cohortFeesDetail?.tokenFee) || 0;
-  const installments = (feeStructure || sch?.scholarshipDetails)?.flatMap((semester: any) => semester.installments) || [];
+  const installments = (feeStructure?.installmentDetails || sch?.installmentDetails)?.flatMap((semester: any) => semester.installments) || [];
   const installmentTotal = installments.reduce((sum: number, installment: any) => sum + (installment.amountPayable || 0), 0);
-  const scholarshipAmount = installments.reduce((sum: number, installment: any) => sum + (installment.scholarshipAmount || 0), 0);
+  const scholarshipAmount = cohortDetails?.baseFee * scholarshipDetails?.scholarshipPercentage * 0.01;;
   const totalAmount = Number(tokenAmount) + Number(installmentTotal);
 
   const isTokenPaid = tokenFeeDetails?.verificationStatus === "paid";
@@ -427,7 +430,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                   </div>
                 </div>
               ))}
-              {sch?.scholarshipDetails?.length > 1 && (
+              {sch?.installmentDetails?.length > 1 && (
                 <Button
                   variant="ghost" className="w-full underline"
                   onClick={() => setShowAllSemesters(!showAllSemesters)}

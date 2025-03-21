@@ -47,7 +47,7 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
           // 2) Filter Out Students with No Application Details
           const validStudents = response.data.filter(
             (student: any) =>
-              ['initiated', 'applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+              ['initiated', 'applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
           );
   
           // 3) Filter Based on Date Range, Search Query, Program, Cohort

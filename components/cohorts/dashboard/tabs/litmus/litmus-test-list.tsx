@@ -53,6 +53,8 @@ export function LitmusTestList({
         return "onhold";
       case "completed":
         return "success";
+      case "dropped":
+        return "destructive";
       default:
         return "default";
     }
@@ -145,12 +147,14 @@ export function LitmusTestList({
                 {new Date(litmusTestDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
               <TableCell>
-                <Badge
-                  className="capitalize"
-                  variant={getStatusColor(litmusTestDetails?.status || "pending")}
-                >
-                  {litmusTestDetails?.status || "pending"}
-                </Badge>
+                {latestCohort?.status === 'dropped' ?
+                  <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(latestCohort?.status)}>
+                    {latestCohort?.status}
+                  </Badge> :
+                  <Badge className="capitalize" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
+                    {litmusTestDetails?.status || "pending"}
+                  </Badge>
+                }
               </TableCell>
               <TableCell>
                 {latestCohort?.cohortId?.collaborators
@@ -189,7 +193,7 @@ export function LitmusTestList({
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
-            <StudentApplicationHeader student={selectedStudentId} />
+            <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}
 
       <Tabs defaultValue="personal" className="space-y-6">

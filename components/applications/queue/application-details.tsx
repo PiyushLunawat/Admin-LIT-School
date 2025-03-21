@@ -267,29 +267,46 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
           <Separator />
 
           {/* Quick Actions */}
-          <div className="space-y-2">
-            <h4 className="font-medium">Quick Actions</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {/* <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('email', application?.email)}>
-                <Mail className="h-4 w-4 mr-2" />
-                Send Email
-              </Button>
-              <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('whatsapp', application?.mobileNumber)}>
-                <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2"/>
-                Send WhatsApp
-              </Button> */}
-              <Button variant="outline" className="justify-start" 
-              // onClick={() => setInterviewOpen(true)}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule Interview
-              </Button>
-              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
-                <UserMinus className="h-4 w-4 mr-2" />
-                Mark as Dropped
-              </Button>
+          {latestCohort?.status === 'dropped' ?
+            <div className="bg-[#FF503D1A] px-4 py-3 rounded-lg space-y-2">
+              <div className="flex justify-between gap-2">
+                <div className="flex gap-2 items-center justify-start text-destructive">
+                  <UserMinus className="h-4 w-4 text-red-500" />
+                  Mark as Dropped
+                </div>
+                <div className="">By Admin</div>
+              </div>
+              <div className="">
+                {latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes && 
+                latestCohort?.reasonForDropped?.[latestCohort?.reasonForDropped.length - 1]?.notes.map((reason: any, index: any) => (
+                  <div key={index} className="text-sm">{reason}</div>
+                ))} 
+              </div>  
+            </div> :
+            <div className="space-y-2">
+              <h4 className="font-medium">Quick Actions</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {/* <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('email', application?.email)}>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
+                </Button>
+                <Button variant="outline" className="justify-start" onClick={() => handleSendMessage('whatsapp', application?.mobileNumber)}>
+                  <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2"/>
+                  Send WhatsApp
+                </Button> */}
+                <Button variant="outline" className="justify-start" 
+                // onClick={() => setInterviewOpen(true)}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule Interview
+                </Button>
+                <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                  <UserMinus className="h-4 w-4 mr-2" />
+                  Mark as Dropped
+                </Button>
+              </div>
             </div>
-          </div>
+          }
 
           {applicationDetails?.applicationTestInterviews?.[0]?.feedback.length > 0 &&
           <>
@@ -403,7 +420,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
           <div className="flex justify-between items-center pb-4 border-b border-gray-700">
             <div>
               <h3 className="text-xl font-semibold">{application?.firstName+' '+application?.lastName}</h3>
-              <div className="flex gap-4 h-5 items-center">
+              <div className="flex gap-2 h-5 items-center">
                 <p className="text-sm text-muted-foreground">{application?.email}</p>
                 <Separator orientation="vertical" />
                 <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
@@ -446,7 +463,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogContent className="max-w-4xl py-4 px-6">
-          <MarkedAsDialog student={application}/>
+          <MarkedAsDialog student={application} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
         </DialogContent>
       </Dialog>
 

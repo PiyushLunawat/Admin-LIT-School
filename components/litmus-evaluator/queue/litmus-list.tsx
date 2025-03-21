@@ -28,6 +28,7 @@ interface LitmusListProps {
   onApplicationSelect: (id: any) => void;
   selectedIds: string[];
   onSelectedIdsChange: (ids: string[]) => void;
+  onApplicationUpdate: () => void;
 }
 
 export function LitmusList({
@@ -35,6 +36,7 @@ export function LitmusList({
   onApplicationSelect,
   selectedIds,
   onSelectedIdsChange,
+  onApplicationUpdate,
 }: LitmusListProps) {
   const [open, setOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -204,7 +206,7 @@ export function LitmusList({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
-            <StudentApplicationHeader student={selectedStudentId} />
+            <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}
 
             <Tabs defaultValue="personal" className="space-y-6">

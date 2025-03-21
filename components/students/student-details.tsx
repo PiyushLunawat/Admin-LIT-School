@@ -8,6 +8,7 @@ import { PersonalDetailsTab } from "@/components/students/sections/personal-deta
 import { PaymentInformationTab } from "@/components/students/sections/payment-information-tab";
 import { DocumentsTab } from "@/components/students/sections/documents-tab";
 import { InternalNotesTab } from "@/components/students/sections/internal-notes-tab";
+import { getCurrentStudents } from "@/app/api/student";
 
 interface StudentDetailsProps {
   studentId: string;
@@ -16,12 +17,30 @@ interface StudentDetailsProps {
 export function StudentDetails({ studentId }: StudentDetailsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // Read the `tab` from the URL, defaulting to "personal".
   const tabQueryParam = searchParams.get("tab") || "personal";
   const [currentTab, setCurrentTab] = useState(tabQueryParam);
 
-  const [studentName, setStudentName] = useState<string>("");
+  const [student, setStudent] = useState<any>();
+  const [refreshKey, setRefreshKey] = useState(0); 
+
+  useEffect(() => {
+    if (studentId) {
+      
+      async function fetchStudent() {
+        try {
+          const application = await getCurrentStudents(studentId);
+          setStudent(application?.data);
+        } catch (error) {
+          console.error("Failed to fetch student data:", error);
+        }
+      }
+      fetchStudent();
+    }
+  }, [studentId, refreshKey]);
+
+  const handleApplicationUpdate = () => {
+    setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
+  };
 
   // Sync state if the query param changes (e.g., user manually changes URL).
   useEffect(() => {
@@ -38,8 +57,8 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
     <div className="p-6 space-y-6">
       <div className="flex flex-col">
         <div className="mb-1">Student Details</div>
-        {studentName ? (
-          <h1 className="text-3xl font-bold">{studentName}</h1>
+        {student ? (
+          <h1 className="text-3xl font-bold">{student?.firstName} {student?.lastName}</h1>
         ) : (
           <Skeleton className="h-9 w-[200px]" />
         )}
@@ -55,16 +74,16 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
         </TabsList>
 
         <TabsContent value="personal">
-          <PersonalDetailsTab studentId={studentId} setStudentName={setStudentName} />
+          <PersonalDetailsTab student={student} onApplicationUpdate={handleApplicationUpdate} />
         </TabsContent>
         <TabsContent value="payment">
-          <PaymentInformationTab studentId={studentId} />
+          <PaymentInformationTab student={student} onApplicationUpdate={handleApplicationUpdate} />
         </TabsContent>
         <TabsContent value="documents">
-          <DocumentsTab studentId={studentId} />
+          <DocumentsTab student={student} onApplicationUpdate={handleApplicationUpdate}/>
         </TabsContent>
         <TabsContent value="notes">
-          <InternalNotesTab studentId={studentId} />
+          <InternalNotesTab student={student} onApplicationUpdate={handleApplicationUpdate}/>
         </TabsContent>
       </Tabs>
     </div>

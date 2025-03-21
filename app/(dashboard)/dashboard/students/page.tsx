@@ -23,6 +23,8 @@ export default function StudentsPage() {
   const [selectedAppStatus, setSelectedAppStatus] = useState("all-statuses");
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState("all-payments");
 
+  const [refreshKey, setRefreshKey] = useState(0); 
+
   // Option data (used for the <Select> items)
   const [programs, setPrograms] = useState<any[]>([]);
   const [cohorts, setCohorts] = useState<any[]>([]);
@@ -54,7 +56,7 @@ export default function StudentsPage() {
           try {
             const response = await getStudents();
             const mappedStudents = response.data.filter((student: any) => (
-              ['initiated', 'applied', 'reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+              ['initiated', 'applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
             ));
                         
             setApplications(mappedStudents);
@@ -65,7 +67,11 @@ export default function StudentsPage() {
           }
         }
         fetchStudents();
-      }, []);
+      }, [refreshKey]);
+
+      const handleApplicationUpdate = () => {
+        setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
+      };
     
       const filteredAndSortedApplications = useMemo(() => {
               
@@ -200,6 +206,7 @@ export default function StudentsPage() {
         selectedIds={selectedStudentIds}
         onSelectedIdsChange={setSelectedStudentIds}
         applications={filteredAndSortedApplications}
+        onApplicationUpdate={handleApplicationUpdate} 
       />
     </div>
   );

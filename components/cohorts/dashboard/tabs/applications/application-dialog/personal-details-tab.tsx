@@ -31,7 +31,6 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const studentDetail = applicationDetails?.studentDetails;
-
   
   // Initialize formData with the new structure.
   const [formData, setFormData] = useState({
@@ -285,11 +284,11 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </div>
             <div className="space-y-2">
               <Label className="pl-3">LinkedIn Profile</Label>
-              <Input defaultValue={student?.linkedInUrl || "--"} disabled={!isEditing} />
+              <Input placeholder="--" defaultValue={student?.linkedInUrl} disabled={!isEditing} />
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Instagram Profile</Label>
-              <Input defaultValue={student?.instagramUrl || "--"} disabled={!isEditing} />
+              <Input placeholder="--" defaultValue={student?.instagramUrl} disabled={!isEditing} />
             </div>
           </div>
         </CardContent>
@@ -355,17 +354,24 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Highest Level of Education Attained</Label>
-              <Input
-                value={formData.studenDetails.previousEducation.highestLevelOfEducation}
-                onChange={(e) =>
-                  handleStudentDetailsChange(
-                    "previousEducation",
-                    "highestLevelOfEducation",
-                    e.target.value
-                  )
-                }
-                disabled={!isEditing}
-              />
+              <Select disabled={!isEditing} value={formData.studenDetails.previousEducation.highestLevelOfEducation}
+              // onChange={(e) =>
+              //   handleStudentDetailsChange(
+              //     "previousEducation",
+              //     "highestLevelOfEducation",
+              //     e.target.value
+              //   )
+              // }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="highschool">High School</SelectItem>
+                  <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
+                  <SelectItem value="master">Master's Degree</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Field of Study</Label>
@@ -402,13 +408,21 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="pl-3">Experience Type</Label>
-                <Input
-                  value={formData.studenDetails.workExperience.experienceType}
-                  onChange={(e) =>
-                    handleStudentDetailsChange("workExperience", "experienceType", e.target.value)
-                  }
-                  disabled={!isEditing}
-                />
+                <Select disabled={!isEditing} value={formData.studenDetails.workExperience.experienceType}
+                // onChange={(e) =>
+                //   handleStudentDetailsChange("workExperience", "experienceType", e.target.value)
+                // }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Working Professional">Employee</SelectItem>
+                    <SelectItem value="Freelancer">Freelancer</SelectItem>
+                    <SelectItem value="Business Owner">Business Owner</SelectItem>
+                    <SelectItem value="Consultant">Consultant</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label className="pl-3">Job Description</Label>
@@ -522,30 +536,26 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             {/* Father's Information */}
             {isEditing ?
             <>
-              {formData.studenDetails.parentInformation.father.firstName &&
-                <div className="space-y-2">
-                  <Label className="pl-3">Father&apos;s First Name</Label>
-                  <Input
-                    value={formData.studenDetails.parentInformation.father.firstName}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "firstName", e.target.value, "father")
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
-              {formData.studenDetails.parentInformation.father.lastName &&
-                <div className="space-y-2">
-                  <Label className="pl-3">Father&apos;s Last Name</Label>
-                  <Input
-                    value={formData.studenDetails.parentInformation.father.lastName}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "lastName", e.target.value, "father")
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
+              <div className="space-y-2">
+                <Label className="pl-3">Father&apos;s First Name</Label>
+                <Input
+                  value={formData.studenDetails.parentInformation.father.firstName}
+                  onChange={(e) =>
+                    handleStudentDetailsChange("parentInformation", "firstName", e.target.value, "father")
+                  }
+                  disabled={!isEditing}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="pl-3">Father&apos;s Last Name</Label>
+                <Input
+                  value={formData.studenDetails.parentInformation.father.lastName}
+                  onChange={(e) =>
+                    handleStudentDetailsChange("parentInformation", "lastName", e.target.value, "father")
+                  }
+                  disabled={!isEditing}
+                />
+              </div>
             </> : 
             formData.studenDetails.parentInformation.father?.firstName && formData.studenDetails.parentInformation.father?.lastName && (
               <div className="space-y-2">
@@ -558,30 +568,26 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             )}
             {isEditing ? 
               <>
-                {formData.studenDetails.parentInformation.mother.firstName &&
-                  <div className="space-y-2">
-                    <Label className="pl-3">Mother&apos;s First Name</Label>
-                    <Input
-                      value={formData.studenDetails.parentInformation.mother.firstName}
-                      onChange={(e) =>
-                        handleStudentDetailsChange("parentInformation", "firstName", e.target.value, "mother")
-                      }
-                      disabled={!isEditing}
-                    />
-                  </div>
-                }
-                {formData.studenDetails.parentInformation.mother.lastName &&
-                  <div className="space-y-2">
-                    <Label className="pl-3">Mother&apos;s Last Name</Label>
-                    <Input
-                      value={formData.studenDetails.parentInformation.mother.lastName}
-                      onChange={(e) =>
-                        handleStudentDetailsChange("parentInformation", "lastName", e.target.value, "mother")
-                      }
-                      disabled={!isEditing}
-                    />
-                  </div>
-                }
+                <div className="space-y-2">
+                  <Label className="pl-3">Mother&apos;s First Name</Label>
+                  <Input
+                    value={formData.studenDetails.parentInformation.mother.firstName}
+                    onChange={(e) =>
+                      handleStudentDetailsChange("parentInformation", "firstName", e.target.value, "mother")
+                    }
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="pl-3">Mother&apos;s Last Name</Label>
+                  <Input
+                    value={formData.studenDetails.parentInformation.mother.lastName}
+                    onChange={(e) =>
+                      handleStudentDetailsChange("parentInformation", "lastName", e.target.value, "mother")
+                    }
+                    disabled={!isEditing}
+                  />
+                </div>
               </> : 
               formData.studenDetails.parentInformation.mother?.firstName && formData.studenDetails.parentInformation.mother?.lastName && (
                 <div className="space-y-2">
@@ -592,7 +598,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                   />
                 </div>
               )}
-              {formData.studenDetails.parentInformation.father.contactNumber &&
+              {(isEditing || formData.studenDetails.parentInformation.father.contactNumber) &&
                 <div className="space-y-2">
                   <Label className="pl-3">Father&apos;s Contact Number</Label>
                   <Input
@@ -604,7 +610,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                   />
                 </div>
               }
-              {formData.studenDetails.parentInformation.mother.contactNumber &&
+              {(isEditing || formData.studenDetails.parentInformation.mother.contactNumber) &&
                 <div className="space-y-2">
                   <Label className="pl-3">Mother&apos;s Contact Number</Label>
                   <Input
@@ -616,7 +622,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                   />
                 </div>
               }
-              {formData.studenDetails.parentInformation.father.email &&
+              {(isEditing || formData.studenDetails.parentInformation.father.email) &&
                 <div className="space-y-2">
                   <Label className="pl-3">Father&apos;s Email</Label>
                   <Input
@@ -628,7 +634,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                   />
                 </div>
               }
-              {formData.studenDetails.parentInformation.mother.email &&
+              {(isEditing || formData.studenDetails.parentInformation.mother.email) &&
                 <div className="space-y-2">
                   <Label className="pl-3">Mother&apos;s Email</Label>
                   <Input
@@ -640,7 +646,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                   />
                 </div>
               }
-              {formData.studenDetails.parentInformation.father.occupation &&
+              {(isEditing || formData.studenDetails.parentInformation.father.occupation) &&
                 <div className="space-y-2">
                   <Label className="pl-3">Father&apos;s Occupation</Label>
                   <Input
@@ -652,7 +658,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                   />
                 </div>
               }
-              {formData.studenDetails.parentInformation.mother.occupation &&
+              {(isEditing || formData.studenDetails.parentInformation.mother.occupation) &&
               <div className="space-y-2">
                   <Label className="pl-3">Mother&apos;s Occupation</Label>
                   <Input
