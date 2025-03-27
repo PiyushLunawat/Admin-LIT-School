@@ -1,28 +1,50 @@
+export async function loginAdmin(payload: { email: string; password: string }) {
+  try {
+    const response = await fetch(`${process.env.API_URL}/auth/admin-login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-export async function loginAdmin(email: string, password: string) {
-    try {
-      const response = await fetch(`${process.env.API_URL}/admin/log-in`, {
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || `Request failed with status ${response.status}`
+      );
+    }
+
+    return await response.json(); // Parse and return the response JSON
+  } catch (error) {
+    console.error("Error Login", error);
+    throw error;
+  }
+}
+
+export async function verifyAdminOtp(email: string, otp: string) {
+  try {
+    const response = await fetch(
+      `${process.env.API_URL}/auth/verify-admin-otp`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
-      });
-  
-      if (!response.ok) {
-        const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
-        throw new Error(
-          `Failed to verify token amount. ${
-            errorDetails ? `${errorDetails.message || JSON.stringify(errorDetails)}` : ""
-          }`
-        );
+        body: JSON.stringify({ email, otp }),
       }
-  
-      const data = await response.json();
-      return data; // Token or login info
-    } catch (error) {
-      console.error("Error during admin login:", error);
-      throw error;
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || `Request failed with status ${response.status}`
+      );
     }
+
+    return await response.json(); // Parse and return the response JSON
+  } catch (error) {
+    console.error("Error OTP", error);
+    throw error;
   }
-  
+}

@@ -1,18 +1,19 @@
-'use client'
-import { useRef } from 'react'
-import { Provider } from 'react-redux'
-import { makeStore, Store } from '../lib/store/store'
+"use client";
+import { useEffect, useRef } from "react";
+import { Provider } from "react-redux";
+import { makeStore, Store } from "../lib/store/store";
+import { RegisterInterceptor } from "./api/interceptor";
 
-export default function StoreProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const storeRef = useRef<Store>()
+export default function StoreProvider({ children }: { children: React.ReactNode }) {
+  const storeRef = useRef<Store>();
+  
   if (!storeRef.current) {
-    // Create the store instance the first time this renders
-    storeRef.current = makeStore()
+    storeRef.current = makeStore();
   }
 
-  return <Provider store={storeRef.current}>{children}</Provider>
+  useEffect(() => {
+    RegisterInterceptor(); // Initialize fetch interceptor
+  }, []);
+
+  return <Provider store={storeRef.current}>{children}</Provider>;
 }

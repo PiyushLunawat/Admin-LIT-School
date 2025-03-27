@@ -97,10 +97,6 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
     if (finalScholarship && finalScholarship.length > 0) {
       setFeeStructure(finalScholarship);
     }
-
-    console.log("matchedScholarship", matchedScholarship);
-    console.log("fallbackScholarship", fallbackScholarship);
-    console.log("finalScholarship", finalScholarship);
     
     setSch((matchedScholarship || fallbackScholarship));
   }, [student]);
