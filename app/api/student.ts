@@ -62,17 +62,26 @@ export async function getStudentApplication(applicationId: string) {
 }
 
 export async function updateStudentData(data: any) {
-  const response = await fetch(
-    `${process.env.API_URL}/admin/update-student-details`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // we send JSON as in the curl example
-      },
-      body: JSON.stringify(data),
+  try {
+    const response = await fetch(
+      `${process.env.API_URL}/admin/update-student-details`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // we send JSON as in the curl example
+        },
+        body: JSON.stringify(data),
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to update task feedback");
     }
-  );
-  return await response.json();
+
+    return await response.json(); // Parse and return the response JSON
+  } catch (error) {
+    console.error("Error updating task feedback:", error);
+    throw error;
+  }
 }
 
 export async function updateStudentTaskFeedback(
@@ -142,27 +151,14 @@ export async function updateStudentTaskFeedbackAccep(
 
 export async function updateLitmusTaskStatus(
   litmusTaskId: string,
-  status: string,
-  results: Array<{
-    task: number;
-    score: Array<{ criteria: string; score: number; totalScore: number }>;
-  }>,
-  feedbackData: Array<{ feedbackTitle: string; data: string[] }>,
-  scholarshipDetail: string,
-  performanceRating: number
+  payload: any
 ) {
   const response = await fetch(
     `${process.env.API_URL}/admin/student/litmus/status/${litmusTaskId}`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        scholarshipDetail,
-        status,
-        performanceRating,
-        feedbackData,
-        results,
-      }),
+      body: JSON.stringify(payload),
     }
   );
   if (!response.ok) {
@@ -207,41 +203,11 @@ export async function updateScholarship(
 
 // New API for uploading student documents
 export async function uploadStudentDocuments(formData: any) {
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/admin/student-perosnal-docs`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    return await response;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-}
-
-export async function updateDocumentStatus(
-  studentId: string,
-  docType: string,
-  docId: string,
-  feedback: string,
-  status: string
-) {
   const response = await fetch(
-    `${process.env.API_URL}/admin/student/document/status`,
+    `${process.env.API_URL}/admin/upload-student-doc`,
     {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        studentId,
-        docType,
-        docId,
-        feedback,
-        status,
-      }),
+      method: "POST",
+      body: JSON.stringify(formData),
     }
   );
 
@@ -252,22 +218,21 @@ export async function updateDocumentStatus(
   return await response.json();
 }
 
-// New API for uploading student documents
-export async function uploadNewStudentDocuments(formData: any) {
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/admin/upload-student-doc`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+export async function updateDocumentStatus(payLoad: any) {
+  const response = await fetch(
+    `${process.env.API_URL}/admin/student/document/status`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payLoad),
+    }
+  );
 
-    return await response;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
+  if (!response.ok) {
+    throw new Error("Failed to update document status");
   }
+
+  return await response.json();
 }
 
 export async function verifyTokenAmount(
@@ -308,35 +273,6 @@ export async function verifyFeeStatus(payload: any) {
   return await response.json();
 }
 
-export default async function internalNotes(studentId: string) {
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/students/${studentId}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      }
-    );
-
-    if (!response.ok) {
-      const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
-      throw new Error(
-        `Failed to verify token amount. ${
-          errorDetails
-            ? `${errorDetails.message || JSON.stringify(errorDetails)}`
-            : ""
-        }`
-      );
-    }
-
-    return await response; // Parse and return the response JSON
-  } catch (error) {
-    console.error("Error in Internal Notes:", error);
-    throw error;
-  }
-}
-
 export async function updateInterviewStatus(jsonString: string) {
   const response = await fetch(
     `${process.env.API_URL}/admin/update-application-test/`,
@@ -359,6 +295,27 @@ export async function updateInterviewStatus(jsonString: string) {
   }
 
   return response.json();
+}
+
+export default async function internalNotes(notesPayload: any) {
+  const response = await fetch(`${process.env.API_URL}/admin/internal-notes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(notesPayload),
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
+    throw new Error(
+      `Failed to verify token amount. ${
+        errorDetails
+          ? `${errorDetails.message || JSON.stringify(errorDetails)}`
+          : ""
+      }`
+    );
+  }
+
+  return await response.json();
 }
 
 // API for Mark-as-dropped

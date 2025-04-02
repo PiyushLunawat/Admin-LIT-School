@@ -16,7 +16,8 @@ export function UserButton() {
   const router = useRouter();
 
   const handleLogout = () => {
-    Cookies.remove('admin-token');
+    Cookies.remove('adminAccessToken');
+    Cookies.remove('adminRefreshToken');
     router.push("/login");
   };
 

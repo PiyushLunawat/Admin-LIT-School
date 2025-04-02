@@ -308,24 +308,19 @@ export function ReviewComponent({
 
     const performanceRating = rating;
 
-    console.log("results", litmusTestDetails?._id,
-      "completed",
-      results,
-      feedbackData,
-      assignedScholarshipId,
-      performanceRating,
-    );
+    const reviewPayload = {
+      status: "completed",
+      results: results,
+      feedbackData: feedbackData,
+      scholarshipDetail: assignedScholarshipId,
+      performanceRating: performanceRating
+    }
+
+    console.log("reviewresults", reviewPayload);
     
     try {
       console.log("Submitting to updateLitmusTaskStatus...");
-      const response = await updateLitmusTaskStatus(
-        litmusTestDetails?._id,
-        "completed",
-        results,
-        feedbackData,
-        assignedScholarshipId,
-        performanceRating
-      );
+      const response = await updateLitmusTaskStatus( litmusTestDetails?._id, reviewPayload );
       console.log("Update Successful:", response);
       onApplicationUpdate();
       onClose();

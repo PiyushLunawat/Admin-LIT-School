@@ -1,19 +1,26 @@
 import fetchIntercept from "fetch-intercept";
 import Cookies from "js-cookie";
+import { refreshToken } from "./auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.API_URL;
 
 export const RegisterInterceptor = () => {
   fetchIntercept.register({
     request: function (url, config: RequestInit = {}) {
+      if (typeof url !== "string") {
+        // console.error("Invalid URL in interceptor:", url);
+        return [url, config];
+      }
+
       if (
         url.includes("/auth/admin-login") ||
-        url.includes("/auth/verify-admin-otp")
+        url.includes("/auth/verify-admin-otp") ||
+        url.includes("/auth/admin-refresh-token")
       ) {
         return [url, config]; // Return without adding Authorization header
       }
 
-      const token = Cookies.get("accessToken");
+      const token = Cookies.get("adminAccessToken");
 
       config.headers = {
         ...config.headers,
@@ -32,7 +39,6 @@ export const RegisterInterceptor = () => {
       if (response.status === 401) {
         handleTokenRefresh(response); // Call separate function for async token refresh
       }
-
       return response; // Ensure a synchronous return type
     },
 
@@ -46,43 +52,36 @@ export const RegisterInterceptor = () => {
  * Handles refreshing the access token asynchronously.
  */
 const handleTokenRefresh = async (response: Response) => {
-  const refreshToken = Cookies.get("refreshToken");
-  if (!refreshToken) {
+  const token = Cookies.get("adminRefreshToken");
+  if (!token) {
+    console.log("No refresh token");
     clearAuthAndRedirect();
     return;
   }
 
   try {
-    const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-      credentials: "include", // Include cookies for authentication
-    });
+    const payload = { refreshToken: token };
+    const refreshResponse = await refreshToken(payload);
 
-    if (!refreshResponse.ok) throw new Error("Failed to refresh token");
+    console.log("refreshResponse", refreshResponse);
 
     const { accessToken, newRefreshToken } = await refreshResponse.json();
 
     // Store new tokens in cookies
-    Cookies.set("accessToken", accessToken, {
-      expires: 1,
-      secure: true,
-      sameSite: "strict",
-    });
-    Cookies.set("refreshToken", newRefreshToken, {
-      expires: 7,
-      secure: true,
-      sameSite: "strict",
-    });
+    Cookies.set("adminAccessToken", accessToken, { expires: 1 / 12 });
+    Cookies.set("adminRefreshToken", newRefreshToken, { expires: 7 });
 
     // Retry the failed request
     return fetch(response.url, {
       method: response.type === "opaque" ? "GET" : response.statusText, // Ensure proper request method
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
     });
   } catch (error) {
-    clearAuthAndRedirect();
+    // clearAuthAndRedirect();
+    console.log("removing refresh token");
     return Promise.reject(error);
   }
 };
@@ -91,7 +90,7 @@ const handleTokenRefresh = async (response: Response) => {
  * Clears authentication tokens and redirects to login.
  */
 const clearAuthAndRedirect = () => {
-  Cookies.remove("accessToken");
-  Cookies.remove("refreshToken");
+  Cookies.remove("adminAccessToken");
+  Cookies.remove("adminRefreshToken");
   // window.location.href = "/login";
 };

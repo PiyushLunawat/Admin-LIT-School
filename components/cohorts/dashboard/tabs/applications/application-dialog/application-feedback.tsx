@@ -463,7 +463,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
               onChange={handleChangeForReasons}
               onKeyDown={handleKeyDownForReasons}
               placeholder="Type here..."
-              rows={3}
+              rows={5}
               cols={40}
               />
           </div>

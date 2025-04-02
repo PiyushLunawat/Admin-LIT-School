@@ -102,7 +102,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
   
     const currentStatus = applicationDetails?.applicationStatus;
   
-    if ( ["interview scheduled", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(currentStatus) ) {
+    if ( ["interview scheduled", "interview concluded", "interview cancelled", "concluded", "waitlist", "selected", "not qualified"].includes(currentStatus) ) {
       setInterview(true);
     } else {
       setInterview(false);

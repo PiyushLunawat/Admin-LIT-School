@@ -9,6 +9,7 @@ import { PaymentInformationTab } from "@/components/students/sections/payment-in
 import { DocumentsTab } from "@/components/students/sections/documents-tab";
 import { InternalNotesTab } from "@/components/students/sections/internal-notes-tab";
 import { getCurrentStudents } from "@/app/api/student";
+// import { Trash } from "./sections/trash";
 
 interface StudentDetailsProps {
   studentId: string;
@@ -71,6 +72,7 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="notes">Internal Notes</TabsTrigger>
+          <TabsTrigger value="trash">Trash</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal">
@@ -84,6 +86,9 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
         </TabsContent>
         <TabsContent value="notes">
           <InternalNotesTab student={student} onApplicationUpdate={handleApplicationUpdate}/>
+        </TabsContent>
+        <TabsContent value="trash">
+          {/* <Trash student={student} onApplicationUpdate={handleApplicationUpdate}/> */}
         </TabsContent>
       </Tabs>
     </div>

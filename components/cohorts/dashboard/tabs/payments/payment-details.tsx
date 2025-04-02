@@ -355,7 +355,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   </Badge>
                 }
                 {tokenFeeDetails?.verificationStatus === 'paid' && 
-                <Button variant="ghost" size="sm" className="px-0 py-1 text-white text-xs" onClick={() => handleView(tokenFeeDetails?.receiptUrl[0])}>
+                <Button variant="ghost" size="sm" className="px-0 py-1 text-white text-xs" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
                   <Eye className="h-3 w-3 mr-2" />
                   View
                 </Button>}
@@ -372,7 +372,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
             {tokenFeeDetails?.verificationStatus === 'verification pending' &&
               <div className="space-y-4">
                 <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
-                  <img src={tokenFeeDetails?.receiptUrl[0]} alt={tokenFeeDetails?.receiptUrl[0].split('/').pop()} className='w-full h-[160px] object-contain rounded-t-xl' />
+                  <img src={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url} alt={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url.split('/').pop()} className='w-full h-[160px] object-contain rounded-t-xl' />
                 </div>
                 {flagOpen ?
                 <div className="space-y-4 ">
@@ -402,29 +402,35 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 <Calendar className="h-4 w-4 mr-2" />
                 Paid: {new Date(tokenFeeDetails?.updatedAt).toLocaleDateString()}
               </div>
-              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receiptUrl[0])}>
+              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
                 <Download className="h-4 w-4 mr-2" />
                 Download Receipt
               </Button>
             </>
             }
-            {(tokenFeeDetails?.comment && tokenFeeDetails?.comment.length > 0) && <div className="space-y-3">
-              <Separator />
-                {tokenFeeDetails?.comment.slice().reverse().map((reason: any, index: any) => (
-                  <div key={index} className="sapce-y-4 text-muted-foreground text-xs">
-                    <div className="flex justify-between items-center">
-                      <div className="">
-                        Reason:
+           {(tokenFeeDetails?.feedback && tokenFeeDetails?.feedback.length > 0) && 
+                <div className="space-y-3">
+                  <Separator />
+                    {tokenFeeDetails?.feedback.slice().reverse().map((feedback: any, index: any) => (
+                      <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
+                        <div className="flex justify-between items-center">
+                          <div className="">
+                            Reason:
+                          </div>
+                          <div className="text-[#FF503D]">Rejected on {new Date(feedback?.date).toLocaleDateString()}</div>
+                        </div>
+                        <div className="">
+                          {feedback?.text?.map((item: string, index: number) => (
+                            <div className="" key={index}>{item}</div>
+                          ))}
+                        </div>
+                        <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.feedback.length - 1 - index]?.url)}>
+                          <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
+                        </Button>
                       </div>
-                      <div className="text-[#FF503D] text-[10px]">Rejected on {new Date(reason?.date).toLocaleDateString()}</div>
-                    </div>
-                    <div className="mt-1">{reason?.text}</div>
-                    <Button variant="ghost" className="px-0 py-1 text-white text-xs" size="sm" onClick={() => handleView(tokenFeeDetails?.receiptUrl[index])}>
-                      <Eye className="h-3 w-3 mr-2" /> Acknowledgement Receipt
-                    </Button>
-                  </div>
-                ))}
-            </div >}
+                    ))}
+                </div>
+              }
           </div>
 
             {paymentDetails?.paymentPlan === 'one-shot' ? 

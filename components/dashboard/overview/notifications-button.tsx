@@ -1,18 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  Banknote,
-  Bell,
-  Bot,
-  Clock10,
-  FileText,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { Bell, FileText, Users, Banknote, Bot, Wallet, Clock10 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,12 +12,17 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 
-const socket = io(`${process.env.API_URL}`);
+const NETWORK_CHECK_INTERVAL = 10000; // 10 seconds
+const socket = io(`${process.env.API_URL}`, { autoConnect: false });
+
+interface ConnectionStatus {
+  connected: boolean;
+  online: boolean;
+  lastActivity: string;
+}
 
 interface Notification {
   id: string;
@@ -38,90 +35,82 @@ interface Notification {
 }
 
 export function NotificationsButton() {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "New Application Initiated",
-      description: "{Student name} has initiated filling in the application form",
-      category: "#00A3FF",
-      timestamp: new Date().toISOString(),
-      cohortId: "CM01JY",
-      status: <FileText className="w-6 h-6" />,
-    },
-    {
-      id: "2",
-      title: "Applicant Waitlisted!",
-      description:
-        "{Student name} has rescheduled their application interview with {Team Member name} for Monday, 3rd January at 3:30PM.",
-      category: "#F8E000",
-      timestamp: new Date().toISOString(),
-      cohortId: "CD02JY",
-      status: <Users className="w-6 h-6" />,
-    },
-    {
-      id: "3",
-      title: "Acknowledgement Receipt Cleared",
-      description:
-        "{Student name}’s admission fee receipt of INR 25,000 has been acknowledged by {team member name}",
-      category: "#2EB88A",
-      timestamp: "2025-02-04T14:38:13.714Z",
-      cohortId: "CM02JY",
-      status: <Banknote className="w-6 h-6" />,
-    },
-    {
-      id: "4",
-      title: "LITMUS Test Timed Out!",
-      description:
-        "{Student name}’s admission fee receipt of INR 25,000 has been acknowledged by {team member name}",
-      category: "#FF503D",
-      timestamp: "2025-02-04T14:38:13.714Z",
-      cohortId: "CM02JY",
-      status: <Bot className="w-6 h-6" />,
-    },
-    {
-      id: "5",
-      title: "Fee Payment Receipt Has Been Re-uploaded by {Student Name}",
-      description:
-        "{Student name} has Re-uploaded their Semester 01, Instalment 01 payment receipt. Kindly Review and acknowledge their payment.",
-      category: "#FF791F",
-      timestamp: "2025-01-27T14:38:13.714Z",
-      cohortId: "CM02JY",
-      status: <Wallet className="w-6 h-6" />,
-    },
-    {
-      id: "6",
-      title: "Interview Schedule",
-      description: "{Student name} has Scheduled the interview on 02-02-2025",
-      category: "#00A3FF",
-      timestamp: "2024-12-27T05:16:24.292Z",
-      cohortId: "CM02JY",
-      status: <Clock10 className="w-6 h-6" />,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [status, setStatus] = useState<ConnectionStatus>({
+    connected: false,
+    online: false,
+    lastActivity: new Date().toISOString(),
+  });
+  const studentId = useRef("67e143b0c6785a411400b343");
+  const networkCheckRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    socket.on("notification", (data) => {
+    setStatus((prev) => ({ ...prev, online: navigator.onLine }));
+  }, []);
+  
 
-      console.log("notification",data.description)
-      // Display a toast notification
-      toast.info(data.description, {
-        position: "top-right",
-        autoClose: 3000, // 3 seconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+  // Network detection
+  useEffect(() => {
+    const checkNetwork = async () => {
+      try {
+        // await fetch("http://localhost:3000", { method: "HEAD", cache: "no-store" });
+        if (!status.online) {
+          setStatus((p) => ({ ...p, online: true }));
+          socket.emit("network_status", { online: true });
+          if (!socket.connected) socket.connect();
+        }
+      } catch {
+        if (status.online) {
+          setStatus((p) => ({ ...p, online: false }));
+          socket.emit("network_status", { online: false });
+          socket.disconnect();
+        }
+      }
+    };
 
-      setNotifications((prevNotifications) => [data, ...prevNotifications]);
+    networkCheckRef.current = setInterval(checkNetwork, NETWORK_CHECK_INTERVAL);
+    window.addEventListener("online", checkNetwork);
+    window.addEventListener("offline", checkNetwork);
+
+    return () => {
+      clearInterval(networkCheckRef.current);
+      window.removeEventListener("online", checkNetwork);
+      window.removeEventListener("offline", checkNetwork);
+    };
+  }, [status.online]);
+
+  // Connection and notification handling
+  useEffect(() => {
+    const updateActivity = () => setStatus((p) => ({ ...p, lastActivity: new Date().toISOString() }));
+
+    socket.on("connect", () => {
+      setStatus((p) => ({ ...p, connected: true }));
+      socket.emit("login", studentId.current);
+    });
+
+    socket.on("disconnect", () => setStatus((p) => ({ ...p, connected: false })));
+    socket.on("newNotification", (data: any) => {
+      setNotifications((prev) => [{ ...data, timestamp: new Date().toISOString() }, ...prev]);
+      toast.info(data.description);
+      updateActivity();
+    });
+
+    socket.on("unreadNotifications", (unreadNotifications: any[]) => {
+      if (unreadNotifications.length > 0) {
+        setNotifications((prev) => [
+          ...unreadNotifications.map((n) => ({ ...n, timestamp: n.createdAt || new Date().toISOString() })),
+          ...prev,
+        ]);
+      }
     });
 
     return () => {
-      socket.off("notification");
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("newNotification");
+      socket.off("unreadNotifications");
     };
   }, []);
-
-  const unreadCount = notifications.length;
 
   return (
     <>
@@ -129,56 +118,45 @@ export function NotificationsButton() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
+            {notifications.length > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
-                {unreadCount}
+                {notifications.length}
               </span>
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-[400px] max-h-[400px] min-h-[80px] overflow-y-auto"
-        >
+        <DropdownMenuContent align="end" className="w-[400px] max-h-[400px] min-h-[80px] overflow-y-auto">
           <DropdownMenuGroup className="space-y-1.5">
-            {notifications.length === 0 ? 
-            <DropdownMenuLabel className="text-base text-center mt-[20px] text-muted-foreground font-normal">
-              No notifications
-            </DropdownMenuLabel> :
-            notifications.map((notification: any, index: any) => (
-              <DropdownMenuItem
-                key={index}
-                className={`bg-[${notification.category}]/20 focus:bg-[${notification.category}] flex flex-col items-start p-2`}
-              >
-                <div className="flex items-center justify-between text-[10px] w-full">
-                  <div>
-                    {new Date(notification.timestamp).toLocaleTimeString()}
-                  </div>
-                  <div
-                    className={`bg-[${notification.category}]/20 rounded px-1 font-semibold`}
-                  >
-                    {notification.cohortId}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={`bg-[${notification.category}]/20 p-4 rounded-full`}>
-                    {notification.status}
-                  </div>
-                  <div>
-                    <div
-                      className={`text-sm font-medium text-[${notification.category}]`}
-                    >
-                      {notification.title}
+            {notifications.length === 0 ? (
+              <DropdownMenuLabel className="text-base text-center mt-[20px] text-muted-foreground font-normal">
+                No notifications
+              </DropdownMenuLabel>
+            ) : (
+              notifications.map((notification, index) => (
+                <DropdownMenuItem key={index} className="flex flex-col items-start p-2">
+                  <div className="flex items-center justify-between text-[10px] w-full">
+                    <div>{new Date(notification.timestamp).toLocaleTimeString()}</div>
+                    <div className="rounded px-1 font-semibold" style={{ backgroundColor: notification.category }}>
+                      {notification.cohortId}
                     </div>
-                    <p className="text-xs">{notification.description}</p>
                   </div>
-                </div>
-              </DropdownMenuItem>
-            ))}
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="p-4 rounded-full" style={{ backgroundColor: notification.category }}>
+                      {notification.status}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium" style={{ color: notification.category }}>
+                        {notification.title}
+                      </div>
+                      <p className="text-xs">{notification.description}</p>
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+              ))
+            )}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <ToastContainer />
     </>
   );

@@ -17,9 +17,9 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
-import { loginAdmin, verifyAdminOtp } from "@/app/api/auth";
+import { login, resendOtp, verifyOtp } from "@/app/api/auth";
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 import { MailIcon } from "lucide-react";
 import { OTPInput } from "input-otp";
@@ -47,6 +47,7 @@ export default function LoginPage() {
   const [timer, setTimer] = useState(59);
   const [email, setEmail] = useState(""); // Store email for OTP verification
   const [otp, setOtp] = useState(""); // Store OTP input
+  const [otpToken, setOtpToken] = useState(""); // Store OTP input
 
   // Initialize React Hook Form
   const form = useForm<LoginFormValues>({
@@ -67,16 +68,12 @@ export default function LoginPage() {
   const handleSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     try {
-      console.log("emaill",data.email, data.password);
-
       const loginPayload = {
         email: data.email,
         password: data.password
       }
-      console.log("response f", loginPayload);
-
-      const loginData = await loginAdmin(loginPayload);
-      console.log("sssd",loginData);
+      const loginData = await login(loginPayload);
+      setOtpToken(loginData.otpRequestToken)
       setShowOtp(true);
       // Cookies.set('admin-token', loginData.token,  { expires: 1 * });
       // router.push("/dashboard");
@@ -97,16 +94,45 @@ export default function LoginPage() {
   const handleOtpSubmit = async () => {
     setLoading(true);
     try {
-      const res = await verifyAdminOtp(email, otp);
+      const otpPayload = {
+        otpRequestToken: otpToken,
+        otp: otp
+      }
+      console.log("res",otpPayload);
+
+      const res = await verifyOtp(otpPayload);
       console.log("res",res);
       
-      Cookies.set("admin-token", "some_token", { expires: 1 }); // Save token
+      Cookies.set("adminAccessToken", res.accessToken, { expires: 1/12 }); 
+      Cookies.set("adminRefreshToken", res.refreshToken, { expires: 7 });
       router.push("/dashboard"); // Redirect to dashboard after verification
     } catch (error: any) {
       toast({
         title: "OTP Verification Failed",
         description: error.message || "Invalid OTP. Please try again.",
-        variant: "destructive",
+        variant: "warning",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendSubmit = async () => {
+    setLoading(true);
+    try {
+      const resendPayload = {
+        otpRequestToken: otpToken
+      }
+
+      const res = await resendOtp(resendPayload);
+      console.log("res",res);
+      setTimer(59);
+      
+    } catch (error: any) {
+      toast({
+        title: "Failed to resend OTP",
+        description: error.message || "Please try again.",
+        variant: "warning",
       });
     } finally {
       setLoading(false);
@@ -192,6 +218,7 @@ export default function LoginPage() {
 
           {/* OTP Dialog */}
           <Dialog open={showOtp} onOpenChange={setShowOtp}>
+            <DialogTitle></DialogTitle>
             <DialogContent className="flex flex-col gap-4 sm:gap-6 p-8 sm:p-16 bg-[#09090b] rounded-xl max-w-[90vw] sm:max-w-2xl mx-auto">
               <div className="text-center text-xl font-semibold">
                 Verify Your Account
@@ -205,21 +232,24 @@ export default function LoginPage() {
                 </span>
               </div>
               <div className="flex mx-auto">
-                <InputOTP maxLength={6}>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                  </InputOTPGroup>
-                  <InputOTPSeparator />
-                  <InputOTPGroup>
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
+              <InputOTP
+                maxLength={6}
+                value={otp} // Controlled state
+                onChange={(value) => setOtp(value)} // Update OTP state
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
               </div>
-
 
               <div className="flex flex-col gap-">
                 <div className="text-center">
@@ -232,12 +262,12 @@ export default function LoginPage() {
                   <Button
                     variant="link"
                     className="underline"
-                    onClick={() => setShowOtp(true)}
+                    onClick={() => handleResendSubmit()}
                     disabled={loading || timer > 0}
                     >
                     {loading ? "Resending OTP..." : "Resend OTP"}
                   </Button>
-                  {timer > 0 ? `in 00:${timer < 10 ? `0${timer}` : `timer`}` : ""}
+                  {timer > 0 ? `in 00:${timer < 10 ? `0${timer}` : `${timer}`}` : ""}
                 </div>
               </div>
             </DialogContent>

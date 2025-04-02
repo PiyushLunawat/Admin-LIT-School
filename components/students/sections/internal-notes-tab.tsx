@@ -12,6 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MessageSquare, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+import internalNotes from "@/app/api/student";
 
 interface InternalNotesTabProps {
   student: any;
@@ -19,30 +22,48 @@ interface InternalNotesTabProps {
 }
 
 export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotesTabProps) {
-  // In a real application, this data would be fetched based on the studentId
-  const notes = [
-    {
-      id: "1",
-      category: "Interview",
-      note: "Strong communication skills, shows leadership potential.",
-      author: "Sarah Admin",
-      timestamp: "2024-03-20 10:30 AM",
-    },
-    {
-      id: "2",
-      category: "Payment",
-      note: "Requested scholarship consideration.",
-      author: "Finance Team",
-      timestamp: "2024-03-19 02:15 PM",
-    },
-    {
-      id: "3",
-      category: "General",
-      note: "Very enthusiastic about the program.",
-      author: "Tom Evaluator",
-      timestamp: "2024-03-18 11:45 AM",
-    },
-  ];
+  
+  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const cohortDetails = latestCohort?.cohortId;
+
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [internalNote, setInternalNote] = useState<any>([]);
+
+  const [category, setCategory] = useState<string>("null");
+  const [content, setContent] = useState<string>("");
+
+  useEffect(() => {
+    setInternalNote(latestCohort?.internalNotes)
+  }, [latestCohort]);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const payload = {
+        studentId: student?._id,
+        category,
+        cohortId: cohortDetails?._id,
+        content: [content], // Wrapped in array as per your payload format
+      };
+      
+      const res = await internalNotes(payload);
+
+      setInternalNote(res?.internalNote)
+      toast({ description: res?.message, variant: "success", });
+
+      setContent(""); // Clear input
+      setCategory(""); // Reset category
+      onApplicationUpdate(); // Refresh data if needed
+    } catch (error: any) {
+      toast({
+        description: error.message || "An unexpected error occurred.",
+        variant: "warning",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -52,7 +73,7 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
           <CardTitle>Add Note</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Select>
+          <Select onValueChange={setCategory}>
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -66,10 +87,12 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
           <Textarea
             placeholder="Type your note here..."
             className="min-h-[100px]"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
           />
-          <Button className="w-full">
+          <Button className="w-full" onClick={handleSubmit} disabled={loading || content === "" || category === "" }>
             <Plus className="h-4 w-4 mr-2" />
-            Add Note
+            {loading ? 'Adding...' : 'Add Note'}
           </Button>
         </CardContent>
       </Card>
@@ -81,21 +104,20 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {notes.map((note) => (
-              <div
-                key={note.id}
-                className="border rounded-lg p-4 space-y-2"
-              >
+            {internalNote?.notes?.map((note: any, index: any) => (
+              <div key={index} className="border rounded-lg p-4 space-y-2" >
                 <div className="flex items-center justify-between">
-                  <Badge variant="secondary">{note.category}</Badge>
-                  <p className="text-sm text-muted-foreground">
-                    {note.timestamp}
+                  <Badge variant="secondary" className="capitalize">{note?.category}</Badge>
+                  <p className="text-sm text-muted-foreground uppercase">
+                    {new Date(note.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <p>{note.note}</p>
+                {note.content.map((item: string, index: number) => (
+                  <div className="pl-3" key={index}>{item}</div>
+                ))}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MessageSquare className="h-4 w-4" />
-                  <span>Added by {note.author}</span>
+                  <span>Added by {note.addedBy}</span>
                 </div>
               </div>
             ))}

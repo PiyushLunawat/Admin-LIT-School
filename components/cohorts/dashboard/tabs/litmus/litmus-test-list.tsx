@@ -16,7 +16,7 @@ import { StudentApplicationHeader } from "../applications/application-dialog/dia
 import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
 import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
 import { DocumentsTab } from "../applications/application-dialog/document-tab";
-import { Calendar, Eye } from "lucide-react";
+import { Calendar, Clock4Icon, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { ReviewComponent } from "./litmus-test-dialog/review";
@@ -123,8 +123,10 @@ export function LitmusTestList({
         </TableHeader>
         <TableBody>
           {applications.map((application: any) => {
+            
             const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
             const litmusTestDetails = latestCohort?.litmusTestDetails;
+            const lastInterview = latestCohort?.litmusTestDetails?.litmusTestInterviews[latestCohort?.litmusTestDetails?.litmusTestInterviews.length - 1];
             return(
             <TableRow
               key={application._id}
@@ -146,31 +148,32 @@ export function LitmusTestList({
               <TableCell>
                 {new Date(litmusTestDetails?.updatedAt).toLocaleDateString() || "--"}
               </TableCell>
-              <TableCell>
+              <TableCell className="">
                 {latestCohort?.status === 'dropped' ?
                   <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(latestCohort?.status)}>
                     {latestCohort?.status}
                   </Badge> :
-                  <Badge className="capitalize" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
+                  <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
                     {litmusTestDetails?.status || "pending"}
                   </Badge>
                 }
               </TableCell>
               <TableCell>
-                {latestCohort?.cohortId?.collaborators
-                  ?.filter((collaborator: any) => collaborator.role === "evaluator")
-                  .map((collaborator: any) => collaborator.email)
-                  .join(", ") || "--"}
+                {lastInterview ? (lastInterview?.ownerFirstName+' '+lastInterview?.ownerLastName) : "--"}
               </TableCell>
               <TableCell>
-                {litmusTestDetails?.litmusTestInterviews?.presentationDate ? (
-                  <div className="flex items-center text-sm">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(litmusTestDetails?.litmusTestInterviews?.presentationDate).toLocaleDateString() || "--"}
+              {lastInterview ? (
+                <div className="space-y-0.5">
+                  <div className="flex items-center text-xs">
+                    <Clock4Icon className="h-3 w-3 mr-1" />
+                    {lastInterview?.startTime}
                   </div>
-                ) : (
-                  "--"
-                )}
+                  <div className="flex items-center text-xs">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {new Date(lastInterview?.meetingDate).toLocaleDateString() || "--"}
+                  </div>
+                </div>
+              ) : "--"}
               </TableCell>
               <TableCell>
                 <Button

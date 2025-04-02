@@ -861,56 +861,68 @@ function ResourcesSection({
    * - complete-multipart-upload
    */
   const uploadMultipart = async (file: File, chunkSize: number) => {
-    // Step 1: Initiate
-    const uniqueKey = generateUniqueFileName(file.name);
-    const initiateRes = await axios.post(`${process.env.API_URL}/admin/initiate-multipart-upload`, {
-      bucketName: "dev-application-portal",
-      key: uniqueKey,
+    // 1) Initiate upload to get an uploadId
+    const fileName = generateUniqueFileName(file.name);
+    const initiateRes = await axios.post(`${process.env.API_URL}/student/initiateUpload`, {
+      fileName,
     });
-    const { uploadId } = initiateRes.data;
-
-    // Step 2: Upload each chunk
+    const { uploadId } = initiateRes.data; // e.g. { uploadId: 'abc123' }
+  
+    // 2) Calculate number of chunks
     const totalChunks = Math.ceil(file.size / chunkSize);
-    let totalBytesUploaded = 0;
-    const parts: { ETag: string; PartNumber: number }[] = [];
-
+    let uploadedBytes = 0;
+  
+    // We'll track overall progress across all chunks
     for (let i = 0; i < totalChunks; i++) {
+      // Slice out this chunk
       const start = i * chunkSize;
       const end = Math.min(start + chunkSize, file.size);
       const chunk = file.slice(start, end);
-
-      const partRes = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url-part`, {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-        uploadId,
-        partNumber: i + 1,
-      });
-      const { url } = partRes.data;
-
-      // Upload the chunk
-      const uploadRes = await axios.put(url, chunk, {
-        headers: { "Content-Type": file.type },
-        onUploadProgress: (evt: any) => {
-          if (!evt.total) return;
-          totalBytesUploaded += evt.loaded;
-          const percent = Math.round((totalBytesUploaded / file.size) * 100);
-          setUploadProgress(Math.min(percent, 100));
-        },
-      });
-      parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
+  
+      // Create form data for the chunk
+      const formData = new FormData();
+      formData.append("file", chunk);
+      formData.append("index", `${i}`);          // chunk index
+      formData.append("fileName", fileName);
+      formData.append("totalChunks", `${totalChunks}`);
+  
+      // 3) Upload the chunk
+      await axios.post(
+        `${process.env.API_URL}/student/upload-chunk?uploadId=${uploadId}`,
+        formData,
+        {
+          onUploadProgress: (evt) => {
+            if (!evt.total) return;
+            // evt.loaded: bytes uploaded in the current chunk
+            // We'll combine that with already-uploaded bytes
+            const chunkUploadedSoFar = evt.loaded;
+            const overallUploaded = uploadedBytes + chunkUploadedSoFar;
+  
+            // Calculate overall percent
+            const percentComplete = Math.round(
+              (overallUploaded / file.size) * 100
+            );
+            setUploadProgress(percentComplete);
+          },
+        }
+      );
+  
+      // When this chunk is fully done, add its size to the total
+      uploadedBytes += chunk.size;
     }
-
-    // Step 3: Complete
-    const partRes = await axios.post(`${process.env.API_URL}/admin/complete-multipart-upload`, {
-      bucketName: "dev-application-portal",
-      key: uniqueKey,
+  
+    // 4) Complete the upload
+    //    This tells your server: "All chunks are up, now merge them."
+    const completeRes = await axios.post(`${process.env.API_URL}/student/completeUpload`, {
       uploadId,
-      parts,
+      fileName,
     });
-
-    // Return final S3 URL
-    return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
+  
+    // The server should respond with the final file URL
+    const { fileUrl } = completeRes.data;
+    return fileUrl;
   };
+  
 
   // Just a helper to generate a unique file name
   const generateUniqueFileName = (originalName: string) => {

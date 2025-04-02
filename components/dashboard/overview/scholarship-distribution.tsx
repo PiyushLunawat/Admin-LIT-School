@@ -18,7 +18,6 @@ const processScholarships = (applications: any) => {
     const scholarshipName = semester?.scholarshipName;
     const scholarshipPercentage = semester?.scholarshipPercentage || 0;
     const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
-    console.log(scholarshipName, scholarshipPercentage, baseFee);
 
       // Calculate total scholarship amount from installments
       const scholarshipAmount = baseFee * scholarshipPercentage * 0.01 || 0;

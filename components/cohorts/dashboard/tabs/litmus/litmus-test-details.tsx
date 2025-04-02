@@ -15,6 +15,7 @@ import {
   Edit2Icon,
   FileIcon,
   FileSignature,
+  Clock4,
 } from "lucide-react";
 import {
   Select,
@@ -170,8 +171,28 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
               <h4 className="font-medium">Evaluation Status</h4>
               <Badge className="capitalize" variant={getStatusColor(litmusTestDetails?.status || "pending")}>{litmusTestDetails?.status || "pending"}</Badge>
             </div>
+            <div className="space-y-1">
+              {latestCohort?.litmusTestDetails?.litmusTestInterviews.slice().reverse().map((interview: any, index: any) => (
+                <div key={index} className="flex justify-between text-muted-foreground text-sm">
+                  <div className="flex justify-center gap-3 items-center">
+                    <div className="flex gap-1 items-center">
+                      <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+                    </div>
+                    <div className="flex gap-1 items-center">
+                      <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
+                    </div>
+                  </div>
+                  {(index !== 0 && interview?.meetingStatus === 'confirmed') ?
+                    <p className="capitalize">Int. Time Elapsed</p> :
+                    (index === 0 && status === 'interview concluded') ?
+                      <p className="capitalize">Int. Time Elapsed</p> :
+                      <p className="capitalize">Interview {interview?.meetingStatus}</p>
+                  }
+                </div>
+              ))}
+            </div>
             {litmusTestDetails?.status !== 'completed' &&
-            <Select disabled value={litmusTestDetails?.status || "pending"}>
+            <Select disabled={litmusTestDetails?.status === 'pending'} value={litmusTestDetails?.status || "pending"}>
               <SelectTrigger>
                 <SelectValue placeholder="Change status" />
               </SelectTrigger>
@@ -288,7 +309,8 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                   </>
                 );
               })()}
-            {litmusTestDetails?.status === 'submitted' && <Button className="w-full flex gap-2" onClick={() => {setOpen(true);}}>
+            {litmusTestDetails?.status === 'interview scheduled' &&
+            <Button className="w-full flex gap-2" onClick={() => {setOpen(true);}}>
               <FileSignature className=""/>Review Submission
             </Button>}
             <Card>
