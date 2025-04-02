@@ -16,7 +16,7 @@
 //   },
 // });
 
-// const baseUrl = "http://localhost:4000/student";
+// const baseUrl = "https://dev.apply.litschool.in/student";
 // const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunk size
 // const MAX_CONCURRENT_UPLOADS = 4; // Number of parallel uploads
 
