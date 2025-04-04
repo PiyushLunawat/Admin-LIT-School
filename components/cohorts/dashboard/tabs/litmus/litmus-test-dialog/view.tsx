@@ -161,55 +161,6 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
     });
   };
 
-    const handlePublish = async () => {
-      // Construct results from tasks and taskScores
-      const results = tasks.map((task: any, tIndex: number) => {
-        const scoreArray = task.judgmentCriteria.map((criteria: any, cIndex: number) => ({
-          criteria: criteria.name,
-          score: taskScores[tIndex][cIndex],
-          totalScore: criteria.points,
-        }));
-        return {
-          task: tIndex + 1, // or task._id if available
-          score: scoreArray,
-        };
-      });
-  
-      // Construct feedbackData from sections
-      const feedbackData = sections.map((section) => {
-        // Extract bullet lines
-        const bulletLines = feedbackInputs[section.title]
-          .split("\n")
-          .map((line) => line.replace(/^•\s*/, "").trim())
-          .filter((line) => line.length > 0);
-
-        return {
-          feedbackTitle: section.title, // changed from feebbackTitle to feedbackTitle
-          data: bulletLines,
-        };
-      });
-  
-      const scholarshipDetail = "507f1f77bcf86cd799439011";
-      const performanceRating = rating;
-  
-      try {
-        console.log("task eve",litmusTaskId);
-        
-        const response = await updateLitmusTaskStatus(litmusTaskId,
-          "completed",
-          results,
-          feedbackData,
-          scholarshipDetail,
-          performanceRating,);
-        console.log("Update Successful:", response);
-        onApplicationUpdate();
-
-      } catch (error) {
-        console.error("Update Failed:", error);
-      }
-    };
-  
-
   return (
     <div className="space-y-3">
       {/* Header Section */}
