@@ -242,13 +242,13 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             let percentageCount = 0;
         
             applications.forEach((application) => {
-              const scholarships = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipDetail?.flatMap((semester: any) => semester.installments) || [];
-              scholarships.forEach((installment: any) => {
-                if (installment?.scholarshipAmount) {
-                  totalScholarship += installment.scholarshipAmount;
-                  scholarshipCount += 1;
-                }
-              });
+              const scholarship = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
+              const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
+        
+              if (scholarship && baseFee) {
+                totalScholarship += scholarship?.scholarshipPercentage * baseFee * 0.01;
+                scholarshipCount += 1;
+              }
               const percentage = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
               if (percentage) {
                 totalPercentage += application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
@@ -270,7 +270,17 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
         
             setTotalTokenAmountPaid(tokensPaid);
 
-            let tokenPaid = 0;
+            // let tokenPaid = 0;
+            // let oneShot = 0;
+            // let oneShotPaid = 0;
+            // let oneShotAmount = 0;
+            // let oneShotAmountPaid = 0;
+            // let installmentAmount = 0;
+            // let installmentAmountPaid = 0;
+            // let pending = 0;
+
+            let tokenAmountPending = 0;
+            let tokenAmountPaid = 0;
             let oneShot = 0;
             let oneShotPaid = 0;
             let oneShotAmount = 0;
@@ -279,84 +289,88 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             let installmentAmountPaid = 0;
             let pending = 0;
 
-            // applications.forEach((application) => {
+            applications.forEach((application) => {
+              const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+              const cohortDetails = latestCohort?.cohortId;
+              const litmusTestDetails = latestCohort?.litmusTestDetails;
+              const tokenFeeDetails = latestCohort?.tokenFeeDetails;
+              const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+              const paymentDetails = latestCohort?.paymentDetails;
+              const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
 
-            //   const breakdown: any[] = [];
-            //   for (let sem = 1; sem <= application?.cohort?.cohortFeesDetail?.semesters; sem++) {
-            //     const semesterBreakdown = [];
-            //     for (let inst = 1; inst <= application?.cohort.cohortFeesDetail.installmentsPerSemester; inst++) {
-            //       semesterBreakdown.push({
-            //         label: `Instalment ${inst}`,
-            //         total: 0,
-            //         received: 0,
-            //         status: "pending",
-            //       });
-            //     }
-            //     breakdown.push({
-            //       semester: sem,
-            //       installments: semesterBreakdown,
-            //     });
-            //   }
-        
-              
-            //   const lastEnrolled = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];    
-            //   if (!lastEnrolled) return;
-              
-            //   const tokenAmount = application?.cohort?.cohortFeesDetail?.tokenFee || 0;
-            //   const lastEnrollment = application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
-            //   if (lastEnrollment?.tokenFeeDetails?.verificationStatus === 'paid') {
-            //     tokenPaid += (tokenAmount || 0);
-            //   }
-              
-            //   // One-Shot Payment Processing
-            //   if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
-            //     oneShot += 1;
-            //     const oneShotDetails = lastEnrolled?.oneShotPayment;
-            //     if (oneShotDetails) {
-            //       oneShotAmount += oneShotDetails?.amountPayable;
-            //       if (oneShotDetails?.verificationStatus === 'paid') {
-            //         oneShotPaid += 1;
-            //         oneShotAmountPaid += oneShotDetails?.amountPayable;
-            //       }
-            //       if (oneShotDetails?.verificationStatus === 'pending') {
-            //         pending += 1;
-            //       }
-            //     }
-            //   }
-      
-            //   // Installments Processing
-            //   if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-            //     lastEnrolled?.installmentDetails.forEach((semesterDetail: any, semIndex: any) => {
-            //       const semesterNumber = semesterDetail?.semester;
-            //       const installments = semesterDetail?.installments;
-            //       installments.forEach((installment: any, instIndex: any) => {
-            //         if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
-            //           breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
-            //           if (installment?.verificationStatus === 'paid') {
-            //             breakdown[semIndex].installments[instIndex].received += installment?.amountPayable;
-            //           }
-            //           if (installment?.verificationStatus === 'pending') {
-            //             pending += 1;
-            //           }
-            //         }
-            //       });
-            //     });
-      
-            //     // Calculate total installments expected and received
-            //     lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
-            //       const installments = semesterDetail?.installments;
-            //       installments.forEach((installment: any) => {
-            //         installmentAmount += installment?.amountPayable;
-            //         if (installment?.verificationStatus === 'paid') {
-            //           installmentAmountPaid += installment?.amountPayable;
-            //         }
-            //       });
-            //     });
-            //   }   
-            // });
+              // Initialize installment breakdown based on cohort
+              const breakdown: any[] = [];
+              for (let sem = 1; sem <= cohortDetails?.cohortFeesDetail?.semesters; sem++) {
+                const semesterBreakdown = [];
+                for (let inst = 1; inst <= cohortDetails.cohortFeesDetail.installmentsPerSemester; inst++) {
+                  semesterBreakdown.push({
+                    label: `Instalment ${inst}`,
+                    total: 0,
+                    received: 0,
+                    status: "pending",
+                  });
+                }
+                breakdown.push({
+                  semester: sem,
+                  installments: semesterBreakdown,
+                });
+              }
+                
+              if (tokenFeeDetails?.verificationStatus === 'paid') {
+                tokenAmountPaid += (tokenAmount || 0);
+              } else if (['selected'].includes(latestCohort?.applicationDetails?.applicationStatus)) {
+                tokenAmountPending += (tokenAmount || 0);
+                pending += 1;
+              }
+          
+              // One-Shot Payment Processing
+              if (paymentDetails?.paymentPlan === 'one-shot') {
+                oneShot += 1;
+                const oneShotDetails = paymentDetails?.oneShotPayment;
+                if (oneShotDetails) {
+                  oneShotAmount += oneShotDetails?.amountPayable;
+                  if (oneShotDetails?.verificationStatus === 'paid') {
+                    oneShotPaid += 1;
+                    oneShotAmountPaid += oneShotDetails?.amountPayable;
+                  } else {
+                    pending += 1;
+                  }
+                }
+              }
 
-            setRevenueCollected(installmentAmountPaid+oneShotAmountPaid+tokensPaid)
-            setRevenuePending((installmentAmount+oneShotAmount)-(installmentAmountPaid+oneShotAmountPaid))
+              // Installments Processing
+              if (paymentDetails?.paymentPlan === 'instalments') {
+                paymentDetails?.installments.forEach((semesterDetail: any, semIndex: any) => {
+                  const semesterNumber = semesterDetail?.semester;
+                  const installments = semesterDetail?.installments;
+                  installments.forEach((installment: any, instIndex: any) => {
+                    if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
+                      breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
+                      if (installment?.verificationStatus === 'paid') {
+                        breakdown[semIndex].installments[instIndex].received += installment?.amountPayable;
+                      }
+                      if (installment?.verificationStatus === 'pending') {
+                        pending += 1;
+                      }
+                    }
+                  });
+                });
+
+                // Calculate total installments expected and received
+                paymentDetails?.installments.forEach((semesterDetail: any) => {
+                  const installments = semesterDetail?.installments;
+                  installments.forEach((installment: any) => {
+                    installmentAmount += installment?.amountPayable;
+                    if (installment?.verificationStatus === 'paid') {
+                      installmentAmountPaid += installment?.amountPayable;
+                    }
+                  });
+                });
+              } 
+            });
+
+            setRevenueCollected(oneShotAmountPaid + installmentAmountPaid + tokenAmountPaid)
+            setRevenuePending(tokenAmountPending + (installmentAmount + oneShotAmount) - (installmentAmountPaid + oneShotAmountPaid))
             setPendingPayments(pending);
           } else {
             console.log("Applications data is not an array or is undefined.");

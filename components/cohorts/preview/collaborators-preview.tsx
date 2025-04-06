@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { CollaboratorsForm } from "../steps/collaborators-form";
 
@@ -46,6 +46,7 @@ export function CollaboratorsPreview() {
       
       {/* Dialog for Collaborators Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <CollaboratorsForm onComplete={() => console.log("Form complete")} /> */}
         </DialogContent>

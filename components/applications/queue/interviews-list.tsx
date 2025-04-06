@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, Clock, CheckCircle, Clock4Icon, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
 import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
@@ -236,6 +236,7 @@ export function InterviewsList({
         </TableBody>
       </Table>
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
@@ -248,11 +249,11 @@ export function InterviewsList({
               </TabsList>
 
               <TabsContent value="personal">
-                <PersonalDetailsTab student={selectedStudentId} />
+                <PersonalDetailsTab student={selectedStudentId} onUpdateStatus={onApplicationUpdate}/>
               </TabsContent>
              {/* 
               <TabsContent value="documents">
-                <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
+                <DocumentsTab student={selectedStudentId} onUpdateStatus={onApplicationUpdate} />
               </TabsContent> */}
             </Tabs>
         </DialogContent>

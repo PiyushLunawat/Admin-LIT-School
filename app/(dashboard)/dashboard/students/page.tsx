@@ -14,7 +14,7 @@ import { getStudents } from "@/app/api/student";
 export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<any>([]);
-  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [selectedStudents, setSelectedStudents] = useState<any[]>([]);
 
   // --- FILTER STATES ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,12 +152,75 @@ export default function StudentsPage() {
 
   // --- ACTION HANDLERS ---
   const handleBulkEmail = () => {
-    console.log("Sending bulk email to:", selectedStudentIds);
+    console.log("Sending bulk email to:", selectedStudents);
   };
 
-  const handleBulkExport = () => {
-    console.log("Exporting data for:", selectedStudentIds);
+  const escapeCSV = (field: string): string => {
+    if (!field) return "";
+    return `"${field.replace(/"/g, '""')}"`;
   };
+  
+  const handleBulkExport = (selectedStudents: any[]) => {
+    if (selectedStudents.length === 0) {
+      console.log("No students selected for export.");
+      return;
+    }
+    // Define CSV headers.
+    const headers = [
+      "Student's Name",
+      "Email",
+      "Phone No.",
+      "Address",
+      "Fathers' Name",
+      "Father's Contact",
+      "Mother's Name",
+      "Mother's Contact",
+      "Emergency Contact Name",
+      "Emergency Contact Number",
+    ];
+  
+    // Map each selected student to a CSV row.
+    const rows = selectedStudents.map((student) => {
+      const studentDetails = student.appliedCohorts?.[student.appliedCohorts.length - 1]?.applicationDetails?.studentDetails;
+
+      const studentName = `${student?.firstName || ""} ${student?.lastName || ""}`.trim();
+      const email = student?.email || "";
+      const phone = student?.mobileNumber || "";
+      const address = `${studentDetails?.currentAddress?.streetAddress || ""} ${studentDetails?.currentAddress?.city || ""} ${studentDetails?.currentAddress?.state || ""} ${studentDetails?.currentAddress?.postalCode || ""}`.trim();
+      const fatherName = `${studentDetails?.parentInformation?.father?.firstName || ""} ${studentDetails?.parentInformation?.father?.lastName || ""}`.trim();
+      const fatherContact = studentDetails?.parentInformation?.father?.contactNumber || "";
+      const motherName = `${studentDetails?.parentInformation?.mother?.firstName || ""} ${studentDetails?.parentInformation?.mother?.lastName || ""}`.trim();
+      const motherContact = studentDetails?.parentInformation?.mother?.contactNumber || "";
+      const emergencyContactName = `${studentDetails?.emergencyContact?.firstName || ""} ${studentDetails?.emergencyContact?.lastName || ""}`.trim();
+      const emergencyContactNumber = studentDetails?.emergencyContact?.contactNumber || "";
+      return [
+        escapeCSV(studentName),
+        escapeCSV(email),
+        escapeCSV(phone),
+        escapeCSV(address),
+        escapeCSV(fatherName),
+        escapeCSV(fatherContact),
+        escapeCSV(motherName),
+        escapeCSV(motherContact),
+        escapeCSV(emergencyContactName),
+        escapeCSV(emergencyContactNumber),
+      ].join(",");
+    });
+  
+    // Combine header and rows into one CSV string.
+    const csvContent = [headers.join(","), ...rows].join("\n");
+  
+    // Create a Blob from the CSV string and trigger the download.
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "students_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };  
 
   return (
     <div className="p-6 space-y-6">
@@ -168,15 +231,15 @@ export default function StudentsPage() {
           {/* <Button
             variant="outline"
             onClick={handleBulkEmail}
-            disabled={selectedStudentIds.length === 0}
+            disabled={selectedStudents.length === 0}
           >
             <Mail className="h-4 w-4 mr-2" />
             Bulk Email
           </Button> */}
           <Button
             variant="outline"
-            onClick={handleBulkExport}
-            disabled={selectedStudentIds.length === 0}
+            onClick={() => handleBulkExport(selectedStudents)}
+            disabled={selectedStudents.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
@@ -203,8 +266,8 @@ export default function StudentsPage() {
 
       {/* Students List */}
       <StudentsList
-        selectedIds={selectedStudentIds}
-        onSelectedIdsChange={setSelectedStudentIds}
+        selectedIds={selectedStudents}
+        onSelectedIdsChange={setSelectedStudents}
         applications={filteredAndSortedApplications}
         onApplicationUpdate={handleApplicationUpdate} 
       />

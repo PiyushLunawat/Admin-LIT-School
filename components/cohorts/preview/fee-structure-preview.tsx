@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { FeePreviewForm } from "../steps/fee-preview-form";
 import { useState } from "react";
 import { FeeStructureForm } from "../steps/fee-structure-form";
@@ -119,6 +119,7 @@ export function FeeStructurePreview() {
       
       {/* Dialog for Fee Structure Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <FeeStructureForm onNext={() => console.log("Navigating to collaborators")} /> */}
           <FeePreviewForm onNext={() => console.log("Navigating to collaborators")} onCohortCreated={handleCohortCreated}/>

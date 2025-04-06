@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -212,6 +212,7 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
                 </Button>
 
                 <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+                <DialogTitle></DialogTitle>
                   <DialogContent className="max-w-4xl py-4 px-6">
                     <MarkedAsDialog student={application} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
                   </DialogContent>
@@ -380,6 +381,7 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
           </div>
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>
+          <DialogTitle></DialogTitle>
             <DialogContent className="max-w-5xl">
               <AwardScholarship student={application} />
             </DialogContent>
@@ -405,6 +407,7 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
         </div>
       </ScrollArea>
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
           {imageUrl ? (
             <img

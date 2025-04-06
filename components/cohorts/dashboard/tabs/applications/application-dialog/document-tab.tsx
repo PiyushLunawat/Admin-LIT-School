@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CircleCheckBig, Download, Eye, FlagIcon, LoaderCircle, Upload, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 import { updateDocumentStatus, uploadStudentDocuments, } from "@/app/api/student";
 import axios from "axios";
@@ -26,7 +26,7 @@ interface DocumentsTabProps {
 }
 
 export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
-  
+    
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId;
 
@@ -102,13 +102,30 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
     }
   };
 
-  const handleFileDownload = (fileUrl: string) => {
-    if (!fileUrl) {
-      console.error("No file URL available for download.");
-      return;
-    }
-    window.open(fileUrl, "_blank") 
-  };
+  const handleFileDownload = async (url: string, docName: string) => {
+  try {
+    // 1. Fetch the file as Blob
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    // 2. Create a temporary object URL for that Blob
+    const blobUrl = URL.createObjectURL(blob);
+
+    // 3. Create a hidden <a> and force download
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `${docName}.pdf`;  // or "myImage.png"
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.error("Download failed", err);
+  }
+};
+
 
   const handleFileChange = async ( e: React.ChangeEvent<HTMLInputElement>, docId: string) => {
     setError(null);
@@ -154,7 +171,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
       const response = await uploadStudentDocuments(payload);
       console.log("Upload response:", response);
       onUpdateStatus()
-      // setDocs(response.data);
+      setDocs(response.data.documents);
 
     } catch (error: any) {
       console.error("Error uploading file:", error);
@@ -310,7 +327,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                       <Button variant="ghost" size="sm" onClick={() => { setOpen(true); setViewDoc(docDetails?.url)}}>
                         <Eye className="h-4 w-4 mr-2" /> View
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleFileDownload(docDetails?.url)}>
+                      <Button variant="ghost" size="sm" onClick={() => handleFileDownload(docDetails?.url, doc.name)}>
                         <Download className="h-4 w-4 mr-2" />
                         Download
                       </Button>
@@ -378,7 +395,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                       <Eye className="h-4 w-4 mr-2" />
                       View
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleFileDownload(doc?.url)}>
+                    <Button variant="ghost" size="sm" onClick={() => handleFileDownload(doc?.url, doc?.name)}>
                       <Download className="h-4 w-4 mr-2" />
                       Download
                     </Button>
@@ -393,6 +410,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
 
       {/* PDF Preview Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {viewDoc ? (
             <div className="max-w-7xl justify-center flex items-center ">

@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Download } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CreateTemplate } from "./communication-dialog/create-template";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
@@ -115,6 +115,7 @@ export function TemplatesTab({ cohortId }: TemplatesTabProps) {
     </div>
 
 <Dialog open={open} onOpenChange={setOpen}>
+<DialogTitle></DialogTitle>
   <DialogContent className="max-w-4xl">
     <CreateTemplate />
   </DialogContent>

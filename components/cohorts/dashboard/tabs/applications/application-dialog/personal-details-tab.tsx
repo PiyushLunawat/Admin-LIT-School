@@ -20,9 +20,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface PersonalDetailsTabProps {
   student: any;
+  onUpdateStatus: () => void;
 }
 
-export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
+export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsTabProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -31,6 +32,8 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const studentDetail = applicationDetails?.studentDetails;
+
+  // console.log("vvsvsv",student);  
   
   // Initialize formData with the new structure.
   const [formData, setFormData] = useState({
@@ -38,9 +41,10 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
     studentId: student?._id,
     
     studentData: {
-      instagramUrl: "https://instagram.com/updatedprofile",
-      linkedInUrl: "https://linkedin.com/updatedprofile"
+      linkedInUrl: student?.linkedInUrl ?? "",
+      instagramUrl: student?.instagramUrl ?? "",
     },
+    
     studentDetailData: {
       currentAddress: {
         streetAddress: studentDetail?.currentAddress?.streetAddress || "",
@@ -97,9 +101,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
         const centresData = await getCentres();
         const center = centresData.data.find(
           (c: any) => c._id === student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.centerDetail
-        );
-        console.log("logg",center?.name);
-        
+        );        
         setSelectedCentre(center?.name || "--");
       } catch (error) {
         console.error("Error fetching centres:", error);
@@ -124,7 +126,20 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
     value: any,
     subSection?: string
   ) => {
+    if (section === "studentData") {
+      // Update top-level studentData fields like instagramUrl, linkedInUrl
+      setFormData((prev: any) => ({
+        ...prev,
+        studentData: {
+          ...prev.studentData,
+          [field]: value,
+        },
+      }));
+      return;
+    }
+
     if (subSection) {
+      // For nested items, e.g. father/mother
       setFormData((prev: any) => ({
         ...prev,
         studentDetailData: {
@@ -139,6 +154,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
         },
       }));
     } else {
+      // For direct keys in studentDetailData
       setFormData((prev: any) => ({
         ...prev,
         studentDetailData: {
@@ -157,6 +173,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
     try {
       setLoading(true)
       const response = await updateStudentData(formData);
+      onUpdateStatus();
       console.log("Student updated successfully:", response);
       toast({
         title: "Details Updated",
@@ -219,12 +236,12 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
                     ? format(new Date(student.dateOfBirth), "yyyy-MM-dd")
                     : ""
                 }
-                disabled={!isEditing}
+                disabled
               />
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Gender</Label>
-              <Select disabled={!isEditing} defaultValue={student?.gender?.toLowerCase()}>
+              <Select disabled defaultValue={student?.gender?.toLowerCase()}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -237,7 +254,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </div>
             <div className="space-y-2">
               <Label className="pl-3" >Current Status</Label>
-              <Select disabled={!isEditing} value={student?.qualification}>
+              <Select disabled value={student?.qualification}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -290,18 +307,23 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </div>
             <div className="space-y-2">
               <Label className="pl-3">LinkedIn Profile</Label>
-              <Input placeholder="--" defaultValue={student?.linkedInUrl} disabled={!isEditing} />
+              <Input placeholder="--" value={formData.studentData.linkedInUrl}
+                onChange={(e) => handleStudentDetailsChange('studentData', 'linkedInUrl', e.target.value)}
+                disabled={!isEditing} />
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Instagram Profile</Label>
-              <Input placeholder="--" defaultValue={student?.instagramUrl} disabled={!isEditing} />
+              <Input placeholder="--" value={formData.studentData.instagramUrl}
+                onChange={(e) => handleStudentDetailsChange('studentData', 'instagramUrl', e.target.value)}
+                disabled={!isEditing}
+              />
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Current Address */}
-      {/* <Card>
+      <Card>
         <CardHeader>
           <CardTitle>Current Address</CardTitle>
         </CardHeader>
@@ -349,7 +371,7 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             </div>
           </div>
         </CardContent>
-      </Card> */}
+      </Card>
 
       {/* Previous Education */}
       <Card>
@@ -361,13 +383,9 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
             <div className="space-y-2">
               <Label className="pl-3">Highest Level of Education Attained</Label>
               <Select disabled={!isEditing} value={formData.studentDetailData.previousEducation.highestLevelOfEducation}
-              // onChange={(e) =>
-              //   handleStudentDetailsChange(
-              //     "previousEducation",
-              //     "highestLevelOfEducation",
-              //     e.target.value
-              //   )
-              // }
+                onValueChange={(val) =>
+                  handleStudentDetailsChange("previousEducation", "highestLevelOfEducation", val)
+                }              
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -415,9 +433,9 @@ export function PersonalDetailsTab({ student }: PersonalDetailsTabProps) {
               <div className="space-y-2">
                 <Label className="pl-3">Experience Type</Label>
                 <Select disabled={!isEditing} value={formData.studentDetailData.workExperience.experienceType}
-                // onChange={(e) =>
-                //   handleStudentDetailsChange("workExperience", "experienceType", e.target.value)
-                // }
+                  onValueChange={(val) =>
+                    handleStudentDetailsChange("workExperience", "experienceType", val)
+                  }                       
                 >
                   <SelectTrigger>
                     <SelectValue />

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getStudents } from "@/app/api/student";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentsTab } from "../applications/application-dialog/document-tab";
 import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
@@ -37,9 +37,9 @@ interface PaymentRecord {
 interface PaymentsListProps {
   applications: any[];
   onStudentSelect: (id: any) => void;
-  selectedIds: string[];
+  selectedIds: any[];
   onApplicationUpdate: () => void;
-  onSelectedIdsChange: (ids: string[]) => void;
+  onSelectedIdsChange: (ids: any[]) => void;
 }
 
 export function PaymentsList({
@@ -76,15 +76,15 @@ export function PaymentsList({
     if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(applications.map(payment => payment._id));
+      onSelectedIdsChange(applications);
     }
   };
 
-  const toggleSelectPayment = (id: string) => {
-    if (selectedIds.includes(id)) {
-      onSelectedIdsChange(selectedIds.filter(selectedId => selectedId !== id));
+  const toggleSelectStudent = (student: any) => {
+    if (selectedIds.some((s: any) => s._id === student._id)) {
+      onSelectedIdsChange(selectedIds.filter((s: any) => s._id !== student._id));
     } else {
-      onSelectedIdsChange([...selectedIds, id]);
+      onSelectedIdsChange([...selectedIds, student]);
     }
   };
 
@@ -112,8 +112,9 @@ export function PaymentsList({
           <TableRow>
             <TableHead className="w-12">
               <Checkbox
-                checked={selectedIds.length === applications.length}
+                checked={applications.length > 0 && selectedIds.length === applications.length}
                 onCheckedChange={toggleSelectAll}
+                disabled={applications.length === 0}
               />
             </TableHead>
             <TableHead>Student</TableHead>
@@ -207,8 +208,8 @@ export function PaymentsList({
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
-                  checked={selectedIds.includes(application._id)}
-                  onCheckedChange={() => toggleSelectPayment(application._id)}
+                  checked={selectedIds.some( (s: any) => s._id === application?._id)}
+                  onCheckedChange={() => toggleSelectStudent(application)}
                 />
               </TableCell>
               <TableCell className="font-medium">
@@ -255,6 +256,7 @@ export function PaymentsList({
       </Table>
 
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
       <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
@@ -268,7 +270,7 @@ export function PaymentsList({
         </TabsList>
 
         <TabsContent value="personal">
-          <PersonalDetailsTab student={selectedStudentId} />
+          <PersonalDetailsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate}/>
         </TabsContent>
 
         <TabsContent value="payment">

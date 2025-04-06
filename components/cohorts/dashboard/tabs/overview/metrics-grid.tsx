@@ -105,7 +105,6 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       applications.forEach((application) => {
         const scholarship = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
         const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
-        console.log(baseFee,scholarship?.scholarshipPercentage );
         
         if (scholarship && baseFee) {
           totalScholarship += scholarship?.scholarshipPercentage * baseFee * 0.01;

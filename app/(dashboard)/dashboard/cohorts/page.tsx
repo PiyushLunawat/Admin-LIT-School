@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CohortGrid } from "@/components/cohorts/cohort-grid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CreateCohortContent } from "@/components/cohorts/create-cohort-content";
 import { getCohorts } from "@/app/api/cohorts";
 
@@ -97,6 +97,7 @@ export default function CohortsPage() {
       </Tabs>
 
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl">
           <CreateCohortContent
             currentStep={currentStep}

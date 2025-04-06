@@ -15,17 +15,28 @@ import {
   Eye,
   EyeIcon,
   ArrowLeft,
+  LoaderCircle,
+  XIcon,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { AwardScholarship } from "../litmus/litmus-test-dialog/award-scholarship";
 import { Textarea } from "@/components/ui/textarea";
-import { verifyFeeStatus, verifyTokenAmount } from "@/app/api/student";
+import { uploadFeeReceipt, verifyFeeStatus, verifyTokenAmount } from "@/app/api/student";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
 type BadgeVariant = "lemon" | "pending" | "warning" | "secondary" | "success" | "default";
+
+interface UploadState {
+  uploading: boolean;
+  uploadProgress: number;
+  fileName: string;
+}
+
 interface PaymentDetailsProps {
   student: any;
   onClose: () => void;
@@ -33,6 +44,8 @@ interface PaymentDetailsProps {
 }
 
 export function PaymentDetails({ student, onClose, onApplicationUpdate }: PaymentDetailsProps) {
+  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [schOpen, setSchOpen] = useState(false);
@@ -44,6 +57,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
   const [open, setOpen] = useState(false);
   const [vopen, setVopen] = useState(false);
 
+  const [uploadStates, setUploadStates] = useState<{ [key: string]: UploadState }>({});
+  
   const handleView = (url: string) => {
     setImageUrl(url);
     setOpen(true);
@@ -66,6 +81,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
   useEffect(() => {
     setTokenFeeDetails(latestCohort?.tokenFeeDetails)
     setPaymentDetails(latestCohort?.paymentDetails);
+    console.log("Dvd",student);
+    
   }, [student]);
 
   const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
@@ -132,6 +149,153 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           setLoading(false)
         }
       } 
+
+
+      const handleFileChange = async ( e: React.ChangeEvent<HTMLInputElement>, paymentId: string, oneShot: boolean, inst?: number, sem?: number) => {
+          setError(null);
+
+          let key: any;
+
+          if(oneShot) key = "oneshot";
+          else key = `${inst}${sem}`
+      
+          setUploadStates(prev => ({
+            ...prev,
+            [key]: { uploading: true, uploadProgress: 0, fileName: "" }
+          }));
+      
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const fileKey = generateUniqueFileName(file.name);
+          
+          // Update fileName for this document
+          setUploadStates(prev => ({
+            ...prev,
+            [key]: { ...prev[key], fileName: fileKey }
+          }));
+      
+          const CHUNK_SIZE = 100 * 1024 * 1024;
+          e.target.value = "";
+      
+          try {
+            let fileUrl = "";
+            if (file.size <= CHUNK_SIZE) {
+              fileUrl = await uploadDirect(file, fileKey, key);
+              console.log("uploadDirect File URL:", fileUrl);
+            } else {
+              fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, key);
+              console.log("uploadMultipart File URL:", fileUrl);
+            }
+            let payload;
+            if(oneShot) {
+              payload = {
+                studentPaymentId: paymentId,
+                oneShotPayment: true,
+                receiptUrl: fileUrl,
+              }
+            } else {
+              payload = {
+                studentPaymentId: paymentId,
+                semesterNumber: sem,
+                installmentNumber: inst,
+                receiptUrl: fileUrl,
+              }
+            }
+            console.log("payload", payload);
+          
+            // Call the API function with FormData
+            const response = await uploadFeeReceipt(payload);
+            console.log("Upload response:", response);
+            onApplicationUpdate()
+            setPaymentDetails(response.updatedPayment
+            );
+      
+          } catch (error: any) {
+            console.error("Error uploading file:", error);
+            toast({
+              title: "Document Upload Failed",
+              description: error.message || "Error updating document. Please try again.",
+              variant: "warning",
+            });
+          } finally {
+            setUploadStates(prev => ({
+              ...prev,
+              [key]: { ...prev[key], uploading: false }
+            }));
+            e.target.value = "";
+          }
+        };
+      
+        const uploadDirect = async (file: File, fileKey: string, key: string) => {
+          const { data } = await axios.post(`https://dev.apply.litschool.in/student/generate-presigned-url`, {
+            bucketName: "dev-application-portal",
+            key: fileKey,
+          });
+          const { url } = data;
+          await axios.put(url, file, {
+            headers: { "Content-Type": file.type },
+            onUploadProgress: (evt: any) => {
+              if (!evt.total) return;
+              const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+              setUploadStates(prev => ({
+                ...prev,
+                [key]: { ...prev[key], uploadProgress: Math.min(percentComplete, 100) }
+              }));
+            },
+          });
+          return `${url.split("?")[0]}`;
+        };
+      
+        const uploadMultipart = async (file: File, fileKey: string, chunkSize: number, key: string) => {
+          const uniqueKey = fileKey;
+      
+          const initiateRes = await axios.post(`https://dev.apply.litschool.in/student/initiate-multipart-upload`, {
+            bucketName: "dev-application-portal",
+            key: uniqueKey,
+          });
+          const { uploadId } = initiateRes.data;
+          const totalChunks = Math.ceil(file.size / chunkSize);
+          let totalBytesUploaded = 0;
+          const parts: { ETag: string; PartNumber: number }[] = [];
+          for (let i = 0; i < totalChunks; i++) {
+            const start = i * chunkSize;
+            const end = Math.min(start + chunkSize, file.size);
+            const chunk = file.slice(start, end);
+            const partRes = await axios.post(`https://dev.apply.litschool.in/student/generate-presigned-url-part`, {
+              bucketName: "dev-application-portal",
+              key: uniqueKey,
+              uploadId,
+              partNumber: i + 1,
+            });
+            const { url } = partRes.data;
+            const uploadRes = await axios.put(url, chunk, {
+              headers: { "Content-Type": file.type },
+              onUploadProgress: (evt: any) => {
+                if (!evt.total) return;
+                totalBytesUploaded += evt.loaded;
+                const percent = Math.round((totalBytesUploaded / file.size) * 100);
+                 setUploadStates(prev => ({
+                  ...prev,
+                  [key]: { ...prev[key], uploadProgress: Math.min(percent, 100) }
+                }));
+              },
+            });
+            parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
+          }
+          await axios.post(`https://dev.apply.litschool.in/student/complete-multipart-upload`, {
+            bucketName: "dev-application-portal",
+            key: uniqueKey,
+            uploadId,
+            parts,
+          });
+          return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
+        };
+      
+        const generateUniqueFileName = (originalName: string) => {
+          const timestamp = Date.now();
+          const sanitizedName = originalName.replace(/\s+/g, '-');
+          return `${timestamp}-${sanitizedName}`;
+        };  
 
     ////////////////////////
   let lastStatus = '';
@@ -243,7 +407,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 <p className={`font-medium ${getColor(scholarshipDetails?.scholarshipName)}`}>
                   {scholarshipDetails ? 
                   `${scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}` : 
-                  '--'}
+                  <span className="text-muted-foreground">Not Assigned</span>}
                 </p>
               </div>
               <div>
@@ -321,6 +485,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 </Button>
 
                 <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+                <DialogTitle></DialogTitle>
                   <DialogContent className="max-w-4xl py-4 px-6">
                     <MarkedAsDialog student={student} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
                   </DialogContent>
@@ -437,7 +602,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
             <Card className="p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h5 className="font-medium">One Shot Payement</h5>
+                  <h5 className="font-medium">One Shot Payment</h5>
                 </div>
                 <div className="flex items-center gap-2">
                   {(new Date(paymentDetails?.oneShotPayment?.installmentDate) < new Date() && paymentDetails?.oneShotPayment?.verificationStatus === 'pending' ) ?
@@ -552,11 +717,37 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                           <EyeIcon className="h-4 w-4 mr-2" />
                           Acknowledgement Receipt
                         </Button>
-                      ) : (
-                        <Button variant="outline" size="sm" className="w-full mt-2">
+                      ) : uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploading ?
+                      <div className="flex items-center gap-2">
+                        {uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress === 100 ? (
+                          <LoaderCircle className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Progress className="h-2 w-20" states={[ { value: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, widt: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, color: '#ffffff' }]} />
+                            <span>{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress}%</span>
+                          </>
+                        )}
+                        <Button variant="ghost" size="sm">
+                          <XIcon className="w-4" />
+                        </Button>
+                      </div> : (
+                        <label className="cursor-pointer w-full">
+                        <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${installmentIndex + 1}${semesterDetail.semester}`)?.click()}>
                           <UploadIcon className="h-4 w-4 mr-2" />
                           Upload Receipt
                         </Button>
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id={`file-input-${installmentIndex + 1}${semesterDetail.semester}`}
+                          onChange={(e) => {
+                            handleFileChange(e, paymentDetails?._id, false, installmentIndex + 1, semesterDetail.semester);
+                          }}
+                        />
+                      </label>                      
+                        
                       )}
                     </Card>
                   ))}
@@ -576,6 +767,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           </div>
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>
+          <DialogTitle></DialogTitle>
             <DialogContent className="max-w-5xl">
               <AwardScholarship student={student} />
             </DialogContent>
@@ -601,6 +793,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
         </div>
       </ScrollArea>
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
           {imageUrl ? (
             <img src={imageUrl} alt="Receipt" className="mx-auto h-[50vh] object-contain"/>
@@ -611,6 +804,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
       </Dialog>
 
       <Dialog open={vopen} onOpenChange={setVopen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
           <div className="flex items-center gap-4">
             <div className="space-y-1">

@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { PreviousMessage } from "./communication-dialog/preview-message";
 
@@ -174,6 +174,7 @@ export function CommunicationLog({ cohortId }: CommunicationLogProps) {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl">
           {selectedMessage && (
             <PreviousMessage

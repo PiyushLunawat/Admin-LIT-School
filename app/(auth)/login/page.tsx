@@ -21,7 +21,7 @@ import { login, resendOtp, verifyOtp } from "@/app/api/auth";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
-import { MailIcon } from "lucide-react";
+import { Eye, EyeOff, MailIcon } from "lucide-react";
 import { OTPInput } from "input-otp";
 
 // Validation schema using Zod
@@ -43,11 +43,11 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [timer, setTimer] = useState(59);
-  const [email, setEmail] = useState(""); // Store email for OTP verification
-  const [otp, setOtp] = useState(""); // Store OTP input
-  const [otpToken, setOtpToken] = useState(""); // Store OTP input
+  const [otp, setOtp] = useState(""); 
+  const [otpToken, setOtpToken] = useState(""); 
 
   // Initialize React Hook Form
   const form = useForm<LoginFormValues>({
@@ -75,8 +75,6 @@ export default function LoginPage() {
       const loginData = await login(loginPayload);
       setOtpToken(loginData.otpRequestToken)
       setShowOtp(true);
-      // Cookies.set('admin-token', loginData.token,  { expires: 1 * });
-      // router.push("/dashboard");
     } catch (error: any) {
       console.error("Login error:", error.message);
       setErrorMessage(error.message || "An unexpected error occurred.");
@@ -98,10 +96,9 @@ export default function LoginPage() {
         otpRequestToken: otpToken,
         otp: otp
       }
-      console.log("res",otpPayload);
 
       const res = await verifyOtp(otpPayload);
-      console.log("res",res);
+      // console.log("res",res);
       
       Cookies.set("adminAccessToken", res.accessToken, { expires: 1/12 }); 
       Cookies.set("adminRefreshToken", res.refreshToken, { expires: 7 });
@@ -125,7 +122,7 @@ export default function LoginPage() {
       }
 
       const res = await resendOtp(resendPayload);
-      console.log("res",res);
+      // console.log("res",res);
       setTimer(59);
       
     } catch (error: any) {
@@ -150,16 +147,8 @@ export default function LoginPage() {
   return (
     <div className="w-full">
       <div className="relative">
-        <img
-          src="/assets/images/lit-banner.svg"
-          alt="BANNER"
-          className="w-full h-[200px] sm:h-[336px] object-cover"
-        />
-        <img
-          src="/assets/images/lit-logo.svg"
-          alt="LIT"
-          className="absolute top-7 left-7 w-8 sm:w-14"
-        />
+        <img src="/assets/images/lit-banner.svg" alt="BANNER" className="w-full h-[200px] sm:h-[336px] object-cover" />
+        <img src="/assets/images/lit-logo.svg" alt="LIT" className="absolute top-7 left-7 w-8 sm:w-14" />
       </div>
       <div className="w-full px-6 mt-8 sm:mt-14 flex justify-center items-center">
         <div className="max-w-[840px] mx-auto">
@@ -172,40 +161,40 @@ export default function LoginPage() {
             </div>
           </div>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="flex flex-col gap-2 mt-8"
-            >
-              <FormField
-                name="email"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <Label>Email Address</Label>
-                    <FormControl>
-                      <Input placeholder="johndoe@gmail.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-2 mt-8">
+              <FormField name="email" control={form.control} render={({ field }) => (
+                <FormItem>
+                  <Label>Email Address</Label>
+                  <FormControl>
+                    <Input type="email" placeholder="johndoe@gmail.com" {...field} />
+                  </FormControl>
+                  <FormMessage className="pl-3" />
+                </FormItem>
                 )}
               />
 
-              <FormField
-                name="password"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
+              <FormField name="password" control={form.control} render={({ field }) => (
+                  <FormItem className="relative">
                     <Label>Password</Label>
                     <FormControl>
-                      <Input type="password" placeholder="******" {...field} />
+                      <div className="relative">
+                        <Input type={showPassword ? "text" : "password"} placeholder="******"
+                          {...field} className="pr-10"
+                        />
+                        <Button type="button" variant="ghost" className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                      </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="pl-3" />
                   </FormItem>
                 )}
               />
 
               {errorMessage && (
-                <div className="text-red-500 text-sm">{errorMessage}</div>
+                <div className="text-[#FF503D] text-sm pl-3">{errorMessage}</div>
               )}
 
               <div className="flex justify-center items-center mt-4">
@@ -228,7 +217,7 @@ export default function LoginPage() {
                   An OTP was sent to your email
                 </span>
                 <span className="flex text-center font-light sm:font-normal mx-auto w-fit items-center">
-                  <MailIcon className="w-4 h-4 ml-2 mr-1" /> {email}
+                  <MailIcon className="w-4 h-4 ml-2 mr-1" /> {form.getValues("email")}
                 </span>
               </div>
               <div className="flex mx-auto">

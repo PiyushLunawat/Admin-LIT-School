@@ -8,25 +8,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Form,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormMessage, } from "@/components/ui/form";
 
 import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
 import { checkEmailExists, inviteCollaborators, updateCohort } from "@/app/api/cohorts";
 import { useToast } from "@/hooks/use-toast";
 
-// Roles array (as before)
+// Roles array 
 const roles = [
   // { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
@@ -34,7 +25,7 @@ const roles = [
   { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
 ];
 
-// Zod schema (as before)
+// Zod schema
 const formSchema = z.object({
   collaborators: z.array(
     z.object({
@@ -57,6 +48,8 @@ export function CollaboratorsForm({
   onCohortCreated,
   initialData,
 }: CollaboratorsFormProps) {
+
+  // console.log("A",initialData);
 
   const formatCollaborators = (collaborators: any[] = []) => {
     return collaborators.flatMap(collab =>
@@ -93,6 +86,7 @@ export function CollaboratorsForm({
 
   useEffect(() => {
     if (fields.length === 0) {
+      // console.log("A",fields.length); 
       append({ email: "", role: "", isInvited: false, isAccepted: false });
     }
   }, [fields, append]);
@@ -170,9 +164,11 @@ export function CollaboratorsForm({
       const savedCohort = await updateCohort(initialData._id, {
         collaborators: collaboratorsToUpdate,
       });
+      console.log("A",savedCohort);
+
       onCohortCreated(savedCohort.data);
       form.reset({
-        collaborators: savedCohort.data.collaborators,
+        collaborators: formatCollaborators(savedCohort.data.collaborators),
       });
   } catch (error) {
   console.error("Failed to update cohort:", error);
@@ -197,6 +193,11 @@ export function CollaboratorsForm({
         const createdCohort = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
         });
+        console.log("A",createdCohort);
+
+        form.reset({
+          collaborators: formatCollaborators(createdCohort.data.collaborators),
+        });
         onCohortCreated(createdCohort.data);
         onComplete(); 
       } else {
@@ -220,6 +221,10 @@ export function CollaboratorsForm({
 
         const createdCohort = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
+        });
+        console.log("A",createdCohort);
+        form.reset({
+          collaborators: formatCollaborators(createdCohort.data.collaborators),
         });
         onCohortCreated(createdCohort.data);
 

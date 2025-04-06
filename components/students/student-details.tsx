@@ -72,7 +72,7 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="notes">Internal Notes</TabsTrigger>
-          <TabsTrigger value="trash">Trash</TabsTrigger>
+          <TabsTrigger value="trash">/</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal">

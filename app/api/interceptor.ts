@@ -8,7 +8,6 @@ export const RegisterInterceptor = () => {
   fetchIntercept.register({
     request: function (url, config: RequestInit = {}) {
       if (typeof url !== "string") {
-        // console.error("Invalid URL in interceptor:", url);
         return [url, config];
       }
 
@@ -17,7 +16,8 @@ export const RegisterInterceptor = () => {
         url.includes("/auth/verify-admin-otp") ||
         url.includes("/auth/admin-refresh-token")
       ) {
-        return [url, config]; // Return without adding Authorization header
+        // console.log("No Int.");
+        return [url, config];
       }
 
       const token = Cookies.get("adminAccessToken");
@@ -27,7 +27,6 @@ export const RegisterInterceptor = () => {
         Authorization: `Bearer ${token || ""}`,
         "Content-Type": "application/json",
       };
-
       return [url, config];
     },
 
@@ -36,10 +35,11 @@ export const RegisterInterceptor = () => {
     },
 
     response: function (response) {
+      // console.log("Int Resp", response.status);
       if (response.status === 401) {
-        handleTokenRefresh(response); // Call separate function for async token refresh
+        handleTokenRefresh(response);
       }
-      return response; // Ensure a synchronous return type
+      return response;
     },
 
     responseError: function (error) {
@@ -48,13 +48,11 @@ export const RegisterInterceptor = () => {
   });
 };
 
-/**
- * Handles refreshing the access token asynchronously.
- */
+//Handles refreshing the access token asynchronously.
 const handleTokenRefresh = async (response: Response) => {
   const token = Cookies.get("adminRefreshToken");
   if (!token) {
-    console.log("No refresh token");
+    // console.log("No refresh token");
     clearAuthAndRedirect();
     return;
   }
@@ -63,7 +61,7 @@ const handleTokenRefresh = async (response: Response) => {
     const payload = { refreshToken: token };
     const refreshResponse = await refreshToken(payload);
 
-    console.log("refreshResponse", refreshResponse);
+    // console.log("refreshResponse", refreshResponse);
 
     const { accessToken, newRefreshToken } = await refreshResponse.json();
 
@@ -80,16 +78,15 @@ const handleTokenRefresh = async (response: Response) => {
       },
     });
   } catch (error) {
-    // clearAuthAndRedirect();
+    clearAuthAndRedirect();
     console.log("removing refresh token");
     return Promise.reject(error);
   }
 };
 
-/**
- * Clears authentication tokens and redirects to login.
- */
+// Clears authentication tokens and redirects to login.
 const clearAuthAndRedirect = () => {
+  // console.log("logout int.");
   Cookies.remove("adminAccessToken");
   Cookies.remove("adminRefreshToken");
   // window.location.href = "/login";

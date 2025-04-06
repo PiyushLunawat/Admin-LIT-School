@@ -256,6 +256,20 @@ export async function verifyTokenAmount(
   return await response.json();
 }
 
+export async function uploadFeeReceipt(payload: any) {
+  const response = await fetch(`${process.env.API_URL}/admin/add-receipt`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update fee status");
+  }
+
+  return await response.json();
+}
+
 export async function verifyFeeStatus(payload: any) {
   const response = await fetch(
     `${process.env.API_URL}/admin/verify-sem-fee-installments`,

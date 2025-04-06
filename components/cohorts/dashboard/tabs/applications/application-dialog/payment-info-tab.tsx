@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, CircleCheckBig, Download, Eye, FlagIcon, Mail, MessageSquare, Upload, UploadIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { verifyTokenAmount } from "@/app/api/student";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,14 +53,30 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
     setOpen(true);
   };
 
-  const handleDownload = (url: string) => {
-    const link = document.createElement("a");
-      link.href = url;
-      link.download = "Receipt.pdf"; // Default filename for the download
+  const handleDownload = async (url: string) => {
+    try {
+      // 1. Fetch the file as Blob
+      const response = await fetch(url);
+      const blob = await response.blob();
+  
+      // 2. Create a temporary object URL for that Blob
+      const blobUrl = URL.createObjectURL(blob);
+  
+      // 3. Create a hidden <a> and force download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "Receipt.pdf";  // or "myImage.png"
       document.body.appendChild(link);
       link.click();
+      
+      // Cleanup
       document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed", err);
+    }
   };
+  
 
   async function handleVerify(tokenId: any, comment: string, verificationStatus: string) {
     try {
@@ -77,7 +93,6 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
     }
   }
 
-  const lastCourse = latestCohort?.cousrseEnrolled?.[latestCohort?.cousrseEnrolled.length - 1];
   let lastStatus = '';
   if(tokenFeeDetails?.verificationStatus === 'pending' || tokenFeeDetails?.verificationStatus === undefined
   ){
@@ -305,56 +320,60 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
               }
             </div>
 
-            {lastCourse?.feeSetup?.installmentType === 'one shot payment' ? 
-            <Card className="p-4 space-y-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h5 className="font-medium">One Shot Payement</h5>
-                </div>
-                <div className="flex items-center gap-2">
-                  {(new Date(lastCourse?.oneShotPayment?.installmentDate) < new Date() && lastCourse?.oneShotPayment?.verificationStatus === 'pending' ) ?
-                    <Badge variant={getStatusColor('overdue')}>
-                      overdue
+            {paymentDetails?.paymentPlan === 'one-shot' ? 
+              <Card className="p-4 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h5 className="font-medium">One Shot Payment</h5>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(new Date(paymentDetails?.oneShotPayment?.installmentDate) < new Date() && paymentDetails?.oneShotPayment?.verificationStatus === 'pending' ) ?
+                      <Badge variant={getStatusColor('overdue')}>
+                        overdue
+                      </Badge>
+                    :
+                    <Badge variant={getStatusColor(paymentDetails?.oneShotPayment?.verificationStatus || '')}>
+                      {paymentDetails?.oneShotPayment?.verificationStatus}
                     </Badge>
-                  :
-                  <Badge variant={getStatusColor(lastCourse?.oneShotPayment?.verificationStatus)}>
-                    {lastCourse?.oneShotPayment?.verificationStatus}
-                  </Badge>
-                  }
-                  {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url && 
-                    <Button variant="ghost" size="sm" onClick={() => handleView(lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url)}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
-                  }
+                    }
+                    {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url && 
+                      <Button variant="ghost" size="sm" onClick={() => handleView(paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                    }
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Amount: ₹{formatAmount(lastCourse?.oneShotPayment?.amountPayable)}</p>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4 mr-2" />
-                Due: {new Date(lastCourse?.oneShotPayment?.installmentDate).toLocaleDateString()}
-              </div>
-              {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Paid: {new Date(lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()}
+                <div>
+                  <p className="text-sm ">Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.amountPayable)}</p>
+                  <p className="text-sm text-muted-foreground">Base Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee)}</p>
+                  <p className="text-sm text-muted-foreground">One Shot Discount: ₹{formatAmount(paymentDetails?.oneShotPayment?.OneShotPaymentAmount)}</p>
+                  <p className="text-sm text-muted-foreground">Scholarship Waiver: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee*scholarshipDetails?.scholarshipPercentage*0.01)}</p>
                 </div>
-              )}
-              {lastCourse?.oneShotPayment?.receiptUrls[lastCourse?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
-                <Button variant="outline" size="sm" className="w-full mt-2">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Receipt
-                </Button>
-              ) : 
-                <Button variant="outline" size="sm" className="w-full mt-2">
-                  <UploadIcon className="h-4 w-4 mr-2" />
-                  Upload Receipt
-                </Button>
-              }             
-            </Card> : 
-            <div className="space-y-2">
+                <div className="flex justify-between items-center gap-2">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Due: {new Date(paymentDetails?.oneShotPayment?.installmentDate).toLocaleDateString()}
+                  </div>
+                  {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate && (
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Paid: {new Date(paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+                {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
+                  <Button variant="outline" size="sm" className="w-full mt-2">
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Receipt
+                  </Button>
+                ) : 
+                  <Button variant="outline" size="sm" className="w-full mt-2">
+                    <UploadIcon className="h-4 w-4 mr-2" />
+                    Upload Receipt
+                  </Button>}             
+              </Card> : 
+              <div className="space-y-2">
               {visibleSemesters?.map((semesterObj: any, semesterIndex: number) => (
                 <div key={semesterIndex}>
                   <Badge variant="blue" className="capitalize mb-3">
@@ -476,6 +495,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
         </CardContent>
       </Card> */}
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
           {imageUrl ? (
             <img

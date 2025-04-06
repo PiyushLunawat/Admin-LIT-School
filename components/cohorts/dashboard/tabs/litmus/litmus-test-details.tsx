@@ -33,7 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { ScholarshipDistribution } from "../overview/scholarship-distribution";
 import { ReviewComponent } from "./litmus-test-dialog/review";
@@ -405,29 +405,34 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
       </ScrollArea>
 
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl">
           <ReviewComponent application={application} onApplicationUpdate={onApplicationUpdate} onClose={() => setOpen(false)}/>
         </DialogContent>
       </Dialog>
       <Dialog open={vopen} onOpenChange={setVopen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl">
           <ViewComponent application={application} onApplicationUpdate={onApplicationUpdate}/>
         </DialogContent>
       </Dialog>
 
       <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-2xl">
           <SchedulePresentation student={application} interviewr={['evaluator']}/>
         </DialogContent>
       </Dialog>
 
       <Dialog open={schOpen} onOpenChange={setSchOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-5xl">
           <AwardScholarship student={application} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-4 px-6">
           <MarkedAsDialog student={application} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
         </DialogContent>

@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentApplicationHeader } from "./application-dialog/dialog-header";
@@ -28,7 +28,7 @@ interface ApplicationsListProps {
   applications: any;
   onApplicationSelect: (id: any) => void;
   selectedIds: string[];
-  onSelectedIdsChange: (ids: string[]) => void;
+  onSelectedIdsChange: (ids: any[]) => void;
   onApplicationUpdate: () => void;
 }
 
@@ -87,7 +87,7 @@ export function ApplicationsList({
         new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime
       );
   
-      console.log("timee", meetingEnd < currentTime, meetingEnd, currentTime);
+      // console.log("timee", meetingEnd < currentTime, meetingEnd, currentTime);
       if (meetingEnd < currentTime) {
         status = "interview concluded";
       }
@@ -100,15 +100,15 @@ export function ApplicationsList({
     if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(applications.map((app: any) => app._id));
+      onSelectedIdsChange(applications);
     }
   };
 
-  const toggleSelectApplication = (id: string) => {
-    if (selectedIds.includes(id)) {
-      onSelectedIdsChange(selectedIds.filter((selectedId) => selectedId !== id));
+  const toggleSelectStudent = (student: any) => {
+    if (selectedIds.some((s: any) => s._id === student._id)) {
+      onSelectedIdsChange(selectedIds.filter((s: any) => s._id !== student._id));
     } else {
-      onSelectedIdsChange([...selectedIds, id]);
+      onSelectedIdsChange([...selectedIds, student]);
     }
   };
 
@@ -143,7 +143,7 @@ export function ApplicationsList({
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox
-                  checked={selectedIds.length === applications.length}
+                  checked={applications.length > 0 && selectedIds.length === applications.length}
                   onCheckedChange={toggleSelectAll}
                 />
               </TableHead>
@@ -171,8 +171,8 @@ export function ApplicationsList({
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Checkbox
-                    checked={selectedIds.includes(application._id)}
-                    onCheckedChange={() => toggleSelectApplication(application._id)}
+                    checked={selectedIds.some( (s: any) => s._id === application?._id)}
+                    onCheckedChange={() => toggleSelectStudent(application)}
                   />
                 </TableCell>
                 <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
@@ -234,6 +234,7 @@ export function ApplicationsList({
 
         {/* Dialog to display "Hi" message */}
         <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTitle></DialogTitle>
           <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
             {selectedStudent && (
               <StudentApplicationHeader student={selectedStudent} onUpdateStatus={() => onApplicationUpdate()}/>
@@ -247,7 +248,7 @@ export function ApplicationsList({
                 </TabsList>
 
                 <TabsContent value="personal">
-                  <PersonalDetailsTab student={selectedStudent} />
+                  <PersonalDetailsTab student={selectedStudent} onUpdateStatus={onApplicationUpdate}/>
                 </TabsContent>
 
                 <TabsContent value="payment">

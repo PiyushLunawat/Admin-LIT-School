@@ -34,7 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Dialog, DialogTrigger, DialogContent,  } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle,  } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import SubmissionView from "./application-dialog/submission-view";
 import ApplicationFeedback from "./application-dialog/application-feedback";
@@ -408,6 +408,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
 
        {/* Application Feedback Dialog */}
        <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
+       <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-4 px-6">
           <ApplicationFeedback
             application={application}
@@ -421,6 +422,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
       </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 pb-6 px-6 ">  
           <div className="flex justify-between items-center pb-4 border-b border-gray-700">
             <div>
@@ -437,6 +439,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
       </Dialog>
 
       <Dialog open={interviewFeedbackOpen} onOpenChange={setInterviewFeedbackOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-4 px-6">
           <InterviewFeedback
             name={application?.firstName}
@@ -452,12 +455,14 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
       </Dialog>
 
       <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-2xl">
           <SchedulePresentation student={application} interviewr={['interviewer']}/>
         </DialogContent>
       </Dialog>
 
       <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl">
           <SendMessage
             type={selectedMessage}
@@ -467,6 +472,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
       </Dialog>
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-4 px-6">
           <MarkedAsDialog student={application} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
         </DialogContent>

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, ExternalLink } from "lucide-react";
-import { useState } from "react";import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ApplicationFormBuilder } from "../steps/application-form-builder";
 
 
@@ -48,6 +48,7 @@ export function ApplicationFormPreview() {
         </div>
       </CardContent>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <ApplicationFormBuilder onNext={() => console.log("Next clicked")} /> */}
         </DialogContent>

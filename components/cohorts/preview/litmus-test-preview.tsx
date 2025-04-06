@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Edit, ExternalLink } from "lucide-react"; 
 import { LitmusTestForm } from "../steps/litmus-test-form";
 
@@ -63,6 +63,7 @@ export function LitmusTestPreview() {
 
       {/* Dialog for Litmus Test Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <LitmusTestForm onNext={() => console.log("Navigating to fee-structure")} /> */}
         </DialogContent>

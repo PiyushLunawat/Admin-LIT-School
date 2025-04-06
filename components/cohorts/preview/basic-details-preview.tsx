@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Edit } from "lucide-react"; 
 import { BasicDetailsForm } from "../steps/basic-details-form";
 
@@ -65,6 +65,7 @@ export function BasicDetailsPreview() {
 
       {/* Dialog for Edit Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <BasicDetailsForm onNext={() => console.log("Next clicked")} initialData={details} /> */}
         </DialogContent>

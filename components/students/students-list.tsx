@@ -21,14 +21,14 @@ import { Eye, Mail, UserMinus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getStudents } from "@/app/api/student";
 import { SendMessage } from "../cohorts/dashboard/tabs/applications/application-dialog/send-message";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { MarkedAsDialog } from "./sections/drop-dialog";
 
 type BadgeVariant = "pending" | "destructive" | "warning" | "secondary" | "success" | "onhold" | "default";
 
 interface StudentsListProps {
-  selectedIds: string[];
-  onSelectedIdsChange: (ids: string[]) => void;
+  selectedIds: any[];
+  onSelectedIdsChange: (ids: any[]) => void;
   applications: any;
   onApplicationUpdate: () => void;
 }
@@ -90,15 +90,15 @@ export function StudentsList({
     if (selectedIds.length === applications.length) {
       onSelectedIdsChange([]);
     } else {
-      onSelectedIdsChange(applications.map((s: any) => s.id));
+      onSelectedIdsChange(applications);
     }
   };
 
-  const toggleSelectStudent = (id: string) => {
-    if (selectedIds.includes(id)) {
-      onSelectedIdsChange(selectedIds.filter((sid) => sid !== id));
+  const toggleSelectStudent = (student: any) => {
+    if (selectedIds.some((s: any) => s._id === student._id)) {
+      onSelectedIdsChange(selectedIds.filter((s: any) => s._id !== student._id));
     } else {
-      onSelectedIdsChange([...selectedIds, id]);
+      onSelectedIdsChange([...selectedIds, student]);
     }
   };
 
@@ -119,12 +119,8 @@ export function StudentsList({
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">
-                {/* Select All checkbox */}
                 <Checkbox
-                  checked={
-                    applications.length > 0 &&
-                    selectedIds.length === applications.length
-                  }
+                  checked={applications.length > 0 && selectedIds.length === applications.length}
                   onCheckedChange={toggleSelectAll}
                   disabled={applications.length === 0}
                 />
@@ -174,8 +170,8 @@ export function StudentsList({
                 <TableRow key={student?._id}>
                   <TableCell>
                     <Checkbox
-                      checked={selectedIds.includes(student?._id)}
-                      onCheckedChange={() => toggleSelectStudent(student?._id)}
+                      checked={selectedIds.some( (s: any) => s._id === student?._id)}
+                      onCheckedChange={() => toggleSelectStudent(student)}
                     />
                   </TableCell>
                   <TableCell>
@@ -239,13 +235,18 @@ export function StudentsList({
                       {/* <Button variant="ghost" size="icon" onClick={() => handleSendMessage('email', student?.email)}>
                         <Mail className="h-4 w-4" />
                       </Button> */}
-                      <Button variant="ghost" size="icon" className="justify-start text-destructive" onClick={()=>handleDrop(student)} disabled={latestCohort?.status === 'dropped'}>
-                        <UserMinus className="h-4 w-4 mr-2" />
-                      </Button>
-                      <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+                      <Dialog >
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="justify-start text-destructive" disabled={latestCohort?.status === 'dropped'}>
+                            <UserMinus className="h-4 w-4 mr-2" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogTitle></DialogTitle>
                         <DialogContent className="max-w-4xl py-4 px-6">
-                          <MarkedAsDialog student={selectedStudent} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
+                          <MarkedAsDialog student={student} onUpdateStatus={() => onApplicationUpdate()}
+                           onClose={() => {}} />
                         </DialogContent>
+                        <DialogClose asChild />
                       </Dialog>
                     </div>
                   </TableCell>
@@ -256,6 +257,7 @@ export function StudentsList({
         </Table>
       </div>
       <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl">
           <SendMessage
             type={selectedMessage}

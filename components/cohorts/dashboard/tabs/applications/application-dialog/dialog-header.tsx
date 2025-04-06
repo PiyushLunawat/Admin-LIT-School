@@ -7,7 +7,7 @@ import { UserMinus, Calendar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
 
 type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
@@ -157,11 +157,14 @@ export function StudentApplicationHeader({ student, onUpdateStatus }: StudentHea
         </div>
 
         <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+        <DialogTitle></DialogTitle>
           <DialogContent className="max-w-2xl">
             <SchedulePresentation student={student} interviewr={['interviewer', 'evaluator']}/>
           </DialogContent>
         </Dialog>
+        
         <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+        <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-4 px-6">
           <MarkedAsDialog student={student} onUpdateStatus={() => onUpdateStatus()} onClose={() => setMarkedAsDialogOpen(false)}/>
         </DialogContent>

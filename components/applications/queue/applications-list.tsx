@@ -15,7 +15,7 @@ import { Eye, CheckCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
 import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
 import { DocumentsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
@@ -187,6 +187,7 @@ export function ApplicationsList({
         </TableBody>
       </Table>
       <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
@@ -199,7 +200,7 @@ export function ApplicationsList({
               </TabsList>
 
               <TabsContent value="personal">
-                <PersonalDetailsTab student={selectedStudentId} />
+                <PersonalDetailsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate}/>
               </TabsContent>
              {/* 
               <TabsContent value="documents">
