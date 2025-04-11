@@ -79,8 +79,10 @@ export async function resendOtp(resendPayload: { otpRequestToken: string }) {
   }
 }
 
-export async function refreshToken(refreshPayload: { refreshToken: string }) {
+export async function adminRefreshToken(refreshPayload: any) {
   try {
+    console.log("refffff", JSON.stringify(refreshPayload));
+
     const response = await fetch(
       `${process.env.API_URL}/auth/admin-refresh-token`,
       {
@@ -92,17 +94,15 @@ export async function refreshToken(refreshPayload: { refreshToken: string }) {
 
     // If the server returns 4xx or 5xx, handle that
     if (!response.ok) {
-      // Attempt to parse the error JSON
       const errorData = await response.json();
-      throw new Error(errorData.message || `Error: ${response.status}`);
+      throw new Error(
+        errorData.message || `Request failed with status ${response.status}`
+      );
     }
 
-    // Now parse and return the JSON (the actual data)
-    const data = await response.json();
-    console.log("Refresh token response:", data);
-    return data;
+    return await response.json();
   } catch (error) {
-    console.error("Error in refreshToken:", error);
+    console.error("Error Refresh Token", error);
     throw error;
   }
 }

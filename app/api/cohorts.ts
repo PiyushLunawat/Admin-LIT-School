@@ -8,7 +8,10 @@ export async function createCohort(data: any) {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    throw new Error("Failed to create cohort");
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to create cohort ${response.status}`
+    );
   }
   return response.json();
 }
@@ -17,7 +20,10 @@ export async function createCohort(data: any) {
 export async function getCohorts() {
   const response = await fetch(`${process.env.API_URL}/admin/cohort`);
   if (!response.ok) {
-    throw new Error("Failed to fetch cohorts");
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to fetch cohort ${response.status}`
+    );
   }
   return response.json();
 }
@@ -28,7 +34,10 @@ export async function deleteCohort(id: string) {
     method: "DELETE",
   });
   if (!response.ok) {
-    throw new Error("Failed to delete cohort");
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to delete cohort ${response.status}`
+    );
   }
   return response.json();
 }
@@ -41,7 +50,10 @@ export async function updateCohort(id: string, data: any) {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    throw new Error("Failed to update cohort");
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to update cohort ${response.status}`
+    );
   }
   return response.json();
 }
@@ -57,7 +69,10 @@ export async function updateCohortStatus(id: string, status: string) {
     }
   );
   if (!response.ok) {
-    throw new Error("Failed to update cohort status");
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to update cohort status ${response.status}`
+    );
   }
   return response.json();
 }
@@ -65,7 +80,40 @@ export async function updateCohortStatus(id: string, status: string) {
 export async function getCohortById(id: string) {
   const response = await fetch(`${process.env.API_URL}/admin/cohort/${id}`);
   if (!response.ok) {
-    throw new Error("Failed to fetch cohort details");
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to fetch cohort details ${response.status}`
+    );
+  }
+  return response.json();
+}
+
+export async function editCollaborator(data: any) {
+  const response = await fetch(`${process.env.API_URL}/admin/collaborator`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to edit collaborators ${response.status}`
+    );
+  }
+  return response.json();
+}
+
+export async function deleteCollaborator(data: any) {
+  const response = await fetch(`${process.env.API_URL}/admin/collaborator`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to delete cohort ${response.status}`
+    );
   }
   return response.json();
 }
@@ -80,7 +128,10 @@ export async function inviteCollaborators(id: string) {
     }
   );
   if (!response.ok) {
-    throw new Error("Failed to invite collaborators to cohort");
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || `Failed to invite cohort ${response.status}`
+    );
   }
   return response.json();
 }
@@ -98,7 +149,6 @@ export async function checkEmailExists(email: string) {
     return data;
   } catch (error) {
     console.error("Error checking user existence:", error);
-    // Return a default fallback
     return { success: false, message: error };
   }
 }

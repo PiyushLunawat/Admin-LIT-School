@@ -29,6 +29,7 @@ export function LitmusTestFilters({
   sortBy,
   onSortByChange,
 }: LitmusTestFiltersProps) {
+
   const handleClearFilters = useCallback(() => {
     onSearchTermChange("");
     onSelectedStatusChange("all-status");
@@ -60,9 +61,9 @@ export function LitmusTestFilters({
           <SelectContent>
             <SelectItem value="all-status">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="under review">Under Review</SelectItem>
+            <SelectItem value="submitted">Submitted Task</SelectItem>
+            <SelectItem value="interview scheduled">Presentation Scheduled</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="presentation scheduled">Presentation Scheduled</SelectItem>
             <SelectItem value="dropped">Dropped</SelectItem>
           </SelectContent>
         </Select>
@@ -82,9 +83,11 @@ export function LitmusTestFilters({
           </SelectContent>
         </Select>
 
-        <Button variant="ghost" size="icon" onClick={handleClearFilters}>
-          <X className="h-4 w-4" />
-        </Button>
+        {!(searchTerm === "" && selectedStatus === "all-status" && sortBy === "newest") &&
+          <Button variant="ghost" size="icon" onClick={handleClearFilters}>
+            <X className="h-4 w-4" />
+          </Button>
+        }
       </div>
     </div>
   );

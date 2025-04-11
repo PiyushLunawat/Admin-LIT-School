@@ -73,7 +73,9 @@ export default function LoginPage() {
         password: data.password
       }
       const loginData = await login(loginPayload);
-      setOtpToken(loginData.otpRequestToken)
+      Cookies.set("adminOtpRequestToken", loginData.otpRequestToken, { expires: 1/144 }); 
+
+      // setOtpToken(loginData.otpRequestToken)
       setShowOtp(true);
     } catch (error: any) {
       console.error("Login error:", error.message);
@@ -92,17 +94,20 @@ export default function LoginPage() {
   const handleOtpSubmit = async () => {
     setLoading(true);
     try {
+      const x = Cookies.get("adminOtpRequestToken");
+      if(x){
       const otpPayload = {
-        otpRequestToken: otpToken,
+        otpRequestToken: x,
         otp: otp
       }
 
       const res = await verifyOtp(otpPayload);
-      // console.log("res",res);
+      console.log("res",res);
       
       Cookies.set("adminAccessToken", res.accessToken, { expires: 1/12 }); 
       Cookies.set("adminRefreshToken", res.refreshToken, { expires: 7 });
       router.push("/dashboard"); // Redirect to dashboard after verification
+    }
     } catch (error: any) {
       toast({
         title: "OTP Verification Failed",
@@ -117,14 +122,16 @@ export default function LoginPage() {
   const handleResendSubmit = async () => {
     setLoading(true);
     try {
+      const x = Cookies.get("adminOtpRequestToken");
+      if(x){
       const resendPayload = {
-        otpRequestToken: otpToken
+        otpRequestToken: x
       }
 
       const res = await resendOtp(resendPayload);
       // console.log("res",res);
       setTimer(59);
-      
+    }
     } catch (error: any) {
       toast({
         title: "Failed to resend OTP",

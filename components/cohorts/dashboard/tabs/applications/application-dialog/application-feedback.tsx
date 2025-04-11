@@ -125,7 +125,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   };
   
   const canUpdate = (): boolean => {
-    if (status === "under review") return true;
+    if (status === "under review") return false;
 
     if (status === "on hold") {
       // Make sure there's something beyond just "• " in reasonItemValue
@@ -300,7 +300,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
               </div>
 
               <div className="space-y-1">
-                <h4 className="font-medium">Resources</h4>
+                <h4 className="font-semibold pl-3">Resources</h4>
                 <div className="space-y-2">
                   <div className='w-full space-y-2'>
                     {task?.resources?.resourceFiles.map((file: any, index: number) => (
@@ -311,7 +311,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                         </div>
                         <Button variant="ghost" size="icon" type='button' onClick={() => window.open(file, "_blank")}
                           className="text-white rounded-xl">
-                          <Download className="w-4 h-4" />
+                          <ArrowUpRight className="w-4 h-4" />
                         </Button>
                       </div>
                     ))}

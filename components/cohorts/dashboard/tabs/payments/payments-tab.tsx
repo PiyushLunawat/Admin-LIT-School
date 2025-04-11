@@ -167,10 +167,13 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
       "Address",
       "Fathers' Name",
       "Father's Contact",
+      "Father's Email",
       "Mother's Name",
       "Mother's Contact",
+      "Mother's Email",
       "Emergency Contact Name",
       "Emergency Contact Number",
+      "Emergency Contact Email",
     ];
   
     // Map each selected student to a CSV row.
@@ -183,10 +186,13 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
       const address = `${studentDetails?.currentAddress?.streetAddress || ""} ${studentDetails?.currentAddress?.city || ""} ${studentDetails?.currentAddress?.state || ""} ${studentDetails?.currentAddress?.postalCode || ""}`.trim();
       const fatherName = `${studentDetails?.parentInformation?.father?.firstName || ""} ${studentDetails?.parentInformation?.father?.lastName || ""}`.trim();
       const fatherContact = studentDetails?.parentInformation?.father?.contactNumber || "";
+      const fatherEmail = studentDetails?.parentInformation?.father?.email || "";
       const motherName = `${studentDetails?.parentInformation?.mother?.firstName || ""} ${studentDetails?.parentInformation?.mother?.lastName || ""}`.trim();
       const motherContact = studentDetails?.parentInformation?.mother?.contactNumber || "";
+      const motherEmail = studentDetails?.parentInformation?.mother?.email || "";
       const emergencyContactName = `${studentDetails?.emergencyContact?.firstName || ""} ${studentDetails?.emergencyContact?.lastName || ""}`.trim();
       const emergencyContactNumber = studentDetails?.emergencyContact?.contactNumber || "";
+      const emergencyContactEmail = studentDetails?.emergencyContact?.email || "";
       return [
         escapeCSV(studentName),
         escapeCSV(email),
@@ -194,10 +200,13 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         escapeCSV(address),
         escapeCSV(fatherName),
         escapeCSV(fatherContact),
+        escapeCSV(fatherEmail),
         escapeCSV(motherName),
         escapeCSV(motherContact),
+        escapeCSV(motherEmail),
         escapeCSV(emergencyContactName),
         escapeCSV(emergencyContactNumber),
+        escapeCSV(emergencyContactEmail),
       ].join(",");
     });
   

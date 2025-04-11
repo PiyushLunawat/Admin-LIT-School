@@ -77,9 +77,12 @@ export function ApplicationFilters({
             <SelectItem value="name-desc">Name Z-A</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="ghost" size="icon" onClick={handleClearFilters}>
-          <X className="h-4 w-4" />
-        </Button>
+        
+        {!(searchTerm === "" && selectedStatus === "all-status" && sortBy === "newest") &&
+          <Button variant="ghost" size="icon" onClick={handleClearFilters}>
+            <X className="h-4 w-4" />
+          </Button>
+        }
       </div>
     </div>
   );

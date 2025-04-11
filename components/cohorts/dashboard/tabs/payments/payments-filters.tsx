@@ -108,9 +108,11 @@ export function PaymentsFilters({
         </Select>
 
         {/* Reset Button */}
-        <Button variant="ghost" size="icon" onClick={handleReset}>
-          <X className="h-4 w-4" />
-        </Button>
+        {!(searchQuery === "" && selectedPaymentStatus === "all" && selectedPaymentPlan === "all" && selectedScholarship === "all") &&
+          <Button variant="ghost" size="icon" onClick={handleReset}>
+            <X className="h-4 w-4" />
+          </Button>
+        }
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { useEffect, useState } from "react";
@@ -220,7 +221,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           } finally {
             setUploadStates(prev => ({
               ...prev,
-              [key]: { ...prev[key], uploading: false }
+              [key]: { ...prev[key], uploading: false, fileName: "" }
             }));
             e.target.value = "";
           }
@@ -239,7 +240,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
               const percentComplete = Math.round((evt.loaded / evt.total) * 100);
               setUploadStates(prev => ({
                 ...prev,
-                [key]: { ...prev[key], uploadProgress: Math.min(percentComplete, 100) }
+                [key]: { ...prev[key], uploadProgress: Math.min(percentComplete, 100)}
               }));
             },
           });
@@ -276,7 +277,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 const percent = Math.round((totalBytesUploaded / file.size) * 100);
                  setUploadStates(prev => ({
                   ...prev,
-                  [key]: { ...prev[key], uploadProgress: Math.min(percent, 100) }
+                  [key]: { ...prev[key], uploadProgress: Math.min(percent, 100)}
                 }));
               },
             });
@@ -300,9 +301,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
     ////////////////////////
   let lastStatus = '';
 
-  const visibleSemesters = showAllSemesters
-  ? paymentDetails?.installments
-  : paymentDetails?.installments?.slice(0, 1); 
+  const visibleSemesters = paymentDetails?.installments
+  // ?.slice(0, 1); 
 
 
   const colorClasses = ['text-emerald-600', 'text-[#3698FB]', 'text-[#FA69E5]', 'text-orange-600'];
@@ -645,15 +645,51 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
                 </Button>
-              ) : 
-                <Button variant="outline" size="sm" className="w-full mt-2">
+              ) : uploadStates[`oneshot`]?.uploading ?
+                <div className="flex justify-between items-center gap-4">
+                  {/* <div className="flex flex-1 truncate">{uploadStates[`oneshot`]?.fileName}</div> */}
+                  <div className="flex items-center gap-2">
+                    {uploadStates[`oneshot`]?.uploadProgress === 100 ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Progress className="h-2 w-20" states={[ { value: uploadStates[`oneshot`]?.uploadProgress, widt: uploadStates[`oneshot`]?.uploadProgress, color: '#ffffff' }]} />
+                        <span>{uploadStates[`oneshot`]?.uploadProgress}%</span>
+                      </>
+                    )}
+                    <Button variant="ghost" size="sm">
+                      <XIcon className="w-4" />
+                    </Button>
+                  </div>
+                </div> :
+                <label className="cursor-pointer w-full">
+                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-oneshot`)?.click()}>
                   <UploadIcon className="h-4 w-4 mr-2" />
                   Upload Receipt
-                </Button>}             
+                </Button>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id={`file-input-oneshot`}
+                  onChange={(e) => {
+                    handleFileChange(e, paymentDetails?._id, true);
+                  }}
+                />
+              </label>     
+            }             
             </Card> : 
             <div className="space-y-2">
+              <Tabs defaultValue={'1'} className="space-y-4">
               {visibleSemesters?.map( (semesterDetail: any, semesterIndex: number) => (
-                <div key={semesterIndex} className="space-y-2">
+                <TabsList variant='ghost'>
+                  <TabsTrigger key={`${semesterDetail.semester}`} variant="xs" value={`${semesterDetail.semester}`}>Sem {semesterDetail.semester}</TabsTrigger>
+                </TabsList>
+              ))}
+              {visibleSemesters?.map( (semesterDetail: any, semesterIndex: number) => (
+                <TabsContent value={`${semesterDetail.semester}`}>
+                  <div key={semesterIndex} className="space-y-2">
                   {semesterDetail?.installments?.map((instalment: any, installmentIndex: number) => (
                     <Card key={installmentIndex} className="p-4 space-y-2">
                       <div className="flex justify-between items-center">
@@ -672,9 +708,6 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                                 {instalment.verificationStatus}
                               </Badge>
                           )}
-                          <div className="hidden">
-                            {lastStatus = instalment.verificationStatus}
-                          </div>
                           {instalment.verificationStatus === 'paid' && 
                             <Button variant="ghost" size="sm" onClick={() => handleView(instalment.receiptUrls?.[instalment.receiptUrls.length - 1]?.url)}>
                               <Eye className="h-4 w-4 mr-2" />
@@ -683,7 +716,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm ">
+                        <p className="text-sm">
                           Amount Payable: ₹{formatAmount(instalment.amountPayable)}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -718,50 +751,61 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                           Acknowledgement Receipt
                         </Button>
                       ) : uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploading ?
-                      <div className="flex items-center gap-2">
-                        {uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress === 100 ? (
-                          <LoaderCircle className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Progress className="h-2 w-20" states={[ { value: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, widt: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, color: '#ffffff' }]} />
-                            <span>{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress}%</span>
-                          </>
-                        )}
-                        <Button variant="ghost" size="sm">
-                          <XIcon className="w-4" />
-                        </Button>
+                      <div className="flex flex-1 justify-between items-center gap-4 truncate">
+                        {/* <div className="flex flex-1 truncate">{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.fileName}</div> */}
+                        <div className="flex items-center gap-2">
+                          {uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress === 100 ? (
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Progress className="h-2 w-20" states={[ { value: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, widt: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, color: '#ffffff' }]} />
+                              <span>{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress}%</span>
+                            </>
+                          )}
+                          <Button variant="ghost" size="sm">
+                            <XIcon className="w-4" />
+                          </Button>
+                        </div>
                       </div> : (
+                      lastStatus !== 'pending' &&
                         <label className="cursor-pointer w-full">
-                        <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${installmentIndex + 1}${semesterDetail.semester}`)?.click()}>
-                          <UploadIcon className="h-4 w-4 mr-2" />
-                          Upload Receipt
-                        </Button>
+                          <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${installmentIndex + 1}${semesterDetail.semester}`)?.click()}>
+                            <UploadIcon className="h-4 w-4 mr-2" />
+                            Upload Receipt
+                          </Button>
 
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          id={`file-input-${installmentIndex + 1}${semesterDetail.semester}`}
-                          onChange={(e) => {
-                            handleFileChange(e, paymentDetails?._id, false, installmentIndex + 1, semesterDetail.semester);
-                          }}
-                        />
-                      </label>                      
-                        
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            id={`file-input-${installmentIndex + 1}${semesterDetail.semester}`}
+                            onChange={(e) => {
+                              handleFileChange(e, paymentDetails?._id, false, installmentIndex + 1, semesterDetail.semester);
+                            }}
+                          />
+                        </label>
                       )}
+                      <div className="hidden">
+                        {lastStatus = instalment.verificationStatus}
+                      </div>
                     </Card>
                   ))}
                 </div>
+                </TabsContent>
+              ))}
+                </Tabs>
+              {/* {visibleSemesters?.map( (semesterDetail: any, semesterIndex: number) => (
+                
               )
-            )}
-              {paymentDetails?.paymentPlan === 'instalments' && (
+            )} */}
+              {/* {paymentDetails?.paymentPlan === 'instalments' && (
                 <Button
                   variant="ghost" className="w-full underline"
                   onClick={() => setShowAllSemesters(!showAllSemesters)}
                 >
                   {showAllSemesters ? "View Less" : "View More"}
                 </Button>
-              )}
+              )} */}
             </div>
             }
           </div>

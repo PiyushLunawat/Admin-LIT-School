@@ -33,6 +33,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [uploadStates, setUploadStates] = useState<{ [docId: string]: UploadState }>({});
   const [docs, setDocs] = useState<any[]>([]);
   
@@ -84,10 +85,11 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
       console.log("Updated document status:", payLoad);
       const response = await updateDocumentStatus(payLoad);
       console.log("Updated document status:", response);
+      // setDocs(response.data.documents)
       toast({
         title: `Document ${status}`,
         description: response.message || `Document ${status} successfully`,
-        variant: "warning",
+        variant: "success",
       });
       onUpdateStatus();
     } catch (error: any) {
@@ -103,6 +105,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   };
 
   const handleFileDownload = async (url: string, docName: string) => {
+  setDownloading(true);
   try {
     // 1. Fetch the file as Blob
     const response = await fetch(url);
@@ -123,6 +126,8 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
     URL.revokeObjectURL(blobUrl);
   } catch (err) {
     console.error("Download failed", err);
+  } finally {
+    setDownloading(false)
   }
 };
 
@@ -327,7 +332,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                       <Button variant="ghost" size="sm" onClick={() => { setOpen(true); setViewDoc(docDetails?.url)}}>
                         <Eye className="h-4 w-4 mr-2" /> View
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleFileDownload(docDetails?.url, doc.name)}>
+                      <Button variant="ghost" size="sm" onClick={() => handleFileDownload(docDetails?.url, doc.name)} disabled={downloading}>
                         <Download className="h-4 w-4 mr-2" />
                         Download
                       </Button>
@@ -395,7 +400,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                       <Eye className="h-4 w-4 mr-2" />
                       View
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleFileDownload(doc?.url, doc?.name)}>
+                    <Button variant="ghost" size="sm" onClick={() => handleFileDownload(doc?.url, doc?.name)} disabled={downloading}>
                       <Download className="h-4 w-4 mr-2" />
                       Download
                     </Button>

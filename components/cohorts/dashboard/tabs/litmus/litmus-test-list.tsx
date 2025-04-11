@@ -131,6 +131,7 @@ export function LitmusTestList({
               key={application._id}
               className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
               onClick={() => {
+                console.log("student -",application)
                 onSubmissionSelect(application)
                 setSelectedRowId(application._id);
               }}

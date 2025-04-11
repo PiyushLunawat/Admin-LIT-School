@@ -26,6 +26,7 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   onClose,
   onUpdateStatus,
 }) => {
+  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string>(initialStatus || "concluded");
   const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[] }>({});
   const [reason, setReason] = useState<string[]>([]);
@@ -69,10 +70,11 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   };
 
   const canUpdate = (): boolean => {
-    return reason.length > 0; // Only allow update if there's valid feedback
+    return (reason.length > 0 && ['not qualified', 'waitlist', 'selected'].includes(status)); 
   };
 
   async function handleInterviewUpdate(newStatus: string) {
+    setLoading(true);
     try {
       const validReasons = reason
       .map((line) => line.trim().replace(/^•\s*/, "")) // Remove bullets and trim spaces
@@ -97,6 +99,8 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
       onClose();
     } catch (error) {
       console.error("Failed to update application status or feedback:", error);
+    } finally {
+      setLoading(false);
     }
   }
   
@@ -149,7 +153,7 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
         <Button
           className="w-full mt-4"
           onClick={() => handleInterviewUpdate(status)}
-          disabled={!canUpdate()}
+          disabled={!canUpdate() || loading}
         >
           Update Interview Status
         </Button>

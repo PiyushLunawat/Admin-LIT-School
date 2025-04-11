@@ -34,7 +34,7 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
           try {
             const response = await getStudents();
             const mappedStudents = response.data.filter((student: any) => (
-              ['reviewing', 'enrolled', 'dropped', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
+              ['reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
               student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?._id == cohortId
             ));
                         
@@ -95,7 +95,12 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
         // b) Status filter
         if (selectedStatus !== "all-status") {
           filtered = filtered?.filter((app: any) => {
-            const status = app?.appliedCohorts[app.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
+            let status;
+            if(selectedStatus === 'dropped') {
+            status = app?.appliedCohorts[app.appliedCohorts.length - 1]?.status?.toLowerCase();
+            } else{
+            status = app?.appliedCohorts[app.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() || "pending";
+            }
             return status === selectedStatus;
           });
         }
@@ -105,10 +110,10 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
           case "newest":
             filtered.sort((a: any, b: any) => {
               const dateA = new Date(
-                a?.appliedCohorts[a.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+                a?.appliedCohorts[a.appliedCohorts.length - 1]?.litmusTestDetails?.updatedAt
               ).getTime();
               const dateB = new Date(
-                b?.appliedCohorts[b.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+                b?.appliedCohorts[b.appliedCohorts.length - 1]?.litmusTestDetails?.updatedAt
               ).getTime();
               return dateB - dateA; // newest first
             });
@@ -117,10 +122,10 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
           case "oldest":
             filtered.sort((a: any, b: any) => {
               const dateA = new Date(
-                a?.appliedCohorts[a.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+                a?.appliedCohorts[a.appliedCohorts.length - 1]?.litmusTestDetails?.updatedAt
               ).getTime();
               const dateB = new Date(
-                b?.appliedCohorts[b.appliedCohorts.length - 1]?.applicationDetails?.updatedAt
+                b?.appliedCohorts[b.appliedCohorts.length - 1]?.litmusTestDetails?.updatedAt
               ).getTime();
               return dateA - dateB; // oldest first
             });
@@ -168,10 +173,13 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
       "Address",
       "Fathers' Name",
       "Father's Contact",
+      "Father's Email",
       "Mother's Name",
       "Mother's Contact",
+      "Mother's Email",
       "Emergency Contact Name",
       "Emergency Contact Number",
+      "Emergency Contact Email",
     ];
   
     // Map each selected student to a CSV row.
@@ -184,10 +192,13 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
       const address = `${studentDetails?.currentAddress?.streetAddress || ""} ${studentDetails?.currentAddress?.city || ""} ${studentDetails?.currentAddress?.state || ""} ${studentDetails?.currentAddress?.postalCode || ""}`.trim();
       const fatherName = `${studentDetails?.parentInformation?.father?.firstName || ""} ${studentDetails?.parentInformation?.father?.lastName || ""}`.trim();
       const fatherContact = studentDetails?.parentInformation?.father?.contactNumber || "";
+      const fatherEmail = studentDetails?.parentInformation?.father?.email || "";
       const motherName = `${studentDetails?.parentInformation?.mother?.firstName || ""} ${studentDetails?.parentInformation?.mother?.lastName || ""}`.trim();
       const motherContact = studentDetails?.parentInformation?.mother?.contactNumber || "";
+      const motherEmail = studentDetails?.parentInformation?.mother?.email || "";
       const emergencyContactName = `${studentDetails?.emergencyContact?.firstName || ""} ${studentDetails?.emergencyContact?.lastName || ""}`.trim();
       const emergencyContactNumber = studentDetails?.emergencyContact?.contactNumber || "";
+      const emergencyContactEmail = studentDetails?.emergencyContact?.email || "";
       return [
         escapeCSV(studentName),
         escapeCSV(email),
@@ -195,10 +206,13 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
         escapeCSV(address),
         escapeCSV(fatherName),
         escapeCSV(fatherContact),
+        escapeCSV(fatherEmail),
         escapeCSV(motherName),
         escapeCSV(motherContact),
+        escapeCSV(motherEmail),
         escapeCSV(emergencyContactName),
         escapeCSV(emergencyContactNumber),
+        escapeCSV(emergencyContactEmail),
       ].join(",");
     });
   

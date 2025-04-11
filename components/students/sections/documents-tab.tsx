@@ -91,7 +91,7 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
       toast({
         title: `Document ${status}`,
         description: response.message || `Document ${status} successfully`,
-        variant: "warning",
+        variant: "success",
       });
       onApplicationUpdate();
     } catch (error: any) {

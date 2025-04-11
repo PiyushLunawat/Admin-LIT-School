@@ -14,14 +14,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Form, FormMessage, } from "@/components/ui/form";
 
 import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
-import { checkEmailExists, inviteCollaborators, updateCohort } from "@/app/api/cohorts";
+import { checkEmailExists, deleteCollaborator, editCollaborator, inviteCollaborators, updateCohort } from "@/app/api/cohorts";
 import { useToast } from "@/hooks/use-toast";
 
 // Roles array 
 const roles = [
-  // { value: "application_reviewer", label: "Application Reviewer" },
+  { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
-  // { value: "fee_collector", label: "Fee Collector" },
+  { value: "fee_collector", label: "Fee Collector" },
   { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
 ];
 
@@ -33,6 +33,9 @@ const formSchema = z.object({
       role: z.string().nonempty("Role is required"),
       isInvited: z.boolean().optional(),
       isAccepted: z.boolean().optional(),
+      cohortId: z.string().optional(),
+      collaboratorId: z.string().optional(),
+      roleId: z.string().optional(),
     })
   ),
 });
@@ -48,9 +51,6 @@ export function CollaboratorsForm({
   onCohortCreated,
   initialData,
 }: CollaboratorsFormProps) {
-
-  // console.log("A",initialData);
-
   const formatCollaborators = (collaborators: any[] = []) => {
     return collaborators.flatMap(collab =>
       (collab.roles || []).map((roleObj: any) => ({
@@ -58,24 +58,29 @@ export function CollaboratorsForm({
         role: roleObj.role || "Unknown Role",
         isInvited: roleObj.isInvited || false,
         isAccepted: roleObj.isAccepted || false,
+        cohortId: roleObj.cohortId || "",
+        collaboratorId: collab._id || "",
+        roleId: roleObj._id || "",
       }))
     );
   };
   
   // Usage
   const formattedCollaborators = formatCollaborators(initialData?.collaborators || []);
+  console.log("one", initialData?.collaborators);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       collaborators: formatCollaborators(initialData?.collaborators || []) || [
-        { email: "", role: "", isInvited: false, isAccepted: false },
+        { email: "", role: "", isInvited: false, isAccepted: false, cohortId: "", collaboratorId: "", roleId: ""  },
       ],
     },
   });
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [deleteLoading, setdeleteLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState<number | null>(null);
 
@@ -86,8 +91,7 @@ export function CollaboratorsForm({
 
   useEffect(() => {
     if (fields.length === 0) {
-      // console.log("A",fields.length); 
-      append({ email: "", role: "", isInvited: false, isAccepted: false });
+      append({ email: "", role: "", isInvited: false, isAccepted: false, cohortId: "", collaboratorId: "", roleId: "" });
     }
   }, [fields, append]);
 
@@ -153,31 +157,6 @@ export function CollaboratorsForm({
     setEditingCollaborator(index);
   };
 
-  const handleSaveEdit = async (data: z.infer<typeof formSchema>) => {
-    try {
-      setSaveLoading(true)
-      const collaboratorsToUpdate = data.collaborators.map((collab) => ({
-        email: collab.email,
-        role: collab.role,
-      }));
-    
-      const savedCohort = await updateCohort(initialData._id, {
-        collaborators: collaboratorsToUpdate,
-      });
-      console.log("A",savedCohort);
-
-      onCohortCreated(savedCohort.data);
-      form.reset({
-        collaborators: formatCollaborators(savedCohort.data.collaborators),
-      });
-  } catch (error) {
-  console.error("Failed to update cohort:", error);
-  } finally {
-    setEditingCollaborator(null);
-    setSaveLoading(false)
-  }
-  };
-
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true)
     try {
@@ -230,6 +209,8 @@ export function CollaboratorsForm({
 
         const invited = await inviteCollaborators(initialData._id);
 
+        console.log("A",createdCohort);
+
         toast({ title: "Collaborators invited successfully!", variant: "success" });
 
         onCohortCreated(invited.data);
@@ -243,9 +224,57 @@ export function CollaboratorsForm({
       }
     } catch (error) {
       console.error("Failed to invite collaborators:", error);
-      toast({ title: `Failed to invite collaborators:", ${error}!`, variant: "destructive" });
+      toast({ title: `Failed to invite collaborators:`, description:`${error}!`, variant: "destructive" });
     } finally {
       setInviteLoading(false)
+    }
+  };
+
+  const handleDeleteCollab = async (cId?: string, collabId?: string, role?: string) => {
+    try {
+      setdeleteLoading(true)      
+      if (cId && collabId && role) {
+        const deletePayload = { cohortId: cId, collaboratorId: collabId, roleId: role };
+        const delResp = await deleteCollaborator(deletePayload);
+        console.log("deleted",delResp);
+        form.reset({
+          collaborators: formatCollaborators(delResp.data),
+        });
+        onCohortCreated(delResp.data);
+        toast({ title: "Collaborator deleted successfully!", variant: "success" });
+      } else {
+        toast({ title: "Cohort ID is missing. Unable to delete collaborators!", variant: "warning" });
+      }
+    } catch (error) {
+      console.error("Failed to delete collaborators:", error);
+      toast({ title: `Failed to delete collaborator:", ${error}!`, variant: "warning" });
+    } finally {
+      setdeleteLoading(false)
+    }
+  };
+
+  const handleSaveEdit = async (roleId?: string, collabId?: string, role?: string) => {
+    try {
+      setSaveLoading(true)
+      
+      const editPayload = { roleId: roleId, collaboratorId: collabId, role: role };
+      if (roleId && collabId && role) {
+        const editResp = await editCollaborator(editPayload);
+        console.log("deleted",editResp);
+        form.reset({
+          collaborators: editResp.data.roles,
+        });
+        // onCohortCreated(editResp.data);
+        toast({ title: "Collaborator edited successfully!", variant: "success" });
+
+      } else {
+        toast({ title: "Cohort ID is missing. Unable to edit collaborators!", variant: "warning" });
+      }
+    } catch (error) {
+      console.error("Failed to edit collaborators:", error);
+      toast({ title: `Failed to edit collaborator:`,description: `${error}!`, variant: "warning" });
+    } finally {
+      setSaveLoading(true)
     }
   };
 
@@ -305,7 +334,7 @@ export function CollaboratorsForm({
                             <Button variant="outline">Cancel</Button>
                             <Button
                               className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
-                              onClick={() => remove(index)}
+                              onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId)}
                               >
                               Delete
                             </Button>
@@ -355,7 +384,8 @@ export function CollaboratorsForm({
                                   <Button variant="outline">Cancel</Button>
                                   <Button
                                     className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
-                                    onClick={() => remove(index)}
+                                    onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId)}
+                                    disabled={deleteLoading}
                                   >
                                     Delete
                                   </Button>
@@ -414,7 +444,7 @@ export function CollaboratorsForm({
                 )}
                 {editingCollaborator === index && (
                   <div className="mt-3">
-                    <Button type="button" onClick={() => handleSaveEdit(form.getValues())}>Save</Button>
+                    <Button type="button" disabled={saveLoading} onClick={() => handleSaveEdit(collaborator.roleId, collaborator.collaboratorId, form.getValues(`collaborators.${index}.role`))}>Save</Button>
                   </div>
                 )}
               </CardContent>
