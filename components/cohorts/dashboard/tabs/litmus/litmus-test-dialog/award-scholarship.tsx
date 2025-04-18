@@ -80,7 +80,12 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
 console.log("award",student?._id, selectedSch._id, litmusTestDetails?._id);
 
     try {
-      const result = await updateScholarship(student?._id, selectedSch._id, litmusTestDetails?._id);
+      const payLoad = {
+        studentId: student?._id,
+        cohortId: latestCohort?._id,
+        scholarshipId: selectedSch._id,
+      }
+      const result = await updateScholarship(payLoad);
       console.log("Scholarship updated successfully:", result);
     } catch (error) {
       console.error("Failed to update scholarship:", error);
@@ -139,7 +144,7 @@ console.log("award",student?._id, selectedSch._id, litmusTestDetails?._id);
                         ))}
                     </div>
                 </div>
-                <Button className="w-full pt-auto" onClick={() => handleScholarship()}>
+                <Button className="w-full pt-auto" onClick={() => handleScholarship()} disabled={latestCohort?.status === 'dropped'}>
                     Update Status
                 </Button>
             </div>

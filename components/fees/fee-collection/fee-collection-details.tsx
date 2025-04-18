@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { formatAmount } from "@/lib/utils/helpers";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
@@ -111,12 +112,6 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
 
-
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b flex items-start justify-between">
@@ -180,7 +175,7 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
                   <UserMinus className="h-4 w-4 text-red-500" />
-                  Mark as Dropped
+                  Dropped off
                 </div>
                 <div className="">By Admin</div>
               </div>

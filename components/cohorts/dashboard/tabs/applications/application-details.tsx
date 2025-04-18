@@ -236,7 +236,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                     <SelectItem value="not qualified">Not Qualified</SelectItem>
                   </SelectContent>
                 </Select>
-                {!['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(status) &&
+                {!['interview scheduled', 'interview cancelled', 'waitlist', 'selected', 'not qualified'].includes(status) &&
                   <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
                     <FileSignature className="w-4 h-4"/>Interview Feedback
                   </Button>
@@ -272,7 +272,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
                   <UserMinus className="h-4 w-4 text-red-500" />
-                  Mark as Dropped
+                  Dropped off
                 </div>
                 <div className="">By Admin</div>
               </div>

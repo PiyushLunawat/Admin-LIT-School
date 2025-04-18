@@ -153,7 +153,9 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
         <Button
           className="w-full mt-4"
           onClick={() => handleInterviewUpdate(status)}
-          disabled={!canUpdate() || loading}
+          disabled={!canUpdate() || loading
+            //  || latestCohort?.status === 'dropped'
+            }
         >
           Update Interview Status
         </Button>

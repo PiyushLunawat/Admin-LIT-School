@@ -3,6 +3,7 @@
 import { getStudents } from "@/app/api/student";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList, Clock, CheckCircle, AlertTriangle, RotateCcw, Calendar, Banknote, Award, Wallet } from "lucide-react";
+import { formatAmount } from "@/lib/utils/helpers";
 import { useEffect, useState } from "react";
 
 interface MetricCardProps {
@@ -13,11 +14,6 @@ interface MetricCardProps {
 }
 
 function MetricCard({ title, value, description, icon: Icon }: MetricCardProps) {
-
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
 
       return (
     <Card>

@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { formatAmount } from "@/lib/utils/helpers";
 import {
   Popover,
   PopoverContent,
@@ -71,12 +72,7 @@ export function EnrolmentDetails({ application, onClose, onApplicationUpdate }: 
       return ``;
     }
   };
-
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-
+  
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b flex items-start justify-between">
@@ -120,7 +116,7 @@ export function EnrolmentDetails({ application, onClose, onApplicationUpdate }: 
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
                   <UserMinus className="h-4 w-4 text-red-500" />
-                  Mark as Dropped
+                  Dropped off
                 </div>
                 <div className="">By Admin</div>
               </div>

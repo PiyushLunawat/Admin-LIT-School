@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatAmount } from "@/lib/utils/helpers";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
@@ -33,11 +34,6 @@ export function FeePreviewForm({ onNext, initialData }: FeePreviewFormProps) {
 
   const scholarshipSlabs = initialData?.litmusTestDetail?.[0].scholarshipSlabs || [];
 console.log("dsdv",scholarshipSlabs)
-
-const formatAmount = (value: number | undefined) =>
-  value !== undefined
-    ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-    : "--";
 
   return (
     <div className="max-h-[80vh] space-y-6 py-4">

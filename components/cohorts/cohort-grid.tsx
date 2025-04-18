@@ -24,6 +24,7 @@ import { getCentres } from "@/app/api/centres";
 import { deleteCohort, updateCohortStatus } from "@/app/api/cohorts";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
+import { formatAmount } from "@/lib/utils/helpers";
 
 interface Program {
   _id: string;
@@ -115,11 +116,6 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
   };
 
   const router = useRouter();
-
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
 
   const handleAction = (cohortId: string, action: string) => {
     try {

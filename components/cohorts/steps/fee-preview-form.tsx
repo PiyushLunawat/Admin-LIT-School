@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useId, useState } from "react";
+import { formatAmount } from "@/lib/utils/helpers";
 import { format, add, differenceInDays } from "date-fns";
 import { updateCohort } from "@/app/api/cohorts";
 import { z } from "zod";
@@ -87,11 +88,6 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
       [`${semesterIndex}-${installmentIndex}`]: newDate,
     }));
   };
-
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
 
   const calculateInstallments = (semesterIndex: number, slab: any) => {
     const totalSemesters = initialData?.cohortFeesDetail?.semesters || 0;

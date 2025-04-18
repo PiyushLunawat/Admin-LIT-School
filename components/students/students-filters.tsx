@@ -129,9 +129,11 @@ export function StudentsFilters({
           </SelectContent>
         </Select>
 
-        <Button variant="ghost" size="icon" onClick={handleReset}>
-          <X className="h-4 w-4" />
-        </Button>
+        {!(searchQuery === "" && selectedProgram === 'all-programs' && selectedCohort === 'all-cohorts' && selectedAppStatus === 'all-statuses' && selectedPaymentStatus === 'all-payments' ) &&
+          <Button variant="ghost" size="icon" onClick={handleReset}>
+            <X className="h-4 w-4" />
+          </Button>
+        }
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatAmount } from "@/lib/utils/helpers";
 import {
   Users,
   ClipboardList,
@@ -175,12 +176,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
     }
   }
-
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-
+  
   const metrics = [
     {
       title: "Total Applications",

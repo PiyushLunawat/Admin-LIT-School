@@ -328,7 +328,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
                 oneShot += 1;
                 const oneShotDetails = paymentDetails?.oneShotPayment;
                 if (oneShotDetails) {
-                  oneShotAmount += oneShotDetails?.amountPayable;
+                  oneShotAmount += (oneShotDetails?.amountPayable || 0);
                   if (oneShotDetails?.verificationStatus === 'paid') {
                     oneShotPaid += 1;
                     oneShotAmountPaid += oneShotDetails?.amountPayable;
@@ -368,7 +368,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
                 });
               } 
             });
-
+            
             setRevenueCollected(oneShotAmountPaid + installmentAmountPaid + tokenAmountPaid)
             setRevenuePending(tokenAmountPending + (installmentAmount + oneShotAmount) - (installmentAmountPaid + oneShotAmountPaid))
             setPendingPayments(pending);

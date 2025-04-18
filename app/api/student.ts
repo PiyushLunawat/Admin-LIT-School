@@ -168,18 +168,14 @@ export async function updateLitmusTaskStatus(
   return await response.json();
 }
 
-export async function updateScholarship(
-  studentId: string,
-  scholarshipId: string,
-  litmusDocId: string
-) {
+export async function updateScholarship(payLoad: any) {
   try {
     const response = await fetch(
       `${process.env.API_URL}/admin/update-scholarship`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, scholarshipId, litmusDocId }),
+        body: JSON.stringify(payLoad),
       }
     );
 

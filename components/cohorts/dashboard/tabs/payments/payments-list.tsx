@@ -97,15 +97,22 @@ export function PaymentsList({
     onApplicationUpdate();
   };
 
-  // useEffect(() => {
-  //   if (applications.length > 0) {
-  //     const firstApplication = applications[0];
-  //     setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
-  //     onStudentSelect(firstApplication); // Call the onApplicationSelect function for the first application
-  //   }
-  // }, [applications]);
+  useEffect(() => {
+    if (applications.length > 0) {      
+      const firstApplication = applications[0];
+      setSelectedRowId(firstApplication._id); 
+      onStudentSelect(firstApplication); 
+    } else {
+      setSelectedRowId(null);
+      onStudentSelect(null);
+    }
+  }, [applications]);
 
   return (
+  applications.length === 0 ?
+    <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
+      <div >No Students found.</div>
+    </div> :
     <div className="border rounded-lg">
       <Table>
         <TableHeader>
@@ -226,7 +233,7 @@ export function PaymentsList({
               </TableCell>
               <TableCell>
                 {latestCohort?.status === 'dropped' ?
-                  <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(latestCohort?.status)}>
+                  <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(latestCohort?.status)}>
                     {latestCohort?.status}
                   </Badge> :
                   paymentDetails?.paymentPlan ? 
@@ -257,7 +264,7 @@ export function PaymentsList({
 
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogTitle></DialogTitle>
-      <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+      <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}

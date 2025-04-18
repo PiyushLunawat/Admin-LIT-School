@@ -31,10 +31,11 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
   useEffect(() => {
       setLoading(true);
       async function fetchStudents() {
+        setLoading(true);
         try {
           const response = await getStudents();
           const mappedStudents = response.data.filter((student: any) => (
-            ['applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
+            ['initiated', 'applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
             student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?._id == cohortId
           ));
                       
@@ -277,17 +278,24 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ApplicationsList
-            applications={filteredAndSortedApplications}
-            onApplicationSelect={(application) => setSelectedApplication(application)}
-            selectedIds={selectedStudents}
-            onSelectedIdsChange={setSelectedStudents}
-            onApplicationUpdate={handleApplicationUpdate} 
+          {loading ? 
+            <div className="h-fit flex items-center justify-center p-6 border rounded text-muted-foreground">
+              <p className="text-center animate-pulse">
+                All your students will appear here...
+              </p>
+            </div> :
+            <ApplicationsList
+              applications={filteredAndSortedApplications}
+              onApplicationSelect={(application) => setSelectedApplication(application)}
+              selectedIds={selectedStudents}
+              onSelectedIdsChange={setSelectedStudents}
+              onApplicationUpdate={handleApplicationUpdate} 
             />
+          }
         </div>
         <div className="lg:col-span-1">
           <div className="sticky top-6">
-            <Card className="max-h-[calc(100vh-7rem)]  overflow-y-auto">
+            <Card className="max-h-[calc(100vh-7rem)] overflow-y-auto">
               {selectedApplication ? (
                 <ApplicationDetails
                   application={selectedApplication}

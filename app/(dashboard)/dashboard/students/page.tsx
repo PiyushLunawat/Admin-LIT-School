@@ -53,6 +53,7 @@ export default function StudentsPage() {
 
   useEffect(() => {
         async function fetchStudents() {
+          setLoading(true);
           try {
             const response = await getStudents();
             const mappedStudents = response.data.filter((student: any) => (
@@ -274,12 +275,19 @@ export default function StudentsPage() {
       />
 
       {/* Students List */}
-      <StudentsList
-        selectedIds={selectedStudents}
-        onSelectedIdsChange={setSelectedStudents}
-        applications={filteredAndSortedApplications}
-        onApplicationUpdate={handleApplicationUpdate} 
-      />
+      {loading ? 
+        <div className="h-fit flex items-center justify-center p-6 border rounded text-muted-foreground">
+          <p className="text-center animate-pulse">
+            Loading...
+          </p>
+        </div> :
+        <StudentsList
+          selectedIds={selectedStudents}
+          onSelectedIdsChange={setSelectedStudents}
+          applications={filteredAndSortedApplications}
+          onApplicationUpdate={handleApplicationUpdate} 
+        />
+      }
     </div>
   );
 }

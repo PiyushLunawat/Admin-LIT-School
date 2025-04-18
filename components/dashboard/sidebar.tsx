@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LayoutDashboard, School, Building2, Users, ClipboardList, Calendar, GraduationCap, CreditCard, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";

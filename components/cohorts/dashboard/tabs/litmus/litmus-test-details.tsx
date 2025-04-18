@@ -217,7 +217,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
                   <UserMinus className="h-4 w-4 text-red-500" />
-                  Mark as Dropped
+                  Dropped off
                 </div>
                 <div className="">By Admin</div>
               </div>
@@ -391,7 +391,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
           {litmusTestDetails?.performanceRating &&
             <div className="space-y-2">
               <h4 className="font-medium">Performance Rating</h4>
-              <div className="flex space-x-1 bg-[#262626] p-2 rounded-lg justify-center mx-auto">
+              <div className="flex gap-1 bg-[#262626] p-2 rounded-lg justify-center mx-auto">
               {[...Array(5)].map((_, index) => (
                 <span key={index} className={`text-2xl transition-colors ${
                 index < litmusTestDetails?.performanceRating ? 'text-[#F8E000]' : 'text-[#A3A3A366]'}`}>

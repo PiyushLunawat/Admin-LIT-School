@@ -99,7 +99,7 @@ export function LitmusTestList({
   return (
     applications.length === 0 ?
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
-      <div >All your students will appear here</div>
+      <div >No Students found.</div>
     </div> :
       <div className="border rounded-lg">
       <Table>
@@ -150,10 +150,10 @@ export function LitmusTestList({
               </TableCell>
               <TableCell className="">
                 {latestCohort?.status === 'dropped' ?
-                  <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(latestCohort?.status)}>
+                  <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(latestCohort?.status)}>
                     {latestCohort?.status}
                   </Badge> :
-                  <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
+                  <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
                     {litmusTestDetails?.status || "pending"}
                   </Badge>
                 }
@@ -195,7 +195,7 @@ export function LitmusTestList({
 
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogTitle></DialogTitle>
-      <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+      <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}

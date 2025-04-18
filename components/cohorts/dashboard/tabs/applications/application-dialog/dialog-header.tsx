@@ -90,28 +90,31 @@ export function StudentApplicationHeader({ student, onUpdateStatus }: StudentHea
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-              {/* <Button variant="outline" className="justify-start">
-                <Mail className="h-4 w-4 mr-2" />
-                Send Email
-              </Button>
-              <Button variant="outline" className="justify-start">
-                <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
-                Send WhatsApp
-              </Button> */}
-              <Button variant="outline" className="justify-start" disabled
-              // onClick={() => setInterviewOpen(true)}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule Interview
-              </Button>
-              <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
-                onClick={()=>setMarkedAsDialogOpen(true)} disabled={latestCohort?.status === 'dropped'}>
-                <UserMinus className="h-4 w-4 mr-2" />
-                Mark as Dropped
-              </Button>
+              {latestCohort?.status === 'dropped' ?
+                <Badge className="" variant={'destructive'}>Dropped</Badge> :
+                <div className="grid grid-cols-2 gap-2">
+                {/* <Button variant="outline" className="justify-start">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Send Email
+                  </Button>
+                  <Button variant="outline" className="justify-start">
+                    <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
+                    Send WhatsApp
+                  </Button> */}
+                  <Button variant="outline" className="justify-start" disabled
+                  // onClick={() => setInterviewOpen(true)}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule Interview
+                  </Button>
+                  <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
+                    onClick={()=>setMarkedAsDialogOpen(true)} disabled={latestCohort?.status === 'dropped'}>
+                    <UserMinus className="h-4 w-4 mr-2" />
+                    Mark as Dropped
+                  </Button>
+                </div>
+              }
             </div>
-          </div>
           
             {/* Status Section */}
             <div className="flex justify-between items-center py-3 border-t">

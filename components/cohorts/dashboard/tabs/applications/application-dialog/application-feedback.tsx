@@ -472,7 +472,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         <Button
           className="w-full mt-4"
           onClick={() => handleApplicationUpdate(status)}
-          disabled={!canUpdate() || loading}
+          disabled={!canUpdate() || loading || latestCohort?.status === 'dropped'}
         >
           {loading ? 'Updating...' : 'Update Status'}
         </Button>

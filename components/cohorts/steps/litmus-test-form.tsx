@@ -101,6 +101,7 @@ const formSchema = z.object({
       percentage: z.coerce.string().nonempty("Percentage is required"),
       clearance: z.coerce.string().nonempty("Clearance is required"),
       description: z.string().optional(),
+      cohortId: z.string().optional(),
     })
   ),
   litmusTestDuration: z.string().nonempty("Duration is required"),
@@ -165,6 +166,7 @@ export function LitmusTestForm({
               percentage: "",
               clearance: "",
               description: "",
+              cohortId: "",
             },
           ],
           litmusTestDuration: "",
@@ -280,6 +282,7 @@ export function LitmusTestForm({
                 percentage: "",
                 clearance: "",
                 description: "",
+                cohortId: initialData?._id,
               })
             }
             className="w-full"

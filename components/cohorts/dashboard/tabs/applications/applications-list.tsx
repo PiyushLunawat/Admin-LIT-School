@@ -135,7 +135,7 @@ export function ApplicationsList({
   return (
     applications.length === 0 ?
       <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
-        <div >All your students will appear here</div>
+        <div >No Students found.</div>
       </div> :
       <div className="border rounded-lg">
         <Table>
@@ -158,7 +158,7 @@ export function ApplicationsList({
           <TableBody>
             {applications.map((application: any) => {
                 const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
-                const applicationDetail = latestCohort?.applicationDetails;
+                const applicationDetails = latestCohort?.applicationDetails;
               return(
               <TableRow
                 key={application._id}
@@ -180,37 +180,38 @@ export function ApplicationsList({
                   {application?._id || "--"}
                 </TableCell>
                 <TableCell>
-                  {new Date(applicationDetail?.updatedAt).toLocaleDateString() || "--"}
+                  {applicationDetails?.updatedAt ? new Date(applicationDetails?.updatedAt).toLocaleDateString() : "--"}
                 </TableCell>
                 <TableCell className="space-y-1">
                   {latestCohort?.status === 'dropped' ?
-                    <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(latestCohort?.status)}>
+                    <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(latestCohort?.status)}>
                       {latestCohort?.status}
                     </Badge> :
-                    applicationDetail?.applicationStatus === 'interview scheduled' ?
-                    <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(checkInterviewStatus(applicationDetail?.applicationTestInterviews))}>
-                      {checkInterviewStatus(applicationDetail?.applicationTestInterviews)}
+                    applicationDetails?.applicationStatus === undefined ? '--' : 
+                    applicationDetails?.applicationStatus === 'interview scheduled' ?
+                    <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(checkInterviewStatus(applicationDetails?.applicationTestInterviews))}>
+                      {checkInterviewStatus(applicationDetails?.applicationTestInterviews)}
                     </Badge> :
-                    <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(applicationDetail?.applicationStatus || "--")}>
-                      {applicationDetail?.applicationStatus || "--"}
+                    <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(applicationDetails?.applicationStatus || "--")}>
+                      {applicationDetails?.applicationStatus}
                     </Badge>
                   } 
-                  {(applicationDetail?.applicationStatus === 'under review' && applicationDetail?.applicationTasks?.[0]?.applicationTasks?.[0]?.overallFeedback.length > 0) &&
+                  {(applicationDetails?.applicationStatus === 'under review' && applicationDetails?.applicationTasks?.[0]?.applicationTasks?.[0]?.overallFeedback.length > 0) &&
                     <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
                       <CheckCircle className="w-3 h-3"/> App. Revised
                     </Badge>
                   }
                 </TableCell>
                 <TableCell>
-                  {applicationDetail?.applicationTestInterviews?.[applicationDetail?.applicationTestInterviews.length - 1] ? (
+                  {applicationDetails?.applicationTestInterviews?.[applicationDetails?.applicationTestInterviews.length - 1] ? (
                     <div className="space-y-0.5">
                       <div className="flex items-center text-xs">
                         <Clock4Icon className="h-3 w-3 mr-1" />
-                        {applicationDetail?.applicationTestInterviews[applicationDetail?.applicationTestInterviews.length - 1]?.startTime}
+                        {applicationDetails?.applicationTestInterviews[applicationDetails?.applicationTestInterviews.length - 1]?.startTime}
                       </div>
                       <div className="flex items-center text-xs">
                         <Calendar className="h-3 w-3 mr-1" />
-                        {new Date(applicationDetail?.applicationTestInterviews[applicationDetail?.applicationTestInterviews.length - 1]?.meetingDate).toLocaleDateString() || "--"}
+                        {new Date(applicationDetails?.applicationTestInterviews[applicationDetails?.applicationTestInterviews.length - 1]?.meetingDate).toLocaleDateString() || "--"}
                       </div>
                     </div>
                   ) : "--"}
@@ -235,7 +236,7 @@ export function ApplicationsList({
         {/* Dialog to display "Hi" message */}
         <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-          <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+          <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
             {selectedStudent && (
               <StudentApplicationHeader student={selectedStudent} onUpdateStatus={() => onApplicationUpdate()}/>
             )}

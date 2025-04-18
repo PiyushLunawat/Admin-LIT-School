@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 import { getCurrentStudents, uploadFeeReceipt, verifyFeeStatus, verifyTokenAmount } from "@/app/api/student";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { formatAmount } from "@/lib/utils/helpers";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
@@ -348,11 +349,6 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
 
-  const formatAmount = (value: number | undefined) =>
-    value !== undefined
-      ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-      : "--";
-
   return (
     <div className="space-y-6">
       {/* Payment Overview */}
@@ -469,11 +465,11 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
                   </div> :
                   <div className="flex gap-4 mt-4">
                     <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
-                      onClick={() => setFlagOpen(true)}>
+                      onClick={() => setFlagOpen(true)} disabled={latestCohort?.status === 'dropped'}>
                         <FlagIcon className="w-4 h-4"/> Flag Reciept
                     </Button>
                     <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                      onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")}>
+                      onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")} disabled={latestCohort?.status === 'dropped'}>
                         <CircleCheckBig className="w-4 h-4"/> Mark as Verified
                     </Button>
                   </div>}
@@ -582,7 +578,7 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
                     </div>
                   </div> :
                   <label className="cursor-pointer w-full">
-                  <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-oneshot`)?.click()}>
+                  <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-oneshot`)?.click()} disabled={latestCohort?.status === 'dropped'}>
                     <UploadIcon className="h-4 w-4 mr-2" />
                     Upload Receipt
                   </Button>
@@ -688,7 +684,7 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
                           </div> : (
                           (paymentDetails && lastStatus !== 'pending') &&
                             <label className="cursor-pointer w-full">
-                              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${instalmentIndex + 1}${semesterDetails.semester}`)?.click()}>
+                              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${instalmentIndex + 1}${semesterDetails.semester}`)?.click()} disabled={latestCohort?.status === 'dropped'}>
                                 <UploadIcon className="h-4 w-4 mr-2" />
                                 Upload Receipt
                               </Button>
@@ -891,10 +887,10 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
               </Button>
             </div> :
             <div className="flex gap-2 mt-2">
-              <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] " disabled={loading}
+              <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] " disabled={loading || latestCohort?.status === 'dropped'}
                 onClick={() => setFlagOpen(true)}> Reject
               </Button>
-              <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading}
+              <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading || latestCohort?.status === 'dropped'}
                 onClick={() => handleFeeVerify(instalmentNo, semesterNo, "", "paid")}> Approve
               </Button>
             </div>

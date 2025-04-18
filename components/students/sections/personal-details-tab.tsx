@@ -266,6 +266,7 @@ export function PersonalDetailsTab({ student, onApplicationUpdate }: PersonalDet
             onClick={() => {
               isEditing ? handleSave() : setIsEditing(true);
             }}
+            disabled={latestCohort?.status === 'dropped'}
           >
             {isEditing ? (
               <Save className="h-4 w-4 mr-2" />
@@ -420,9 +421,12 @@ export function PersonalDetailsTab({ student, onApplicationUpdate }: PersonalDet
               <Label className="pl-3">Postal Code</Label>
               <Input
                 value={formData.studentDetailData.currentAddress.postalCode}
-                onChange={(e) =>
-                  handleStudentDetailsChange("currentAddress", "postalCode", e.target.value)
-                }
+                onChange={(e) =>{
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^0-9]/g, '');
+                  handleStudentDetailsChange("currentAddress", "postalCode", target.value)
+                }}
+                maxLength={10}
                 disabled={!isEditing}
               />
             </div>
@@ -587,9 +591,12 @@ export function PersonalDetailsTab({ student, onApplicationUpdate }: PersonalDet
               <Label className="pl-3">Contact&apos;s Number</Label>
               <Input
                 value={formData.studentDetailData.emergencyContact.contactNumber}
-                onChange={(e) =>
-                  handleStudentDetailsChange("emergencyContact", "contactNumber", e.target.value)
-                }
+                onChange={(e) =>{
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^0-9]/g, '');
+                  handleStudentDetailsChange("emergencyContact", "contactNumber", target.value)
+                }}
+                maxLength={10}
                 disabled={!isEditing}
               />
             </div>
@@ -684,9 +691,12 @@ export function PersonalDetailsTab({ student, onApplicationUpdate }: PersonalDet
                   <Label className="pl-3">Father&apos;s Contact Number</Label>
                   <Input
                     value={formData.studentDetailData.parentInformation.father.contactNumber}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "contactNumber", e.target.value, "father")
-                    }
+                    onChange={(e) =>{
+                      const target = e.target as HTMLInputElement;
+                      target.value = target.value.replace(/[^0-9]/g, '');
+                      handleStudentDetailsChange("parentInformation", "contactNumber", target.value, "father")
+                    }}
+                    maxLength={10}
                     disabled={!isEditing}
                   />
                 </div>
@@ -696,9 +706,12 @@ export function PersonalDetailsTab({ student, onApplicationUpdate }: PersonalDet
                   <Label className="pl-3">Mother&apos;s Contact Number</Label>
                   <Input
                     value={formData.studentDetailData.parentInformation.mother.contactNumber}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "contactNumber", e.target.value, "mother")
-                    }
+                    onChange={(e) =>{
+                      const target = e.target as HTMLInputElement;
+                      target.value = target.value.replace(/[^0-9]/g, '');
+                      handleStudentDetailsChange("parentInformation", "contactNumber", target.value, "mother")
+                    }}
+                    maxLength={10}
                     disabled={!isEditing}
                   />
                 </div>

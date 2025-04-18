@@ -98,32 +98,34 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
       </Card>
 
       {/* Notes List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Internal Notes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {internalNote?.notes?.map((note: any, index: any) => (
-              <div key={index} className="border rounded-lg p-4 space-y-2" >
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="capitalize">{note?.category}</Badge>
-                  <p className="text-sm text-muted-foreground uppercase">
-                    {new Date(note.createdAt).toLocaleString()}
-                  </p>
+      {internalNote !== undefined &&
+        <Card>
+          <CardHeader>
+            <CardTitle>Internal Notes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {internalNote?.notes?.map((note: any, index: any) => (
+                <div key={index} className="border rounded-lg p-4 space-y-2" >
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" className="capitalize">{note?.category}</Badge>
+                    <p className="text-sm text-muted-foreground uppercase">
+                      {new Date(note.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  {note.content.map((item: string, index: number) => (
+                    <div className="pl-3" key={index}>{item}</div>
+                  ))}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Added by {note.addedBy}</span>
+                  </div>
                 </div>
-                {note.content.map((item: string, index: number) => (
-                  <div className="pl-3" key={index}>{item}</div>
-                ))}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Added by {note.addedBy}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      }
     </div>
   );
 }

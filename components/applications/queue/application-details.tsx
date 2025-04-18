@@ -272,7 +272,7 @@ console.log("timee", (endDate < currentTime), endDate, currentTime)
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
                   <UserMinus className="h-4 w-4 text-red-500" />
-                  Mark as Dropped
+                  Dropped off
                 </div>
                 <div className="">By Admin</div>
               </div>

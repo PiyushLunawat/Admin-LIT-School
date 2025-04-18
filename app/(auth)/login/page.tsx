@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
@@ -106,6 +105,9 @@ export default function LoginPage() {
       
       Cookies.set("adminAccessToken", res.accessToken, { expires: 1/12 }); 
       Cookies.set("adminRefreshToken", res.refreshToken, { expires: 7 });
+      Cookies.set("adminId", res.user.id);
+      Cookies.set("adminEmail", res.user.email);
+      Cookies.remove('adminOtpRequestToken');
       router.push("/dashboard"); // Redirect to dashboard after verification
     }
     } catch (error: any) {

@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { uploadFeeReceipt, verifyFeeStatus, verifyTokenAmount } from "@/app/api/student";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { formatAmount } from "@/lib/utils/helpers";
 
 type BadgeVariant = "lemon" | "pending" | "warning" | "secondary" | "success" | "default";
 
@@ -370,12 +371,6 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
     return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
   };
 
-
-  const formatAmount = (value: number) =>
-    value === 0
-      ? "--" :
-      new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value));
-
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b flex items-start justify-between ">
@@ -443,7 +438,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
                   <UserMinus className="h-4 w-4 text-red-500" />
-                  Mark as Dropped
+                  Dropped off
                 </div>
                 <div className="">By Admin</div>
               </div>
@@ -466,19 +461,19 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   Download Files
                 </Button>
                 {scholarshipDetails ? 
-                    <Button variant="outline" className={`justify-start ${getColor(scholarshipDetails?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
-                      <div className="flex gap-2 items-center">
-                        <span className="text-lg pb-[2px]">★ </span> {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
-                      </div> 
-                    </Button>
-                      :
-                    <Button variant="outline" className="justify-start" disabled>
-                      <div className="flex gap-2 items-center">
-                        <Star className="h-4 w-4" />
-                        Award Scholarship
-                      </div>
-                    </Button>
-                  }
+                  <Button variant="outline" className={`justify-start ${getColor(scholarshipDetails?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
+                    <div className="flex gap-2 items-center">
+                      <span className="text-lg pb-[2px]">★ </span> {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
+                    </div> 
+                  </Button>
+                    :
+                  <Button variant="outline" className="justify-start" disabled>
+                    <div className="flex gap-2 items-center">
+                      <Star className="h-4 w-4" />
+                      Award Scholarship
+                    </div>
+                  </Button>
+                }
                 <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
                   <UserMinus className="h-4 w-4 mr-2" />
                   Mark as Dropped
@@ -552,10 +547,10 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   </div>
                 </div> :
                 <div className="flex gap-2 mt-4">
-                  <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] hover:bg-[#FF503D]/[0.1] " disabled={loading}
+                  <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] hover:bg-[#FF503D]/[0.1] " disabled={loading || latestCohort?.status === 'dropped'}
                     onClick={() => setFlagOpen(true)}> Reject
                   </Button>
-                  <Button variant="outline" className="flex-1 bg-[#2EB88A] hover:bg-[#2EB88A]/90" disabled={loading}
+                  <Button variant="outline" className="flex-1 bg-[#2EB88A] hover:bg-[#2EB88A]/90" disabled={loading || latestCohort?.status === 'dropped'}
                     onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")}> Approve
                   </Button>
                 </div>}
@@ -663,7 +658,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   </div>
                 </div> :
                 <label className="cursor-pointer w-full">
-                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-oneshot`)?.click()}>
+                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-oneshot`)?.click()}
+                  disabled={latestCohort?.status === 'dropped'}>
                   <UploadIcon className="h-4 w-4 mr-2" />
                   Upload Receipt
                 </Button>
@@ -769,7 +765,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                       </div> : (
                       lastStatus !== 'pending' &&
                         <label className="cursor-pointer w-full">
-                          <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${installmentIndex + 1}${semesterDetail.semester}`)?.click()}>
+                          <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${installmentIndex + 1}${semesterDetail.semester}`)?.click()}
+                            disabled={latestCohort?.status === 'dropped'}>
                             <UploadIcon className="h-4 w-4 mr-2" />
                             Upload Receipt
                           </Button>
@@ -917,10 +914,10 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
               </Button>
             </div> :
             <div className="flex gap-2 mt-2">
-              <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] " disabled={loading}
+              <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] " disabled={loading || latestCohort?.status === 'dropped'}
                 onClick={() => setFlagOpen(true)}> Reject
               </Button>
-              <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading}
+              <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading || latestCohort?.status === 'dropped'}
                 onClick={() => handleFeeVerify(instalmentNo, semesterNo, "", "paid")}> Approve
               </Button>
             </div>

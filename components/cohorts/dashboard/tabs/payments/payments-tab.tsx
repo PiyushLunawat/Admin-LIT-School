@@ -284,17 +284,24 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
       {/* Payments List and Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <PaymentsList
-            applications={applications}
-            onStudentSelect={(id) => { setSelectedStudent(id); }}
-            selectedIds={selectedStudents}
-            onSelectedIdsChange={setSelectedStudents}
-            onApplicationUpdate={handleApplicationUpdate} 
-          />
+          {loading ? 
+            <div className="h-fit flex items-center justify-center p-6 border rounded text-muted-foreground">
+              <p className="text-center animate-pulse">
+                All your students will appear here...
+              </p>
+            </div> :
+            <PaymentsList
+              applications={applications}
+              onStudentSelect={(id) => { setSelectedStudent(id); }}
+              selectedIds={selectedStudents}
+              onSelectedIdsChange={setSelectedStudents}
+              onApplicationUpdate={handleApplicationUpdate} 
+            />
+          }
         </div>
         <div className="lg:col-span-1">
           <div className="sticky top-6">
-            <Card className="h-[calc(100vh-7rem)] overflow-hidden">
+            <Card className="max-h-[calc(100vh-7rem)] overflow-hidden">
               {selectedStudent? (
                 <PaymentDetails
                   student={selectedStudent}

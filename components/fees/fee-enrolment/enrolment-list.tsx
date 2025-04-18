@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye } from "lucide-react";
+import { formatAmount } from "@/lib/utils/helpers";
 import { useEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -111,12 +112,7 @@ export function EnrolmentList({
         return ``;
       }
     };
-  
-    const formatAmount = (value: number | undefined) =>
-      value !== undefined
-        ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(value))
-        : "--";
-
+    
     useEffect(() => {
       if (applications.length > 0) {
         const firstApplication = applications[0];
@@ -218,7 +214,7 @@ export function EnrolmentList({
       </Table>
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+        <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}

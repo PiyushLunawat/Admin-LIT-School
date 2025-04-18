@@ -15,9 +15,13 @@ import { useRouter } from "next/navigation";
 export function UserButton() {
   const router = useRouter();
 
+  const email = Cookies.get("adminEmail");
+
   const handleLogout = () => {
     Cookies.remove('adminAccessToken');
     Cookies.remove('adminRefreshToken');
+    Cookies.remove('adminId');
+    Cookies.remove('adminEmail');
     router.push("/login");
   };
 
@@ -25,7 +29,7 @@ export function UserButton() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="cursor-pointer">
-          <AvatarFallback>AD</AvatarFallback>
+          <AvatarFallback className="capitalize">{email?.[0]}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

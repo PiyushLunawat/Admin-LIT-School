@@ -12,6 +12,7 @@ import { updateDocumentStatus, uploadStudentDocuments, } from "@/app/api/student
 import axios from "axios";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 type BadgeVariant = "warning" | "success" | "pending" | "default";
 interface UploadState {
@@ -36,34 +37,58 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   const [downloading, setDownloading] = useState(false);
   const [uploadStates, setUploadStates] = useState<{ [docId: string]: UploadState }>({});
   const [docs, setDocs] = useState<any[]>([]);
+
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [reason, setReason] = useState("");
   
   const [open, setOpen] = useState(false);
   const [viewDoc, setViewDoc] = useState("");
 
-  const documents = [
+  const reqDocuments = [
     {
       id: "aadharDocument",
       name: "ID Proof (Aadhar card)",
       type: "PDF",
-      size: "2.5 MB",
+      size: "5 MB",
     },
     {
       id: "secondarySchoolMarksheet",
       name: "10th Marks Sheet",
       type: "PDF",
-      size: "15.2 MB",
+      size: "5 MB",
     },
     {
       id: "higherSecondaryMarkSheet",
       name: "12th Marks Sheet",
       type: "PDF",
-      size: "1.8 MB",
+      size: "5 MB",
+    },
+    {
+      id: "higherSecondaryTC",
+      name: "12th Transfer Certificate",
+      type: "PDF",
+      size: "5 MB",
     },
     {
       id: "graduationMarkSheet",
       name: "Graduation Marks Sheet",
       type: "PDF",
-      size: "5.1 MB",
+      size: "5 MB",
+    },
+  ];
+
+  const parentDocuments = [
+    {
+      id: "fatherIdProof",
+      name: "Father’s ID Proof (Aadhar/PAN Card/Passport)",
+      type: "PDF",
+      size: "5 MB",
+    },
+    {
+      id: "motherIdProof",
+      name: "Father’s ID Proof (Aadhar/PAN Card/Passport)",
+      type: "PDF",
+      size: "5 MB",
     },
   ];
 
@@ -72,15 +97,14 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   }, [student]);
 
   // Handle document action (flag/verify)
-  const handleDocumentVerification = async ( personalDocId: string, docId: string, status: string
-  ) => {
+  const handleDocumentVerification = async ( personalDocId: string, docId: string, status: string, feedback?: string ) => {
     try {
       setLoading(true);
       const payLoad = {
         personalDocId: personalDocId,
         docId: docId,
         status: status,
-        feedback: [""]
+        feedback: [feedback]
       }
       console.log("Updated document status:", payLoad);
       const response = await updateDocumentStatus(payLoad);
@@ -286,7 +310,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
           <CardTitle>Required Documents</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {documents.map((doc: any, index: any) => {
+          {reqDocuments.map((doc: any, index: any) => {
 
             const docDetails = docs.length > 0 ? docs.find((d: any) => d.name === doc.id) : null;
             
@@ -340,7 +364,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                   ) : (
                     <div className="flex items-center gap-2">
                       <label htmlFor={`file-input-${doc.id}`} className="cursor-pointer">
-                        <Button variant="outline" asChild>
+                        <Button variant="outline" asChild disabled={latestCohort?.status === 'dropped'}>
                           <span>Choose File</span>
                         </Button>
                         <input
@@ -357,14 +381,26 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
 
                 {/* Show Flag/Verify actions if the document is uploaded and marked as "updated" */}
                 {docDetails?.status === "pending" && (
+                  flagOpen ?
+                    <div className="space-y-4 ">
+                      <div className="mt-2 space-y-2">
+                        <label className="text-base">Provide Reasons</label>
+                        <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+                      </div>
+                      <div className="flex gap-2" >
+                        <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
+                        <Button className="flex-1" disabled={!reason.trim()}
+                          onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged")}>Mark as Flagged</Button>
+                      </div>
+                    </div> :
                   <div className="flex gap-4 mt-4">
-                    <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]" disabled={loading}
-                      onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged")}
+                    <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]" disabled={loading || latestCohort?.status === 'dropped'}
+                      onClick={() => setFlagOpen(true)}
                     >
                       <FlagIcon className="w-4 h-4" />
                       Flag Document
                     </Button>
-                    <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]" disabled={loading}
+                    <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]" disabled={loading || latestCohort?.status === 'dropped'}
                       onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "verified")}
                     >
                       <CircleCheckBig className="w-4 h-4" />
@@ -376,10 +412,121 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
             );
           })}
         </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Parent's Documents</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {parentDocuments.map((doc: any, index: any) => {
+
+            const docDetails = docs.length > 0 ? docs.find((d: any) => d.name === doc.id) : null;
+            
+            return (
+              <div key={index} className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  {/* Document Information */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{doc.name}</p>
+                    </div>
+                    {docDetails ? (
+                      <div className="text-sm text-muted-foreground">
+                        {doc.type} • {doc.size} • Uploaded on {new Date(docDetails?.date).toLocaleDateString()}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        • Upload in {doc.type} Format
+                      </div>
+                    )}
+                  </div>
+
+
+                {uploadStates[doc.id]?.uploading ?
+                  <div className="flex items-center gap-2">
+                    {uploadStates[doc.id]?.uploadProgress === 100 ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Progress className="h-2 w-20" states={[ { value: uploadStates[doc.id]?.uploadProgress, widt: uploadStates[doc.id]?.uploadProgress, color: '#ffffff' }]} />
+                        <span>{uploadStates[doc.id]?.uploadProgress}%</span>
+                      </>
+                    )}
+                    <Button variant="ghost" size="sm">
+                      <XIcon className="w-4" />
+                    </Button>
+                  </div> :
+                  docDetails ? (
+                    <div className="flex items-center gap-2">
+                      <Badge className="capitalize" variant={getStatusColor(docDetails?.status)}>
+                        {docDetails?.status === 'pending' ? 'verification pending' : docDetails?.status}
+                      </Badge>
+                      <Button variant="ghost" size="sm" onClick={() => { setOpen(true); setViewDoc(docDetails?.url)}}>
+                        <Eye className="h-4 w-4 mr-2" /> View
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleFileDownload(docDetails?.url, doc.name)} disabled={downloading}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <label htmlFor={`file-input-${doc.id}`} className="cursor-pointer">
+                        <Button variant="outline" asChild disabled={latestCohort?.status === 'dropped'}>
+                          <span>Choose File</span>
+                        </Button>
+                        <input
+                          type="file"
+                          accept="application/pdf"
+                          className="hidden"
+                          id={`file-input-${doc.id}`}
+                          onChange={(e) => handleFileChange(e, doc.id)}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* Show Flag/Verify actions if the document is uploaded and marked as "updated" */}
+                {docDetails?.status === "pending" && (
+                  flagOpen ?
+                    <div className="space-y-4 ">
+                      <div className="mt-2 space-y-2">
+                        <label className="text-base">Provide Reasons</label>
+                        <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+                      </div>
+                      <div className="flex gap-2" >
+                        <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
+                        <Button className="flex-1" disabled={!reason.trim()}
+                          onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged")}>Mark as Flagged</Button>
+                      </div>
+                    </div> :
+                  <div className="flex gap-4 mt-4">
+                    <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]" disabled={loading || latestCohort?.status === 'dropped'}
+                      onClick={() => setFlagOpen(true)}
+                    >
+                      <FlagIcon className="w-4 h-4" />
+                      Flag Document
+                    </Button>
+                    <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]" disabled={loading || latestCohort?.status === 'dropped'}
+                      onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "verified")}
+                    >
+                      <CircleCheckBig className="w-4 h-4" />
+                      Mark as Verified
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
         {/* Additional Documents */}
-        {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", ].includes(doc.name)).length > 0 &&
-        <>
+      {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", ].includes(doc.name)).length > 0 &&
+      <>
+        <Card>
           <CardHeader>
             <CardTitle>Additional Documents</CardTitle>
           </CardHeader>
@@ -409,9 +556,9 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
               </div>
             ))}
           </CardContent>
+        </Card>
         </>
       }
-      </Card>
 
       {/* PDF Preview Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>

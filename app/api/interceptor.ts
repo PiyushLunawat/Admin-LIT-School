@@ -72,5 +72,7 @@ export const RegisterInterceptor = () => {
 const clearAuthAndRedirect = () => {
   Cookies.remove("adminAccessToken");
   Cookies.remove("adminRefreshToken");
+  Cookies.remove("adminId");
+  Cookies.remove("adminEmail");
   // window.location.href = "/login";
 };

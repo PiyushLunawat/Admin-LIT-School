@@ -582,7 +582,7 @@ export function ReviewComponent({
 
       {/* Publish Button */}
       <div className="text-center">
-        <Button className="w-full" onClick={handlePublish} disabled={!canPublish()}>
+        <Button className="w-full" onClick={handlePublish} disabled={!canPublish() || latestCohort?.status === 'dropped'}>
           Publish Review
         </Button>
       </div>

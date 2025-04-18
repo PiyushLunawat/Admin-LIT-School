@@ -197,7 +197,7 @@ export function InterviewsList({
                   <div className="text-xs">Waiting for Interview to be scheduled</div>
                   <div className="text-[10px]">Accepted {timeAgo(applicationDetails?.updatedAt)}</div>
                 </div> :
-                <Badge className="capitalize max-w-28 pr-2 truncate" variant={getStatusColor(applicationDetails?.applicationStatus || "--")}>
+                <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(applicationDetails?.applicationStatus || "--")}>
                   {applicationDetails?.applicationStatus || "--"}
                 </Badge>}
                 {(applicationDetails?.applicationStatus === 'under review' && applicationDetails?.applicationTasks?.length > 1) &&
@@ -237,7 +237,7 @@ export function InterviewsList({
       </Table>
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+        <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
             <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
           )}

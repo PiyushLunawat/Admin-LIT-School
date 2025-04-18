@@ -35,7 +35,7 @@ export function CohortDashboard({ cohortId }: CohortDashboardProps) {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="flex flex-col gap-6 p-6">
       <CohortHeader cohortId={cohortId} setDateRange={setDateRange} />
 
       <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
