@@ -47,7 +47,7 @@ export function NotificationsButton() {
   const [adminId, setAdminId] = useState<string | undefined>();
   const [status, setStatus] = useState<ConnectionStatus>({
     connected: false,
-    online: navigator.onLine,
+    online: true,
     lastActivity: new Date().toISOString(),
   });
 
@@ -88,7 +88,7 @@ export function NotificationsButton() {
   // Periodic network checking
   useEffect(() => {
     const checkNetwork = () => {
-      const isOnline = navigator.onLine;
+      const isOnline = true;
 
       if (isOnline && !status.online) {
         console.log("Network restored.");
