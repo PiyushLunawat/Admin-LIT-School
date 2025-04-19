@@ -209,6 +209,7 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
         variant: "warning",
       });
     } finally {
+      setNewDocName("");
       setUploadStates(prev => ({
         ...prev,
         [docId]: { ...prev[docId], uploading: false }
@@ -389,7 +390,7 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
                     <div className="flex gap-2" >
                       <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
                       <Button className="flex-1" disabled={!reason.trim()}
-                        onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged")}>Mark as Flagged</Button>
+                        onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged", reason)}>Mark as Flagged</Button>
                     </div>
                   </div> :
                   <div className="flex gap-4 mt-4">
@@ -498,7 +499,7 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
                     <div className="flex gap-2" >
                       <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
                       <Button className="flex-1" disabled={!reason.trim()}
-                        onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged")}>Mark as Flagged</Button>
+                        onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged", reason)}>Mark as Flagged</Button>
                     </div>
                   </div> :
                   <div className="flex gap-4 mt-4">
@@ -523,14 +524,14 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
       </Card>
 
       {/* Additional Documents */}
-      {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", ].includes(doc.name)).length > 0 &&
+      {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", "aadharDocument", "higherSecondaryTC", "fatherIdProof", "motherIdProof"].includes(doc.name)).length > 0 &&
       <>
         <Card>
           <CardHeader>
             <CardTitle>Additional Documents</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", ].includes(doc.name)).map((doc: any) => (
+            {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", "aadharDocument", "higherSecondaryTC", "fatherIdProof", "motherIdProof"].includes(doc.name)).map((doc: any) => (
               <div key={doc._id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">

@@ -241,7 +241,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             let totalPercentage = 0;
             let percentageCount = 0;
         
-            applications.forEach((application) => {
+            applications?.forEach((application) => {
               const scholarship = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
               const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
         
@@ -289,7 +289,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
             let installmentAmountPaid = 0;
             let pending = 0;
 
-            applications.forEach((application) => {
+            applications?.forEach((application) => {
               const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
               const cohortDetails = latestCohort?.cohortId;
               const litmusTestDetails = latestCohort?.litmusTestDetails;
@@ -340,10 +340,10 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
 
               // Installments Processing
               if (paymentDetails?.paymentPlan === 'instalments') {
-                paymentDetails?.installments.forEach((semesterDetail: any, semIndex: any) => {
+                paymentDetails?.installments?.forEach((semesterDetail: any, semIndex: any) => {
                   const semesterNumber = semesterDetail?.semester;
                   const installments = semesterDetail?.installments;
-                  installments.forEach((installment: any, instIndex: any) => {
+                  installments?.forEach((installment: any, instIndex: any) => {
                     if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
                       breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
                       if (installment?.verificationStatus === 'paid') {
@@ -357,9 +357,9 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
                 });
 
                 // Calculate total installments expected and received
-                paymentDetails?.installments.forEach((semesterDetail: any) => {
+                paymentDetails?.installments?.forEach((semesterDetail: any) => {
                   const installments = semesterDetail?.installments;
-                  installments.forEach((installment: any) => {
+                  installments?.forEach((installment: any) => {
                     installmentAmount += installment?.amountPayable;
                     if (installment?.verificationStatus === 'paid') {
                       installmentAmountPaid += installment?.amountPayable;

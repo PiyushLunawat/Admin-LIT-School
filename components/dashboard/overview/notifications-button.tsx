@@ -38,7 +38,7 @@ interface Notification {
   message: string;
   cohortTitle: string;
   timestamp: string;
-  category: string;
+  type: string;
   status: string;
 }
 
@@ -47,7 +47,7 @@ export function NotificationsButton() {
   const [adminId, setAdminId] = useState<string | undefined>();
   const [status, setStatus] = useState<ConnectionStatus>({
     connected: false,
-    online: true,
+    online: navigator.onLine,
     lastActivity: new Date().toISOString(),
   });
 
@@ -88,7 +88,7 @@ export function NotificationsButton() {
   // Periodic network checking
   useEffect(() => {
     const checkNetwork = () => {
-      const isOnline = true;
+      const isOnline = navigator.onLine;
 
       if (isOnline && !status.online) {
         console.log("Network restored.");
@@ -167,7 +167,7 @@ export function NotificationsButton() {
         },
         ...prev,
       ]);
-      toast.info(data.message);
+      // toast.info(data.message);
       updateActivity();
     };
 
@@ -221,17 +221,17 @@ export function NotificationsButton() {
     }
   }
 
-  function getCategoryIcon(category: string): JSX.Element {
-    switch (category.toLowerCase()) {
-      case "application":
+  function geCohortIcon(type: string): JSX.Element {
+    switch (type) {
+      case "Registration and Application Task":
         return <FileText className="w-6 h-6" />;
-      case "interview":
+      case "Application Interview":
         return <Users className="w-6 h-6" />;
-      case "admission":
+      case "Admission Fee Payment":
         return <Banknote className="w-6 h-6" />;
-      case "litmus":
+      case "LITMUS Test":
         return <Bot className="w-6 h-6" />;
-      case "fee":
+      case "Fee Payment Setup":
         return <Wallet className="w-6 h-6" />;
       default:
         return <Megaphone className="w-6 h-6" />;
@@ -299,7 +299,7 @@ export function NotificationsButton() {
                           backgroundColor: `${getStatusColor(notification.status || "")}40`,
                         }}
                       >
-                        {getCategoryIcon(notification.category || "")}
+                        {geCohortIcon(notification.type || "")}
                       </div>
                       <div>
                         <div

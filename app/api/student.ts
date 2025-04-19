@@ -93,28 +93,27 @@ export async function updateStudentTaskFeedback(
     feedbackData?: string[];
   }
 ) {
-  try {
-    console.log("x11", JSON.stringify(feedback));
-    const response = await fetch(
-      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${newStatus}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(feedback),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to update task feedback");
+  const response = await fetch(
+    `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${newStatus}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(feedback),
     }
+  );
 
-    return await response.json(); // Parse and return the response JSON
-  } catch (error) {
-    console.error("Error updating task feedback:", error);
-    throw error;
+  if (!response.ok) {
+    const errorDetails = await response.json().catch(() => null);
+    throw new Error(
+      errorDetails
+        ? `${errorDetails.message || JSON.stringify(errorDetails)}`
+        : "Failed to update interview status"
+    );
   }
+
+  return response.json();
 }
 
 export async function updateStudentTaskFeedbackAccep(
@@ -126,27 +125,27 @@ export async function updateStudentTaskFeedbackAccep(
     feedbackData?: Array<{ taskId: string; feedback: string[] }>;
   }
 ) {
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${status}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(feedback),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to update task feedback");
+  const response = await fetch(
+    `${process.env.API_URL}/admin/student/application?applicationId=${applicationId}&applicationTaskId=${applicationTaskId}&subTaskId=${subTaskId}&status=${status}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(feedback),
     }
+  );
 
-    return await response.json(); // Parse and return the response JSON
-  } catch (error) {
-    console.error("Error updating task feedback:", error);
-    throw error;
+  if (!response.ok) {
+    const errorDetails = await response.json().catch(() => null);
+    throw new Error(
+      errorDetails
+        ? `${errorDetails.message || JSON.stringify(errorDetails)}`
+        : "Failed to update interview status"
+    );
   }
+
+  return response.json();
 }
 
 export async function updateLitmusTaskStatus(

@@ -150,18 +150,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   ) {
     try {
       setLoading(true)
-      if (status === "under review") {
-        const res = await updateStudentApplicationStatus(
-          applicationId,
-          status,
-        );
-        console.log(
-          `Feedback for application ${applicationId} submitted successfully`,
-          res
-        );
-      }
-
-      else if (status === "on hold") {
+        if (status === "on hold") {
         // Filter out empty reasons
         const validReasons = reasonItemValue
         .split('\n') // Split the string into individual lines

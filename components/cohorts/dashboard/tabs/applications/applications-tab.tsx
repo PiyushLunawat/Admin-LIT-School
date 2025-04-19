@@ -278,7 +278,7 @@ export function ApplicationsTab({ cohortId, selectedDateRange }: ApplicationsTab
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          {loading ? 
+          {(applications.length === 0 && loading) ? 
             <div className="h-fit flex items-center justify-center p-6 border rounded text-muted-foreground">
               <p className="text-center animate-pulse">
                 All your students will appear here...

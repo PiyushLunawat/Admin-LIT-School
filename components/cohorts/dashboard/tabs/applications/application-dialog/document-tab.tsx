@@ -129,32 +129,31 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   };
 
   const handleFileDownload = async (url: string, docName: string) => {
-  setDownloading(true);
-  try {
-    // 1. Fetch the file as Blob
-    const response = await fetch(url);
-    const blob = await response.blob();
+    setDownloading(true);
+    try {
+      // 1. Fetch the file as Blob
+      const response = await fetch(url);
+      const blob = await response.blob();
 
-    // 2. Create a temporary object URL for that Blob
-    const blobUrl = URL.createObjectURL(blob);
+      // 2. Create a temporary object URL for that Blob
+      const blobUrl = URL.createObjectURL(blob);
 
-    // 3. Create a hidden <a> and force download
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = `${docName}.pdf`;  // or "myImage.png"
-    document.body.appendChild(link);
-    link.click();
-    
-    // Cleanup
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
-  } catch (err) {
-    console.error("Download failed", err);
-  } finally {
-    setDownloading(false)
-  }
-};
-
+      // 3. Create a hidden <a> and force download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${docName}.pdf`;  // or "myImage.png"
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed", err);
+    } finally {
+      setDownloading(false)
+    }
+  };
 
   const handleFileChange = async ( e: React.ChangeEvent<HTMLInputElement>, docId: string) => {
     setError(null);
@@ -390,7 +389,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                       <div className="flex gap-2" >
                         <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
                         <Button className="flex-1" disabled={!reason.trim()}
-                          onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged")}>Mark as Flagged</Button>
+                          onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged", reason)}>Mark as Flagged</Button>
                       </div>
                     </div> :
                   <div className="flex gap-4 mt-4">
@@ -499,7 +498,7 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
                       <div className="flex gap-2" >
                         <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
                         <Button className="flex-1" disabled={!reason.trim()}
-                          onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged")}>Mark as Flagged</Button>
+                          onClick={() => handleDocumentVerification(latestCohort?.personalDocs?._id, docDetails._id, "flagged", reason)}>Mark as Flagged</Button>
                       </div>
                     </div> :
                   <div className="flex gap-4 mt-4">
@@ -524,14 +523,14 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
       </Card>
 
         {/* Additional Documents */}
-      {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", ].includes(doc.name)).length > 0 &&
+      {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", , "aadharDocument", "higherSecondaryTC", "fatherIdProof", "motherIdProof"].includes(doc.name)).length > 0 &&
       <>
         <Card>
           <CardHeader>
             <CardTitle>Additional Documents</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", ].includes(doc.name)).map((doc: any) => (
+            {docs?.filter((doc: any) =>![ "graduationMarkSheet", "higherSecondaryMarkSheet", "secondarySchoolMarksheet", "aadharDocument", "higherSecondaryTC", "fatherIdProof", "motherIdProof" ].includes(doc.name)).map((doc: any) => (
               <div key={doc._id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
