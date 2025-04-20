@@ -61,7 +61,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
       setFeedbacks((prevFeedbacks) => {
         const newFeedbacks = { ...prevFeedbacks };
         // For each task, if there is no feedback or it's empty, init with ["• "]
-        taskList.forEach((task: any) => {
+        taskList?.forEach((task: any) => {
           const existing = newFeedbacks[task._id];
           if (!existing || existing.length === 0) {
             newFeedbacks[task._id] = ["• "];

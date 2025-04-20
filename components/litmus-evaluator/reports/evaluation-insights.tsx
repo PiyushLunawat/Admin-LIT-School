@@ -26,14 +26,14 @@ export function EvaluationInsights({ applications }: EvaluationInsightsProps) {
       const highPerformanceMap: any = {};  // To map skills to high performance students
       const weakPerformanceMap: any = {};  // To map skills to weak performance students
 
-      applications.forEach((application: any) => {
+      applications?.forEach((application: any) => {
         const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
         const litmusTestDetails = latestCohort?.litmusTestDetails;
 
         if (litmusTestDetails?.status === "completed") {
           const taskScores = litmusTestDetails?.results || [];
 
-          taskScores.forEach((task: any) => {
+          taskScores?.forEach((task: any) => {
             task?.score?.forEach((criterion: any) => {
               const scorePercentage = (criterion.score / criterion.totalScore) * 100;
 

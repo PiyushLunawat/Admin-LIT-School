@@ -90,17 +90,39 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
 
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
-    if (newStatus === "accepted" || newStatus === "on hold" || newStatus === "rejected" || newStatus === "under review") {
-      setFeedbackOpen(true);
+    if (["under review", "completed"].includes(newStatus)) {
+      setOpen(true);
     }
   };
 
-  const handleStatusUpdate = (newStatus: string) => {
-    // Update application status locally and reload application data
-    setStatus(newStatus);
-    onApplicationUpdate();
-    // fetchStudent();
-  };
+  useEffect(() => {
+    if (!litmusTestDetails) return;
+  
+    const currentStatus = litmusTestDetails?.status;
+    
+    setStatus(currentStatus);
+    if (currentStatus === "interview scheduled") {
+      checkInterviewStatus(litmusTestDetails?.litmusTestInterviews);
+    }
+  }, [application]);
+
+  function checkInterviewStatus(interviews: any) {
+    if (!interviews || interviews.length === 0) return;
+
+    const lastInterview = interviews[interviews.length - 1];
+    const endTime = lastInterview?.endTime;
+    const currentTime = new Date();
+
+    let meetingEnd: Date | null = null;
+    if (lastInterview?.meetingDate && lastInterview?.endTime) {
+      meetingEnd = new Date(new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime);
+
+      console.log("timee", (meetingEnd < currentTime), meetingEnd, currentTime)
+      if (meetingEnd < currentTime) {
+        setStatus("interview concluded");
+      }
+    }
+  }
 
   function handleDownloadAll() {
     // Safety checks
@@ -110,7 +132,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
     // Collect all file URLs
     const urls: string[] = [];
   
-    tasks.forEach((taskObj, index) => {
+    tasks?.forEach((taskObj, index) => {
       const task = taskObj?.task;
       if (!task) return;
     
@@ -125,7 +147,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
     });
   
     // Download each URL
-    urls.forEach((url) => {
+    urls?.forEach((url) => {
       // Derive a filename from the URL (optional)
     console.log(`URL:`, url);
 
@@ -169,7 +191,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Evaluation Status</h4>
-              <Badge className="capitalize" variant={getStatusColor(litmusTestDetails?.status || "pending")}>{litmusTestDetails?.status || "pending"}</Badge>
+              <Badge className="capitalize" variant={getStatusColor(status || "pending")}>{status || "pending"}</Badge>
             </div>
             <div className="space-y-1">
               {latestCohort?.litmusTestDetails?.litmusTestInterviews.slice().reverse().map((interview: any, index: any) => (
@@ -191,15 +213,17 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </div>
               ))}
             </div>
-            {litmusTestDetails?.status !== 'completed' &&
-            <Select disabled={litmusTestDetails?.status === 'pending'} value={litmusTestDetails?.status || "pending"}>
+            {status !== 'completed' &&
+            <Select disabled={['pending', 'interview scheduled', 'completed'].includes(status)} 
+              value={status || "pending"}
+              onValueChange={handleStatusChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Change status" />
               </SelectTrigger>
               <SelectContent>
-                {!['pending', 'under review', 'completed'].includes(litmusTestDetails?.status) &&
-                  <SelectItem className="capitalize" value={litmusTestDetails?.status}>
-                    <span className="capitalize">{litmusTestDetails?.status}</span>
+                {!['pending', 'under review', 'completed'].includes(status) &&
+                  <SelectItem className="capitalize" value={status}>
+                    <span className="capitalize">{status}</span>
                   </SelectItem>
                 }
                 <SelectItem value="pending">Pending</SelectItem>
@@ -238,7 +262,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                   <span className="truncate w-[170px]">Schedule Presentation</span>
                 </Button>
                 <Button variant="outline" className="justify-start min-px-2" onClick={handleDownloadAll}
-                  disabled={[undefined, 'pending'].includes(litmusTestDetails?.status)} >
+                  disabled={[undefined, 'pending'].includes(status)} >
                   <Download className="h-4 w-4 mr-2" />
                   Download Files
                 </Button>
@@ -274,42 +298,42 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <Button size="zero" variant="ghost" className="flex gap-1 text-xs items-center text-muted-foreground" onClick={() => {setVopen(true);}}>
                   <EyeIcon className="w-3 h-3 text-white"/> View
                 </Button>
-                {litmusTestDetails?.status === 'completed' && <Button size="zero" variant="ghost" className="flex gap-1 text-xs items-center text-muted-foreground" onClick={() => {setOpen(true);}}>
+                {status === 'completed' && <Button size="zero" variant="ghost" className="flex gap-1 text-xs items-center text-muted-foreground" onClick={() => {setOpen(true);}}>
                   <Edit2Icon className="w-3 h-3 text-white"/> Edit Review
                 </Button>}
               </div>
             </div>
             {(() => {
-                const taskScores = litmusTestDetails?.results || [];
-                let totalScore = 0;
-                let totalPercentage = 0;
-                let maxScore = 0;
-      
-                taskScores.forEach((task: any) => {
-                  const taskScore = task?.score?.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
-                  const taskMaxScore = task?.score?.reduce((acc: any, criterion: any) => acc + Number(criterion.totalScore), 0);
-                  const taskPercentage = taskMaxScore ? (taskScore / taskMaxScore) * 100 : 0;
-                  totalScore += taskScore;
-                  totalPercentage += taskPercentage;
-                  maxScore += taskMaxScore;
-                });
-      
-                const avgTaskScore = totalPercentage / taskScores.length;
-                if (totalPercentage)
-                return (
-                  <>
-                    <div className="space-y-1">
-                      <div className="flex items-end justify-between text-[#00A3FF]">
-                        <Label className="font-semibold">Total</Label>
-                        <div className="">
-                          <span className="text-sm text-muted-foreground mr-2">{(avgTaskScore).toFixed(2) || '--'}%</span><span className="text-sm">{totalScore ? totalScore : '--'}/{maxScore}</span>
-                        </div>
+              const taskScores = litmusTestDetails?.results || [];
+              let totalScore = 0;
+              let totalPercentage = 0;
+              let maxScore = 0;
+    
+              taskScores?.forEach((task: any) => {
+                const taskScore = task?.score?.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
+                const taskMaxScore = task?.score?.reduce((acc: any, criterion: any) => acc + Number(criterion.totalScore), 0);
+                const taskPercentage = taskMaxScore ? (taskScore / taskMaxScore) * 100 : 0;
+                totalScore += taskScore;
+                totalPercentage += taskPercentage;
+                maxScore += taskMaxScore;
+              });
+    
+              const avgTaskScore = totalPercentage / taskScores.length;
+              if (totalPercentage)
+              return (
+                <>
+                  <div className="space-y-1">
+                    <div className="flex items-end justify-between text-[#00A3FF]">
+                      <Label className="font-semibold">Total</Label>
+                      <div className="">
+                        <span className="text-sm text-muted-foreground mr-2">{(avgTaskScore).toFixed(2) || '--'}%</span><span className="text-sm">{totalScore ? totalScore : '--'}/{maxScore}</span>
                       </div>
                     </div>
-                  </>
-                );
-              })()}
-            {litmusTestDetails?.status === 'interview scheduled' &&
+                  </div>
+                </>
+              );
+            })()}
+            {status === 'interview concluded' &&
             <Button className="w-full flex gap-2" onClick={() => {setOpen(true);}}>
               <FileSignature className=""/>Review Submission
             </Button>}

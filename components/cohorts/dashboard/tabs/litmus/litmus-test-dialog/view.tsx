@@ -81,7 +81,7 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
     let changed = false;
     const updatedFeedbackInputs = { ...feedbackInputs };
   
-    sections.forEach((section) => {
+    sections?.forEach((section) => {
       if (section.data && section.data.length > 0) {
         const bulletLines = section.data.map((line) => `• ${line}`).join("\n");
         if (updatedFeedbackInputs[section.title] !== bulletLines) {

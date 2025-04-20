@@ -8,7 +8,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 const processScholarships = (applications: any) => {
   const scholarshipMap: any = {};
 
-  applications.forEach((application: any) => {
+  applications?.forEach((application: any) => {
 
     const semester = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
 

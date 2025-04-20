@@ -94,7 +94,6 @@ export function ApplicationsList({
     }
     return status;
   }
-  
 
   const toggleSelectAll = () => {
     if (selectedIds.length === applications.length) {

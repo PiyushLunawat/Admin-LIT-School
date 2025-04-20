@@ -63,7 +63,7 @@ export function MetricsGrid({ applications }: MetricGridProps) {
 
 
 
-      applications.forEach((application) => {
+      applications?.forEach((application) => {
 
               // Initialize installment breakdown based on cohort
       const breakdown: any[] = [];
@@ -112,10 +112,10 @@ export function MetricsGrid({ applications }: MetricGridProps) {
 
         // Installments Processing
         if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-          lastEnrolled?.installmentDetails.forEach((semesterDetail: any, semIndex: any) => {
+          lastEnrolled?.installmentDetails?.forEach((semesterDetail: any, semIndex: any) => {
             const semesterNumber = semesterDetail?.semester;
             const installments = semesterDetail?.installments;
-            installments.forEach((installment: any, instIndex: any) => {
+            installments?.forEach((installment: any, instIndex: any) => {
               if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
                 breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
                 if (installment?.verificationStatus === 'paid') {
@@ -129,9 +129,9 @@ export function MetricsGrid({ applications }: MetricGridProps) {
           });
 
           // Calculate total installments expected and received
-          lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+          lastEnrolled?.installmentDetails?.forEach((semesterDetail: any) => {
             const installments = semesterDetail?.installments;
-            installments.forEach((installment: any) => {
+            installments?.forEach((installment: any) => {
               installmentAmount += installment?.amountPayable;
               if (installment?.verificationStatus === 'paid') {
                 installmentAmountPaid += installment?.amountPayable;
@@ -139,8 +139,8 @@ export function MetricsGrid({ applications }: MetricGridProps) {
 
               // Scholarships
               if (semesterDetail?.scholarshipDetails) {
-                semesterDetail.scholarshipDetails.forEach((scholarship: any) => {
-                  scholarship?.installments.forEach((install: any) => {
+                semesterDetail.scholarshipDetails?.forEach((scholarship: any) => {
+                  scholarship?.installments?.forEach((install: any) => {
                     if (install.scholarshipAmount) {
                       totalScholarship += install?.scholarshipAmount;
                       scholarshipCount += 1;
@@ -159,7 +159,7 @@ export function MetricsGrid({ applications }: MetricGridProps) {
         }
 
         const scholarships = application?.cousrseEnrolled[application.cousrseEnrolled.length - 1]?.installmentDetails?.flatMap((semester: any) => semester.installments) || [];
-         scholarships.forEach((installment: any) => {
+         scholarships?.forEach((installment: any) => {
            if (installment?.scholarshipAmount) {
              totalScholarship += installment?.scholarshipAmount;
              scholarshipCount += 1;

@@ -36,6 +36,7 @@ interface AwardScholarshipProps {
 
 export function AwardScholarship({ student }: AwardScholarshipProps) {
 
+  const [loading, setLoading] = useState(false);
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId;
   const litmusTestDetails = latestCohort?.litmusTestDetails;
@@ -77,18 +78,21 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
   };
 
   const handleScholarship = async () => {
-console.log("award",student?._id, selectedSch._id, litmusTestDetails?._id);
-
+    setLoading(true);
     try {
       const payLoad = {
         studentId: student?._id,
         cohortId: latestCohort?._id,
         scholarshipId: selectedSch._id,
       }
+      console.log("change", payLoad);
+      
       const result = await updateScholarship(payLoad);
       console.log("Scholarship updated successfully:", result);
     } catch (error) {
       console.error("Failed to update scholarship:", error);
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -144,7 +148,7 @@ console.log("award",student?._id, selectedSch._id, litmusTestDetails?._id);
                         ))}
                     </div>
                 </div>
-                <Button className="w-full pt-auto" onClick={() => handleScholarship()} disabled={latestCohort?.status === 'dropped'}>
+                <Button className="w-full pt-auto" onClick={() => handleScholarship()} disabled={loading || latestCohort?.status === 'dropped'}>
                     Update Status
                 </Button>
             </div>

@@ -327,9 +327,9 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
       }
     }
   } else if (paymentDetails?.paymentPlan === 'instalments') {
-    paymentDetails?.installments.forEach((semesterDetail: any) => {
+    paymentDetails?.installments?.forEach((semesterDetail: any) => {
       const installments = semesterDetail?.installments;
-      installments.forEach((instalment: any) => {
+      installments?.forEach((instalment: any) => {
         if (instalment?.verificationStatus === 'paid') {
           paidAmount += instalment?.amountPayable;
         } else {

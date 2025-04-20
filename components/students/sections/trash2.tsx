@@ -102,7 +102,7 @@
 //   }, []);
 
 //   const abortAllRequests = () => {
-//     activeRequests.current.forEach((controller) => controller.abort());
+//     activeRequests.current?.forEach((controller) => controller.abort());
 //     activeRequests.current.clear();
 //   };
 
@@ -199,7 +199,7 @@
 //     const results = {};
 //     const abortController = new AbortController();
 
-//     chunkIndexes.forEach((index) => {
+//     chunkIndexes?.forEach((index) => {
 //       results[index] = false;
 //     });
 

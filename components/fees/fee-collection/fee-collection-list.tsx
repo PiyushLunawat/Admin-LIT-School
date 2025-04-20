@@ -203,9 +203,9 @@ export function FeeCollectionList({
               paidDate = earliestUnpaid?.receiptUrls?.uploadedDate
             }
 
-            lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+            lastEnrolled?.installmentDetails?.forEach((semesterDetail: any) => {
               const installments = semesterDetail?.installments;
-              installments.forEach((installment: any) => {
+              installments?.forEach((installment: any) => {
                 if (installment?.verificationStatus === 'paid') {
                   paidCount += 1;
                 } else {

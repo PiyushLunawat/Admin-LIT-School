@@ -103,7 +103,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       let totalPercentage = 0;
       let percentageCount = 0;
   
-      applications.forEach((application) => {
+      applications?.forEach((application) => {
         const scholarship = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
         const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
         
@@ -136,7 +136,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       let oneShotAmountPaid = 0;
       let installmentAmountPaid = 0;
 
-      applications.forEach((application) => {
+      applications?.forEach((application) => {
         const lastEnrolled = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
         if (!lastEnrolled) return;
 
@@ -151,9 +151,9 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
         }
         // Installments Processing
         if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-          lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+          lastEnrolled?.installmentDetails?.forEach((semesterDetail: any) => {
             const installments = semesterDetail?.installments;
-            installments.forEach((installment: any) => {
+            installments?.forEach((installment: any) => {
               if (installment?.verificationStatus === 'paid') {
                 installmentAmountPaid += installment?.amountPayable;
               }

@@ -23,7 +23,7 @@ import { ReviewComponent } from "./litmus-test-dialog/review";
 import { getStudents } from "@/app/api/student";
 import { DateRange } from "react-day-picker";
 
-type BadgeVariant = "destructive" | "onhold" | "pending" | "success" | "default";
+type BadgeVariant = "destructive" | "onhold" | "pending" | "success" | "lemon" | "default";
 
 interface LitmusTestListProps {
   applications: any
@@ -53,6 +53,10 @@ export function LitmusTestList({
         return "onhold";
       case "completed":
         return "success";
+      case "interview scheduled":
+        return "default";
+      case "interview rescheduled":
+        return "lemon";
       case "dropped":
         return "destructive";
       default:
@@ -95,6 +99,29 @@ export function LitmusTestList({
       onSubmissionSelect(null);
     }
   }, [applications]);
+
+  function checkInterviewStatus(interviews: any): string {
+    let status = 'interview scheduled';
+  
+    if (interviews.length > 1) {
+      status = 'interview rescheduled';
+    }
+  
+    const lastInterview = interviews[interviews.length - 1];
+    const currentTime = new Date();
+  
+    if (lastInterview?.meetingDate && lastInterview?.endTime) {
+      const meetingEnd = new Date(
+        new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime
+      );
+  
+      // console.log("timee", meetingEnd < currentTime, meetingEnd, currentTime);
+      if (meetingEnd < currentTime) {
+        status = "interview concluded";
+      }
+    }
+    return status;
+  }
 
   return (
     applications.length === 0 ?
@@ -152,6 +179,10 @@ export function LitmusTestList({
                 {latestCohort?.status === 'dropped' ?
                   <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(latestCohort?.status)}>
                     {latestCohort?.status}
+                  </Badge> :
+                  litmusTestDetails?.status === 'interview scheduled' ?
+                  <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(checkInterviewStatus(litmusTestDetails?.litmusTestInterviews))}>
+                    {checkInterviewStatus(litmusTestDetails?.status)}
                   </Badge> :
                   <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
                     {litmusTestDetails?.status || "pending"}

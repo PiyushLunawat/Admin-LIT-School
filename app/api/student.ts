@@ -168,32 +168,27 @@ export async function updateLitmusTaskStatus(
 }
 
 export async function updateScholarship(payLoad: any) {
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/admin/update-scholarship`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payLoad),
-      }
-    );
-
-    if (!response.ok) {
-      const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
-      throw new Error(
-        `Failed to update scholarship. ${
-          errorDetails
-            ? `${errorDetails.message || JSON.stringify(errorDetails)}`
-            : ""
-        }`
-      );
+  const response = await fetch(
+    `${process.env.API_URL}/admin/update-scholarship`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payLoad),
     }
+  );
 
-    return await response.json(); // Parse and return the response JSON
-  } catch (error) {
-    console.error("Error in updateScholarship:", error);
-    throw error;
+  if (!response.ok) {
+    const errorDetails = await response.json().catch(() => null); // Handle non-JSON responses
+    throw new Error(
+      `Failed to update scholarship. ${
+        errorDetails
+          ? `${errorDetails.message || JSON.stringify(errorDetails)}`
+          : ""
+      }`
+    );
   }
+
+  return await response.json(); // Parse and return the response JSON
 }
 
 // New API for uploading student documents

@@ -73,9 +73,9 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
     }
   }
   if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-    lastEnrolled?.installmentDetails.forEach((semesterDetail: any) => {
+    lastEnrolled?.installmentDetails?.forEach((semesterDetail: any) => {
       const installments = semesterDetail?.installments;
-      installments.forEach((instalment: any) => {
+      installments?.forEach((instalment: any) => {
         if (instalment?.verificationStatus === 'paid') {
           paidAmount += instalment?.amountPayable;
         } else {

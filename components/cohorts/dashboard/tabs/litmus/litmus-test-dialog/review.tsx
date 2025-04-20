@@ -39,6 +39,7 @@ export function ReviewComponent({
   onClose
 }: ReviewComponentProps) {
 
+  const [loading, setLoading] = useState(false);
   const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId;
   const litmusTestDetails = latestCohort?.litmusTestDetails;
@@ -97,7 +98,7 @@ export function ReviewComponent({
     let changed = false;
     const updatedFeedbackInputs = { ...feedbackInputs };
   
-    sections.forEach((section) => {
+    sections?.forEach((section) => {
       if (section.data && section.data.length > 0) {
         const bulletLines = section.data.map((line) => `• ${line}`).join("\n");
         if (updatedFeedbackInputs[section.title] !== bulletLines) {
@@ -258,8 +259,8 @@ export function ReviewComponent({
 
     let totalScore = 0;
     let maxScore = 0;
-    results.forEach((taskResult: any) => {
-      taskResult.score.forEach((criterion: any) => {
+    results?.forEach((taskResult: any) => {
+      taskResult.score?.forEach((criterion: any) => {
         totalScore += criterion.score;       // the actual score
         maxScore += Number(criterion.totalScore);    // the possible max
       });
@@ -317,7 +318,7 @@ export function ReviewComponent({
     }
 
     console.log("reviewresults", reviewPayload);
-    
+    setLoading(true);
     try {
       console.log("Submitting to updateLitmusTaskStatus...");
       const response = await updateLitmusTaskStatus( litmusTestDetails?._id, reviewPayload );
@@ -326,6 +327,8 @@ export function ReviewComponent({
       onClose();
     } catch (error) {
       console.error("Update Failed:", error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -582,7 +585,7 @@ export function ReviewComponent({
 
       {/* Publish Button */}
       <div className="text-center">
-        <Button className="w-full" onClick={handlePublish} disabled={!canPublish() || latestCohort?.status === 'dropped'}>
+        <Button className="w-full" onClick={handlePublish} disabled={loading || !canPublish() || latestCohort?.status === 'dropped'}>
           Publish Review
         </Button>
       </div>

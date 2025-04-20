@@ -108,7 +108,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
     // Collect all file URLs
     const urls: string[] = [];
   
-    tasks.forEach((taskObj, index) => {
+    tasks?.forEach((taskObj, index) => {
       const task = taskObj?.task;
       if (!task) return;
     
@@ -123,7 +123,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
     });
   
     // Download each URL
-    urls.forEach((url) => {
+    urls?.forEach((url) => {
       // Derive a filename from the URL (optional)
     console.log(`URL:`, url);
 
@@ -257,7 +257,7 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
                 let totalPercentage = 0;
                 let maxScore = 0;
       
-                taskScores.forEach((task: any) => {
+                taskScores?.forEach((task: any) => {
                   const taskScore = task?.score?.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
                   const taskMaxScore = task?.score?.reduce((acc: any, criterion: any) => acc + Number(criterion.totalScore), 0);
                   const taskPercentage = taskMaxScore ? (taskScore / taskMaxScore) * 100 : 0;

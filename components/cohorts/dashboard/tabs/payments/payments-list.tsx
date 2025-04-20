@@ -99,7 +99,7 @@ export function PaymentsList({
 
   useEffect(() => {
     if (applications.length > 0) {      
-      const firstApplication = applications[0];
+      const firstApplication = applications?.[0];
       setSelectedRowId(firstApplication._id); 
       onStudentSelect(firstApplication); 
     } else {
@@ -167,7 +167,7 @@ export function PaymentsList({
             }
             if (paymentDetails?.paymentPlan === 'instalments') {
               const installmentsDetails = paymentDetails?.installments
-              let earliestUnpaid= installmentsDetails?.[0]?.installments[0];
+              let earliestUnpaid= installmentsDetails?.[0]?.installments?.[0];
               let allPaid = true;
 
               outer: for (const semesterDetail of installmentsDetails || []) {
@@ -192,9 +192,9 @@ export function PaymentsList({
                 paymentStatus = earliestUnpaid.verificationStatus;
               }
 
-              installmentsDetails.forEach((semesterDetail: any) => {
+              installmentsDetails?.forEach((semesterDetail: any) => {
                 const installments = semesterDetail?.installments;
-                installments.forEach((installment: any) => {
+                installments?.forEach((installment: any) => {
                   if (installment?.verificationStatus === 'paid') {
                     paidCount += 1;
                   } else {

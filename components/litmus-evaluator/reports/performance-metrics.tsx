@@ -40,7 +40,7 @@ export function PerformanceMetrics({ applications }: PerformanceMetricsProps) {
 
       let high = 0, good = 0, average = 0, weak = 0;
 
-      applications.forEach((application: any) => {
+      applications?.forEach((application: any) => {
         const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
         const litmusTestDetails = latestCohort?.litmusTestDetails;
         if (litmusTestDetails?.status === "completed") {
@@ -56,7 +56,7 @@ export function PerformanceMetrics({ applications }: PerformanceMetricsProps) {
           const taskScores = litmusTestDetails?.results || [];
           let totalScore = 0;
 
-          taskScores.forEach((task: any) => {
+          taskScores?.forEach((task: any) => {
             const taskScore = task?.score?.reduce((acc: any, criterion: any) => acc + criterion.score, 0);
             const taskMaxScore = task?.score?.reduce((acc: any, criterion: any) => acc + Number(criterion.totalScore), 0);
             const taskPercentage = taskMaxScore ? (taskScore / taskMaxScore) * 100 : 0;

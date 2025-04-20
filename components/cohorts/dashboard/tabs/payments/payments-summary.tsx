@@ -78,7 +78,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         });
       }
 
-      applications.forEach((application) => {
+      applications?.forEach((application) => {
         const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
         const litmusTestDetails = latestCohort?.litmusTestDetails;
         const tokenFeeDetails = latestCohort?.tokenFeeDetails;
@@ -111,10 +111,10 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
         // Installments Processing
         if (paymentDetails?.paymentPlan === 'instalments') {
-          paymentDetails?.installments.forEach((semesterDetail: any, semIndex: any) => {
+          paymentDetails?.installments?.forEach((semesterDetail: any, semIndex: any) => {
             const semesterNumber = semesterDetail?.semester;
             const installments = semesterDetail?.installments;
-            installments.forEach((installment: any, instIndex: any) => {
+            installments?.forEach((installment: any, instIndex: any) => {
               if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
                 breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
                 if (installment?.verificationStatus === 'paid') {
@@ -128,9 +128,9 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
           });
 
           // Calculate total installments expected and received
-          paymentDetails?.installments.forEach((semesterDetail: any) => {
+          paymentDetails?.installments?.forEach((semesterDetail: any) => {
             const installments = semesterDetail?.installments;
-            installments.forEach((installment: any) => {
+            installments?.forEach((installment: any) => {
               installmentAmount += installment?.amountPayable;
               if (installment?.verificationStatus === 'paid') {
                 installmentAmountPaid += installment?.amountPayable;
@@ -138,8 +138,8 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
               // Scholarships
               if (semesterDetail?.scholarshipDetails) {
-                semesterDetail.scholarshipDetails.forEach((scholarship: any) => {
-                  scholarship?.installments.forEach((install: any) => {
+                semesterDetail.scholarshipDetails?.forEach((scholarship: any) => {
+                  scholarship?.installments?.forEach((install: any) => {
                     if (install.scholarshipAmount) {
                       totalScholarship += install?.scholarshipAmount;
                       scholarshipCount += 1;
@@ -158,7 +158,7 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         }
 
         const scholarships = scholarshipDetails?.installmentDetails?.flatMap((semester: any) => semester.installments) || [];
-         scholarships.forEach((installment: any) => {
+         scholarships?.forEach((installment: any) => {
            if (installment?.scholarshipAmount) {
              totalScholarship += installment?.scholarshipAmount;
              scholarshipCount += 1;

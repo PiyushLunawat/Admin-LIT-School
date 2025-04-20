@@ -185,7 +185,7 @@ export function NotificationsButton() {
     };
 
     const userEvents = ["mousemove", "keydown", "click", "scroll"];
-    userEvents.forEach((event) => window.addEventListener(event, updateActivity));
+    userEvents?.forEach((event) => window.addEventListener(event, updateActivity));
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
@@ -199,7 +199,7 @@ export function NotificationsButton() {
       socket.off("ping", handlePing);
       socket.off("newNotification", handleNewNotification);
       socket.off("unreadNotifications", handleUnreadNotifications);
-      userEvents.forEach((event) => window.removeEventListener(event, updateActivity));
+      userEvents?.forEach((event) => window.removeEventListener(event, updateActivity));
     };
   }, [adminId, status.online]);
 

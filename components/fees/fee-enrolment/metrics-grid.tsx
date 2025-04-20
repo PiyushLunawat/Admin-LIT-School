@@ -66,7 +66,7 @@ export function MetricsGrid({ applications }: MetricGridProps) {
 
       const today = new Date().toISOString().split('T')[0]; // get current date in YYYY-MM-DD format
 
-      applications.forEach((application: any) => {
+      applications?.forEach((application: any) => {
         const lastTokenFeeDetail = application?.cousrseEnrolled?.[application?.cousrseEnrolled?.length - 1]?.tokenFeeDetails;
         const cohortFeesDetail = application?.cohort?.cohortFeesDetail;
         
