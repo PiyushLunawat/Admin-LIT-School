@@ -47,6 +47,8 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
   const [open, setOpen] = useState(false);
   const [viewDoc, setViewDoc] = useState("");
 
+  const [downloading, setDownloading] = useState(false);
+
   const reqDocuments = [
     {
       id: "aadharDocument",
@@ -131,6 +133,7 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
   };
 
   const handleFileDownload = async (url: string, docName: string) => {
+  setDownloading(true)
   try {
     // 1. Fetch the file as Blob
     const response = await fetch(url);
@@ -151,6 +154,8 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
     URL.revokeObjectURL(blobUrl);
   } catch (err) {
     console.error("Download failed", err);
+  } finally {
+    setDownloading(false)
   }
 };
 
@@ -356,10 +361,26 @@ export function DocumentsTab({ student, onApplicationUpdate }: DocumentsTabProps
                       <Button variant="ghost" size="sm" onClick={() => { setOpen(true); setViewDoc(docDetails?.url)}}>
                         <Eye className="h-4 w-4 mr-2" /> View
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleFileDownload(docDetails?.url, doc.name)}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
+                      {docDetails?.status === 'flagged' ?
+                        <div className="flex items-center gap-2">
+                          <label htmlFor={`file-input-${doc.id}`} className="cursor-pointer">
+                            <Button variant="outline" asChild disabled={latestCohort?.status === 'dropped'}>
+                              <span>Choose File</span>
+                            </Button>
+                            <input
+                              type="file"
+                              accept="application/pdf"
+                              className="hidden"
+                              id={`file-input-${doc.id}`}
+                              onChange={(e) => handleFileChange(e, doc.id)}
+                            />
+                          </label>
+                        </div> :
+                        <Button variant="ghost" size="sm" onClick={() => handleFileDownload(docDetails?.url, doc.name)} disabled={downloading}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      }
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">

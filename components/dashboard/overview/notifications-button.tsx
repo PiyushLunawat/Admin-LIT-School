@@ -6,15 +6,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Banknote, Bell, Bot, FileText, Megaphone, Users, Wallet, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Cookies from "js-cookie";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const NETWORK_CHECK_INTERVAL = 15000; // 15 seconds
 
@@ -47,6 +41,7 @@ export function NotificationsButton() {
   const [adminId, setAdminId] = useState<string | undefined>();
   const [status, setStatus] = useState<ConnectionStatus>({
     connected: false,
+    // online: navigator.onLine,
     online: true,
     lastActivity: new Date().toISOString(),
   });
@@ -88,6 +83,7 @@ export function NotificationsButton() {
   // Periodic network checking
   useEffect(() => {
     const checkNetwork = () => {
+      // const isOnline = navigator.onLine;
       const isOnline = true;
 
       if (isOnline && !status.online) {
@@ -244,8 +240,8 @@ export function NotificationsButton() {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Popover>
+        <PopoverTrigger >
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             {notifications.length > 0 && (
@@ -259,72 +255,79 @@ export function NotificationsButton() {
               }`}
             />
           </Button>
-        </DropdownMenuTrigger>
+        </PopoverTrigger>
 
-        <DropdownMenuContent align="end" className="w-[400px] max-h-[400px] min-h-[80px] overflow-y-auto">
-          <DropdownMenuGroup className="space-y-1.5">
-            {notifications.length === 0 ? (
-              <DropdownMenuLabel className="text-base text-center mt-[20px] text-muted-foreground font-normal">
-                No notifications
-              </DropdownMenuLabel>
+        <PopoverContent align="end" className="flex flex-col w-[400px] p-1 max-h-[400px] min-h-[80px] justify-center">
+          {notifications.length === 0 ? (
+            <Label className="text-base text-center text-muted-foreground font-normal">
+              No notifications
+            </Label>
             ) : (
-              notifications.map((notification) => (
-                <DropdownMenuItem
-                  key={notification.notificationId}
-                  className="flex flex-col gap-1 items-start p-2"
-                  style={{ backgroundColor: `${getStatusColor(notification.status)}20` }}
-                >
-                  <div className="flex items-center justify-between text-[10px] w-full">
-                    <div className="text-muted-foreground">
+            <div className="flex flex-col justify-center">
+              <div className="flex flex-col gap-1.5 max-h-[360px] min-h-[80px] overflow-y-auto">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.notificationId}
+                    className="flex flex-col gap-1 rounded-lg items-start p-2"
+                    style={{ backgroundColor: `${getStatusColor(notification.status)}20` }}
+                  >
+                    <div className="flex items-center justify-between text-[10px] w-full">
+                      <div className="text-muted-foreground">
                       {new Date(notification.timestamp).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
+                        hour12: true,
                       })}
-                    </div>
-                    <div
-                      className="rounded px-1 font-semibold"
-                      style={{
-                        backgroundColor: `${getStatusColor(notification.status || "")}40`,
-                      }}
-                    >
-                      {notification.cohortTitle}
-                    </div>
-                  </div>
-
-                  <div className="w-full flex justify-between items-center">
-                    <div className="flex flex-1 items-center gap-2 mb-1">
+                      </div>
                       <div
-                        className="p-4 rounded-full"
+                        className="rounded px-1 font-semibold"
                         style={{
                           backgroundColor: `${getStatusColor(notification.status || "")}40`,
                         }}
                       >
-                        {geCohortIcon(notification.type || "")}
-                      </div>
-                      <div>
-                        <div
-                          className="text-base font-medium"
-                          style={{ color: notification.status ? getStatusColor(notification.status) : "#ffffff" }}
-                        >
-                          {notification.title}
-                        </div>
-                        <p className="text-xs">{notification.message}</p>
+                        {notification.cohortTitle}
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveNotification(notification.notificationId)}
-                    >
-                      <XIcon className="w-4 h-4" />
-                    </Button>
+
+                    <div className="w-full flex justify-between items-center">
+                      <div className="flex flex-1 items-center gap-2 mb-1">
+                        <div
+                          className="p-4 rounded-full"
+                          style={{
+                            backgroundColor: `${getStatusColor(notification.status || "")}40`,
+                          }}
+                        >
+                          {geCohortIcon(notification.type || "")}
+                        </div>
+                        <div>
+                          <div
+                            className="text-base font-medium"
+                            style={{ color: notification.status ? getStatusColor(notification.status) : "#ffffff" }}
+                          >
+                            {notification.title}
+                          </div>
+                          <p className="text-xs">{notification.message}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveNotification(notification.notificationId)}
+                      >
+                        <XIcon className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </DropdownMenuItem>
-              ))
+                  ))}
+              </div>
+              <Button variant={'link'} className="text-xs text-muted-foreground underline mx-auto"
+                onClick={() => setNotifications([])}>
+                  Clear All
+              </Button>
+            </div>
             )}
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
 
       <ToastContainer />
     </>

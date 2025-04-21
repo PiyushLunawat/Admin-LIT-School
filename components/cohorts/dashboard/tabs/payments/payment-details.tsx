@@ -21,6 +21,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "@/components/ui/carousel"
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -677,12 +678,25 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
             }             
             </Card> : 
             <div className="space-y-2">
-              <Tabs defaultValue={'1'} className="space-y-4">
-              {visibleSemesters?.map( (semesterDetail: any, semesterIndex: number) => (
-                <TabsList variant='ghost'>
-                  <TabsTrigger key={`${semesterDetail.semester}`} variant="xs" value={`${semesterDetail.semester}`}>Sem {semesterDetail.semester}</TabsTrigger>
-                </TabsList>
-              ))}
+             <Tabs defaultValue="1" className="space-y-4">
+              <TabsList variant="ghost" className="w-full pl-">
+                <Carousel className="w-[320px]">
+                  <CarouselContent className="overflow-x-auto">
+                    {visibleSemesters?.map((semesterDetail: any, semesterIndex: number) => (
+                      <CarouselItem className="basis-1/5" key={semesterIndex}>
+                        <TabsTrigger 
+                          variant="xs" 
+                          value={`${semesterIndex + 1}`}
+                        >
+                          Sem {semesterIndex + 1}
+                        </TabsTrigger>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              </TabsList>
               {visibleSemesters?.map( (semesterDetail: any, semesterIndex: number) => (
                 <TabsContent value={`${semesterDetail.semester}`}>
                   <div key={semesterIndex} className="space-y-2">
