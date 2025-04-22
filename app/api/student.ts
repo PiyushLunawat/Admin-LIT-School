@@ -264,7 +264,7 @@ export async function verifyFeeStatus(payload: any) {
   const response = await fetch(
     `${process.env.API_URL}/admin/verify-sem-fee-installments`,
     {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }

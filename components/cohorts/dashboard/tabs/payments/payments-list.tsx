@@ -170,16 +170,13 @@ export function PaymentsList({
               let earliestUnpaid= installmentsDetails?.[0]?.installments?.[0];
               let allPaid = true;
 
-              outer: for (const semesterDetail of installmentsDetails || []) {
-                for (const installment of semesterDetail.installments || []) {
+                for (const installment of installmentsDetails || []) {
                   if (installment.verificationStatus !== "paid") {
                     allPaid = false;
                     earliestUnpaid = installment;
-                    break outer;
+                    break;
                   }
                 }
-              }
-              
               if (allPaid) {
                 paymentStatus = "Complete";
                 dueDate = "--";
@@ -191,16 +188,13 @@ export function PaymentsList({
                 dueDate = new Date(earliestUnpaid.installmentDate).toLocaleDateString();
                 paymentStatus = earliestUnpaid.verificationStatus;
               }
-
-              installmentsDetails?.forEach((semesterDetail: any) => {
-                const installments = semesterDetail?.installments;
-                installments?.forEach((installment: any) => {
-                  if (installment?.verificationStatus === 'paid') {
-                    paidCount += 1;
-                  } else {
-                    notPaidCount += 1;
-                  }    
-                });
+        
+              installmentsDetails?.forEach((installment: any) => {
+                if (installment?.verificationStatus === 'paid') {
+                  paidCount += 1;
+                } else {
+                  notPaidCount += 1;
+                }    
               });
             }
 
