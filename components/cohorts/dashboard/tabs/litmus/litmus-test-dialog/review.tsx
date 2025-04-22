@@ -136,33 +136,15 @@ export function ReviewComponent({
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
-  
-      const textarea = e.target as HTMLTextAreaElement;
-      const { selectionStart, selectionEnd } = textarea;
-  
       setFeedbackInputs((prev) => {
-        const currentValue = prev[title] || "";
-        const beforeCursor = currentValue.substring(0, selectionStart);
-        const afterCursor = currentValue.substring(selectionEnd);
-  
-        const newValue = beforeCursor + "\n• " + afterCursor;
-  
+        const newValue = prev[title] + "\n• ";
         return {
           ...prev,
-          [title]: newValue,
+          [title]: formatInput(newValue),
         };
       });
-  
-      // Set cursor after the inserted bullet point (optional, but feels better UX)
-      requestAnimationFrame(() => {
-        const textarea = document.getElementById(title) as HTMLTextAreaElement;
-        if (textarea) {
-          const newCursorPos = selectionStart + 3; // "\n• " is 3 characters
-          textarea.setSelectionRange(newCursorPos, newCursorPos);
-        }
-      });
     }
-  };  
+  };
 
   const handleSectionChange = (
     title: string,
@@ -588,7 +570,7 @@ export function ReviewComponent({
               </h4>
               <Textarea
                 id={section.title}
-                defaultValue={feedbackInputs[section.title] ?? ""}
+                value={feedbackInputs[section.title]}
                 className="px-3 text-sm"
                 onChange={(e) => handleSectionChange(section.title, e)}
                 onKeyDown={(e) => handleSectionKeyDown(section.title, e)}

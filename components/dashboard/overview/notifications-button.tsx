@@ -269,7 +269,7 @@ export function NotificationsButton() {
                   <div
                     key={notification.notificationId}
                     className="flex flex-col gap-1 rounded-lg items-start p-2"
-                    style={{ backgroundColor: `${getStatusColor(notification.status)}20` }}
+                    style={{ backgroundColor: `${getStatusColor(notification.status || "")}20` }}
                   >
                     <div className="flex items-center justify-between text-[10px] w-full">
                       <div className="text-muted-foreground">
@@ -302,7 +302,7 @@ export function NotificationsButton() {
                         <div>
                           <div
                             className="text-base font-medium"
-                            style={{ color: notification.status ? getStatusColor(notification.status) : "#ffffff" }}
+                            style={{ color: notification.status ? getStatusColor(notification.status || "") : "#ffffff" }}
                           >
                             {notification.title}
                           </div>

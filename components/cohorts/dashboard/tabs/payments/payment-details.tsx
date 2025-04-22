@@ -303,9 +303,21 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
     ////////////////////////
   let lastStatus = '';
 
-  const visibleSemesters = paymentDetails?.installments
-  // ?.slice(0, 1); 
+  function groupInstallmentsBySemester(installments: any[] = []): any[][] {
+    const grouped = installments.reduce((acc, installment) => {
+      const semester = installment.semester;
+      if (!acc[semester]) {
+        acc[semester] = [];
+      }
+      acc[semester].push(installment);
+      return acc;
+    }, {} as Record<number, any[]>);
+  
+    return Object.values(grouped);
+  } 
 
+  const visibleSemesters = groupInstallmentsBySemester(paymentDetails?.installments);
+  console.log(visibleSemesters);
 
   const colorClasses = ['text-emerald-600', 'text-[#3698FB]', 'text-[#FA69E5]', 'text-orange-600'];
 
