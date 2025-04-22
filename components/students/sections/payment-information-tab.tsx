@@ -305,7 +305,19 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
     const fallbackScholarship = cohortDetails.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );
-    const finalScholarship = paymentDetails?.installments;
+    function groupInstallmentsBySemester(installments: any[] = []): any[][] {
+      const grouped = installments.reduce((acc, installment) => {
+        const semester = installment.semester;
+        if (!acc[semester]) {
+          acc[semester] = [];
+        }
+        acc[semester].push(installment);
+        return acc;
+      }, {} as Record<number, any[]>);
+    
+      return Object.values(grouped);
+    } 
+    const finalScholarship = groupInstallmentsBySemester(paymentDetails?.installments);
     if (finalScholarship) {
       setFeeStructure(finalScholarship);
     }
@@ -596,13 +608,13 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
               }             
               </Card> : 
               <div className="space-y-2">
-              {visibleSemesters?.map((semesterDetails: any, semesterIndex: number) => (
+              {visibleSemesters?.map((installments: any, semesterIndex: any) => (
                 <div key={semesterIndex}>
                   <Badge variant="blue" className="capitalize mb-3">
-                    Semester {semesterDetails.semester}
+                    Semester {semesterIndex + 1}
                   </Badge>
                   <div className="space-y-4">
-                    {semesterDetails.installments?.map((instalment: any, instalmentIndex: number) => (
+                    {installments?.map((instalment: any, instalmentIndex: number) => (
                       <div key={instalmentIndex} className="border rounded-lg p-4 space-y-2">
                         <div className="flex justify-between items-start">
                           <div>
@@ -661,20 +673,20 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
                             </Button>
                           ) : instalment.verificationStatus === 'verifying' ? (
                             <Button variant="outline" size="sm" className="w-full mt-2"
-                              onClick={() => handleVerifyDialog(instalment, instalmentIndex + 1,semesterDetails.semester)}>
+                              onClick={() => handleVerifyDialog(instalment, instalmentIndex + 1,instalment?.semester)}>
                               <EyeIcon className="h-4 w-4 mr-2" />
                               Acknowledgement Receipt
                             </Button>
-                          ) : uploadStates[`${instalmentIndex + 1}${semesterDetails.semester}`]?.uploading ?
+                          ) : uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploading ?
                           <div className="flex flex-1 justify-between items-center gap-4 truncate">
                             {/* <div className="flex flex-1 truncate">{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.fileName}</div> */}
                             <div className="flex items-center gap-2">
-                              {uploadStates[`${instalmentIndex + 1}${semesterDetails.semester}`]?.uploadProgress === 100 ? (
+                              {uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress === 100 ? (
                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                               ) : (
                                 <>
-                                  <Progress className="h-2 w-20" states={[ { value: uploadStates[`${instalmentIndex + 1}${semesterDetails.semester}`]?.uploadProgress, widt: uploadStates[`${instalmentIndex + 1}${semesterDetails.semester}`]?.uploadProgress, color: '#ffffff' }]} />
-                                  <span>{uploadStates[`${instalmentIndex + 1}${semesterDetails.semester}`]?.uploadProgress}%</span>
+                                  <Progress className="h-2 w-20" states={[ { value: uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress, widt: uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress, color: '#ffffff' }]} />
+                                  <span>{uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress}%</span>
                                 </>
                               )}
                               <Button variant="ghost" size="sm">
@@ -684,7 +696,7 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
                           </div> : (
                           (paymentDetails && lastStatus !== 'pending') &&
                             <label className="cursor-pointer w-full">
-                              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${instalmentIndex + 1}${semesterDetails.semester}`)?.click()} disabled={latestCohort?.status === 'dropped'}>
+                              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${instalmentIndex + 1}${instalment?.semester}`)?.click()} disabled={latestCohort?.status === 'dropped'}>
                                 <UploadIcon className="h-4 w-4 mr-2" />
                                 Upload Receipt
                               </Button>
@@ -693,9 +705,9 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                id={`file-input-${instalmentIndex + 1}${semesterDetails.semester}`}
+                                id={`file-input-${instalmentIndex + 1}${instalment?.semester}`}
                                 onChange={(e) => {
-                                  handleFileChange(e, paymentDetails?._id, false, instalmentIndex + 1, semesterDetails.semester);
+                                  handleFileChange(e, paymentDetails?._id, false, instalmentIndex + 1, instalment?.semester);
                                 }}
                               />
                             </label>

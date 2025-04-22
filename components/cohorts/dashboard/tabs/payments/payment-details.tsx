@@ -693,7 +693,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
              <Tabs defaultValue="1" className="space-y-4">
               <TabsList variant="ghost" className="w-full pl-">
                 <Carousel className="w-[320px]">
-                  <CarouselContent className="overflow-x-auto">
+                  <CarouselContent className="">
                     {visibleSemesters?.map((semesterDetail: any, semesterIndex: number) => (
                       <CarouselItem className="basis-1/5" key={semesterIndex}>
                         <TabsTrigger 
@@ -709,15 +709,15 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   <CarouselNext />
                 </Carousel>
               </TabsList>
-              {visibleSemesters?.map( (semesterDetail: any, semesterIndex: number) => (
-                <TabsContent value={`${semesterDetail.semester}`}>
+              {visibleSemesters?.map((installments: any, semesterIndex: any) => (
+                <TabsContent value={`${semesterIndex + 1}`}>
                   <div key={semesterIndex} className="space-y-2">
-                  {semesterDetail?.installments?.map((instalment: any, installmentIndex: number) => (
+                  {installments?.map((instalment: any, installmentIndex: number) => (
                     <Card key={installmentIndex} className="p-4 space-y-2">
                       <div className="flex justify-between items-center">
                         <div>
                           <h5 className="font-medium">instalment {installmentIndex + 1}</h5>
-                          <p className="text-xs text-[#00A3FF]">Semester {semesterDetail.semester}</p>
+                          <p className="text-xs text-[#00A3FF]">Semester {instalment?.semester}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           {lastStatus !== 'pending' && (
@@ -768,20 +768,20 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                         </Button>
                       ) : instalment.verificationStatus === 'verifying' ? (
                         <Button variant="outline" size="sm" className="w-full mt-2"
-                          onClick={() => handleVerifyDialog(instalment, installmentIndex + 1,semesterDetail.semester)}>
+                          onClick={() => handleVerifyDialog(instalment, installmentIndex + 1,instalment?.semester)}>
                           <EyeIcon className="h-4 w-4 mr-2" />
                           Acknowledgement Receipt
                         </Button>
-                      ) : uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploading ?
+                      ) : uploadStates[`${installmentIndex + 1}${instalment?.semester}`]?.uploading ?
                       <div className="flex flex-1 justify-between items-center gap-4 truncate">
                         {/* <div className="flex flex-1 truncate">{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.fileName}</div> */}
                         <div className="flex items-center gap-2">
-                          {uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress === 100 ? (
+                          {uploadStates[`${installmentIndex + 1}${instalment?.semester}`]?.uploadProgress === 100 ? (
                             <LoaderCircle className="h-4 w-4 animate-spin" />
                           ) : (
                             <>
-                              <Progress className="h-2 w-20" states={[ { value: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, widt: uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress, color: '#ffffff' }]} />
-                              <span>{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.uploadProgress}%</span>
+                              <Progress className="h-2 w-20" states={[ { value: uploadStates[`${installmentIndex + 1}${instalment?.semester}`]?.uploadProgress, widt: uploadStates[`${installmentIndex + 1}${instalment?.semester}`]?.uploadProgress, color: '#ffffff' }]} />
+                              <span>{uploadStates[`${installmentIndex + 1}${instalment?.semester}`]?.uploadProgress}%</span>
                             </>
                           )}
                           <Button variant="ghost" size="sm">
@@ -791,7 +791,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                       </div> : (
                       lastStatus !== 'pending' &&
                         <label className="cursor-pointer w-full">
-                          <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${installmentIndex + 1}${semesterDetail.semester}`)?.click()}
+                          <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => document.getElementById(`file-input-${installmentIndex + 1}${instalment?.semester}`)?.click()}
                             disabled={latestCohort?.status === 'dropped'}>
                             <UploadIcon className="h-4 w-4 mr-2" />
                             Upload Receipt
@@ -801,9 +801,9 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            id={`file-input-${installmentIndex + 1}${semesterDetail.semester}`}
+                            id={`file-input-${installmentIndex + 1}${instalment?.semester}`}
                             onChange={(e) => {
-                              handleFileChange(e, paymentDetails?._id, false, installmentIndex + 1, semesterDetail.semester);
+                              handleFileChange(e, paymentDetails?._id, false, installmentIndex + 1, instalment?.semester);
                             }}
                           />
                         </label>
