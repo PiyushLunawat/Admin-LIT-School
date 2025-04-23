@@ -248,7 +248,7 @@ export async function verifyTokenAmount(
 
 export async function uploadFeeReceipt(payload: any) {
   const response = await fetch(`${process.env.API_URL}/admin/add-receipt`, {
-    method: "POST",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });

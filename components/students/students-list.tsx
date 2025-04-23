@@ -159,6 +159,65 @@ export function StudentsList({
                   'text-orange-600 !bg-orange-600/20 border-orange-600'
                 ];
 
+            let paymentStage = "";
+            let paymentStatus = "pending";
+            const paymentDetails = latestCohort?.paymentDetails;
+
+            if(!paymentDetails?.paymentPlan) {
+              paymentStatus = tokenFeeDetails?.verificationStatus ;
+              paymentStage = `Adm. Fee`
+            } else if (paymentDetails?.paymentPlan === 'one-shot') {
+              const oneShotDetails = paymentDetails?.oneShotPayment;
+              if (oneShotDetails) {
+                // if (oneShotDetails?.verificationStatus === 'paid') {
+                //   paidCount += 1;
+                // } else{
+                //   notPaidCount +=1;
+                // }
+
+                if (new Date(oneShotDetails?.installmentDate) < new Date()) {
+                  paymentStatus = "overdue";
+                  paymentStage = `One-Shot`
+
+                } else {
+                  paymentStatus = oneShotDetails?.verificationStatus ;
+                  paymentStage = `One-Shot`
+                }
+
+              }
+            } else if (paymentDetails?.paymentPlan === 'instalments') {
+              const installmentsDetails = paymentDetails?.installments
+              let earliestUnpaid= installmentsDetails?.[0]?.installments?.[0];
+              let allPaid = true;
+
+                for (const installment of installmentsDetails || []) {
+                  if (installment.verificationStatus !== "paid") {
+                    allPaid = false;
+                    earliestUnpaid = installment;
+                    break;
+                  }
+                }
+              if (allPaid) {
+                paymentStatus = "Complete";
+                paymentStage = "";
+              } else if (new Date(earliestUnpaid.installmentDate) < new Date()) {
+
+                paymentStage = `S${earliestUnpaid?.semester} Inst.${earliestUnpaid?.installmentNumber}`
+                paymentStatus = "overdue";
+              } else {
+                paymentStage = `S${earliestUnpaid?.semester} Inst.${earliestUnpaid?.installmentNumber}`
+                paymentStatus = earliestUnpaid.verificationStatus;
+              }
+        
+              // installmentsDetails?.forEach((installment: any) => {
+              //   if (installment?.verificationStatus === 'paid') {
+              //     paidCount += 1;
+              //   } else {
+              //     notPaidCount += 1;
+              //   }    
+              // });
+            }
+
                 const getColor = (slabName: string): string => {
                   const index = cohortDetails?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
                     (slab: any) => slab.name === slabName
@@ -209,12 +268,13 @@ export function StudentsList({
                       {latestCohort?.status?.toLowerCase() || "not enrolled"}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="space-x-1">
+                    <span className="text-xs text-muted-foreground">{paymentStage}</span>
                     <Badge
                       className="capitalize"
-                      variant={getStatusColor(student?.paymentStatus)}
+                      variant={getStatusColor(paymentStatus)}
                     >
-                      {student?.paymentStatus?.toLowerCase() || "pending"}
+                      {(paymentStatus)?.toLowerCase() || "pending"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -265,12 +325,6 @@ export function StudentsList({
           />
         </DialogContent>
       </Dialog>
-
-      
-      {/* If you want pagination, you can add it here */}
-      {/* <div className="flex items-center justify-end space-x-2 py-4">
-        ...
-      </div> */}
     </>
   );
 }

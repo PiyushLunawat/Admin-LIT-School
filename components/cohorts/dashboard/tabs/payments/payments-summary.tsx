@@ -98,6 +98,8 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
         if (paymentDetails?.paymentPlan === 'one-shot') {
           oneShot += 1;
           const oneShotDetails = paymentDetails?.oneShotPayment;
+          console.log("paymentDetails",paymentDetails);
+          
           if (oneShotDetails) {
             oneShotAmount += oneShotDetails?.amountPayable;
             if (oneShotDetails?.verificationStatus === 'paid') {
@@ -111,34 +113,28 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
 
         // Installments Processing
         if (paymentDetails?.paymentPlan === 'instalments') {
-          paymentDetails?.installments?.forEach((semesterDetail: any, semIndex: any) => {
-            const semesterNumber = semesterDetail?.semester;
-            const installments = semesterDetail?.installments;
-            installments?.forEach((installment: any, instIndex: any) => {
-              if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
-                breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
+            paymentDetails?.installments?.forEach((installment: any, instIndex: any) => {
+              if (breakdown[installment?.semester-1] && breakdown[installment?.semester-1]?.installments[instIndex]) {
+                breakdown[installment?.semester-1].installments[instIndex].total += installment?.amountPayable;
                 if (installment?.verificationStatus === 'paid') {
-                  breakdown[semIndex].installments[instIndex].received += installment?.amountPayable;
+                  breakdown[installment?.semester-1].installments[instIndex].received += installment?.amountPayable;
                 }
                 if (installment?.verificationStatus === 'pending') {
                   pending += 1;
                 }
               }
             });
-          });
 
           // Calculate total installments expected and received
-          paymentDetails?.installments?.forEach((semesterDetail: any) => {
-            const installments = semesterDetail?.installments;
-            installments?.forEach((installment: any) => {
+          paymentDetails?.installments?.forEach((installment: any) => {
               installmentAmount += installment?.amountPayable;
               if (installment?.verificationStatus === 'paid') {
                 installmentAmountPaid += installment?.amountPayable;
               }
 
               // Scholarships
-              if (semesterDetail?.scholarshipDetails) {
-                semesterDetail.scholarshipDetails?.forEach((scholarship: any) => {
+              if (paymentDetails?.scholarshipDetails) {
+                paymentDetails.scholarshipDetails?.forEach((scholarship: any) => {
                   scholarship?.installments?.forEach((install: any) => {
                     if (install.scholarshipAmount) {
                       totalScholarship += install?.scholarshipAmount;
@@ -149,11 +145,10 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
               }
 
               // Scholarship Percentage
-              if (semesterDetail?.scholarshipPercentage !== undefined) {
-                totalPercentage += semesterDetail?.scholarshipPercentage;
+              if (paymentDetails?.scholarshipPercentage !== undefined) {
+                totalPercentage += paymentDetails?.scholarshipPercentage;
                 percentageCount += 1;
               }
-            });
           });
         }
 
@@ -214,126 +209,126 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
   }
 
   return (
-  <>
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Total Expected</CardTitle>
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount)}</div>
-          {/* <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" /> */}
-          <p className="text-xs text-muted-foreground mt-2">
-            {(((totalReceivedCount / totalExpectedCount) * 100) || 0).toFixed(2)}% collected
-          </p>
-        </CardContent>
-      </Card>
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Expected</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount)}</div>
+            {/* <Progress states={[ {value:(summary.collectionProgress)} ]} className="mt-2" /> */}
+            <p className="text-xs text-muted-foreground mt-2">
+              {(((totalReceivedCount / totalExpectedCount) * 100) || 0).toFixed(2)}% collected
+            </p>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Total Received</CardTitle>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">₹{formatAmount(totalReceivedCount)}</div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {KLsystem(tokenAmountCount)} Admission Fee Collected
-          </p>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Received</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{formatAmount(totalReceivedCount)}</div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {KLsystem(tokenAmountCount)} Admission Fee Collected
+            </p>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
-          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount-totalReceivedCount)}</div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {pendingPayments} payments pending
-          </p>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{formatAmount(totalExpectedCount-totalReceivedCount)}</div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {pendingPayments} payments pending
+            </p>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Scholarships</CardTitle>
-          <Award className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">₹{formatAmount(Number(totalScholarshipsAmount))}</div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {totalStudentCount} scholarships awarded
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-
-    <Card className="md:col-span-2 lg:col-span-4">
-        <CardHeader>
-          <CardTitle>Instalment Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent className={`grid grid-cols-${instalmentBreakdown.length <= 4 ? instalmentBreakdown.length : 3} gap-4 `}>
-          {instalmentBreakdown.map((semester, semesterIndex) => (
-            <div key={semesterIndex} className="space-y-2 flex-1">
-              <Badge variant="blue" className="py-1">Semester {semester.semester}</Badge>
-              <Card className="md:col-span-1 lg:col-span-1">
-                <CardContent className="pt-4">
-                  <div className="space-y-4">
-                    {semester.installments.map((instalment: any, instalmentIndex: number) => (
-                      <div key={instalmentIndex} className="space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-sm font-medium">{instalment.label}</span>
-                          <span className="text-sm text-muted-foreground">
-                            ₹{formatAmount(instalment.received)} / ₹{formatAmount(instalment.total)}
-                          </span>
-                        </div>
-                        <Progress states={[
-                          {
-                          value: instalment.received,
-                          widt: (instalment.received / instalment.total) * 100 || 0,
-                          color:
-                            instalment.received >= instalment.total
-                              ? "#2EB88A"
-                              : instalment.received > 0
-                              ? "#2EB88A"
-                              : "#2EB88A"
-                          }
-                        ]}  />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Scholarships</CardTitle>
+            <Award className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{formatAmount(Number(totalScholarshipsAmount))}</div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {totalStudentCount} scholarships awarded
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card className="md:col-span-2 lg:col-span-4">
-        <CardHeader>
-          <CardTitle>One-Shot Payment Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-              <div className="flex items-center">
-                <div className="flex-1">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">{totalOneShotPaidCount}/{totalOneShotCount} Students</span>
-                    <span className="text-sm text-muted-foreground">
-                      {formatAmount(totalOneShotAmountPaidCount)} / {formatAmount(totalOneShotAmountCount)}
-                    </span>
-                  </div>
-                  <Progress 
-                  states={[
-                    { value: totalOneShotAmountPaidCount, widt: (totalOneShotAmountPaidCount / totalOneShotAmountCount) * 100, color: '#2EB88A' }
-                  ]} />
-                </div>
+          <CardHeader>
+            <CardTitle>Instalment Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent className={`grid grid-cols-${instalmentBreakdown.length <= 4 ? instalmentBreakdown.length : 3} gap-4 `}>
+            {instalmentBreakdown.map((semester, semesterIndex) => (
+              <div key={semesterIndex} className="space-y-2 flex-1">
+                <Badge variant="blue" className="py-1">Semester {semester.semester}</Badge>
+                <Card className="md:col-span-1 lg:col-span-1">
+                  <CardContent className="pt-4">
+                    <div className="space-y-4">
+                      {semester.installments.map((instalment: any, instalmentIndex: number) => (
+                        <div key={instalmentIndex} className="space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-sm font-medium">{instalment.label}</span>
+                            <span className="text-sm text-muted-foreground">
+                              ₹{formatAmount(instalment.received)} / ₹{formatAmount(instalment.total)}
+                            </span>
+                          </div>
+                          <Progress states={[
+                            {
+                            value: instalment.received,
+                            widt: (instalment.received / instalment.total) * 100 || 0,
+                            color:
+                              instalment.received >= instalment.total
+                                ? "#2EB88A"
+                                : instalment.received > 0
+                                ? "#2EB88A"
+                                : "#2EB88A"
+                            }
+                          ]}  />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-          </div>
-        </CardContent>
-      </Card>
-  </>  
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2 lg:col-span-4">
+          <CardHeader>
+            <CardTitle>One-Shot Payment Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">{totalOneShotPaidCount}/{totalOneShotCount} Students</span>
+                      <span className="text-sm text-muted-foreground">
+                        {formatAmount(totalOneShotAmountPaidCount)} / {formatAmount(totalOneShotAmountCount)}
+                      </span>
+                    </div>
+                    <Progress 
+                    states={[
+                      { value: totalOneShotAmountPaidCount, widt: (totalOneShotAmountPaidCount / totalOneShotAmountCount) * 100, color: '#2EB88A' }
+                    ]} />
+                  </div>
+                </div>
+            </div>
+          </CardContent>
+        </Card>
+    </div>  
   );
 }

@@ -199,15 +199,12 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
             let payload;
             if(oneShot) {
               payload = {
-                studentPaymentId: paymentId,
-                oneShotPayment: true,
+                oneShotId: paymentId,
                 receiptUrl: fileUrl,
               }
             } else {
               payload = {
-                studentPaymentId: paymentId,
-                semesterNumber: sem,
-                installmentNumber: inst,
+                installmentId: paymentId,
                 receiptUrl: fileUrl,
               }
             }
@@ -324,7 +321,6 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
   } 
 
   const visibleSemesters = groupInstallmentsBySemester(paymentDetails?.installments);
-  console.log(visibleSemesters);
 
   const colorClasses = ['text-emerald-600', 'text-[#3698FB]', 'text-[#FA69E5]', 'text-orange-600'];
 
@@ -807,7 +803,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                             className="hidden"
                             id={`file-input-${installmentIndex + 1}${instalment?.semester}`}
                             onChange={(e) => {
-                              handleFileChange(e, paymentDetails?._id, false, installmentIndex + 1, instalment?.semester);
+                              handleFileChange(e, instalment?._id, false, installmentIndex + 1, instalment?.semester);
                             }}
                           />
                         </label>
