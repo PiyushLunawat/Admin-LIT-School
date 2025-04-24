@@ -159,64 +159,50 @@ export function StudentsList({
                   'text-orange-600 !bg-orange-600/20 border-orange-600'
                 ];
 
-            let paymentStage = "";
-            let paymentStatus = "pending";
-            const paymentDetails = latestCohort?.paymentDetails;
+                let paymentStage = "";
+                let paymentStatus = "pending";
+                const paymentDetails = latestCohort?.paymentDetails;
 
-            if(!paymentDetails?.paymentPlan) {
-              paymentStatus = tokenFeeDetails?.verificationStatus ;
-              paymentStage = `Adm. Fee`
-            } else if (paymentDetails?.paymentPlan === 'one-shot') {
-              const oneShotDetails = paymentDetails?.oneShotPayment;
-              if (oneShotDetails) {
-                // if (oneShotDetails?.verificationStatus === 'paid') {
-                //   paidCount += 1;
-                // } else{
-                //   notPaidCount +=1;
-                // }
+                if(!paymentDetails?.paymentPlan) {
+                  paymentStatus = tokenFeeDetails?.verificationStatus ;
+                  paymentStage = `Adm. Fee`
+                } else if (paymentDetails?.paymentPlan === 'one-shot') {
+                  const oneShotDetails = paymentDetails?.oneShotPayment;
+                  if (oneShotDetails) {
+                    if (new Date(oneShotDetails?.installmentDate) < new Date()) {
+                      paymentStatus = "overdue";
+                      paymentStage = `One-Shot`
 
-                if (new Date(oneShotDetails?.installmentDate) < new Date()) {
-                  paymentStatus = "overdue";
-                  paymentStage = `One-Shot`
+                    } else {
+                      paymentStatus = oneShotDetails?.verificationStatus ;
+                      paymentStage = `One-Shot`
+                    }
 
-                } else {
-                  paymentStatus = oneShotDetails?.verificationStatus ;
-                  paymentStage = `One-Shot`
-                }
+                  }
+                } else if (paymentDetails?.paymentPlan === 'instalments') {
+                  const installmentsDetails = paymentDetails?.installments
+                  let earliestUnpaid= installmentsDetails?.[0]?.installments?.[0];
+                  let allPaid = true;
 
-              }
-            } else if (paymentDetails?.paymentPlan === 'instalments') {
-              const installmentsDetails = paymentDetails?.installments
-              let earliestUnpaid= installmentsDetails?.[0]?.installments?.[0];
-              let allPaid = true;
+                    for (const installment of installmentsDetails || []) {
+                      if (installment.verificationStatus !== "paid") {
+                        allPaid = false;
+                        earliestUnpaid = installment;
+                        break;
+                      }
+                    }
+                  if (allPaid) {
+                    paymentStatus = "Complete";
+                    paymentStage = "";
+                  } else if (new Date(earliestUnpaid.installmentDate) < new Date()) {
 
-                for (const installment of installmentsDetails || []) {
-                  if (installment.verificationStatus !== "paid") {
-                    allPaid = false;
-                    earliestUnpaid = installment;
-                    break;
+                    paymentStage = `S${earliestUnpaid?.semester} Inst.${earliestUnpaid?.installmentNumber}`
+                    paymentStatus = "overdue";
+                  } else {
+                    paymentStage = `S${earliestUnpaid?.semester} Inst.${earliestUnpaid?.installmentNumber}`
+                    paymentStatus = earliestUnpaid.verificationStatus;
                   }
                 }
-              if (allPaid) {
-                paymentStatus = "Complete";
-                paymentStage = "";
-              } else if (new Date(earliestUnpaid.installmentDate) < new Date()) {
-
-                paymentStage = `S${earliestUnpaid?.semester} Inst.${earliestUnpaid?.installmentNumber}`
-                paymentStatus = "overdue";
-              } else {
-                paymentStage = `S${earliestUnpaid?.semester} Inst.${earliestUnpaid?.installmentNumber}`
-                paymentStatus = earliestUnpaid.verificationStatus;
-              }
-        
-              // installmentsDetails?.forEach((installment: any) => {
-              //   if (installment?.verificationStatus === 'paid') {
-              //     paidCount += 1;
-              //   } else {
-              //     notPaidCount += 1;
-              //   }    
-              // });
-            }
 
                 const getColor = (slabName: string): string => {
                   const index = cohortDetails?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(

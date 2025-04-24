@@ -223,7 +223,10 @@ export function PaymentsList({
                 }
               </TableCell>
               <TableCell>
-                {dueDate ? `${dueDate}` : "--"}
+                {paymentDetails?.paymentPlan ? 
+                  `${dueDate}` :
+                  `${new Date(new Date(latestCohort?.cohortId?.startDate).setDate(new Date(latestCohort?.cohortId?.startDate).getDate() - 7)).toLocaleDateString()}`
+                }
               </TableCell>
               <TableCell>
                 {latestCohort?.status === 'dropped' ?

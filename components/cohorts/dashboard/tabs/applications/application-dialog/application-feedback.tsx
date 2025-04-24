@@ -50,6 +50,21 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
   const taskList = (latestCohort?.applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks || []);
 
+  useEffect(() => {
+    if (initialStatus === "accepted" || initialStatus === "rejected") {
+      setFeedbacks((prevFeedbacks) => {
+        const newFeedbacks = { ...prevFeedbacks };
+        taskList?.forEach((task: any) => {
+          const existing = newFeedbacks[task._id];
+          if (!existing || existing.length === 0) {
+            newFeedbacks[task._id] = ["• "];
+          }
+        });
+        return newFeedbacks;
+      });
+    }
+  }, []); // empty dependency array means this runs only once after initial render
+  
   const handleStatusChange = (value: string) => {
     setStatus(value);
        if (value === "on hold") {
@@ -339,16 +354,16 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                     </div>
                   ))}
                   {submission?.tasks[index]?.links?.map((linkItem: string, id: number) => (
-                    <div key={`link-${id}`} className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl">
+                    <div key={`link-${id}`} className="w-full flex items-center justify-between gap-2 text-sm px-4 py-3 border rounded-xl">
                       <div className='flex items-center gap-2 text-sm truncate'>
                         <Link2Icon className="w-4 h-4" />
                         <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
                           {linkItem}
                         </a>
                       </div>
-                      <Button variant="ghost" size="icon" type='button' className="text-white rounded-xl"
+                      <Button variant="ghost" size="zero" type='button' className="text-white rounded-xl"
                         onClick={() => window.open(linkItem, "_blank")}>
-                        <Download className="w-4 h-4 " />
+                        <ArrowUpRight className="w-4 h-4 " />
                       </Button>
                     </div>
                   ))}
@@ -413,7 +428,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                 <>
                   <h4 className="font-medium !mt-4">Feedback</h4>
                   <div key={taskList[index]?._id}>
-                    <div className="w-full grid border rounded-md ">
+                    <div className="w-full grid rounded-md ">
                       {(feedbacks[taskList[index]?._id] || [""]).map((feedbackItem, idx) => (
                         <div key={idx} className="flex items-center space-x-2 mb-2 w-full">
                           <Textarea

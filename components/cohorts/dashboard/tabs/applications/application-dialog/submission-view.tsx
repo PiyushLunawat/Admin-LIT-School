@@ -104,16 +104,16 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({ tasks, submission }) =>
                 </div>
               ))}
               {submission?.tasks[index]?.links?.map((linkItem: string, id: number) => (
-                <div key={`link-${id}`} className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl">
+                <div key={`link-${id}`} className="w-full flex items-center justify-between gap-2 text-sm px-4 py-3 border rounded-xl">
                   <div className='flex items-center gap-2 text-sm truncate'>
                     <Link2Icon className="w-4 h-4" />
                     <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-white">
                       {linkItem}
                     </a>
                   </div>
-                  <Button variant="ghost" size="icon" type='button' className="text-white rounded-xl"
+                  <Button variant="ghost" size="zero" type='button' className="text-white rounded-xl"
                     onClick={() => window.open(linkItem, "_blank")}>
-                    <Download className="w-4 h-4 " />
+                    <ArrowUpRight className="w-4 h-4 " />
                   </Button>
                 </div>
               ))}

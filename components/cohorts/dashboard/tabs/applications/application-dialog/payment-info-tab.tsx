@@ -49,8 +49,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
 
   const [uploadStates, setUploadStates] = useState<{ [key: string]: UploadState }>({});
   const [instalment, setInstalment] = useState<any>();
-  const [instalmentNo, setInstalmentNo] = useState<any>();
-  const [semesterNo, setSemesterNo] = useState<any>();
+  const [verificationType, setVerificationType] = useState<any>();
   const [vopen, setVopen] = useState(false);
 
   useEffect(() => {
@@ -110,22 +109,31 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
     }
   }
 
-  const handleVerifyDialog = (instalment: any, insIndex: any, semIndex: any) => {
+  const handleVerifyDialog = (oneShot: boolean, instalment: any) => {
     setInstalment(instalment);
-    setInstalmentNo(insIndex);
-    setSemesterNo(semIndex);
+    setVerificationType(oneShot);
     setVopen(true);
   };
 
-  async function handleFeeVerify(ins: any, sem: any,  comment: string, verificationStatus: string) {      
-    const payload = {
-      studentPaymentId: paymentDetails?._id,
-      semesterNumber: sem,
-      installmentNumber: ins,
-      feedbackData: comment,
-      verificationStatus: verificationStatus,
-    };
-    console.log("payloadvdvd", payload);
+  async function handleFeeVerify(oneShot: boolean, id: any, verificationStatus: string, comment: string, receiptId: string) {
+    let payload;
+    if(oneShot) {
+      payload = {
+        oneshotPaymentId: id,
+        newStatus: verificationStatus,
+        feedback: [comment],
+        receiptId: receiptId,
+       };
+    } else {
+      payload = {
+        installmentId: id,
+        newStatus: verificationStatus,
+        feedback: [comment],
+        receiptId: receiptId,
+       };
+    }
+     
+    console.log("payload", payload);
     
     try {
       if (!payload) {
@@ -146,80 +154,77 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
     }
   } 
 
-
   const handleFileChange = async ( e: React.ChangeEvent<HTMLInputElement>, paymentId: string, oneShot: boolean, inst?: number, sem?: number) => {
-      setError(null);
+    setError(null);
 
-      let key: any;
+    let key: any;
 
-      if(oneShot) key = "oneshot";
-      else key = `${inst}${sem}`
-  
-      setUploadStates(prev => ({
-        ...prev,
-        [key]: { uploading: true, uploadProgress: 0, fileName: "" }
-      }));
-  
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const fileKey = generateUniqueFileName(file.name);
-      
-      // Update fileName for this document
-      setUploadStates(prev => ({
-        ...prev,
-        [key]: { ...prev[key], fileName: fileKey }
-      }));
-  
-      const CHUNK_SIZE = 100 * 1024 * 1024;
-      e.target.value = "";
-  
-      try {
-        let fileUrl = "";
-        if (file.size <= CHUNK_SIZE) {
-          fileUrl = await uploadDirect(file, fileKey, key);
-          console.log("uploadDirect File URL:", fileUrl);
-        } else {
-          fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, key);
-          console.log("uploadMultipart File URL:", fileUrl);
-        }
-        let payload;
-        if(oneShot) {
-          payload = {
-            studentPaymentId: paymentId,
-            oneShotPayment: true,
-            receiptUrl: fileUrl,
-          }
-        } else {
-          payload = {
-            studentPaymentId: paymentId,
-            semesterNumber: sem,
-            installmentNumber: inst,
-            receiptUrl: fileUrl,
-          }
-        }
-        console.log("payload", payload);
-      
-        // Call the API function with FormData
-        const response = await uploadFeeReceipt(payload);
-        console.log("Upload response:", response);
-        onUpdateStatus()
-        setPaymentDetails(response.updatedPayment);
-  
-      } catch (error: any) {
-        console.error("Error uploading file:", error);
-        toast({
-          title: "Document Upload Failed",
-          description: error.message || "Error updating document. Please try again.",
-          variant: "warning",
-        });
-      } finally {
-        setUploadStates(prev => ({
-          ...prev,
-          [key]: { ...prev[key], uploading: false, fileName: "" }
-        }));
-        e.target.value = "";
+    if(oneShot) key = "oneshot";
+    else key = `${inst}${sem}`
+
+    setUploadStates(prev => ({
+      ...prev,
+      [key]: { uploading: true, uploadProgress: 0, fileName: "" }
+    }));
+
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fileKey = generateUniqueFileName(file.name);
+    
+    // Update fileName for this document
+    setUploadStates(prev => ({
+      ...prev,
+      [key]: { ...prev[key], fileName: fileKey }
+    }));
+
+    const CHUNK_SIZE = 100 * 1024 * 1024;
+    e.target.value = "";
+
+    try {
+      let fileUrl = "";
+      if (file.size <= CHUNK_SIZE) {
+        fileUrl = await uploadDirect(file, fileKey, key);
+        console.log("uploadDirect File URL:", fileUrl);
+      } else {
+        fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, key);
+        console.log("uploadMultipart File URL:", fileUrl);
       }
-    };
+      let payload;
+      if(oneShot) {
+        payload = {
+          oneShotId: paymentId,
+          receiptUrl: fileUrl,
+        }
+      } else {
+        payload = {
+          installmentId: paymentId,
+          receiptUrl: fileUrl,
+        }
+      }
+      console.log("payload", payload);
+    
+      // Call the API function with FormData
+      const response = await uploadFeeReceipt(payload);
+      console.log("Upload response:", response);
+      onUpdateStatus()
+      setPaymentDetails(response.updatedPayment
+      );
+
+    } catch (error: any) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Document Upload Failed",
+        description: error.message || "Error updating document. Please try again.",
+        variant: "warning",
+      });
+    } finally {
+      setUploadStates(prev => ({
+        ...prev,
+        [key]: { ...prev[key], uploading: false, fileName: "" }
+      }));
+      e.target.value = "";
+    }
+  };
   
     const uploadDirect = async (file: File, fileKey: string, key: string) => {
       const { data } = await axios.post(`https://dev.apply.litschool.in/student/generate-presigned-url`, {
@@ -606,7 +611,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                     className="hidden"
                     id={`file-input-oneshot`}
                     onChange={(e) => {
-                      handleFileChange(e, paymentDetails?._id, true);
+                      handleFileChange(e, paymentDetails?.oneShotPayment?._id, true);
                     }}
                   />
                 </label>
@@ -678,7 +683,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                             </Button>
                           ) : instalment.verificationStatus === 'verifying' ? (
                             <Button variant="outline" size="sm" className="w-full mt-2"
-                              onClick={() => handleVerifyDialog(instalment, instalmentIndex + 1,instalment?.semester)}>
+                              onClick={() => handleVerifyDialog(false, instalment)}>
                               <EyeIcon className="h-4 w-4 mr-2" />
                               Acknowledgement Receipt
                             </Button>
@@ -698,7 +703,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                                 <XIcon className="w-4" />
                               </Button>
                             </div>
-                          </div> : (
+                          </div> :(
                           (paymentDetails && lastStatus !== 'pending') &&
                             <label className="cursor-pointer w-full">
                               <Button variant="outline" size="sm" className="w-full mt-2" 
@@ -791,8 +796,8 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
           <Card className="p-4 space-y-2">
             <div className="flex justify-between items-center">
               <div>
-                <h5 className="font-medium">Instalment {instalmentNo}</h5>
-                <p className="text-xs text-[#00A3FF]">Semester {semesterNo}</p>
+                <h5 className="font-medium">Instalment {instalment?.instalmentNumber}</h5>
+                <p className="text-xs text-[#00A3FF]">Semester {instalment?.semester}</p>
               </div>
             </div>
             <div>
@@ -834,7 +839,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                 <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
               </div>
               <Button className="flex-1" disabled={!reason.trim() || loading}
-                onClick={() => handleFeeVerify(instalmentNo, semesterNo , reason, "flagged")}
+                onClick={() => handleFeeVerify(verificationType, instalment?._id , "flagged", reason, instalment?.receiptUrls?.[instalment?.receiptUrls.length - 1]?._id)}
                 >
                 Confirm and Update Status
               </Button>
@@ -844,7 +849,7 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
                 onClick={() => setFlagOpen(true)}> Reject
               </Button>
               <Button variant="outline" className="flex-1 bg-[#2EB88A]" disabled={loading || latestCohort?.status === 'dropped'}
-                onClick={() => handleFeeVerify(instalmentNo, semesterNo, "", "paid")}> Approve
+                onClick={() => handleFeeVerify(verificationType, instalment?._id, "paid", "", instalment?.receiptUrls?.[instalment?.receiptUrls.length - 1]?._id)}> Approve
               </Button>
             </div>
           }

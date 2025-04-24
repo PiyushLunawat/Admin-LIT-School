@@ -101,7 +101,7 @@ export default function LoginPage() {
       }
 
       const res = await verifyOtp(otpPayload);
-      console.log("res",res);
+      // console.log("res",res);
       
       Cookies.set("adminAccessToken", res.accessToken, { expires: 1/12 }); 
       Cookies.set("adminRefreshToken", res.refreshToken, { expires: 7 });

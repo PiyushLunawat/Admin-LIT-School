@@ -648,12 +648,45 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   </div>
                 )}
               </div>
-              {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
-                <Button variant="outline" size="sm" className="w-full mt-2">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Receipt
-                </Button>
-              ) : uploadStates[`oneshot`]?.uploading ?
+              {/* {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url ? ( */}
+                {paymentDetails?.oneShotPayment?.verificationStatus === 'verifying' ?
+                  <div className="space-y-4">
+                    <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
+                      <img src={paymentDetails?.oneShotPayment?.receiptUrls?.[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url} alt={paymentDetails?.oneShotPayment?.receiptUrls?.[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url.split('/').pop()} className='w-full h-[160px] object-contain rounded-t-xl' />
+                    </div>
+                    {flagOpen ?
+                    <div className="space-y-4 ">
+                      <div className="mt-2 space-y-2">
+                        <label className="text-sm">Provide Reasons</label>
+                        <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+                      </div>
+                      <div className="flex gap-2" >
+                        <Button variant="outline" className="flex" disabled={loading} onClick={() => setFlagOpen(false)}>Back</Button>
+                        <Button className="flex-1" disabled={!reason.trim() || loading}
+                          onClick={() => handleFeeVerify(true, paymentDetails?.oneShotPayment?._id, "flagged", reason, paymentDetails?.oneShotPayment?.receiptUrls?.[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?._id)}>Mark as Flagged</Button>
+                      </div>
+                    </div> :
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" className="flex-1 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] hover:bg-[#FF503D]/[0.1] " disabled={loading || latestCohort?.status === 'dropped'}
+                        onClick={() => setFlagOpen(true)}> Reject
+                      </Button>
+                      <Button variant="outline" className="flex-1 bg-[#2EB88A] hover:bg-[#2EB88A]/90" disabled={loading || latestCohort?.status === 'dropped'}
+                        onClick={() => handleFeeVerify(true, paymentDetails?.oneShotPayment?._id, "paid", "", paymentDetails?.oneShotPayment?.receiptUrls?.[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?._id)}> Approve
+                      </Button>
+                    </div>}
+                  </div> : 
+                  paymentDetails?.oneShotPayment?.verificationStatus === 'paid' ? 
+                <>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Paid: {new Date(paymentDetails?.oneShotPayment?.updatedAt).toLocaleDateString()}
+                  </div>
+                  <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(paymentDetails?.oneShotPayment?.receiptUrls?.[tokenFeeDetails?.receiptUrls.length - 1]?.url)}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Receipt
+                  </Button>
+                </>
+               : uploadStates[`oneshot`]?.uploading ?
                 <div className="flex justify-between items-center gap-4">
                   {/* <div className="flex flex-1 truncate">{uploadStates[`oneshot`]?.fileName}</div> */}
                   <div className="flex items-center gap-2">
@@ -683,7 +716,7 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                   className="hidden"
                   id={`file-input-oneshot`}
                   onChange={(e) => {
-                    handleFileChange(e, paymentDetails?._id, true);
+                    handleFileChange(e, paymentDetails?.oneShotPayment?._id, true);
                   }}
                 />
               </label>     

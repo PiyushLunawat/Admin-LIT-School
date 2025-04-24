@@ -866,7 +866,7 @@ function ResourcesSection({
   const uploadMultipart = async (file: File, chunkSize: number) => {
     // 1) Initiate upload to get an uploadId
     const fileName = generateUniqueFileName(file.name);
-    const initiateRes = await axios.post(`${process.env.API_URL}/student/initiateUpload`, {
+    const initiateRes = await axios.post(`${process.env.API_URL}/admin/initiateUpload`, {
       fileName,
     });
     const { uploadId } = initiateRes.data; // e.g. { uploadId: 'abc123' }
@@ -891,7 +891,7 @@ function ResourcesSection({
   
       // 3) Upload the chunk
       await axios.post(
-        `${process.env.API_URL}/student/upload-chunk?uploadId=${uploadId}`,
+        `${process.env.API_URL}/admin/upload-chunk?uploadId=${uploadId}`,
         formData,
         {
           onUploadProgress: (evt) => {
@@ -916,7 +916,7 @@ function ResourcesSection({
   
     // 4) Complete the upload
     //    This tells your server: "All chunks are up, now merge them."
-    const completeRes = await axios.post(`${process.env.API_URL}/student/completeUpload`, {
+    const completeRes = await axios.post(`${process.env.API_URL}/admin/completeUpload`, {
       uploadId,
       fileName,
     });

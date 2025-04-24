@@ -74,5 +74,5 @@ const clearAuthAndRedirect = () => {
   Cookies.remove("adminRefreshToken");
   Cookies.remove("adminId");
   Cookies.remove("adminEmail");
-  // window.location.href = "/login";
+  window.location.href = "/login";
 };
