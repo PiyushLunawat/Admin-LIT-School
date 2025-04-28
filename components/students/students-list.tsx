@@ -64,6 +64,7 @@ export function StudentsList({
       case "on hold":
       case "waitlist":
       case "reviewing":
+      case "payment due":
         return "onhold";
       case "accepted":
         return "success";
@@ -258,9 +259,9 @@ export function StudentsList({
                     <span className="text-xs text-muted-foreground">{paymentStage}</span>
                     <Badge
                       className="capitalize"
-                      variant={getStatusColor(paymentStatus)}
+                      variant={getStatusColor(paymentStatus || "payment due")}
                     >
-                      {(paymentStatus)?.toLowerCase() || "pending"}
+                      {(paymentStatus)?.toLowerCase() || "payment due"}
                     </Badge>
                   </TableCell>
                   <TableCell>

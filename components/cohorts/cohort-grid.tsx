@@ -397,7 +397,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
           <CardContent className="flex-1 space-y-4 mt-4 cursor-pointer" onClick={() => handleAction(cohort._id, "dashboard")}>
             <div className="space-y-1">
               <p className="text-sm font-medium">{getCentreName(cohort.centerDetail)}</p>
-              <p className="text-sm text-muted-foreground">{cohort.schedule}</p>
+              {/* <p className="text-sm text-muted-foreground">{cohort?.schedule}</p> */}
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
@@ -444,7 +444,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
           <CardContent className="flex-1 space-y-4 mt-4">
             <div className="space-y-1">
               <p className="text-sm font-medium">{getCentreName(cohort.centerDetail)}</p>
-              <p className="text-sm text-muted-foreground">{cohort.schedule}</p>
+              {/* <p className="text-sm text-muted-foreground">{cohort?.schedule}</p> */}
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">

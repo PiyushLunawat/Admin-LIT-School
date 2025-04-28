@@ -377,7 +377,9 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
   };
 
   const getColor = (slabName: string): string => {
-    const index = student?.cohort?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+    console.log("gggg",slabName,student?.appliedCohorts?.[student?.appliedCohorts.length -1]?.cohortId?.litmusTestDetail?.[0]?.scholarshipSlabs);
+    
+    const index = student?.appliedCohorts?.[student?.appliedCohorts.length -1]?.cohortId?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
       (slab: any) => slab.name === slabName
     );
     
@@ -422,8 +424,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 <p className="text-sm text-muted-foreground">Admission Fee Status</p>
                 <span className="text-base mr-2">₹{formatAmount(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee)}</span>
                 {tokenFeeDetails?.verificationStatus &&
-                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
-                    {tokenFeeDetails?.verificationStatus}
+                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || 'pending')}>
+                    {tokenFeeDetails?.verificationStatus || "payment due"}
                   </Badge>
                 }
               </div>
@@ -475,8 +477,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 </Button>
                 {scholarshipDetails ? 
                   <Button variant="outline" className={`justify-start ${getColor(scholarshipDetails?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
-                    <div className="flex gap-2 items-center">
-                      <span className="text-lg pb-[2px]">★ </span> {scholarshipDetails?.scholarshipName+' ('+scholarshipDetails?.scholarshipPercentage+'%)'}
+                    <div className="flex gap-2 items-center truncate">
+                      <span className="text-lg pb-[2px]">★ </span> <span className="truncate">{scholarshipDetails?.scholarshipName}</span>{'('+scholarshipDetails?.scholarshipPercentage+'%)'}
                     </div> 
                   </Button>
                     :
@@ -581,32 +583,32 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
               </Button>
             </>
             }
-           {(tokenFeeDetails?.feedback && tokenFeeDetails?.feedback.length > 0) && 
-                <div className="space-y-3">
-                  <Separator />
-                    {tokenFeeDetails?.feedback.slice().reverse().map((feedback: any, index: any) => (
-                      <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
-                        <div className="flex justify-between items-center">
-                          <div className="">
-                            Reason:
-                          </div>
-                          <div className="text-[#FF503D]">Rejected on {new Date(feedback?.date).toLocaleDateString()}</div>
-                        </div>
+            {(tokenFeeDetails?.feedback && tokenFeeDetails?.feedback.length > 0) && 
+              <div className="space-y-3">
+                <Separator />
+                  {tokenFeeDetails?.feedback.slice().reverse().map((feedback: any, index: any) => (
+                    <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
+                      <div className="flex justify-between items-center">
                         <div className="">
-                          {feedback?.text?.map((item: string, index: number) => (
-                            <div className="" key={index}>{item}</div>
-                          ))}
+                          Reason:
                         </div>
-                        <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.feedback.length - 1 - index]?.url)}>
-                          <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
-                        </Button>
+                        <div className="text-[#FF503D]">Rejected on {new Date(feedback?.date).toLocaleDateString()}</div>
                       </div>
-                    ))}
-                </div>
-              }
+                      <div className="">
+                        {feedback?.text?.map((item: string, index: number) => (
+                          <div className="" key={index}>{item}</div>
+                        ))}
+                      </div>
+                      <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.feedback.length - 1 - index]?.url)}>
+                        <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            }
           </div>
 
-            {paymentDetails?.paymentPlan === 'one-shot' ? 
+          {paymentDetails?.paymentPlan === 'one-shot' ? 
             <Card className="p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
@@ -743,8 +745,8 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
                 </Carousel>
               </TabsList>
               {visibleSemesters?.map((installments: any, semesterIndex: any) => (
-                <TabsContent value={`${semesterIndex + 1}`}>
-                  <div key={semesterIndex} className="space-y-2">
+                <TabsContent key={semesterIndex} value={`${semesterIndex + 1}`}>
+                  <div  className="space-y-2">
                   {installments?.map((instalment: any, installmentIndex: number) => (
                     <Card key={installmentIndex} className="p-4 space-y-2">
                       <div className="flex justify-between items-center">

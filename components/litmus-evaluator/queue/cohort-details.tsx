@@ -103,7 +103,7 @@ export function CohortDetails({ cohort, applied, intCleared, feePaid }: CohortDe
 
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Schedule</p>
-            <p className="font-medium">{cohort.schedule}</p>
+            {/* <p className="font-medium">{cohort?.schedule}</p> */}
             <p className="text-sm">
               {new Date(cohort.startDate).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })} - {" "}
               {new Date(cohort.endDate).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}

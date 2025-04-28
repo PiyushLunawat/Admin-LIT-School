@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -173,7 +173,50 @@ export function LitmusTestForm({
         },
   });
   const [loading, setLoading] = useState(false);  
-  const { control, handleSubmit, watch, setValue  } = form;
+  const { control, handleSubmit, watch, setValue, setError, clearErrors, trigger } = form;
+
+  const scholarshipSlabs = watch('scholarshipSlabs');
+  function hasOverlap(slabs: { clearance: string }[]) {
+    const ranges = slabs.map((slab, index) => {
+      const [startStr, endStr] = (slab.clearance || "").split("-");
+      const start = Number(startStr);
+      const end = Number(endStr);
+      return { start, end, index };
+    }).filter(({ start, end }) => !isNaN(start) && !isNaN(end));
+  
+    const overlappingIndexes = new Set<number>();
+  
+    for (let i = 0; i < ranges.length; i++) {
+      for (let j = i + 1; j < ranges.length; j++) {
+        const a = ranges[i];
+        const b = ranges[j];
+        if (a.start <= b.end && b.start <= a.end) {
+          overlappingIndexes.add(a.index);
+          overlappingIndexes.add(b.index);
+        }
+      }
+    }
+  
+    return overlappingIndexes.size > 0 ? Array.from(overlappingIndexes) : null;
+  }  
+
+  useEffect(() => {
+    const overlapIndexes = hasOverlap(scholarshipSlabs);
+    if (overlapIndexes) {
+      overlapIndexes.forEach((index) => {
+        setError(`scholarshipSlabs.${index}.clearance`, {
+          type: "manual",
+          message: "Clearance range overlaps with another slab.",
+        });
+      });
+    } else {
+      // Clear previous errors
+      scholarshipSlabs.forEach((_, index) => {
+        clearErrors(`scholarshipSlabs.${index}.clearance`);
+      });
+    }
+  }, [scholarshipSlabs, setError, clearErrors]);
+  
   
   const {
     fields: taskFields,
@@ -272,6 +315,7 @@ export function LitmusTestForm({
             control={control}
             removeSlab={removeSlab}
             form={form}
+            trigger={trigger}
             />
           ))}
           <Button type="button"
@@ -1073,12 +1117,14 @@ function ScholarshipSlabItem({
   control,
   removeSlab,
   form,
+  trigger,
 }: {
   slab: any;
   slabIndex: number;
   control: any;
   removeSlab: (index: number) => void;
   form: UseFormReturn<FormData>;
+  trigger: UseFormReturn<FormData>['trigger'];
 }) {
 
   return (
@@ -1136,41 +1182,55 @@ function ScholarshipSlabItem({
               )}
             />
             <FormField
-  control={control}
-  name={`scholarshipSlabs.${slabIndex}.clearance`}
-  render={({ field }) => (
-    <FormItem className="w-1/2">
-      <Label>LITMUS Challenge Clearance (%)</Label>
-      <FormControl>
-        <div className="flex items-center gap-2">
-          {/* First Input */}
-          <Input
-            type="number"
-            placeholder="Start"
-            value={typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : ""}
-            onChange={(e) => {
-              const endValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : "";
-              field.onChange(`${e.target.value}-${endValue}`);
-            }}
-          />
-          <span>-</span>
-          {/* Second Input */}
-          <Input
-            type="number"
-            placeholder="End"
-            value={typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : ""}
-            onChange={(e) => {
-              const startValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : "";
-              field.onChange(`${startValue}-${e.target.value}`);
-            }}
-          />
-        </div>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+              control={control}
+              name={`scholarshipSlabs.${slabIndex}.clearance`}
+              render={({ field, fieldState }) => {
+                const start = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : "";
+                const end = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : "";
 
+                return (
+                  <FormItem className="w-1/2">
+                    <Label>LITMUS Challenge Clearance (%)</Label>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        {/* Start Input */}
+                        <Input
+                          type="number"
+                          placeholder="Start"
+                          value={start}
+                          min={0}
+                          max={end || 99}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            const endValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : "";
+                            const newValue = `${value}-${endValue}`;
+                            field.onChange(newValue); // Update form field
+                            trigger(`scholarshipSlabs.${slabIndex}.clearance`); // 👈 Immediately trigger validation!
+                          }}
+                        />
+                        <span>-</span>
+                        {/* End Input */}
+                        <Input
+                          type="number"
+                          placeholder="End"
+                          value={end}
+                          min={start || 0}
+                          max={100}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            const startValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : "";
+                            const newValue = `${startValue}-${value}`;
+                            field.onChange(newValue); 
+                            trigger(`scholarshipSlabs.${slabIndex}.clearance`); // 👈 Immediately trigger validation!
+                          }}       
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
           </div>
           <FormField
             control={control}

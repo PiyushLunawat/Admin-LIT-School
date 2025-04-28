@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useRouter } from "next/navigation";
+import { markNotificationsAsRead } from "@/app/api/auth";
 
 const NETWORK_CHECK_INTERVAL = 15000; // 15 seconds
 
@@ -30,6 +32,7 @@ interface Notification {
   notificationId: string;
   title: string;
   message: string;
+  cohortId: string;
   cohortTitle: string;
   timestamp: string;
   type: string;
@@ -45,40 +48,16 @@ export function NotificationsButton() {
     online: true,
     lastActivity: new Date().toISOString(),
   });
+  const router = useRouter();
 
   const networkCheckRef = useRef<NodeJS.Timeout>();
-
-  // Helpers for localStorage
-  function saveNotificationsToStorage(notifications: Notification[]) {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("adminNotification", JSON.stringify(notifications));
-    }
-  }
-
-  function loadNotificationsFromStorage(): Notification[] {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("adminNotification");
-      return stored ? JSON.parse(stored) : [];
-    }
-    return [];
-  }
 
   // Get adminId from cookies + load notifications
   useEffect(() => {
     const id = Cookies.get("adminId");
     setAdminId(id);
     // console.log("Admin ID from cookies:", id);
-
-    const storedNotifications = loadNotificationsFromStorage();
-    if (storedNotifications.length > 0) {
-      setNotifications(storedNotifications);
-    }
   }, []);
-
-  // Save to localStorage on notifications update
-  useEffect(() => {
-    saveNotificationsToStorage(notifications);
-  }, [notifications]);
 
   // Periodic network checking
   useEffect(() => {
@@ -169,7 +148,7 @@ export function NotificationsButton() {
 
     const handleUnreadNotifications = (unreadNotifications: Notification[]) => {
       if (unreadNotifications.length > 0) {
-        console.log("Unread notifications received:", unreadNotifications.length);
+        console.log("Unread notifications received:", unreadNotifications);
         setNotifications((prev) => [
           ...unreadNotifications.map((n) => ({
             ...n,
@@ -234,9 +213,39 @@ export function NotificationsButton() {
     }
   }
 
-  function handleRemoveNotification(id: string) {
-    setNotifications((prev) => prev.filter((n) => n.notificationId !== id));
+  function getUrl(cohortId: string, type: string): string {
+    switch (type) {
+      case "Registration and Application Task":
+      case "Application Interview":
+        return `${baseUrl}/dashboard/cohorts/${cohortId}?tab=applications` ;
+      case "Admission Fee Payment":
+      case "Fee Payment Setup":
+        return `${baseUrl}/dashboard/cohorts/${cohortId}?tab=payments` ;
+      case "LITMUS Test":
+        return `${baseUrl}/dashboard/cohorts/${cohortId}?tab=litmus` ;
+      default:
+        return `${baseUrl}/dashboard/cohorts/${cohortId}` ;
+    }
   }
+
+  async function handleRemoveNotification(notificationId: string, adminId: string) {
+    try {
+      const payload = {
+        notificationIds: [notificationId],
+        userId: adminId,
+      }
+      const res = await markNotificationsAsRead(payload);
+      console.log("vf",res);
+      
+      // Optionally, you can update UI state here after successful API call
+      setNotifications((prev) => prev.filter((n) => n.notificationId !== adminId));
+      console.log("Notification marked as read:", notificationId);
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }  
+  }
+
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
 
   return (
     <>
@@ -268,8 +277,9 @@ export function NotificationsButton() {
                 {notifications.map((notification) => (
                   <div
                     key={notification.notificationId}
-                    className="flex flex-col gap-1 rounded-lg items-start p-2"
+                    className="flex flex-col gap-1 rounded-lg items-start p-2 cursor-pointer"
                     style={{ backgroundColor: `${getStatusColor(notification.status || "")}20` }}
+                    onClick={() => router.push(getUrl(notification.cohortId, notification.type))}
                   >
                     <div className="flex items-center justify-between text-[10px] w-full">
                       <div className="text-muted-foreground">
@@ -309,13 +319,17 @@ export function NotificationsButton() {
                           <p className="text-xs">{notification.message}</p>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveNotification(notification.notificationId)}
-                      >
-                        <XIcon className="w-4 h-4" />
-                      </Button>
+                      {adminId &&
+                        <Button
+                          variant="ghost"
+                          size="icon" className="z-10"
+                          onClick={(e) => {
+                            e.stopPropagation(); // ✅ Prevent parent div onClick
+                            handleRemoveNotification(notification.notificationId, adminId);
+                          }}                      >
+                          <XIcon className="w-4 h-4" />
+                        </Button>
+                      }
                     </div>
                   </div>
                   ))}

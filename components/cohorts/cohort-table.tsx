@@ -50,7 +50,7 @@ export function CohortTable({ type }: CohortTableProps) {
             <TableCell className="font-medium">{cohort.id}</TableCell>
             <TableCell>{cohort.program}</TableCell>
             <TableCell>{cohort.centre}</TableCell>
-            <TableCell>{cohort.schedule}</TableCell>
+            {/* <TableCell>{cohort?.schedule}</TableCell> */}
             <TableCell>
               {new Date(cohort.startDate).toLocaleDateString()} -{" "}
               {new Date(cohort.endDate).toLocaleDateString()}

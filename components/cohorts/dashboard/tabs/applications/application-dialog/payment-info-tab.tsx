@@ -404,11 +404,9 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
               <p className="text-sm text-muted-foreground">Admission Fee Status</p>
               <div className="flex gap-2 items-center">
                 <span className="text-sm font-semibold">₹{formatAmount(tokenAmount)}</span>
-                {applicationDetails?.applicationStatus === 'selected' && 
-                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || 'pending')}>
-                    {tokenFeeDetails?.verificationStatus || 'pending'}
-                  </Badge>
-                }
+                <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || 'pending')}>
+                  {tokenFeeDetails?.verificationStatus || 'payment due'}
+                </Badge>
               </div>
             </div>
           </div>

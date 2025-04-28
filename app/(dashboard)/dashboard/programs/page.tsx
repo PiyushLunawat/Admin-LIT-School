@@ -136,8 +136,9 @@ export default function ProgramsPage() {
 
   const toggleProgramStatus = async (id: string, currentStatus: boolean) => {
     try {
-      await updateProgramStatus(id, !currentStatus);
-      toast({ title: "Program updated successfully!", variant: "success" });
+      const res = await updateProgramStatus(id, !currentStatus);
+      // console.log("loggdss",res);
+      toast({ title: `Program successfully ${currentStatus ? "Disabled" : "Enabled"}!`, variant: "success" });
       await fetchPrograms();
     } catch (error) {
       console.error("Failed to update program status:", error);
@@ -255,26 +256,26 @@ export default function ProgramsPage() {
                     Edit
                   </Button>
                   <AlertDialog>
-              <AlertDialogTrigger asChild>
-                 <Button variant="ghost" size="sm" className={program.status ? "text-destructive" : "text-[#2EB88A]"}>
-                    {program.status ? "Disable" : "Enable"}
-                  </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle> {program.status ? "Disable" : "Enable"} Centre</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to  {program.status ? "Disable" : "Enable"} this center?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className={`${program.status ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`} onClick={() => toggleProgramStatus(program._id, program.status)}>
-                  {program.status ? "Disable" : "Enable"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className={program.status ? "text-destructive" : "text-[#2EB88A]"}>
+                          {program.status ? "Disable" : "Enable"}
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle> {program.status ? "Disable" : "Enable"} Program</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to {program.status ? "Disable" : "Enable"} this Program?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className={`${program.status ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`} onClick={() => toggleProgramStatus(program._id, program.status)}>
+                        {program.status ? "Disable" : "Enable"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}

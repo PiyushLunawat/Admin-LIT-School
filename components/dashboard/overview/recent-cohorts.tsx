@@ -97,10 +97,10 @@ export function RecentCohorts() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="space-y-1">
+              {/* <div className="space-y-1">
                 <p className="text-muted-foreground">Schedule</p>
-                <p>{cohort.schedule}</p>
-              </div>
+                <p>{cohort?.schedule}</p>
+              </div> */}
               <div className="space-y-1">
                 <p className="text-muted-foreground">Duration</p>
                 <p>

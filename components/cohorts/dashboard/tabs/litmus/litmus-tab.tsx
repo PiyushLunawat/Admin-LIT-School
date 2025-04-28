@@ -34,7 +34,7 @@ export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
           try {
             const response = await getStudents();
             const mappedStudents = response.data.filter((student: any) => (
-              ['reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
+              ['enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status) &&
               student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?._id == cohortId
             ));
                         

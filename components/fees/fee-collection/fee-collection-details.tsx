@@ -151,8 +151,8 @@ export function FeeCollectionDetails({ application, onClose, onApplicationUpdate
               <div>
                 <p className="text-sm text-muted-foreground">Admission Fee Status</p>
                 <span className="text-base mr-2">₹{formatAmount(application?.cohort?.cohortFeesDetail?.tokenFee)}</span>
-                <Badge className="capitalize" variant={getStatusColor(lastCourse?.tokenFeeDetails?.verificationStatus || '')}>
-                  {lastCourse?.tokenFeeDetails?.verificationStatus}
+                <Badge className="capitalize" variant={getStatusColor(lastCourse?.tokenFeeDetails?.verificationStatus || 'pending')}>
+                  {lastCourse?.tokenFeeDetails?.verificationStatus || "payment due"}
                 </Badge>
               </div>
             </div>

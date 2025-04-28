@@ -42,11 +42,11 @@ const formSchema = z.object({
   endDate: z.date({
     required_error: "End date is required",
   }),
-  schedule: z.string().min(1, "Schedule is required"),
+  // schedule: z.string().min(1, "Schedule is required"),
   timeSlot: z.string().min(1, "Time slot is required"),
   totalSeats: z.coerce.number().min(1, "Minimum 1 seat is required"),
   baseFee: z.coerce.number().min(1, "Minimum base fee is required"),
-  isGSTIncluded: z.boolean().default(true),
+  isGSTIncluded: z.boolean().default(false),
 });
 
 interface Program {
@@ -72,7 +72,7 @@ interface Cohort {
   centerDetail: string;
   startDate: string;
   endDate: string;
-  schedule: string;
+  // schedule: string;
   seats: number;
   filled: number;
   status: "Draft" | "Open" | "Full" | "Closed" | "Archived";
@@ -95,11 +95,11 @@ export function BasicDetailsForm({ onNext, onCohortCreated, initialData }: Basic
       cohortId: initialData?.cohortId || "",
       startDate: initialData?.startDate ? new Date(initialData.startDate) : undefined,
       endDate: initialData?.endDate ? new Date(initialData.endDate) : undefined,
-      schedule: initialData?.schedule || "",
+      // schedule: initialData?.schedule || "",
       timeSlot: initialData?.timeSlot || "",
       totalSeats: initialData?.totalSeats || "",
       baseFee: initialData?.baseFee || "",
-      isGSTIncluded: initialData?.isGSTIncluded !== undefined ? initialData?.isGSTIncluded : true ,
+      isGSTIncluded: initialData?.isGSTIncluded !== undefined ? initialData?.isGSTIncluded : false ,
     },
   });
 
@@ -393,7 +393,7 @@ function removeFormatting(value: string): string {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <FormField
+          {/* <FormField
             control={form.control}
             name="schedule"
             render={({ field }) => (
@@ -413,7 +413,7 @@ function removeFormatting(value: string): string {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           <FormField
             control={form.control}
@@ -482,6 +482,7 @@ function removeFormatting(value: string): string {
               <FormItem className="flex flex-row items-center gap-2">
                 <FormControl>
                   <Checkbox
+                    disabled
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />

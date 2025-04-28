@@ -106,3 +106,30 @@ export async function adminRefreshToken(refreshPayload: any) {
     throw error;
   }
 }
+
+export async function markNotificationsAsRead(payload: any) {
+  try {
+    const response = await fetch(
+      `${process.env.API_URL}/notifications/mark-as-read`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || `Request failed with status ${response.status}`
+      );
+    }
+
+    return await response.json(); // ✅ Return response if success
+  } catch (error) {
+    console.error("Error marking notifications as read", error);
+    throw error; // ✅ Re-throw for upper layers to handle
+  }
+}

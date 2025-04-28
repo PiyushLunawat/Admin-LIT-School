@@ -143,7 +143,7 @@ export default function CentresPage() {
   const toggleCenterStatus = async (id: string, currentStatus: boolean) => {
     try {
       await updateCentreStatus(id, !currentStatus);
-      toast({ title: "Centre updated successfully!", variant: "success" });
+      toast({ title: `Centre successfully ${currentStatus ? "Disabled" : "Enabled"}!`, variant: "success" });
       await fetchCentres();
     } catch (error) {
       console.error("Failed to update centre status:", error);

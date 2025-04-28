@@ -22,6 +22,7 @@ export function UserButton() {
     Cookies.remove('adminRefreshToken');
     Cookies.remove('adminId');
     Cookies.remove('adminEmail');
+    localStorage.clear();
     router.push("/login");
   };
 

@@ -16,6 +16,7 @@ export const RegisterInterceptor = () => {
       const publicEndpoints = [
         "/auth/admin-login",
         "/auth/verify-admin-otp",
+        "/auth/resend-admin-otp",
         "/auth/admin-refresh-token",
       ];
 
@@ -74,5 +75,6 @@ const clearAuthAndRedirect = () => {
   Cookies.remove("adminRefreshToken");
   Cookies.remove("adminId");
   Cookies.remove("adminEmail");
+  localStorage.clear();
   window.location.href = "/login";
 };
