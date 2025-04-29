@@ -4,6 +4,7 @@
 import { getCohorts } from "@/app/api/cohorts";
 import { getStudents } from "@/app/api/student";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { KLsystem } from "@/lib/utils/helpers";
 import { addMonths } from "date-fns";
 import {
   Users,
@@ -16,6 +17,7 @@ import {
   AlertTriangle,
   UserMinus,
   CheckCircle,
+  Wallet,
 } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
@@ -169,225 +171,141 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
     fetchAndFilterStudents();
   }, [selectedDateRange, searchQuery, selectedProgram, selectedCohort]);
 
-      useEffect(() => {
-          if (applications && Array.isArray(applications)) {
-            // Total Applications
-            setTotalApplicationsCount(applications.length);
-
-            const thisMonthApps = applications.filter((app: any) => {
-              const appDate = new Date(app.updatedAt);
-              const startOfMonth = new Date();
-              startOfMonth.setDate(1);
-              return appDate >= startOfMonth;
-            });
-            setApplicationsThisMonth(thisMonthApps.length);
-    
-            const lastMonthApps = applications.filter((app: any) => {
-              const appDate = new Date(app.updatedAt);
-              const startOfLastMonth = addMonths(new Date(), -1);
-              startOfLastMonth.setDate(1);
-              const endOfLastMonth = new Date(startOfLastMonth);
-              endOfLastMonth.setMonth(startOfLastMonth.getMonth() + 1);
-              return appDate >= startOfLastMonth && appDate < endOfLastMonth;
-            });
-            setApplicationsLastMonth(lastMonthApps.length);
-      
-            // Under Review Count
-            const underReview = applications.filter(
-              (application) =>
-                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
-                "under review"
-            );
-            setUnderReviewCount(underReview.length);
-      
-            // Interviews Scheduled Count
-            const interviewsScheduled = applications.filter(
-              (application) =>
-                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "interview scheduled"
-            );
-            setInterviewsScheduledCount(interviewsScheduled.length);
-      
-            // Admission Fee Count
-            const admissionFee = applications.filter(
-              (application) =>
-                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid'
-            );
-            setAdmissionFeeCount(admissionFee.length);
-      
-            // Litmus Tests Count
-            const litmusTests = applications.filter(
-              (application) =>
-                ['under review', 'completed'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status)
-            );
-            setLitmusTestsCount(litmusTests.length);
-
-            // Reviewed Count
-            const reviewed = applications.filter(
-              (application) =>
-                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status === 'completed'
-            );
-            setReviewedCount(reviewed.length);
-
-            const dropped = applications.filter(
-              (application) =>
-                application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status?.toLowerCase() ===
-                "dropped"
-            );
-            setDroppedCount(dropped.length);
-            
-            // Total Scholarship and Average Scholarships Percentage
-            let totalScholarship = 0;
-            let scholarshipCount = 0;
-            let totalPercentage = 0;
-            let percentageCount = 0;
-        
-            applications?.forEach((application) => {
-              const scholarship = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
-              const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
-        
-              if (scholarship && baseFee) {
-                totalScholarship += scholarship?.scholarshipPercentage * baseFee * 0.01;
-                scholarshipCount += 1;
-              }
-              const percentage = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
-              if (percentage) {
-                totalPercentage += application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
-                percentageCount += 1;
-              }
-            });
-        
-            setTotalScholarshipsAmount(totalScholarship);
-            setAvgScholarshipsPercentage((totalPercentage / percentageCount));
-        
-            // Total Token Amount Paid
-            const tokensPaid = applications.reduce((sum, application) => {
-              const tokenAmount = Number(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
-              if (application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid') {
-                return sum + (tokenAmount || 0);
-              }
-              return sum;
-            }, 0);
-        
-            setTotalTokenAmountPaid(tokensPaid);
-
-            // let tokenPaid = 0;
-            // let oneShot = 0;
-            // let oneShotPaid = 0;
-            // let oneShotAmount = 0;
-            // let oneShotAmountPaid = 0;
-            // let installmentAmount = 0;
-            // let installmentAmountPaid = 0;
-            // let pending = 0;
-
-            let tokenAmountPending = 0;
-            let tokenAmountPaid = 0;
-            let oneShot = 0;
-            let oneShotPaid = 0;
-            let oneShotAmount = 0;
-            let oneShotAmountPaid = 0;
-            let installmentAmount = 0;
-            let installmentAmountPaid = 0;
-            let pending = 0;
-
-            applications?.forEach((application) => {
-              const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
-              const cohortDetails = latestCohort?.cohortId;
-              const litmusTestDetails = latestCohort?.litmusTestDetails;
-              const tokenFeeDetails = latestCohort?.tokenFeeDetails;
-              const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
-              const paymentDetails = latestCohort?.paymentDetails;
-              const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
-
-              // Initialize installment breakdown based on cohort
-              const breakdown: any[] = [];
-              for (let sem = 1; sem <= cohortDetails?.cohortFeesDetail?.semesters; sem++) {
-                const semesterBreakdown = [];
-                for (let inst = 1; inst <= cohortDetails.cohortFeesDetail.installmentsPerSemester; inst++) {
-                  semesterBreakdown.push({
-                    label: `Instalment ${inst}`,
-                    total: 0,
-                    received: 0,
-                    status: "pending",
-                  });
-                }
-                breakdown.push({
-                  semester: sem,
-                  installments: semesterBreakdown,
-                });
-              }
-                
-              if (tokenFeeDetails?.verificationStatus === 'paid') {
-                tokenAmountPaid += (tokenAmount || 0);
-              } else if (['selected'].includes(latestCohort?.applicationDetails?.applicationStatus)) {
-                tokenAmountPending += (tokenAmount || 0);
-                pending += 1;
-              }
-          
-              // One-Shot Payment Processing
-              if (paymentDetails?.paymentPlan === 'one-shot') {
-                oneShot += 1;
-                const oneShotDetails = paymentDetails?.oneShotPayment;
-                if (oneShotDetails) {
-                  oneShotAmount += (oneShotDetails?.amountPayable || 0);
-                  if (oneShotDetails?.verificationStatus === 'paid') {
-                    oneShotPaid += 1;
-                    oneShotAmountPaid += oneShotDetails?.amountPayable;
-                  } else {
-                    pending += 1;
-                  }
-                }
-              }
-
-              // Installments Processing
-              if (paymentDetails?.paymentPlan === 'instalments') {
-                paymentDetails?.installments?.forEach((semesterDetail: any, semIndex: any) => {
-                  const semesterNumber = semesterDetail?.semester;
-                  const installments = semesterDetail?.installments;
-                  installments?.forEach((installment: any, instIndex: any) => {
-                    if (breakdown[semIndex] && breakdown[semIndex]?.installments[instIndex]) {
-                      breakdown[semIndex].installments[instIndex].total += installment?.amountPayable;
-                      if (installment?.verificationStatus === 'paid') {
-                        breakdown[semIndex].installments[instIndex].received += installment?.amountPayable;
-                      }
-                      if (installment?.verificationStatus === 'pending') {
-                        pending += 1;
-                      }
-                    }
-                  });
-                });
-
-                // Calculate total installments expected and received
-                paymentDetails?.installments?.forEach((semesterDetail: any) => {
-                  const installments = semesterDetail?.installments;
-                  installments?.forEach((installment: any) => {
-                    installmentAmount += installment?.amountPayable;
-                    if (installment?.verificationStatus === 'paid') {
-                      installmentAmountPaid += installment?.amountPayable;
-                    }
-                  });
-                });
-              } 
-            });
-            
-            setRevenueCollected(oneShotAmountPaid + installmentAmountPaid + tokenAmountPaid)
-            setRevenuePending(tokenAmountPending + (installmentAmount + oneShotAmount) - (installmentAmountPaid + oneShotAmountPaid))
-            setPendingPayments(pending);
-          } else {
-            console.log("Applications data is not an array or is undefined.");
-          }
-        }, [applications]);
-
-        function KLsystem(amount: number): string {
-
-          if (amount === 0) {
-            return `--`; // Converts to 'L' format with two decimal places
-          } else if (amount >= 100000) {
-            return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
-          } else {
-            return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
+  useEffect(() => {
+    if (applications && Array.isArray(applications)) {
+      let totalApplications = 0;
+      let applicationsThisMonth = 0;
+      let applicationsLastMonth = 0;
+  
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // last date of last month
+  
+      let underReview = 0;
+      let interviewsScheduled = 0;
+      let admissionFee = 0;
+      let litmusTests = 0;
+      let reviewed = 0;
+      let dropped = 0;
+  
+      let totalScholarshipAmount = 0;
+      let totalScholarshipPercentage = 0;
+      let scholarshipCount = 0;
+  
+      let totalTokenPaid = 0;
+      let tokenAmountPending = 0;
+      let tokenAmountPaid = 0;
+  
+      let oneShot = 0;
+      let oneShotPaid = 0;
+      let oneShotAmount = 0;
+      let oneShotAmountPaid = 0;
+  
+      let installmentAmount = 0;
+      let installmentAmountPaid = 0;
+  
+      let pendingPayments = 0;
+  
+      applications.forEach((application) => {
+        totalApplications += 1;
+  
+        const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+        const appDate = new Date(application.updatedAt);
+  
+        // Date based
+        if (appDate >= startOfMonth) {
+          applicationsThisMonth += 1;
+        }
+        if (appDate >= startOfLastMonth && appDate <= endOfLastMonth) {
+          applicationsLastMonth += 1;
+        }
+  
+        // Status based
+        const applicationStatus = latestCohort?.applicationDetails?.applicationStatus?.toLowerCase();
+        const tokenFeeStatus = latestCohort?.tokenFeeDetails?.verificationStatus;
+        const litmusStatus = latestCohort?.litmusTestDetails?.status?.toLowerCase();
+        const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
+        const baseFee = latestCohort?.cohortId?.baseFee || 0;
+        const scholarshipDetails = latestCohort?.litmusTestDetails?.scholarshipDetail;
+        const paymentDetails = latestCohort?.paymentDetails;
+  
+        if (applicationStatus === "under review") underReview++;
+        if (applicationStatus === "interview scheduled") interviewsScheduled++;
+        if (tokenFeeStatus === "paid") admissionFee++;
+  
+        if ([undefined, '', 'pending'].includes(litmusStatus)) litmusTests++;
+        if (litmusStatus === "completed") reviewed++;
+  
+        if (latestCohort?.status?.toLowerCase() === "dropped") dropped++;
+  
+        // Scholarships
+        if (scholarshipDetails && baseFee) {
+          totalScholarshipAmount += scholarshipDetails.scholarshipPercentage * baseFee * 0.01;
+          totalScholarshipPercentage += scholarshipDetails.scholarshipPercentage;
+          scholarshipCount += 1;
+        }
+  
+        // Token Payments
+        if (tokenFeeStatus === "paid") {
+          tokenAmountPaid += tokenAmount;
+        } else if (applicationStatus === "selected") {
+          tokenAmountPending += tokenAmount;
+          pendingPayments++;
+        }
+  
+        // Revenue
+        if (paymentDetails?.paymentPlan === "one-shot") {
+          oneShot++;
+          const oneShotPayment = paymentDetails.oneShotPayment;
+          if (oneShotPayment) {
+            oneShotAmount += oneShotPayment.amountPayable || 0;
+            if (oneShotPayment.verificationStatus === "paid") {
+              oneShotPaid++;
+              oneShotAmountPaid += oneShotPayment.amountPayable || 0;
+            } else {
+              pendingPayments++;
+            }
           }
         }
-
+  
+        if (paymentDetails?.paymentPlan === "instalments") {
+          paymentDetails.installments?.forEach((installment: any) => {
+              installmentAmount += installment.amountPayable || 0;
+              if (installment.verificationStatus === "paid") {
+                installmentAmountPaid += installment.amountPayable || 0;
+              } else if (installment.verificationStatus === "pending") {
+                pendingPayments++;
+              }
+          });
+        }
+      });
+  
+      // Set all states
+      setTotalApplicationsCount(totalApplications);
+      setApplicationsThisMonth(applicationsThisMonth);
+      setApplicationsLastMonth(applicationsLastMonth);
+  
+      setUnderReviewCount(underReview);
+      setInterviewsScheduledCount(interviewsScheduled);
+      setAdmissionFeeCount(admissionFee);
+      setLitmusTestsCount(litmusTests);
+      setReviewedCount(reviewed);
+      setDroppedCount(dropped);
+  
+      setTotalScholarshipsAmount(totalScholarshipAmount);
+      setAvgScholarshipsPercentage(totalScholarshipPercentage / (scholarshipCount || 1));
+  
+      setTotalTokenAmountPaid(tokenAmountPaid);
+  
+      setRevenueCollected(oneShotAmountPaid + installmentAmountPaid + tokenAmountPaid);
+      setRevenuePending(tokenAmountPending + (installmentAmount + oneShotAmount) - (installmentAmountPaid + oneShotAmountPaid));
+      setPendingPayments(pendingPayments);
+    } else {
+      console.log("Applications data is not an array or is undefined.");
+    }
+  }, [applications]);
+  
         const calculatePercentageIncrease = (current: number, previous: number) => {
           if (current === 0) return 0;
           if (previous === 0) return 100;
@@ -406,7 +324,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
     {
       title: "Under Review",
       value: underReviewCount,
-      description: "8 pending feedback",
+      description: "pending feedback",
       icon: CheckCircle,
     },
     {
@@ -437,7 +355,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
       title: "Revenue Collected",
       value: `${KLsystem(revenueCollected)}`,
       description: `${KLsystem(totalTokenAmountPaid)} Admission Fee Paid`,
-      icon: IndianRupee,
+      icon: Wallet,
       // trend: { value: 8, isPositive: true },
     },
     {

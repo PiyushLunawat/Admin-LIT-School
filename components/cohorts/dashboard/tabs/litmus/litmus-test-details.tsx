@@ -213,7 +213,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </div>
               ))}
             </div>
-            {status !== 'completed' &&
+            {/* {status !== 'completed' &&
             <Select disabled={['pending', 'interview scheduled', 'completed'].includes(status)} 
               value={status || "pending"}
               onValueChange={handleStatusChange}>
@@ -230,7 +230,8 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <SelectItem value="under review">Under Review</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
-            </Select>}
+            </Select>
+            } */}
           </div>
 
           <Separator />
@@ -268,8 +269,8 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </Button>
                   {litmusTestDetails?.scholarshipDetail ? 
                     <Button variant="outline" className={`justify-start min-px-2 ${getColor(litmusTestDetails?.scholarshipDetail?.scholarshipName)}`} onClick={() => setSchOpen(true)}>
-                      <div className="flex gap-2 items-center">
-                        <span className="text-lg pb-[2px]">★ </span> {litmusTestDetails?.scholarshipDetail?.scholarshipName+' '+(litmusTestDetails?.scholarshipDetail?.scholarshipPercentage+'%')}
+                      <div className="flex gap-2 items-center truncate">
+                        <span className="text-lg pb-[2px]">★ </span> <span className="truncate">{litmusTestDetails?.scholarshipDetail?.scholarshipName}</span>{'('+litmusTestDetails?.scholarshipDetail?.scholarshipPercentage+'%)'}
                       </div> 
                     </Button>
                       :

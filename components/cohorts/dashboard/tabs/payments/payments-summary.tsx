@@ -4,7 +4,7 @@ import { getCohortById } from "@/app/api/cohorts";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { formatAmount } from "@/lib/utils/helpers";
+import { formatAmount, KLsystem } from "@/lib/utils/helpers";
 import { CreditCard, Clock, AlertTriangle, Award } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -199,14 +199,6 @@ export function PaymentsSummary({ cohortId, applications }: PaymentsSummaryProps
     if (received > 0 && received < total) return "partial";
     return "pending";
   };
-
-  function KLsystem(amount: number): string {
-    if (amount >= 100000) {
-      return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
-    } else {
-      return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
-    }
-  }
 
   return (
     <div className="flex flex-col gap-4">

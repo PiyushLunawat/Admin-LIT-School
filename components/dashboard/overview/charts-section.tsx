@@ -112,59 +112,50 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
       fetchAndFilterStudents();
     }, [selectedDateRange, searchQuery, selectedProgram, selectedCohort]);
     
-      useEffect(() => {
-        if (applications && Array.isArray(applications)) {
-  
-          // Applied Count
-          const applied = applications.filter(
-            (application) =>
-              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() !==
-              undefined
-          );
-          setAppliedCount(applied.length);
+    useEffect(() => {
+      if (applications && Array.isArray(applications)) {
+        let appliedCount = 0;
+        let underReviewCount = 0;
+        let interviewedCount = 0;
+        let litmusCompleteCount = 0;
+        let enrolledCount = 0;
     
-          // Under Review Count
-          const underReview = applications.filter(
-            (application) =>
-              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
-              "under review"
-          );
-          setUnderReviewCount(underReview.length);
+        applications.forEach((application) => {
+          const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
     
-          // Interviews Scheduled Count
-          const onhold = applications.filter(
-            (application) =>
-              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
-              "complete"
-          );
-          setInterviewedCount(onhold.length);
-  
-          const litmus = applications.filter(
-            (application) =>
-            (application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() !== "pending" &&
-            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() !== undefined)
-          );
-          setLitmusCompleteCount(litmus.length);
+          const applicationStatus = latestCohort?.applicationDetails?.applicationStatus?.toLowerCase();
+          const litmusStatus = latestCohort?.litmusTestDetails?.status?.toLowerCase();
     
-          const enrolled = applications.filter(
-            (application) =>
-              application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status?.toLowerCase() ===
-              "completed"
-          );
-          setEnrolledCount(enrolled.length);
-  
-          // const rejected = applications.filter(
-          //   (application) =>
-          //     application?.applicationDetails?.applicationStatus?.toLowerCase() ===
-          //     "rejected"
-          // );
-          // setRejectedCount(rejected.length);
-  
+          if (applicationStatus !== undefined) {
+            appliedCount++;
+          }
     
-        } else {
-          console.log("Applications data is not an array or is undefined.");
-        }
-      }, [applications]);
+          if (applicationStatus === "under review") {
+            underReviewCount++;
+          }
+    
+          if (applicationStatus === "complete") {
+            interviewedCount++;
+          }
+    
+          if (litmusStatus !== "pending" && litmusStatus !== undefined) {
+            litmusCompleteCount++;
+          }
+    
+          if (litmusStatus === "completed") {
+            enrolledCount++;
+          }
+        });
+    
+        setAppliedCount(appliedCount);
+        setUnderReviewCount(underReviewCount);
+        setInterviewedCount(interviewedCount);
+        setLitmusCompleteCount(litmusCompleteCount);
+        setEnrolledCount(enrolledCount);
+      } else {
+        console.log("Applications data is not an array or is undefined.");
+      }
+    }, [applications]);    
 
   const funnelData = [
     { stage: "Applications", value: appliedCount },

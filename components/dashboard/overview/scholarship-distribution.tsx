@@ -11,29 +11,25 @@ const processScholarships = (applications: any) => {
   applications?.forEach((application: any) => {
 
     const semester = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
-
     if (!semester) return;
 
-    
     const scholarshipName = semester?.scholarshipName;
     const scholarshipPercentage = semester?.scholarshipPercentage || 0;
     const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
+    const scholarshipAmount = baseFee * scholarshipPercentage * 0.01 || 0;
 
-      // Calculate total scholarship amount from installments
-      const scholarshipAmount = baseFee * scholarshipPercentage * 0.01 || 0;
-
-      if (!scholarshipMap[scholarshipName]) {
-        scholarshipMap[scholarshipName] = {
-          name: scholarshipName,
-          value: scholarshipPercentage,
-          count: 1,
-          amount: scholarshipAmount,
-          color: `hsl(var(--chart-${Object.keys(scholarshipMap).length + 1}))`, // Assign color dynamically
-        };
-      } else {
-        scholarshipMap[scholarshipName].count += 1;
-        scholarshipMap[scholarshipName].amount += scholarshipAmount;
-      }
+    if (!scholarshipMap[scholarshipName]) {
+      scholarshipMap[scholarshipName] = {
+        name: scholarshipName,
+        value: scholarshipPercentage,
+        count: 1,
+        amount: scholarshipAmount,
+        color: `hsl(var(--chart-${Object.keys(scholarshipMap).length + 1}))`, // Assign color dynamically
+      };
+    } else {
+      scholarshipMap[scholarshipName].count += 1;
+      scholarshipMap[scholarshipName].amount += scholarshipAmount;
+    }
   });
 
   return Object.values(scholarshipMap);

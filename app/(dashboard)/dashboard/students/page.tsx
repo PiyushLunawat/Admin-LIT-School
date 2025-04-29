@@ -142,11 +142,48 @@ export default function StudentsPage() {
     
           // 5) Payment Status check
           if (selectedPaymentStatus !== "all-payments") {
-            if (latestCohort?.paymentStatus !== selectedPaymentStatus) {
-              return false;
+            if (selectedPaymentStatus === 'token-paid') {
+              if (latestCohort?.tokenFeeDetails?.verificationStatus !== 'paid')
+                return false;
+            } else {
+              let paymentStatus = "";
+              const paymentDetails = latestCohort?.paymentDetails;
+
+              if (paymentDetails?.paymentPlan === 'one-shot') {
+                const oneShotDetails = paymentDetails?.oneShotPayment;
+                if (oneShotDetails) {
+                  if(oneShotDetails?.verificationStatus === 'paid') {
+                    paymentStatus = "complete";
+                  } else if (new Date(oneShotDetails?.installmentDate) < new Date()) {
+                    paymentStatus = "overdue";
+                  } else {
+                    paymentStatus = oneShotDetails?.verificationStatus ;
+                  }
+                }
+              } else if (paymentDetails?.paymentPlan === 'instalments') {
+                const installmentsDetails = paymentDetails?.installments
+                let earliestUnpaid= installmentsDetails?.[0]?.installments?.[0];
+                let allPaid = true;
+
+                  for (const installment of installmentsDetails || []) {
+                    if (installment.verificationStatus !== "paid") {
+                      allPaid = false;
+                      earliestUnpaid = installment;
+                      break;
+                    }
+                  }
+                if (allPaid) {
+                  paymentStatus = "complete";
+                } else if (new Date(earliestUnpaid.installmentDate) < new Date()) {
+                  paymentStatus = "overdue";
+                } else {
+                  paymentStatus = earliestUnpaid.verificationStatus;
+                }
+              }
+              if (selectedPaymentStatus !== paymentStatus)
+                return false;
             }
           }
-    
           return true;
         });
       }, [applications, searchQuery, selectedProgram, selectedCohort, selectedAppStatus, selectedPaymentStatus]);

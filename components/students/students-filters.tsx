@@ -122,8 +122,8 @@ export function StudentsFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all-payments">All Payment Status</SelectItem>
-            <SelectItem value="token paid">Admission Fee Paid</SelectItem>
-            <SelectItem value="instalments pending">Instalments Pending</SelectItem>
+            <SelectItem value="token-paid">Admission Fee Paid</SelectItem>
+            <SelectItem value="pending">Instalments Pending</SelectItem>
             <SelectItem value="overdue">Overdue</SelectItem>
             <SelectItem value="complete">Complete</SelectItem>
           </SelectContent>

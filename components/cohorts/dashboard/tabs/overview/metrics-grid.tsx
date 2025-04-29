@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatAmount } from "@/lib/utils/helpers";
+import { formatAmount, KLsystem } from "@/lib/utils/helpers";
 import {
   Users,
   ClipboardList,
@@ -169,14 +169,6 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
     }
   }, [applications]);
 
-  function KLsystem(amount: number): string {
-    if (amount >= 100000) {
-      return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
-    } else {
-      return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
-    }
-  }
-  
   const metrics = [
     {
       title: "Total Applications",

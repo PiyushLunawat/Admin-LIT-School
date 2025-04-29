@@ -426,316 +426,339 @@ export function PaymentInformationTab({ student, onApplicationUpdate }: PaymentI
           <CardTitle>Payment Schedule</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-            <div className="border rounded-lg p-4 space-y-2">
+          <div className="border rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium">Application Fee</h4>
+                <p className="text-sm text-muted-foreground">
+                  Amount: ₹{formatAmount(cohortDetails?.cohortFeesDetail?.applicationFee)}
+                  {/* {latestCohort?.appliedDate && (
+                    <>
+                      {" • Paid on "}
+                      {new Date(
+                        latestCohort?.appliedDate
+                      ).toLocaleDateString()}
+                    </>
+                  )} */}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="capitalize" variant={getStatusColor(applicationDetails?.applicationFee || '')}>
+                  {applicationDetails?.applicationFee || 'pending'}
+                </Badge>
+              </div>                
+            </div>
+          </div>
+          <div className="border rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium">Admission Fee</h4>
+                <p className="text-sm text-muted-foreground">
+                  Amount: ₹{formatAmount(tokenAmount)}
+                  {tokenFeeDetails && (
+                    <>
+                      {" • Uploaded on "}
+                      {new Date(
+                        tokenFeeDetails?.updatedAt
+                      ).toLocaleDateString()}
+                    </>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {applicationDetails?.applicationStatus === 'selected' && 
+                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
+                    {tokenFeeDetails?.verificationStatus || 'pending'}
+                  </Badge>
+                }
+                {tokenFeeDetails?.verificationStatus === 'paid' && 
+                <Button variant="ghost" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View
+                </Button>}
+              </div>                
+            </div>
+            {/* <div className="flex justify-between items-center">
+              {payment.tokenPaid !== "Paid" && <Button variant="outline" size="sm" className="">
+                <UploadIcon className="h-4 w-4 mr-2" />
+                Upload Receipt
+              </Button>}
+            </div>  */}
+
+            
+            {tokenFeeDetails?.verificationStatus === 'verification pending' &&
+              <div className="space-y-4">
+                <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
+                  <img src={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url} alt={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url.split('/').pop()} className='w-full h-[200px] object-contain rounded-t-xl' />
+                </div>
+                {flagOpen ?
+                <div className="space-y-4 ">
+                  <div className="mt-2 space-y-2">
+                    <label className="text-lg pl-3">Provide Reasons</label>
+                    <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+                  </div>
+                  <div className="flex gap-2" >
+                    <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
+                    <Button className="flex-1" disabled={!reason.trim()}
+                      onClick={() => handleTokenVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
+                  </div>
+                </div> :
+                <div className="flex gap-4 mt-4">
+                  <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
+                    onClick={() => setFlagOpen(true)} disabled={latestCohort?.status === 'dropped'}>
+                      <FlagIcon className="w-4 h-4"/> Flag Reciept
+                  </Button>
+                  <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
+                    onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")} disabled={latestCohort?.status === 'dropped'}>
+                      <CircleCheckBig className="w-4 h-4"/> Mark as Verified
+                  </Button>
+                </div>}
+              </div>
+            }
+            {tokenFeeDetails?.verificationStatus === 'paid' && 
+            <>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 mr-2" />
+                Paid: {new Date(tokenFeeDetails?.updatedAt).toLocaleDateString()}
+              </div>
+              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Receipt
+              </Button>
+            </>
+            }
+            {(tokenFeeDetails?.feedback && tokenFeeDetails?.feedback.length > 0) && 
+              <div className="space-y-3">
+                <Separator />
+                  {tokenFeeDetails?.feedback.slice().reverse().map((feedback: any, index: any) => (
+                    <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
+                      <div className="flex justify-between items-center">
+                        <div className="">
+                          Reason:
+                        </div>
+                        <div className="text-[#FF503D]">Rejected on {new Date(feedback?.date).toLocaleDateString()}</div>
+                      </div>
+                      <div className="">
+                        {feedback?.text?.map((item: string, index: number) => (
+                          <div className="" key={index}>{item}</div>
+                        ))}
+                      </div>
+                      <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.feedback.length - 1 - index]?.url)}>
+                        <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            }
+          </div>
+
+          {paymentDetails?.paymentPlan === 'one-shot' ? 
+            <Card className="p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-medium">Admission Fee</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Amount: ₹{formatAmount(tokenAmount)}
-                    {tokenFeeDetails && (
-                      <>
-                        {" • Uploaded on "}
-                        {new Date(
-                          tokenFeeDetails?.updatedAt
-                        ).toLocaleDateString()}
-                      </>
-                    )}
-                  </p>
+                  <h5 className="font-medium">One Shot Payment</h5>
                 </div>
                 <div className="flex items-center gap-2">
-                  {applicationDetails?.applicationStatus === 'selected' && 
-                    <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
-                      {tokenFeeDetails?.verificationStatus || 'pending'}
+                  {(new Date(paymentDetails?.oneShotPayment?.installmentDate) < new Date() && paymentDetails?.oneShotPayment?.verificationStatus === 'pending' ) ?
+                    <Badge variant={getStatusColor('overdue')}>
+                      overdue
                     </Badge>
+                  :
+                  <Badge variant={getStatusColor(paymentDetails?.oneShotPayment?.verificationStatus || '')}>
+                    {paymentDetails?.oneShotPayment?.verificationStatus}
+                  </Badge>
                   }
-                  {tokenFeeDetails?.verificationStatus === 'paid' && 
-                  <Button variant="ghost" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View
-                  </Button>}
-                </div>                
+                  {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url && 
+                    <Button variant="ghost" size="sm" onClick={() => handleView(paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                  }
+                </div>
               </div>
-              {/* <div className="flex justify-between items-center">
-                {payment.tokenPaid !== "Paid" && <Button variant="outline" size="sm" className="">
-                  <UploadIcon className="h-4 w-4 mr-2" />
-                  Upload Receipt
-                </Button>}
-              </div>  */}
-
-              
-              {tokenFeeDetails?.verificationStatus === 'verification pending' &&
-                <div className="space-y-4">
-                  <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
-                    <img src={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url} alt={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url.split('/').pop()} className='w-full h-[200px] object-contain rounded-t-xl' />
-                  </div>
-                  {flagOpen ?
-                  <div className="space-y-4 ">
-                    <div className="mt-2 space-y-2">
-                      <label className="text-lg pl-3">Provide Reasons</label>
-                      <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
-                    </div>
-                    <div className="flex gap-2" >
-                      <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
-                      <Button className="flex-1" disabled={!reason.trim()}
-                        onClick={() => handleTokenVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
-                    </div>
+              <div>
+                <p className="text-sm ">Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.amountPayable)}</p>
+                <p className="text-sm text-muted-foreground">Base Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee)}</p>
+                <p className="text-sm text-muted-foreground">One Shot Discount: ₹{formatAmount(paymentDetails?.oneShotPayment?.OneShotPaymentAmount)}</p>
+                <p className="text-sm text-muted-foreground">Scholarship Waiver: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee*scholarshipDetails?.scholarshipPercentage*0.01)}</p>
+              </div>
+              <div className="flex justify-between items-center gap-2">
+                {paymentDetails?.oneShotPayment?.verificationStatus === 'paid' ?
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Paid: {new Date(paymentDetails?.oneShotPayment?.receiptUrls?.[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.uploadedAt).toLocaleDateString()}
                   </div> :
-                  <div className="flex gap-4 mt-4">
-                    <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
-                      onClick={() => setFlagOpen(true)} disabled={latestCohort?.status === 'dropped'}>
-                        <FlagIcon className="w-4 h-4"/> Flag Reciept
-                    </Button>
-                    <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                      onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")} disabled={latestCohort?.status === 'dropped'}>
-                        <CircleCheckBig className="w-4 h-4"/> Mark as Verified
-                    </Button>
-                  </div>}
-                </div>
-              }
-              {tokenFeeDetails?.verificationStatus === 'paid' && 
-              <>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Paid: {new Date(tokenFeeDetails?.updatedAt).toLocaleDateString()}
-                </div>
-                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Due: {new Date(paymentDetails?.oneShotPayment?.installmentDate).toLocaleDateString()}
+                  </div>
+                }
+              </div>
+              {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
+                <Button variant="outline" size="sm" className="w-full mt-2">
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
                 </Button>
-              </>
-              }
-              {(tokenFeeDetails?.feedback && tokenFeeDetails?.feedback.length > 0) && 
-                <div className="space-y-3">
-                  <Separator />
-                    {tokenFeeDetails?.feedback.slice().reverse().map((feedback: any, index: any) => (
-                      <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
-                        <div className="flex justify-between items-center">
-                          <div className="">
-                            Reason:
-                          </div>
-                          <div className="text-[#FF503D]">Rejected on {new Date(feedback?.date).toLocaleDateString()}</div>
-                        </div>
-                        <div className="">
-                          {feedback?.text?.map((item: string, index: number) => (
-                            <div className="" key={index}>{item}</div>
-                          ))}
-                        </div>
-                        <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.feedback.length - 1 - index]?.url)}>
-                          <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
-                        </Button>
-                      </div>
-                    ))}
-                </div>
-              }
-            </div>
-
-            {paymentDetails?.paymentPlan === 'one-shot' ? 
-              <Card className="p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-medium">One Shot Payment</h5>
-                  </div>
+              ) : 
+              uploadStates[`oneshot`]?.uploading ?
+                <div className="flex justify-between items-center gap-4">
+                  {/* <div className="flex flex-1 truncate">{uploadStates[`oneshot`]?.fileName}</div> */}
                   <div className="flex items-center gap-2">
-                    {(new Date(paymentDetails?.oneShotPayment?.installmentDate) < new Date() && paymentDetails?.oneShotPayment?.verificationStatus === 'pending' ) ?
-                      <Badge variant={getStatusColor('overdue')}>
-                        overdue
-                      </Badge>
-                    :
-                    <Badge variant={getStatusColor(paymentDetails?.oneShotPayment?.verificationStatus || '')}>
-                      {paymentDetails?.oneShotPayment?.verificationStatus}
-                    </Badge>
-                    }
-                    {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url && 
-                      <Button variant="ghost" size="sm" onClick={() => handleView(paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                    }
+                    {uploadStates[`oneshot`]?.uploadProgress === 100 ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Progress className="h-2 w-20" states={[ { value: uploadStates[`oneshot`]?.uploadProgress, widt: uploadStates[`oneshot`]?.uploadProgress, color: '#ffffff' }]} />
+                        <span>{uploadStates[`oneshot`]?.uploadProgress}%</span>
+                      </>
+                    )}
+                    <Button variant="ghost" size="sm">
+                      <XIcon className="w-4" />
+                    </Button>
                   </div>
-                </div>
-                <div>
-                  <p className="text-sm ">Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.amountPayable)}</p>
-                  <p className="text-sm text-muted-foreground">Base Amount: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee)}</p>
-                  <p className="text-sm text-muted-foreground">One Shot Discount: ₹{formatAmount(paymentDetails?.oneShotPayment?.OneShotPaymentAmount)}</p>
-                  <p className="text-sm text-muted-foreground">Scholarship Waiver: ₹{formatAmount(paymentDetails?.oneShotPayment?.baseFee*scholarshipDetails?.scholarshipPercentage*0.01)}</p>
-                </div>
-                <div className="flex justify-between items-center gap-2">
-                  {paymentDetails?.oneShotPayment?.verificationStatus === 'paid' ?
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Paid: {new Date(paymentDetails?.oneShotPayment?.receiptUrls?.[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.uploadedAt).toLocaleDateString()}
-                    </div> :
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Due: {new Date(paymentDetails?.oneShotPayment?.installmentDate).toLocaleDateString()}
-                    </div>
-                  }
-                </div>
-                {paymentDetails?.oneShotPayment?.receiptUrls[paymentDetails?.oneShotPayment?.receiptUrls.length - 1]?.url ? (
-                  <Button variant="outline" size="sm" className="w-full mt-2">
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Receipt
-                  </Button>
-                ) : 
-                uploadStates[`oneshot`]?.uploading ?
-                  <div className="flex justify-between items-center gap-4">
-                    {/* <div className="flex flex-1 truncate">{uploadStates[`oneshot`]?.fileName}</div> */}
-                    <div className="flex items-center gap-2">
-                      {uploadStates[`oneshot`]?.uploadProgress === 100 ? (
-                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Progress className="h-2 w-20" states={[ { value: uploadStates[`oneshot`]?.uploadProgress, widt: uploadStates[`oneshot`]?.uploadProgress, color: '#ffffff' }]} />
-                          <span>{uploadStates[`oneshot`]?.uploadProgress}%</span>
-                        </>
-                      )}
-                      <Button variant="ghost" size="sm">
-                        <XIcon className="w-4" />
-                      </Button>
-                    </div>
-                  </div> :
-                  <label className="cursor-pointer w-full">
-                  <Button variant="outline" size="sm" className="w-full mt-2" 
-                    onClick={() => document.getElementById(`file-input-oneshot`)?.click()} disabled={latestCohort?.status === 'dropped'}>
-                    <UploadIcon className="h-4 w-4 mr-2" />
-                    Upload Receipt
-                  </Button>
+                </div> :
+                <label className="cursor-pointer w-full">
+                <Button variant="outline" size="sm" className="w-full mt-2" 
+                  onClick={() => document.getElementById(`file-input-oneshot`)?.click()} disabled={latestCohort?.status === 'dropped'}>
+                  <UploadIcon className="h-4 w-4 mr-2" />
+                  Upload Receipt
+                </Button>
 
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    id={`file-input-oneshot`}
-                    onChange={(e) => {
-                      handleFileChange(e, paymentDetails?.oneShotPayment?._id, true);
-                    }}
-                  />
-                </label>
-              }             
-              </Card> : 
-              <div className="space-y-2">
-              {visibleSemesters?.map((installments: any, semesterIndex: any) => (
-                <div key={semesterIndex}>
-                  <Badge variant="blue" className="capitalize mb-3">
-                    Semester 0{semesterIndex + 1}
-                  </Badge>
-                  <div className="space-y-4">
-                    {installments?.map((instalment: any, instalmentIndex: number) => (
-                      <div key={instalmentIndex} className="border rounded-lg p-4 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">Instalment {instalmentIndex + 1}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Amount: ₹{formatAmount(instalment?.amountPayable)}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {(paymentDetails && lastStatus !== 'pending') && (
-                              (new Date(instalment?.installmentDate) < new Date() && instalment?.verificationStatus === 'pending' && !(instalment.receiptUrls[0]?.uploadedDate)) ?
-                                <Badge variant={getStatusColor('overdue')}>
-                                  overdue
-                                </Badge>
-                              :
-                                <Badge className="capitalize" variant={getStatusColor(instalment?.verificationStatus)}>
-                                  {instalment?.verificationStatus}
-                                </Badge>
-                            )}
-                            {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url && 
-                              <Button variant="ghost" size="sm" onClick={() => handleView(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View
-                              </Button>
-                            }
-                          </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id={`file-input-oneshot`}
+                  onChange={(e) => {
+                    handleFileChange(e, paymentDetails?.oneShotPayment?._id, true);
+                  }}
+                />
+              </label>
+            }             
+            </Card> : 
+            <div className="space-y-2">
+            {visibleSemesters?.map((installments: any, semesterIndex: any) => (
+              <div key={semesterIndex}>
+                <Badge variant="blue" className="capitalize mb-3">
+                  Semester 0{semesterIndex + 1}
+                </Badge>
+                <div className="space-y-4">
+                  {installments?.map((instalment: any, instalmentIndex: number) => (
+                    <div key={instalmentIndex} className="border rounded-lg p-4 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium">Instalment {instalmentIndex + 1}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Amount: ₹{formatAmount(instalment?.amountPayable)}
+                          </p>
                         </div>
-
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            Due:{" "}
-                            {instalment?.installmentDate
-                              ? new Date(instalment?.installmentDate).toLocaleDateString()
-                              : "--"}
-                          </div>
-                          {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate && 
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Calendar className="h-4 w-4 mr-2" />
-                              Paid:{" "}
-                              {instalment?.installmentDate
-                                ? new Date(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()
-                                : "--"}
-                            </div>
+                        <div className="flex items-center gap-2">
+                          {(paymentDetails && lastStatus !== 'pending') && (
+                            (new Date(instalment?.installmentDate) < new Date() && instalment?.verificationStatus === 'pending' && !(instalment.receiptUrls[0]?.uploadedDate)) ?
+                              <Badge variant={getStatusColor('overdue')}>
+                                overdue
+                              </Badge>
+                            :
+                              <Badge className="capitalize" variant={getStatusColor(instalment?.verificationStatus)}>
+                                {instalment?.verificationStatus}
+                              </Badge>
+                          )}
+                          {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url && 
+                            <Button variant="ghost" size="sm" onClick={() => handleView(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.url)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </Button>
                           }
                         </div>
-                        {/* <Button variant="outline" size="sm">
-                            <UploadIcon className="h-4 w-4 mr-2" />
-                            Upload Receipt
-                            </Button> */}
-                          {instalment.verificationStatus === 'paid' ? (
-                            <Button variant="outline" size="sm" className="w-full mt-2"
-                              onClick={() => window.open(instalment.receiptUrls?.[instalment?.receiptUrls.length - 1]?.url, "_blank")}>
-                              <Download className="h-4 w-4 mr-2" />
-                              Download Receipt
-                            </Button>
-                          ) : instalment.verificationStatus === 'verifying' ? (
-                            <Button variant="outline" size="sm" className="w-full mt-2"
-                              onClick={() => handleVerifyDialog(false, instalment)}>
-                              <EyeIcon className="h-4 w-4 mr-2" />
-                              Acknowledgement Receipt
-                            </Button>
-                          ) : uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploading ?
-                          <div className="flex flex-1 justify-between items-center gap-4 truncate">
-                            {/* <div className="flex flex-1 truncate">{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.fileName}</div> */}
-                            <div className="flex items-center gap-2">
-                              {uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress === 100 ? (
-                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <>
-                                  <Progress className="h-2 w-20" states={[ { value: uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress, widt: uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress, color: '#ffffff' }]} />
-                                  <span>{uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress}%</span>
-                                </>
-                              )}
-                              <Button variant="ghost" size="sm">
-                                <XIcon className="w-4" />
-                              </Button>
-                            </div>
-                          </div> :(
-                          (paymentDetails && lastStatus !== 'pending') &&
-                            <label className="cursor-pointer w-full">
-                              <Button variant="outline" size="sm" className="w-full mt-2" 
-                                onClick={() => document.getElementById(`file-input-${instalmentIndex + 1}${instalment?.semester}`)?.click()}
-                                disabled={latestCohort?.status === 'dropped'}>
-                                <UploadIcon className="h-4 w-4 mr-2" />
-                                Upload Receipt
-                              </Button>
-
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                id={`file-input-${instalmentIndex + 1}${instalment?.semester}`}
-                                onChange={(e) => {
-                                  handleFileChange(e, paymentDetails?._id, false, instalmentIndex + 1, instalment?.semester);
-                                }}
-                              />
-                            </label>
-                          )} 
-                          <div className="hidden">
-                              {lastStatus = instalment?.verificationStatus}
-                            </div>
                       </div>
-                    ))}
-                  </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Due:{" "}
+                          {instalment?.installmentDate
+                            ? new Date(instalment?.installmentDate).toLocaleDateString()
+                            : "--"}
+                        </div>
+                        {instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate && 
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Paid:{" "}
+                            {instalment?.installmentDate
+                              ? new Date(instalment?.receiptUrls[instalment?.receiptUrls.length - 1]?.uploadedDate).toLocaleDateString()
+                              : "--"}
+                          </div>
+                        }
+                      </div>
+                      {/* <Button variant="outline" size="sm">
+                          <UploadIcon className="h-4 w-4 mr-2" />
+                          Upload Receipt
+                          </Button> */}
+                        {instalment.verificationStatus === 'paid' ? (
+                          <Button variant="outline" size="sm" className="w-full mt-2"
+                            onClick={() => window.open(instalment.receiptUrls?.[instalment?.receiptUrls.length - 1]?.url, "_blank")}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Download Receipt
+                          </Button>
+                        ) : instalment.verificationStatus === 'verifying' ? (
+                          <Button variant="outline" size="sm" className="w-full mt-2"
+                            onClick={() => handleVerifyDialog(false, instalment)}>
+                            <EyeIcon className="h-4 w-4 mr-2" />
+                            Acknowledgement Receipt
+                          </Button>
+                        ) : uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploading ?
+                        <div className="flex flex-1 justify-between items-center gap-4 truncate">
+                          {/* <div className="flex flex-1 truncate">{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.fileName}</div> */}
+                          <div className="flex items-center gap-2">
+                            {uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress === 100 ? (
+                              <LoaderCircle className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Progress className="h-2 w-20" states={[ { value: uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress, widt: uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress, color: '#ffffff' }]} />
+                                <span>{uploadStates[`${instalmentIndex + 1}${instalment?.semester}`]?.uploadProgress}%</span>
+                              </>
+                            )}
+                            <Button variant="ghost" size="sm">
+                              <XIcon className="w-4" />
+                            </Button>
+                          </div>
+                        </div> :(
+                        (paymentDetails && lastStatus !== 'pending') &&
+                          <label className="cursor-pointer w-full">
+                            <Button variant="outline" size="sm" className="w-full mt-2" 
+                              onClick={() => document.getElementById(`file-input-${instalmentIndex + 1}${instalment?.semester}`)?.click()}
+                              disabled={latestCohort?.status === 'dropped'}>
+                              <UploadIcon className="h-4 w-4 mr-2" />
+                              Upload Receipt
+                            </Button>
+
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              id={`file-input-${instalmentIndex + 1}${instalment?.semester}`}
+                              onChange={(e) => {
+                                handleFileChange(e, paymentDetails?._id, false, instalmentIndex + 1, instalment?.semester);
+                              }}
+                            />
+                          </label>
+                        )} 
+                        <div className="hidden">
+                            {lastStatus = instalment?.verificationStatus}
+                          </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-                <Button
-                  variant="ghost" className="w-full underline"
-                  onClick={() => setShowAllSemesters(!showAllSemesters)}
-                >
-                  {showAllSemesters ? "View Less" : "View More"}
-                </Button>
-            </div>
-          }
+              </div>
+            ))}
+              <Button
+                variant="ghost" className="w-full underline"
+                onClick={() => setShowAllSemesters(!showAllSemesters)}
+              >
+                {showAllSemesters ? "View Less" : "View More"}
+              </Button>
+          </div>
+        }
         </CardContent>
       </Card>
 

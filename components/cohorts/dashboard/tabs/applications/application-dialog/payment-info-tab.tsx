@@ -42,6 +42,8 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
   const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId; 
   const applicationDetails = latestCohort?.applicationDetails;
+  console.log("wfwfw", latestCohort);
+  
   const litmusTestDetails = latestCohort?.litmusTestDetails;
   const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
   const [tokenFeeDetails, setTokenFeeDetails] = useState<any>(latestCohort?.tokenFeeDetails);
@@ -428,108 +430,132 @@ export function PaymentInformationTab({ student, onUpdateStatus }: PaymentInform
           <CardTitle>Payment Schedule</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-            <div className="border rounded-lg p-4 space-y-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-medium">Admission Fee</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Amount: ₹{formatAmount(tokenAmount)}
-                    {tokenFeeDetails && (
-                      <>
-                        {" • Uploaded on "}
-                        {new Date(
-                          tokenFeeDetails?.updatedAt
-                        ).toLocaleDateString()}
-                      </>
-                    )}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {applicationDetails?.applicationStatus === 'selected' && 
-                    <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
-                      {tokenFeeDetails?.verificationStatus || 'pending'}
-                    </Badge>
-                  }
-                  {tokenFeeDetails?.verificationStatus === 'paid' && 
-                  <Button variant="ghost" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View
-                  </Button>}
-                </div>                
+          <div className="border rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium">Application Fee</h4>
+                <p className="text-sm text-muted-foreground">
+                  Amount: ₹{formatAmount(cohortDetails?.cohortFeesDetail?.applicationFee)}
+                  {/* {latestCohort?.appliedDate && (
+                    <>
+                      {" • Paid on "}
+                      {new Date(
+                        latestCohort?.appliedDate
+                      ).toLocaleDateString()}
+                    </>
+                  )} */}
+                </p>
               </div>
-              {/* <div className="flex justify-between items-center">
-                {payment.tokenPaid !== "Paid" && <Button variant="outline" size="sm" className="">
-                  <UploadIcon className="h-4 w-4 mr-2" />
-                  Upload Receipt
-                </Button>}
-              </div>  */}
-
-              
-              {tokenFeeDetails?.verificationStatus === 'verification pending' &&
-                <div className="space-y-4">
-                  <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
-                    <img src={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url} alt={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url.split('/').pop()} className='w-full h-[200px] object-contain rounded-t-xl' />
-                  </div>
-                  {flagOpen ?
-                  <div className="space-y-4 ">
-                    <div className="mt-2 space-y-2">
-                      <label className="text-lg pl-3">Provide Reasons</label>
-                      <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
-                    </div>
-                    <div className="flex gap-2" >
-                      <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
-                      <Button className="flex-1" disabled={!reason.trim()}
-                        onClick={() => handleTokenVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
-                    </div>
-                  </div> :
-                  <div className="flex gap-4 mt-4">
-                    <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
-                      onClick={() => setFlagOpen(true)} disabled={latestCohort?.status === 'dropped'}>
-                        <FlagIcon className="w-4 h-4"/> Flag Reciept
-                    </Button>
-                    <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
-                      onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")} disabled={latestCohort?.status === 'dropped'}>
-                        <CircleCheckBig className="w-4 h-4"/> Mark as Verified
-                    </Button>
-                  </div>}
-                </div>
-              }
-              {tokenFeeDetails?.verificationStatus === 'paid' && 
-              <>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Paid: {new Date(tokenFeeDetails?.updatedAt).toLocaleDateString()}
-                </div>
-                <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Receipt
-                </Button>
-              </>
-              }
-              {(tokenFeeDetails?.feedback && tokenFeeDetails?.feedback.length > 0) && 
-                <div className="space-y-3">
-                  <Separator />
-                    {tokenFeeDetails?.feedback.slice().reverse().map((feedback: any, index: any) => (
-                      <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
-                        <div className="flex justify-between items-center">
-                          <div className="">
-                            Reason:
-                          </div>
-                          <div className="text-[#FF503D]">Rejected on {new Date(feedback?.date).toLocaleDateString()}</div>
-                        </div>
-                        <div className="">
-                          {feedback?.text?.map((item: string, index: number) => (
-                            <div className="" key={index}>{item}</div>
-                          ))}
-                        </div>
-                        <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.feedback.length - 1 - index]?.url)}>
-                          <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
-                        </Button>
-                      </div>
-                    ))}
-                </div>
-              }
+              <div className="flex items-center gap-2">
+                <Badge className="capitalize" variant={getStatusColor(applicationDetails?.applicationFee || '')}>
+                  {applicationDetails?.applicationFee || 'pending'}
+                </Badge>
+              </div>                
             </div>
+          </div>
+          
+          <div className="border rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium">Admission Fee</h4>
+                <p className="text-sm text-muted-foreground">
+                  Amount: ₹{formatAmount(tokenAmount)}
+                  {tokenFeeDetails && (
+                    <>
+                      {" • Uploaded on "}
+                      {new Date(
+                        tokenFeeDetails?.updatedAt
+                      ).toLocaleDateString()}
+                    </>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {applicationDetails?.applicationStatus === 'selected' && 
+                  <Badge className="capitalize" variant={getStatusColor(tokenFeeDetails?.verificationStatus || '')}>
+                    {tokenFeeDetails?.verificationStatus || 'pending'}
+                  </Badge>
+                }
+                {tokenFeeDetails?.verificationStatus === 'paid' && 
+                <Button variant="ghost" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View
+                </Button>}
+              </div>                
+            </div>
+            {/* <div className="flex justify-between items-center">
+              {payment.tokenPaid !== "Paid" && <Button variant="outline" size="sm" className="">
+                <UploadIcon className="h-4 w-4 mr-2" />
+                Upload Receipt
+              </Button>}
+            </div>  */}
+
+            
+            {tokenFeeDetails?.verificationStatus === 'verification pending' &&
+              <div className="space-y-4">
+                <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
+                  <img src={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url} alt={tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url.split('/').pop()} className='w-full h-[200px] object-contain rounded-t-xl' />
+                </div>
+                {flagOpen ?
+                <div className="space-y-4 ">
+                  <div className="mt-2 space-y-2">
+                    <label className="text-lg pl-3">Provide Reasons</label>
+                    <Textarea className="h-[100px]" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Type your reasons here..."/>
+                  </div>
+                  <div className="flex gap-2" >
+                    <Button variant="outline" className="flex" onClick={() => setFlagOpen(false)}>Back</Button>
+                    <Button className="flex-1" disabled={!reason.trim()}
+                      onClick={() => handleTokenVerify(tokenFeeDetails?._id, reason, "flagged")}>Mark as Flagged</Button>
+                  </div>
+                </div> :
+                <div className="flex gap-4 mt-4">
+                  <Button variant="outline" className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2] "
+                    onClick={() => setFlagOpen(true)} disabled={latestCohort?.status === 'dropped'}>
+                      <FlagIcon className="w-4 h-4"/> Flag Reciept
+                  </Button>
+                  <Button variant="outline" className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
+                    onClick={() => handleTokenVerify(tokenFeeDetails?._id, "", "paid")} disabled={latestCohort?.status === 'dropped'}>
+                      <CircleCheckBig className="w-4 h-4"/> Mark as Verified
+                  </Button>
+                </div>}
+              </div>
+            }
+            {tokenFeeDetails?.verificationStatus === 'paid' && 
+            <>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 mr-2" />
+                Paid: {new Date(tokenFeeDetails?.updatedAt).toLocaleDateString()}
+              </div>
+              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownload(tokenFeeDetails?.receipts?.[tokenFeeDetails?.receipts.length - 1]?.url)}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Receipt
+              </Button>
+            </>
+            }
+            {(tokenFeeDetails?.feedback && tokenFeeDetails?.feedback.length > 0) && 
+              <div className="space-y-3">
+                <Separator />
+                  {tokenFeeDetails?.feedback.slice().reverse().map((feedback: any, index: any) => (
+                    <div key={index} className="sapce-y-4 text-muted-foreground text-sm">
+                      <div className="flex justify-between items-center">
+                        <div className="">
+                          Reason:
+                        </div>
+                        <div className="text-[#FF503D]">Rejected on {new Date(feedback?.date).toLocaleDateString()}</div>
+                      </div>
+                      <div className="">
+                        {feedback?.text?.map((item: string, index: number) => (
+                          <div className="" key={index}>{item}</div>
+                        ))}
+                      </div>
+                      <Button variant="ghost" className="px-0 text-white" size="sm" onClick={() => handleView(tokenFeeDetails?.receipts?.[tokenFeeDetails?.feedback.length - 1 - index]?.url)}>
+                        <Eye className="h-4 w-4 mr-2" /> Acknowledgement Receipt
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            }
+          </div>
 
             {paymentDetails?.paymentPlan === 'one-shot' ? 
               <Card className="p-4 space-y-2">

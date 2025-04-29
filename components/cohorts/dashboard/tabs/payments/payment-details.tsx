@@ -509,6 +509,29 @@ export function PaymentDetails({ student, onClose, onApplicationUpdate }: Paymen
           {/* Instalments */}
           <div className="space-y-4">
             <h4 className="font-medium">Payment Schedule</h4>
+            <div className="border rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium">Application Fee</h4>
+                <p className="text-sm text-muted-foreground">
+                  Amount: ₹{formatAmount(cohortDetails?.cohortFeesDetail?.applicationFee)}
+                  {/* {latestCohort?.appliedDate && (
+                    <>
+                      {" • Paid on "}
+                      {new Date(
+                        latestCohort?.appliedDate
+                      ).toLocaleDateString()}
+                    </>
+                  )} */}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="capitalize" variant={getStatusColor(applicationDetails?.applicationFee || '')}>
+                  {applicationDetails?.applicationFee || 'pending'}
+                </Badge>
+              </div>                
+            </div>
+          </div>
 
             <div className="border rounded-lg p-4 space-y-2">
             <div className="flex justify-between items-start">

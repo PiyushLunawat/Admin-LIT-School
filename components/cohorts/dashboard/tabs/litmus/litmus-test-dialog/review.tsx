@@ -8,6 +8,7 @@ import { SelectSeparator } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { formatInput } from "@/lib/utils/helpers";
 import {
   ArrowUpRight,
   Download,
@@ -118,17 +119,6 @@ export function ReviewComponent({
       setFeedbackInputs(updatedFeedbackInputs);
     }
   }, [sections, feedbackInputs]);
-  
-
-  const formatInput = (value: string): string => {
-    const lines = value.split("\n");
-    // Keep only lines that start with "• "
-    const formattedLines = lines.filter((line) => {
-      const trimmed = line.trimStart();
-      return trimmed.startsWith("• ");
-    });
-    return formattedLines.join("\n");
-  };
 
   const handleSectionKeyDown = (
     title: string,

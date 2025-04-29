@@ -1,7 +1,7 @@
 "use client";
 
 import { getStudents } from "@/app/api/student";
-import { formatAmount } from "@/lib/utils/helpers";
+import { formatAmount, KLsystem } from "@/lib/utils/helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList, Clock, CheckCircle, AlertTriangle, RotateCcw, Calendar, Banknote } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -108,14 +108,6 @@ export function MetricsGrid({ applications }: MetricGridProps) {
       console.log("Applications data is not an array or is undefined.");
     }
   }, [applications]);
-
-  function KLsystem(amount: number): string {
-    if (amount >= 100000) {
-      return `₹${(amount / 100000).toFixed(2)}L`; // Converts to 'L' format with two decimal places
-    } else {
-      return `₹${(amount / 1000).toFixed(2)}K`; // Converts to 'K' format with two decimal places
-    }
-  }
   
   const metrics = [
     {

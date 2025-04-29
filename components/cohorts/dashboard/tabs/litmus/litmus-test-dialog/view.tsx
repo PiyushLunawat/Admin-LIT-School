@@ -8,6 +8,7 @@ import { SelectSeparator } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { formatInput } from "@/lib/utils/helpers";
 import { log } from "console";
 import { ArrowUpRight, Download, File, FileIcon, FileText, FileTextIcon, HandMetal, ImageIcon, Link, Link2, Link2Icon, VideoIcon } from "lucide-react";
 import React, { ChangeEvent, useEffect, useState } from "react";
@@ -102,18 +103,6 @@ export function ViewComponent({ application, onApplicationUpdate }: ReviewCompon
     }
   }, [sections, feedbackInputs]);
   
-
-
-  const formatInput = (value: string): string => {
-    const lines = value.split('\n');
-    const formattedLines = lines.filter(line => {
-      const trimmed = line.trimStart();
-      return trimmed.startsWith('• ');
-    });
-    return formattedLines.join('\n');
-  };
-
-
   const handleSectionKeyDown = (title: string, e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();

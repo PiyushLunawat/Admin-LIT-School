@@ -19,6 +19,7 @@ import { ArrowUpRight, Download, FileIcon, ImageIcon, Link2, Link2Icon, MinusIco
 import { Badge } from "@/components/ui/badge";
 import { log } from "console";
 import { Textarea } from "@/components/ui/textarea";
+import { formatInput } from "@/lib/utils/helpers";
 
 interface Task {
   _id: string;
@@ -40,7 +41,6 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string>(initialStatus);
   const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[]; }>({});
-  const [reason, setReason] = useState<string[]>([""]);
   const [reasonItemValue, setReasonItemValue] = useState("• ");
 
   const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
@@ -63,7 +63,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
         return newFeedbacks;
       });
     }
-  }, []); // empty dependency array means this runs only once after initial render
+  }, [application]);
   
   const handleStatusChange = (value: string) => {
     setStatus(value);
@@ -87,16 +87,6 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
     }
   };
 
-
-  const formatInput = (value: string): string => {
-    const lines = value.split('\n');
-    const formattedLines = lines.filter(line => {
-      const trimmed = line.trimStart();
-      return trimmed.startsWith('• ');
-    });
-    return formattedLines.join('\n');
-  };
-
   const handleKeyDownForReasons = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -109,17 +99,19 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
   const handleChangeForReasons = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
-    setReasonItemValue(formatInput(value));
+    if (value === "" || value === "•") {
+      setReasonItemValue("• ");
+    } else {
+      setReasonItemValue(formatInput(value));
+    }
   };
 
   const handleFeedbackKeyDownForFeedback = (taskId: string, idx: number, e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       setFeedbacks(prevFeedbacks => {
-        
         const taskFeedback = prevFeedbacks[taskId] || [];
         const updatedValue = formatInput((taskFeedback[idx] || "") + '\n• ');
-        console.log("11",updatedValue);
         const newTaskFeedback = [...taskFeedback];
         newTaskFeedback[idx] = updatedValue;
         return { ...prevFeedbacks, [taskId]: newTaskFeedback };
@@ -129,14 +121,26 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
 
   const handleFeedbackChangeForFeedback = (taskId: string, idx: number, e: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
-    setFeedbacks(prevFeedbacks => {
-      const taskFeedback = prevFeedbacks[taskId] || [];
-      const newTaskFeedback = [...taskFeedback];
-      newTaskFeedback[idx] = formatInput(value);
-      console.log("2",formatInput(newTaskFeedback[0]));
-
-      return { ...prevFeedbacks, [taskId]: [formatInput(newTaskFeedback[0])] };
-    });
+    if (value === "" || value === "•") {
+      setFeedbacks((prevFeedbacks) => {
+        const newFeedbacks = { ...prevFeedbacks };
+        taskList?.forEach((task: any) => {
+          const existing = newFeedbacks[task._id];
+          if (!existing || existing.length === 0) {
+            newFeedbacks[task._id] = ["• "];
+          }
+        });
+        return newFeedbacks;
+      });
+    } else {
+      setFeedbacks(prevFeedbacks => {
+        const taskFeedback = prevFeedbacks[taskId] || [];
+        const newTaskFeedback = [...taskFeedback];
+        newTaskFeedback[idx] = formatInput(value);
+        console.log("2",formatInput(newTaskFeedback[0]));
+        return { ...prevFeedbacks, [taskId]: [formatInput(newTaskFeedback[0])] };
+      });
+    }
   };
   
   const canUpdate = (): boolean => {

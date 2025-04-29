@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { updateInterviewStatus } from "@/app/api/student";
+import { formatInput } from "@/lib/utils/helpers";
 
 interface InterviewFeedbackProps {
   name: string;
@@ -38,16 +39,7 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
       setReasonItemValue("• ");
     }
   };
-
-  const formatInput = (value: string): string => {
-    const lines = value.split("\n");
-    const formattedLines = lines.filter((line) => {
-      const trimmed = line.trimStart();
-      return trimmed.startsWith("• ");
-    });
-    return formattedLines.join("\n");
-  };
-
+  
   const handleKeyDownForReasons = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -60,13 +52,17 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
 
   const handleChangeForReasons = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
-    setReasonItemValue(formatInput(value));
-    // Update reason array based on input
-    const reasons = value
-      .split("\n")
-      .filter((line) => line.trim().startsWith("• "))
-      .map((line) => line.trim());
-    setReason(reasons);
+    if (value === "" || value === "•") {
+      setReasonItemValue("• ");
+    } else {
+      setReasonItemValue(formatInput(value));
+      // Update reason array based on input
+      const reasons = value
+        .split("\n")
+        .filter((line) => line.trim().startsWith("• "))
+        .map((line) => line.trim());
+      setReason(reasons);
+    }
   };
 
   const canUpdate = (): boolean => {
