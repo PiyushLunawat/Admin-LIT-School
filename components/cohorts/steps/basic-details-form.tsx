@@ -436,21 +436,21 @@ function removeFormatting(value: string): string {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="totalSeats"
+            render={({ field }) => (
+              <FormItem>
+                <Label>Total Seats</Label>
+                <FormControl>
+                  <Input type="number" placeholder="50" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <FormField
-          control={form.control}
-          name="totalSeats"
-          render={({ field }) => (
-            <FormItem>
-              <Label>Total Seats</Label>
-              <FormControl>
-                <Input type="number" placeholder="50" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="space-y-4">
           <FormField
@@ -475,7 +475,7 @@ function removeFormatting(value: string): string {
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
             name="isGSTIncluded"
             render={({ field }) => (
@@ -493,7 +493,7 @@ function removeFormatting(value: string): string {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>Next: Application Form</Button>

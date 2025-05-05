@@ -198,7 +198,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 <div key={index} className="flex justify-between text-muted-foreground text-sm">
                   <div className="flex justify-center gap-3 items-center">
                     <div className="flex gap-1 items-center">
-                      <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+                      <Clock4 className="w-4 h-4"/>{interview?.startTime} - {interview?.endTime}
                     </div>
                     <div className="flex gap-1 items-center">
                       <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}

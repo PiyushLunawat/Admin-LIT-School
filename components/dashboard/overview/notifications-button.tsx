@@ -135,13 +135,7 @@ export function NotificationsButton() {
 
     const handleNewNotification = (data: Notification) => {
       console.log("Received notification:", data);
-      setNotifications((prev) => [
-        {
-          ...data,
-          timestamp: new Date().toISOString(),
-        },
-        ...prev,
-      ]);
+      setNotifications((prev) => [data, ...prev]); 
       // toast.info(data.message);
       updateActivity();
     };
@@ -213,20 +207,21 @@ export function NotificationsButton() {
     }
   }
 
-  function getUrl(cohortId: string, type: string): string {
+  const getUrl = (cohortId: string, type: string): string => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
     switch (type) {
       case "Registration and Application Task":
       case "Application Interview":
-        return `${baseUrl}/dashboard/cohorts/${cohortId}?tab=applications` ;
+        return `${origin}/dashboard/cohorts/${cohortId}?tab=applications`;
       case "Admission Fee Payment":
       case "Fee Payment Setup":
-        return `${baseUrl}/dashboard/cohorts/${cohortId}?tab=payments` ;
+        return `${origin}/dashboard/cohorts/${cohortId}?tab=payments`;
       case "LITMUS Test":
-        return `${baseUrl}/dashboard/cohorts/${cohortId}?tab=litmus` ;
+        return `${origin}/dashboard/cohorts/${cohortId}?tab=litmus`;
       default:
-        return `${baseUrl}/dashboard/cohorts/${cohortId}` ;
+        return `${origin}/dashboard/cohorts/${cohortId}`;
     }
-  }
+  };  
 
   async function handleRemoveNotification(notificationId: string, adminId: string) {
     try {
@@ -244,8 +239,6 @@ export function NotificationsButton() {
       console.error("Failed to mark notification as read:", error);
     }  
   }
-
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
 
   return (
     <>

@@ -173,7 +173,7 @@ export function LitmusTestForm({
         },
   });
   const [loading, setLoading] = useState(false);  
-  const { control, handleSubmit, watch, setValue, setError, clearErrors, trigger } = form;
+  const { control, handleSubmit, watch, setValue, setError, clearErrors, trigger, formState: { isValid, errors }, } = form;
 
   const scholarshipSlabs = watch('scholarshipSlabs');
   function hasOverlap(slabs: { clearance: string }[]) {
@@ -353,7 +353,7 @@ export function LitmusTestForm({
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading || !isValid}>
           Next: Fee Structure
         </Button>
       </form>

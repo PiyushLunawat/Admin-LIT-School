@@ -234,7 +234,7 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
         if (applicationStatus === "interview scheduled") interviewsScheduled++;
         if (tokenFeeStatus === "paid") admissionFee++;
   
-        if ([undefined, '', 'pending'].includes(litmusStatus)) litmusTests++;
+        if (![undefined, '', 'pending', 'completed'].includes(litmusStatus)) litmusTests++;
         if (litmusStatus === "completed") reviewed++;
   
         if (latestCohort?.status?.toLowerCase() === "dropped") dropped++;

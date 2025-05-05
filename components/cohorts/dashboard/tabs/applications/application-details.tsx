@@ -125,7 +125,9 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
     if (lastInterview?.meetingDate && lastInterview?.endTime) {
       meetingEnd = new Date(new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime);
 
-      console.log("timee", (meetingEnd < currentTime), meetingEnd, currentTime)
+      if (interviews.length > 1) {
+        setStatus('interview rescheduled');
+      }
       if (meetingEnd < currentTime) {
         setStatus("interview concluded");
       }
@@ -203,7 +205,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                     <div key={index} className="flex justify-between text-muted-foreground text-sm">
                       <div className="flex justify-center gap-3 items-center">
                         <div className="flex gap-1 items-center">
-                          <Clock4 className="w-4 h-4"/>{interview?.startTime || interview?.endTime}
+                          <Clock4 className="w-4 h-4"/>{interview?.startTime} - {interview?.endTime}
                         </div>
                         <div className="flex gap-1 items-center">
                           <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
@@ -218,32 +220,35 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                     </div>
                   ))}
                 </div>
-                <Select
-                disabled={['interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
-                value={status}
-                onValueChange={handleInterviewStatusChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {!['not qualified', 'waitlist', 'selected'].includes(status) &&
-                      <SelectItem className="capitalize" value={status}>
-                        <span className="capitalize">{status}</span>
-                      </SelectItem>
-                    }
-                    <SelectItem value="waitlist">Waitlist</SelectItem>
-                    <SelectItem value="selected">Selected</SelectItem>
-                    <SelectItem value="not qualified">Not Qualified</SelectItem>
-                  </SelectContent>
-                </Select>
-                {!['interview scheduled', 'interview cancelled', 'waitlist', 'selected', 'not qualified'].includes(status) &&
+                {!['interview rescheduled', 'interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status) &&
+                  <Select
+                  disabled={['interview rescheduled', 'interview scheduled','interview cancelled', 'not qualified', 'selected'].includes(status)}
+                  value={status}
+                  onValueChange={handleInterviewStatusChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {!['not qualified', 'waitlist', 'selected'].includes(status) &&
+                        <SelectItem className="capitalize" value={status}>
+                          <span className="capitalize">{status}</span>
+                        </SelectItem>
+                      }
+                      <SelectItem value="waitlist">Waitlist</SelectItem>
+                      <SelectItem value="selected">Selected</SelectItem>
+                      <SelectItem value="not qualified">Not Qualified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                }
+                {!['interview rescheduled', 'interview scheduled', 'interview cancelled', 'waitlist', 'selected', 'not qualified'].includes(status) &&
                   <Button className="w-full flex gap-1 text-sm items-center -mt-1" onClick={() => {setInterviewFeedbackOpen(true);}}>
                     <FileSignature className="w-4 h-4"/>Interview Feedback
                   </Button>
                 }
               </div> : 
               (
-                <Select disabled={['initiated', 'rejected', 'on hold', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus)} 
+                !['incomplete','initiated', 'rejected', 'on hold', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus) &&
+                <Select disabled={['incomplete','initiated', 'rejected', 'on hold', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus)} 
                   value={applicationDetails?.applicationStatus} 
                   onValueChange={handleApplicationStatusChange}>
                   <SelectTrigger>

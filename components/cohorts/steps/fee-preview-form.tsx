@@ -58,7 +58,7 @@ interface FeePreviewFormProps {
 
 export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePreviewFormProps) {
   const [loading, setLoading] = useState(false);  
-  const [newBaseFee, setNewBaseFee] = useState(initialData?.baseFee || 0);
+  const [newBaseFee, setNewBaseFee] = useState(0);
   const [isGST, setIsGST] = useState(true);
   const [GSTAmount, setGSTAmount] = useState(1);
   const [withoutGSTAmount, setWithoutGSTAmount] = useState(1);
@@ -79,6 +79,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
     } else {
       setWithoutGSTAmount(1.18);
     }
+    setNewBaseFee((initialData?.baseFee * 1.18 - initialData?.cohortFeesDetail?.tokenFee) / 1.18)
   }, [initialData]);
 
   // Handle date changes in the <input type="date">

@@ -76,5 +76,5 @@ const clearAuthAndRedirect = () => {
   Cookies.remove("adminId");
   Cookies.remove("adminEmail");
   localStorage.clear();
-  window.location.href = "/login";
+  // window.location.href = "/login";
 };

@@ -44,10 +44,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
-  const [timer, setTimer] = useState(59);
+  const [timer, setTimer] = useState<number | null>(null); 
   const [otp, setOtp] = useState(""); 
   const [otpToken, setOtpToken] = useState(""); 
-
+  
+  useEffect(() => {
+    setTimer(59);
+  }, []);
+  
   // Initialize React Hook Form
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
@@ -72,6 +76,8 @@ export default function LoginPage() {
         password: data.password
       }
       const loginData = await login(loginPayload);
+      console.log(loginData);
+      
       Cookies.set("adminOtpRequestToken", loginData.otpRequestToken, { expires: 1/144 }); 
 
       // setOtpToken(loginData.otpRequestToken)
@@ -131,7 +137,7 @@ export default function LoginPage() {
       }
 
       const res = await resendOtp(resendPayload);
-      // console.log("res",res);
+      console.log("res",res);
       setTimer(59);
     }
     } catch (error: any) {
@@ -147,12 +153,14 @@ export default function LoginPage() {
 
   // Handle OTP countdown
   useEffect(() => {
-    if (showOtp && timer > 0) {
-      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+    if (showOtp && typeof timer === "number" && timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => (typeof prev === "number" && prev > 0 ? prev - 1 : 0));
+      }, 1000);
       return () => clearInterval(interval);
     }
   }, [showOtp, timer]);
-
+  
   return (
     <div className="w-full">
       <div className="relative">
@@ -260,12 +268,16 @@ export default function LoginPage() {
                   <Button
                     variant="link"
                     className="underline"
-                    onClick={() => handleResendSubmit()}
-                    disabled={loading || timer > 0}
-                    >
+                    onClick={handleResendSubmit}
+                    disabled={loading || (typeof timer === "number" && timer > 0)}
+                  >
                     {loading ? "Resending OTP..." : "Resend OTP"}
                   </Button>
-                  {timer > 0 ? `in 00:${timer < 10 ? `0${timer}` : `${timer}`}` : ""}
+                  {typeof timer === "number" && timer > 0 && (
+                    <span>
+                      in 00:{timer < 10 ? `0${timer}` : timer}
+                    </span>
+                  )}
                 </div>
               </div>
             </DialogContent>

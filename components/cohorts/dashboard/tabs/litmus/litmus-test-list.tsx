@@ -182,7 +182,7 @@ export function LitmusTestList({
                   </Badge> :
                   litmusTestDetails?.status === 'interview scheduled' ?
                   <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(checkInterviewStatus(litmusTestDetails?.litmusTestInterviews))}>
-                    {checkInterviewStatus(litmusTestDetails?.status)}
+                    {checkInterviewStatus(litmusTestDetails?.litmusTestInterviews)}
                   </Badge> :
                   <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
                     {litmusTestDetails?.status || "pending"}

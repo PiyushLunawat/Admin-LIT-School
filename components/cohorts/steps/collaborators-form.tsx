@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 const roles = [
   // { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
-  // { value: "fee_collector", label: "Fee Collector" },
+  { value: "fee_collector", label: "Fee Collector" },
   { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
 ];
 
@@ -67,7 +67,7 @@ export function CollaboratorsForm({
   
   // Usage
   const formattedCollaborators = formatCollaborators(initialData?.collaborators || []);
-  console.log("one", initialData?.collaborators);
+  console.log("one", formatCollaborators(initialData?.collaborators));
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -198,18 +198,18 @@ export function CollaboratorsForm({
           role: collab.role,
         }));
 
-        const createdCohort = await updateCohort(initialData._id, {
+        const updatedCohort = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
         });
-        console.log("A",createdCohort);
+        console.log("updateCohort",updatedCohort);
         form.reset({
-          collaborators: formatCollaborators(createdCohort.data.collaborators),
+          collaborators: formatCollaborators(updatedCohort.data.collaborators),
         });
-        onCohortCreated(createdCohort.data);
+        onCohortCreated(updatedCohort.data);
 
         const invited = await inviteCollaborators(initialData._id);
 
-        console.log("A",createdCohort);
+        console.log("invited",updatedCohort);
 
         toast({ title: "Collaborators invited successfully!", variant: "success" });
 
@@ -230,26 +230,31 @@ export function CollaboratorsForm({
     }
   };
 
-  const handleDeleteCollab = async (cId?: string, collabId?: string, role?: string) => {
+  const handleDeleteCollab = async (cId?: string, collabId?: string, role?: string,index?: number) => {
     try {
-      setdeleteLoading(true)      
-      if (cId && collabId && role) {
-        const deletePayload = { cohortId: cId, collaboratorId: collabId, roleId: role };
-        const delResp = await deleteCollaborator(deletePayload);
-        console.log("deleted",delResp);
-        form.reset({
-          collaborators: formatCollaborators(delResp.data),
-        });
-        onCohortCreated(delResp.data);
+      setdeleteLoading(true);
+      
+      if (cId && collabId && role && typeof index === 'number') {
+        const deletePayload = { 
+          cohortId: cId, 
+          collaboratorId: collabId, 
+          roleId: role 
+        };
+        
+        const deleteRes = await deleteCollaborator(deletePayload);        
+        if (index !== undefined) {
+          remove(index);
+        }
+        
         toast({ title: "Collaborator deleted successfully!", variant: "success" });
-      } else {
-        toast({ title: "Cohort ID is missing. Unable to delete collaborators!", variant: "warning" });
+      } else if (typeof index === 'number') {
+        remove(index);
       }
     } catch (error) {
       console.error("Failed to delete collaborators:", error);
-      toast({ title: `Failed to delete collaborator:", ${error}!`, variant: "warning" });
+      toast({ title: `Failed to delete collaborator: ${error}!`, variant: "warning" });
     } finally {
-      setdeleteLoading(false)
+      setdeleteLoading(false);
     }
   };
 
@@ -260,10 +265,8 @@ export function CollaboratorsForm({
       const editPayload = { roleId: roleId, collaboratorId: collabId, role: role };
       if (roleId && collabId && role) {
         const editResp = await editCollaborator(editPayload);
-        console.log("deleted",editResp);
-        form.reset({
-          collaborators: editResp.data.roles,
-        });
+        console.log("edited",editResp);
+        
         // onCohortCreated(editResp.data);
         toast({ title: "Collaborator edited successfully!", variant: "success" });
 
@@ -274,7 +277,8 @@ export function CollaboratorsForm({
       console.error("Failed to edit collaborators:", error);
       toast({ title: `Failed to edit collaborator:`,description: `${error}!`, variant: "warning" });
     } finally {
-      setSaveLoading(true)
+      setSaveLoading(false)
+      setEditingCollaborator(null)
     }
   };
 
@@ -334,7 +338,7 @@ export function CollaboratorsForm({
                             <Button variant="outline">Cancel</Button>
                             <Button
                               className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
-                              onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId)}
+                              onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId, index)}
                               >
                               Delete
                             </Button>
@@ -384,7 +388,7 @@ export function CollaboratorsForm({
                                   <Button variant="outline">Cancel</Button>
                                   <Button
                                     className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
-                                    onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId)}
+                                    onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId, index )}
                                     disabled={deleteLoading}
                                   >
                                     Delete
