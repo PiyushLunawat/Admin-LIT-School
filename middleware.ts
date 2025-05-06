@@ -8,9 +8,9 @@ export function middleware(req: NextRequest) {
   const isLogin = req.nextUrl.pathname === "/login";
 
   // Prevent accessing the dashboard without authentication
-  // if (isDashboard && !(accessToken || refreshToken)) {
-  //   return NextResponse.redirect(new URL("/login", req.url));
-  // }
+  if (isDashboard && !(accessToken || refreshToken)) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
 
   // Prevent accessing login if already authenticated
   if (isLogin && (accessToken || refreshToken)) {
