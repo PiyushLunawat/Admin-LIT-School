@@ -202,8 +202,10 @@ export default function CentresPage() {
                   placeholder="e.g., JY"
                   className="uppercase"
                   value={newCentre.suffix}
-                  onChange={(e) => setNewCentre({ ...newCentre, suffix: e.target.value.toUpperCase() })}
-                />
+                  onChange={(e) => {
+                    const onlyAlphanumeric = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    setNewCentre(prev => ({ ...prev, suffix: onlyAlphanumeric }));
+                  }}/>
                 {errors.suffix && <p className="text-red-500 text-sm">{errors.suffix}</p>}
               </div>
               <Button className="w-full" onClick={handleCreateOrUpdateCentre}>

@@ -214,7 +214,10 @@ export default function ProgramsPage() {
                     placeholder="e.g., CM"
                     className="uppercase"
                     value={newProgram.prefix}
-                    onChange={(e) => setNewProgram({ ...newProgram, prefix: e.target.value.toUpperCase() })}
+                    onChange={(e) => {
+                      const onlyAlphanumeric = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                      setNewProgram(prev => ({ ...prev, prefix: onlyAlphanumeric }));
+                    }}
                   />
                   {errors.prefix && <p className="text-red-500 text-sm">{errors.prefix}</p>}
                 </div>

@@ -108,7 +108,7 @@ export function StudentApplicationHeader({ student, onUpdateStatus }: StudentHea
                     Schedule Interview
                   </Button>
                   <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
-                    onClick={()=>setMarkedAsDialogOpen(true)} disabled={latestCohort?.status === 'dropped'}>
+                    onClick={()=>setMarkedAsDialogOpen(true)} disabled={latestCohort?.status === 'dropped' || ['rejected', 'not qualified'].includes(applicationDetails?.applicationStatus)}>
                     <UserMinus className="h-4 w-4 mr-2" />
                     Mark as Dropped
                   </Button>

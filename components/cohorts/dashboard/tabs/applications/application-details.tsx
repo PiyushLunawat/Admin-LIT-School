@@ -247,7 +247,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                 }
               </div> : 
               (
-                !['incomplete','initiated', 'rejected', 'on hold', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus) &&
+                !['incomplete','initiated', 'rejected', 'on hold', 'accepted', 'rejected', undefined].includes(applicationDetails?.applicationStatus) &&
                 <Select disabled={['incomplete','initiated', 'rejected', 'on hold', 'accepted', 'rejected'].includes(applicationDetails?.applicationStatus)} 
                   value={applicationDetails?.applicationStatus} 
                   onValueChange={handleApplicationStatusChange}>
@@ -305,7 +305,8 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                   <Calendar className="h-4 w-4 mr-2" />
                   <span className="truncate w-[170px]">Schedule Presentation</span>
                 </Button>
-                <Button variant="outline" className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive" onClick={()=>setMarkedAsDialogOpen(true)}>
+                <Button variant="outline" className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive" 
+                  onClick={()=>setMarkedAsDialogOpen(true)} disabled={['rejected', 'not qualified'].includes(applicationDetails?.applicationStatus)}>
                   <UserMinus className="h-4 w-4 mr-2" />
                   Mark as Dropped
                 </Button>

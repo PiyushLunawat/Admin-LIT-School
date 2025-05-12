@@ -284,7 +284,7 @@ export function StudentsList({
                       </Button> */}
                       <Dialog >
                         <DialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="justify-start text-destructive" disabled={latestCohort?.status === 'dropped'}>
+                          <Button variant="ghost" size="icon" className="justify-start text-destructive" disabled={latestCohort?.status === 'dropped' || ['rejected', 'not qualified'].includes(applicationDetails?.applicationStatus)}>
                             <UserMinus className="h-4 w-4 mr-2" />
                           </Button>
                         </DialogTrigger>

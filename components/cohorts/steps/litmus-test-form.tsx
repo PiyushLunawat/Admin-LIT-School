@@ -103,7 +103,33 @@ const formSchema = z.object({
       description: z.string().optional(),
       cohortId: z.string().optional(),
     })
-  ),
+  ).superRefine((slabs, ctx) => {
+    const ranges = slabs.map((slab, index) => {
+      const [start, end] = slab.clearance.split('-').map(Number);
+      return { start, end, index };
+    });
+  
+    // Check for overlapping ranges
+    for (let i = 0; i < ranges.length; i++) {
+      for (let j = i + 1; j < ranges.length; j++) {
+        const a = ranges[i];
+        const b = ranges[j];
+  
+        if (a.start < b.end && b.start < a.end) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Clearance range overlaps with another slab",
+            path: [`scholarshipSlabs.${a.index}.clearance`],
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Clearance range overlaps with another slab",
+            path: [`scholarshipSlabs.${b.index}.clearance`],
+          });
+        }
+      }
+    }
+  }),
   litmusTestDuration: z.string().nonempty("Duration is required"),
 });
 
