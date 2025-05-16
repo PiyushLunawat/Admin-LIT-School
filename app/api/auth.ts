@@ -1,5 +1,6 @@
 export async function login(payload: { email: string; password: string }) {
   try {
+    console.log(payload);
     const response = await fetch(`${process.env.API_URL}/auth/admin-login`, {
       method: "POST",
       headers: {

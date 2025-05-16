@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { getCentres } from "@/app/api/centres";
+import { updateStudentData } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,39 +13,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
-import { format } from "date-fns";
-import { getCentres } from "@/app/api/centres";
-import { updateStudentData } from "@/app/api/student";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface PersonalDetailsTabProps {
   student: any;
   onUpdateStatus: () => void;
 }
 
-export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsTabProps) {
+export function PersonalDetailsTab({
+  student,
+  onUpdateStatus,
+}: PersonalDetailsTabProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCentre, setSelectedCentre] = useState("");
 
-  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const latestCohort =
+    student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const studentDetail = applicationDetails?.studentDetails;
 
-  // console.log("vvsvsv",student);  
-  
+  // console.log("vvsvsv",student);
+
   // Initialize formData with the new structure.
   const [formData, setFormData] = useState({
     studentDetailId: studentDetail?._id,
     studentId: student?._id,
-    
+
     studentData: {
       linkedInUrl: student?.linkedInUrl ?? "",
       instagramUrl: student?.instagramUrl ?? "",
     },
-    
+
     studentDetailData: {
       currentAddress: {
         streetAddress: studentDetail?.currentAddress?.streetAddress || "",
@@ -53,10 +57,13 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
         postalCode: studentDetail?.currentAddress?.postalCode || "",
       },
       previousEducation: {
-        highestLevelOfEducation: studentDetail?.previousEducation?.highestLevelOfEducation || "",
+        highestLevelOfEducation:
+          studentDetail?.previousEducation?.highestLevelOfEducation || "",
         fieldOfStudy: studentDetail?.previousEducation?.fieldOfStudy || "",
-        nameOfInstitution: studentDetail?.previousEducation?.nameOfInstitution || "",
-        yearOfGraduation: studentDetail?.previousEducation?.yearOfGraduation || "",
+        nameOfInstitution:
+          studentDetail?.previousEducation?.nameOfInstitution || "",
+        yearOfGraduation:
+          studentDetail?.previousEducation?.yearOfGraduation || "",
       },
       workExperience: {
         isExperienced: studentDetail?.workExperience?.isExperienced || false,
@@ -69,27 +76,36 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
         firstName: studentDetail?.emergencyContact?.firstName || "",
         lastName: studentDetail?.emergencyContact?.lastName || "",
         contactNumber: studentDetail?.emergencyContact?.contactNumber || "",
-        relationshipWithStudent: studentDetail?.emergencyContact?.relationshipWithStudent || "",
+        relationshipWithStudent:
+          studentDetail?.emergencyContact?.relationshipWithStudent || "",
       },
       parentInformation: {
         father: {
           firstName: studentDetail?.parentInformation?.father?.firstName || "",
           lastName: studentDetail?.parentInformation?.father?.lastName || "",
-          contactNumber: studentDetail?.parentInformation?.father?.contactNumber || "",
-          occupation: studentDetail?.parentInformation?.father?.occupation || "",
+          contactNumber:
+            studentDetail?.parentInformation?.father?.contactNumber || "",
+          occupation:
+            studentDetail?.parentInformation?.father?.occupation || "",
           email: studentDetail?.parentInformation?.father?.email || "",
         },
         mother: {
           firstName: studentDetail?.parentInformation?.mother?.firstName || "",
           lastName: studentDetail?.parentInformation?.mother?.lastName || "",
-          contactNumber: studentDetail?.parentInformation?.mother?.contactNumber || "",
-          occupation: studentDetail?.parentInformation?.mother?.occupation || "",
+          contactNumber:
+            studentDetail?.parentInformation?.mother?.contactNumber || "",
+          occupation:
+            studentDetail?.parentInformation?.mother?.occupation || "",
           email: studentDetail?.parentInformation?.mother?.email || "",
         },
       },
       financialInformation: {
-        isFinanciallyIndependent: studentDetail?.financialInformation?.isFinanciallyIndependent || false,
-        hasAppliedForFinancialAid: studentDetail?.financialInformation?.hasAppliedForFinancialAid || false,
+        isFinanciallyIndependent:
+          studentDetail?.financialInformation?.isFinanciallyIndependent ||
+          false,
+        hasAppliedForFinancialAid:
+          studentDetail?.financialInformation?.hasAppliedForFinancialAid ||
+          false,
       },
     },
   });
@@ -100,8 +116,11 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
       try {
         const centresData = await getCentres();
         const center = centresData.data.find(
-          (c: any) => c._id === student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.centerDetail
-        );        
+          (c: any) =>
+            c._id ===
+            student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+              ?.cohortId?.centerDetail
+        );
         setSelectedCentre(center?.name || "--");
       } catch (error) {
         console.error("Error fetching centres:", error);
@@ -171,24 +190,24 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
   // Save handler.
   const handleSave = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await updateStudentData(formData);
       onUpdateStatus();
       console.log("Student updated successfully:", response);
       toast({
         title: "Details Updated",
         description: "Your changes have been saved.",
-        variant: "success",
+        variant: "default",
       });
     } catch (error) {
       toast({
         title: "Update Failed",
         description: "An unexpected error occurred.",
-        variant: "warning",
+        variant: "destructive",
       });
       console.error("Error updating student details:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
       setIsEditing(false);
     }
   };
@@ -196,7 +215,7 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
   if (!latestCohort || !applicationDetails || !studentDetail) {
     return <div>No student details available</div>;
   }
-  
+
   return (
     <div className="space-y-6">
       {/* Basic Information (non-editable fields) */}
@@ -206,7 +225,7 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
           <Button
             variant="ghost"
             size="sm"
-            disabled={loading || latestCohort?.status === 'dropped'}
+            disabled={loading || latestCohort?.status === "dropped"}
             onClick={() => {
               isEditing ? handleSave() : setIsEditing(true);
             }}
@@ -216,7 +235,11 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             ) : (
               <Edit className="h-4 w-4 mr-2" />
             )}
-            {isEditing ? loading ? "Saving..." : "Save Changes" : "Edit Details"}
+            {isEditing
+              ? loading
+                ? "Saving..."
+                : "Save Changes"
+              : "Edit Details"}
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -224,7 +247,9 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             <div className="space-y-2">
               <Label className="pl-3">Full Name</Label>
               <Input
-                defaultValue={(student?.firstName + " " + student?.lastName) || "--"}
+                defaultValue={
+                  student?.firstName + " " + student?.lastName || "--"
+                }
                 disabled
               />
             </div>
@@ -254,16 +279,22 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="pl-3" >Current Status</Label>
+              <Label className="pl-3">Current Status</Label>
               <Select disabled value={student?.qualification}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Student">Student</SelectItem>
-                  <SelectItem value="Highschool Graduate">Highschool Graduate</SelectItem>
-                  <SelectItem value="College Graduate">College Graduate</SelectItem>
-                  <SelectItem value="Working Professional">Working Professional</SelectItem>
+                  <SelectItem value="Highschool Graduate">
+                    Highschool Graduate
+                  </SelectItem>
+                  <SelectItem value="College Graduate">
+                    College Graduate
+                  </SelectItem>
+                  <SelectItem value="Working Professional">
+                    Working Professional
+                  </SelectItem>
                   <SelectItem value="Freelancer">Freelancer</SelectItem>
                   <SelectItem value="Business Owner">Business Owner</SelectItem>
                   <SelectItem value="Consultant">Consultant</SelectItem>
@@ -272,15 +303,26 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Program of Interest</Label>
-              <Input defaultValue={student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.programDetail?.name} disabled />
+              <Input
+                defaultValue={
+                  student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+                    ?.cohortId?.programDetail?.name
+                }
+                disabled
+              />
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Cohort</Label>
               <Input
                 value={
-                  formatDateToMonthYear(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.startDate) +
+                  formatDateToMonthYear(
+                    student?.appliedCohorts?.[
+                      student?.appliedCohorts.length - 1
+                    ]?.cohortId?.startDate
+                  ) +
                   " " +
-                  student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.timeSlot +
+                  student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+                    ?.cohortId?.timeSlot +
                   ", " +
                   selectedCentre
                 }
@@ -308,14 +350,31 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             </div>
             <div className="space-y-2">
               <Label className="pl-3">LinkedIn Profile</Label>
-              <Input placeholder="--" value={formData.studentData.linkedInUrl}
-                onChange={(e) => handleStudentDetailsChange('studentData', 'linkedInUrl', e.target.value)}
-                disabled={!isEditing} />
+              <Input
+                placeholder="--"
+                value={formData.studentData.linkedInUrl}
+                onChange={(e) =>
+                  handleStudentDetailsChange(
+                    "studentData",
+                    "linkedInUrl",
+                    e.target.value
+                  )
+                }
+                disabled={!isEditing}
+              />
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Instagram Profile</Label>
-              <Input placeholder="--" value={formData.studentData.instagramUrl}
-                onChange={(e) => handleStudentDetailsChange('studentData', 'instagramUrl', e.target.value)}
+              <Input
+                placeholder="--"
+                value={formData.studentData.instagramUrl}
+                onChange={(e) =>
+                  handleStudentDetailsChange(
+                    "studentData",
+                    "instagramUrl",
+                    e.target.value
+                  )
+                }
                 disabled={!isEditing}
               />
             </div>
@@ -335,7 +394,11 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
               <Input
                 value={formData.studentDetailData.currentAddress.streetAddress}
                 onChange={(e) =>
-                  handleStudentDetailsChange("currentAddress", "streetAddress", e.target.value)
+                  handleStudentDetailsChange(
+                    "currentAddress",
+                    "streetAddress",
+                    e.target.value
+                  )
                 }
                 disabled={!isEditing}
               />
@@ -345,7 +408,11 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
               <Input
                 value={formData.studentDetailData.currentAddress.city}
                 onChange={(e) =>
-                  handleStudentDetailsChange("currentAddress", "city", e.target.value)
+                  handleStudentDetailsChange(
+                    "currentAddress",
+                    "city",
+                    e.target.value
+                  )
                 }
                 disabled={!isEditing}
               />
@@ -355,7 +422,11 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
               <Input
                 value={formData.studentDetailData.currentAddress.state}
                 onChange={(e) =>
-                  handleStudentDetailsChange("currentAddress", "state", e.target.value)
+                  handleStudentDetailsChange(
+                    "currentAddress",
+                    "state",
+                    e.target.value
+                  )
                 }
                 disabled={!isEditing}
               />
@@ -364,10 +435,14 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
               <Label className="pl-3">Postal Code</Label>
               <Input
                 value={formData.studentDetailData.currentAddress.postalCode}
-                onChange={(e) =>{
+                onChange={(e) => {
                   const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^0-9]/g, '');
-                  handleStudentDetailsChange("currentAddress", "postalCode", target.value)
+                  target.value = target.value.replace(/[^0-9]/g, "");
+                  handleStudentDetailsChange(
+                    "currentAddress",
+                    "postalCode",
+                    target.value
+                  );
                 }}
                 maxLength={6}
                 disabled={!isEditing}
@@ -385,28 +460,47 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="pl-3">Highest Level of Education Attained</Label>
-              <Select disabled={!isEditing} value={formData.studentDetailData.previousEducation.highestLevelOfEducation}
+              <Label className="pl-3">
+                Highest Level of Education Attained
+              </Label>
+              <Select
+                disabled={!isEditing}
+                value={
+                  formData.studentDetailData.previousEducation
+                    .highestLevelOfEducation
+                }
                 onValueChange={(val) =>
-                  handleStudentDetailsChange("previousEducation", "highestLevelOfEducation", val)
-                }              
+                  handleStudentDetailsChange(
+                    "previousEducation",
+                    "highestLevelOfEducation",
+                    val
+                  )
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="highschool">High School</SelectItem>
-                  <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
-                  <SelectItem value="master">Master's Degree</SelectItem>
+                  <SelectItem value="bachelor">
+                    Bachelor&apos;s Degree
+                  </SelectItem>
+                  <SelectItem value="master">Master&apos;s Degree</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label className="pl-3">Field of Study</Label>
               <Input
-                value={formData.studentDetailData.previousEducation.fieldOfStudy}
+                value={
+                  formData.studentDetailData.previousEducation.fieldOfStudy
+                }
                 onChange={(e) =>
-                  handleStudentDetailsChange("previousEducation", "fieldOfStudy", e.target.value)
+                  handleStudentDetailsChange(
+                    "previousEducation",
+                    "fieldOfStudy",
+                    e.target.value
+                  )
                 }
                 disabled={!isEditing}
               />
@@ -414,9 +508,15 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             <div className="space-y-2">
               <Label className="pl-3">Name of Institution</Label>
               <Input
-                value={formData.studentDetailData.previousEducation.nameOfInstitution}
+                value={
+                  formData.studentDetailData.previousEducation.nameOfInstitution
+                }
                 onChange={(e) =>
-                  handleStudentDetailsChange("previousEducation", "nameOfInstitution", e.target.value)
+                  handleStudentDetailsChange(
+                    "previousEducation",
+                    "nameOfInstitution",
+                    e.target.value
+                  )
                 }
                 disabled={!isEditing}
               />
@@ -424,9 +524,15 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             <div className="space-y-2">
               <Label className="pl-3">Year of Graduation</Label>
               <Input
-                value={formData.studentDetailData.previousEducation.yearOfGraduation}
+                value={
+                  formData.studentDetailData.previousEducation.yearOfGraduation
+                }
                 onChange={(e) =>
-                  handleStudentDetailsChange("previousEducation", "yearOfGraduation", e.target.value)
+                  handleStudentDetailsChange(
+                    "previousEducation",
+                    "yearOfGraduation",
+                    e.target.value
+                  )
                 }
                 disabled={!isEditing}
               />
@@ -436,18 +542,30 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="pl-3">Experience Type</Label>
-                <Select disabled={!isEditing} value={formData.studentDetailData.workExperience.experienceType}
+                <Select
+                  disabled={!isEditing}
+                  value={
+                    formData.studentDetailData.workExperience.experienceType
+                  }
                   onValueChange={(val) =>
-                    handleStudentDetailsChange("workExperience", "experienceType", val)
-                  }                       
+                    handleStudentDetailsChange(
+                      "workExperience",
+                      "experienceType",
+                      val
+                    )
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Working Professional">Employee</SelectItem>
+                    <SelectItem value="Working Professional">
+                      Employee
+                    </SelectItem>
                     <SelectItem value="Freelancer">Freelancer</SelectItem>
-                    <SelectItem value="Business Owner">Business Owner</SelectItem>
+                    <SelectItem value="Business Owner">
+                      Business Owner
+                    </SelectItem>
                     <SelectItem value="Consultant">Consultant</SelectItem>
                   </SelectContent>
                 </Select>
@@ -455,41 +573,57 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
               <div className="space-y-2">
                 <Label className="pl-3">Job Description</Label>
                 <Input
-                  value={formData.studentDetailData.workExperience.jobDescription}
+                  value={
+                    formData.studentDetailData.workExperience.jobDescription
+                  }
                   onChange={(e) =>
-                    handleStudentDetailsChange("workExperience", "jobDescription", e.target.value)
+                    handleStudentDetailsChange(
+                      "workExperience",
+                      "jobDescription",
+                      e.target.value
+                    )
                   }
                   disabled={!isEditing}
                 />
               </div>
-              {formData.studentDetailData.workExperience.nameOfCompany &&
+              {formData.studentDetailData.workExperience.nameOfCompany && (
                 <div className="space-y-2">
                   <Label className="pl-3">Name of Company</Label>
                   <Input
-                    value={formData.studentDetailData.workExperience.nameOfCompany}
+                    value={
+                      formData.studentDetailData.workExperience.nameOfCompany
+                    }
                     onChange={(e) =>
-                      handleStudentDetailsChange("workExperience", "nameOfCompany", e.target.value)
+                      handleStudentDetailsChange(
+                        "workExperience",
+                        "nameOfCompany",
+                        e.target.value
+                      )
                     }
                     disabled={!isEditing}
                   />
                 </div>
-              }
-              {formData.studentDetailData.workExperience.duration &&
+              )}
+              {formData.studentDetailData.workExperience.duration && (
                 <div className="space-y-2">
                   <Label className="pl-3">Apx Duration of Work</Label>
                   <Input
                     value={formData.studentDetailData.workExperience.duration}
                     onChange={(e) =>
-                      handleStudentDetailsChange("workExperience", "duration", e.target.value)
+                      handleStudentDetailsChange(
+                        "workExperience",
+                        "duration",
+                        e.target.value
+                      )
                     }
                     disabled={!isEditing}
                   />
                 </div>
-              }
+              )}
             </div>
           )}
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
 
       {/* Emergency Contact */}
       <Card>
@@ -498,46 +632,69 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-          {isEditing ?
-            <>
-              <div className="space-y-2">
-                <Label className="pl-3">First Name</Label>
-                <Input
-                  value={formData.studentDetailData.emergencyContact.firstName}
-                  onChange={(e) =>
-                    handleStudentDetailsChange("emergencyContact", "firstName", e.target.value)
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="pl-3">Last Name</Label>
-                <Input
-                  value={formData.studentDetailData.emergencyContact.lastName}
-                  onChange={(e) =>
-                    handleStudentDetailsChange("emergencyContact", "lastName", e.target.value)
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-            </> : 
-            formData.studentDetailData.emergencyContact?.firstName && formData.studentDetailData.emergencyContact?.lastName && (
-            <div className="space-y-2">
-              <Label className="pl-3">Contact&apos;s Name</Label>
-              <Input
-                defaultValue={formData.studentDetailData.emergencyContact?.firstName + ' ' + formData.studentDetailData.emergencyContact?.lastName}
-                disabled
-              />
-            </div>)
-            }
+            {isEditing ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="pl-3">First Name</Label>
+                  <Input
+                    value={
+                      formData.studentDetailData.emergencyContact.firstName
+                    }
+                    onChange={(e) =>
+                      handleStudentDetailsChange(
+                        "emergencyContact",
+                        "firstName",
+                        e.target.value
+                      )
+                    }
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="pl-3">Last Name</Label>
+                  <Input
+                    value={formData.studentDetailData.emergencyContact.lastName}
+                    onChange={(e) =>
+                      handleStudentDetailsChange(
+                        "emergencyContact",
+                        "lastName",
+                        e.target.value
+                      )
+                    }
+                    disabled={!isEditing}
+                  />
+                </div>
+              </>
+            ) : (
+              formData.studentDetailData.emergencyContact?.firstName &&
+              formData.studentDetailData.emergencyContact?.lastName && (
+                <div className="space-y-2">
+                  <Label className="pl-3">Contact&apos;s Name</Label>
+                  <Input
+                    defaultValue={
+                      formData.studentDetailData.emergencyContact?.firstName +
+                      " " +
+                      formData.studentDetailData.emergencyContact?.lastName
+                    }
+                    disabled
+                  />
+                </div>
+              )
+            )}
             <div className="space-y-2">
               <Label className="pl-3">Contact&apos;s Number</Label>
               <Input
-                value={formData.studentDetailData.emergencyContact.contactNumber}
-                onChange={(e) =>{
+                value={
+                  formData.studentDetailData.emergencyContact.contactNumber
+                }
+                onChange={(e) => {
                   const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^0-9]/g, '');
-                  handleStudentDetailsChange("emergencyContact", "contactNumber", target.value)
+                  target.value = target.value.replace(/[^0-9]/g, "");
+                  handleStudentDetailsChange(
+                    "emergencyContact",
+                    "contactNumber",
+                    target.value
+                  );
                 }}
                 maxLength={10}
                 disabled={!isEditing}
@@ -546,9 +703,16 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             <div className="space-y-2">
               <Label className="pl-3">Relationship</Label>
               <Input
-                value={formData.studentDetailData.emergencyContact.relationshipWithStudent}
+                value={
+                  formData.studentDetailData.emergencyContact
+                    .relationshipWithStudent
+                }
                 onChange={(e) =>
-                  handleStudentDetailsChange("emergencyContact", "relationshipWithStudent", e.target.value)
+                  handleStudentDetailsChange(
+                    "emergencyContact",
+                    "relationshipWithStudent",
+                    e.target.value
+                  )
                 }
                 disabled={!isEditing}
               />
@@ -565,46 +729,79 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {/* Father's Information */}
-            {isEditing ?
-            <>
-              <div className="space-y-2">
-                <Label className="pl-3">Father&apos;s First Name</Label>
-                <Input
-                  value={formData.studentDetailData.parentInformation.father.firstName}
-                  onChange={(e) =>
-                    handleStudentDetailsChange("parentInformation", "firstName", e.target.value, "father")
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="pl-3">Father&apos;s Last Name</Label>
-                <Input
-                  value={formData.studentDetailData.parentInformation.father.lastName}
-                  onChange={(e) =>
-                    handleStudentDetailsChange("parentInformation", "lastName", e.target.value, "father")
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-            </> : 
-            formData.studentDetailData.parentInformation.father?.firstName && formData.studentDetailData.parentInformation.father?.lastName && (
-              <div className="space-y-2">
-                <Label className="pl-3">Father&apos;s Name</Label>
-                <Input
-                  defaultValue={formData.studentDetailData.parentInformation.father?.firstName + ' ' + formData.studentDetailData.parentInformation.father?.lastName}
-                  disabled
-                />
-              </div>
+            {isEditing ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="pl-3">Father&apos;s First Name</Label>
+                  <Input
+                    value={
+                      formData.studentDetailData.parentInformation.father
+                        .firstName
+                    }
+                    onChange={(e) =>
+                      handleStudentDetailsChange(
+                        "parentInformation",
+                        "firstName",
+                        e.target.value,
+                        "father"
+                      )
+                    }
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="pl-3">Father&apos;s Last Name</Label>
+                  <Input
+                    value={
+                      formData.studentDetailData.parentInformation.father
+                        .lastName
+                    }
+                    onChange={(e) =>
+                      handleStudentDetailsChange(
+                        "parentInformation",
+                        "lastName",
+                        e.target.value,
+                        "father"
+                      )
+                    }
+                    disabled={!isEditing}
+                  />
+                </div>
+              </>
+            ) : (
+              formData.studentDetailData.parentInformation.father?.firstName &&
+              formData.studentDetailData.parentInformation.father?.lastName && (
+                <div className="space-y-2">
+                  <Label className="pl-3">Father&apos;s Name</Label>
+                  <Input
+                    defaultValue={
+                      formData.studentDetailData.parentInformation.father
+                        ?.firstName +
+                      " " +
+                      formData.studentDetailData.parentInformation.father
+                        ?.lastName
+                    }
+                    disabled
+                  />
+                </div>
+              )
             )}
-            {isEditing ? 
+            {isEditing ? (
               <>
                 <div className="space-y-2">
                   <Label className="pl-3">Mother&apos;s First Name</Label>
                   <Input
-                    value={formData.studentDetailData.parentInformation.mother.firstName}
+                    value={
+                      formData.studentDetailData.parentInformation.mother
+                        .firstName
+                    }
                     onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "firstName", e.target.value, "mother")
+                      handleStudentDetailsChange(
+                        "parentInformation",
+                        "firstName",
+                        e.target.value,
+                        "mother"
+                      )
                     }
                     disabled={!isEditing}
                   />
@@ -612,101 +809,174 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
                 <div className="space-y-2">
                   <Label className="pl-3">Mother&apos;s Last Name</Label>
                   <Input
-                    value={formData.studentDetailData.parentInformation.mother.lastName}
+                    value={
+                      formData.studentDetailData.parentInformation.mother
+                        .lastName
+                    }
                     onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "lastName", e.target.value, "mother")
+                      handleStudentDetailsChange(
+                        "parentInformation",
+                        "lastName",
+                        e.target.value,
+                        "mother"
+                      )
                     }
                     disabled={!isEditing}
                   />
                 </div>
-              </> : 
-              formData.studentDetailData.parentInformation.mother?.firstName && formData.studentDetailData.parentInformation.mother?.lastName && (
+              </>
+            ) : (
+              formData.studentDetailData.parentInformation.mother?.firstName &&
+              formData.studentDetailData.parentInformation.mother?.lastName && (
                 <div className="space-y-2">
                   <Label className="pl-3">Mother&apos;s Name</Label>
                   <Input
-                    defaultValue={formData.studentDetailData.parentInformation.mother?.firstName + ' ' + formData.studentDetailData.parentInformation.mother?.lastName}
+                    defaultValue={
+                      formData.studentDetailData.parentInformation.mother
+                        ?.firstName +
+                      " " +
+                      formData.studentDetailData.parentInformation.mother
+                        ?.lastName
+                    }
                     disabled
                   />
                 </div>
-              )}
-              {(isEditing || formData.studentDetailData.parentInformation.father.contactNumber) &&
-                <div className="space-y-2">
-                  <Label className="pl-3">Father&apos;s Contact Number</Label>
-                  <Input
-                    value={formData.studentDetailData.parentInformation.father.contactNumber}
-                    onChange={(e) =>{
-                      const target = e.target as HTMLInputElement;
-                      target.value = target.value.replace(/[^0-9]/g, '');
-                      handleStudentDetailsChange("parentInformation", "contactNumber", target.value, "father")
-                    }}
-                    maxLength={10}
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
-              {(isEditing || formData.studentDetailData.parentInformation.mother.contactNumber) &&
-                <div className="space-y-2">
-                  <Label className="pl-3">Mother&apos;s Contact Number</Label>
-                  <Input
-                    value={formData.studentDetailData.parentInformation.mother.contactNumber}
-                    onChange={(e) =>{
-                      const target = e.target as HTMLInputElement;
-                      target.value = target.value.replace(/[^0-9]/g, '');
-                      handleStudentDetailsChange("parentInformation", "contactNumber", target.value, "mother")
-                    }}
-                    maxLength={10}
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
-              {(isEditing || formData.studentDetailData.parentInformation.father.email) &&
-                <div className="space-y-2">
-                  <Label className="pl-3">Father&apos;s Email</Label>
-                  <Input
-                    value={formData.studentDetailData.parentInformation.father.email}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "email", e.target.value, "father")
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
-              {(isEditing || formData.studentDetailData.parentInformation.mother.email) &&
-                <div className="space-y-2">
-                  <Label className="pl-3">Mother&apos;s Email</Label>
-                  <Input
-                    value={formData.studentDetailData.parentInformation.mother.email}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "email", e.target.value, "mother")
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
-              {(isEditing || formData.studentDetailData.parentInformation.father.occupation) &&
-                <div className="space-y-2">
-                  <Label className="pl-3">Father&apos;s Occupation</Label>
-                  <Input
-                    value={formData.studentDetailData.parentInformation.father.occupation}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "occupation", e.target.value, "father")
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
-              {(isEditing || formData.studentDetailData.parentInformation.mother.occupation) &&
+              )
+            )}
+            {(isEditing ||
+              formData.studentDetailData.parentInformation.father
+                .contactNumber) && (
               <div className="space-y-2">
-                  <Label className="pl-3">Mother&apos;s Occupation</Label>
-                  <Input
-                    value={formData.studentDetailData.parentInformation.mother.occupation}
-                    onChange={(e) =>
-                      handleStudentDetailsChange("parentInformation", "occupation", e.target.value, "mother")
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              }
+                <Label className="pl-3">Father&apos;s Contact Number</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.parentInformation.father
+                      .contactNumber
+                  }
+                  onChange={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.value = target.value.replace(/[^0-9]/g, "");
+                    handleStudentDetailsChange(
+                      "parentInformation",
+                      "contactNumber",
+                      target.value,
+                      "father"
+                    );
+                  }}
+                  maxLength={10}
+                  disabled={!isEditing}
+                />
+              </div>
+            )}
+            {(isEditing ||
+              formData.studentDetailData.parentInformation.mother
+                .contactNumber) && (
+              <div className="space-y-2">
+                <Label className="pl-3">Mother&apos;s Contact Number</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.parentInformation.mother
+                      .contactNumber
+                  }
+                  onChange={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.value = target.value.replace(/[^0-9]/g, "");
+                    handleStudentDetailsChange(
+                      "parentInformation",
+                      "contactNumber",
+                      target.value,
+                      "mother"
+                    );
+                  }}
+                  maxLength={10}
+                  disabled={!isEditing}
+                />
+              </div>
+            )}
+            {(isEditing ||
+              formData.studentDetailData.parentInformation.father.email) && (
+              <div className="space-y-2">
+                <Label className="pl-3">Father&apos;s Email</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.parentInformation.father.email
+                  }
+                  onChange={(e) =>
+                    handleStudentDetailsChange(
+                      "parentInformation",
+                      "email",
+                      e.target.value,
+                      "father"
+                    )
+                  }
+                  disabled={!isEditing}
+                />
+              </div>
+            )}
+            {(isEditing ||
+              formData.studentDetailData.parentInformation.mother.email) && (
+              <div className="space-y-2">
+                <Label className="pl-3">Mother&apos;s Email</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.parentInformation.mother.email
+                  }
+                  onChange={(e) =>
+                    handleStudentDetailsChange(
+                      "parentInformation",
+                      "email",
+                      e.target.value,
+                      "mother"
+                    )
+                  }
+                  disabled={!isEditing}
+                />
+              </div>
+            )}
+            {(isEditing ||
+              formData.studentDetailData.parentInformation.father
+                .occupation) && (
+              <div className="space-y-2">
+                <Label className="pl-3">Father&apos;s Occupation</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.parentInformation.father
+                      .occupation
+                  }
+                  onChange={(e) =>
+                    handleStudentDetailsChange(
+                      "parentInformation",
+                      "occupation",
+                      e.target.value,
+                      "father"
+                    )
+                  }
+                  disabled={!isEditing}
+                />
+              </div>
+            )}
+            {(isEditing ||
+              formData.studentDetailData.parentInformation.mother
+                .occupation) && (
+              <div className="space-y-2">
+                <Label className="pl-3">Mother&apos;s Occupation</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.parentInformation.mother
+                      .occupation
+                  }
+                  onChange={(e) =>
+                    handleStudentDetailsChange(
+                      "parentInformation",
+                      "occupation",
+                      e.target.value,
+                      "mother"
+                    )
+                  }
+                  disabled={!isEditing}
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -719,7 +989,8 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
         <CardContent className="space-y-4">
           <div className="grid gap-4">
             <div>
-              {formData.studentDetailData.financialInformation.isFinanciallyIndependent ? (
+              {formData.studentDetailData.financialInformation
+                .isFinanciallyIndependent ? (
                 <Label className="pl-3 flex gap-2 items-center">
                   <CircleCheckBig className="w-3 h-3 text-[#2EB88A]" />
                   Financially independent
@@ -732,7 +1003,8 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
               )}
             </div>
             <div>
-              {formData.studentDetailData.financialInformation.hasAppliedForFinancialAid ? (
+              {formData.studentDetailData.financialInformation
+                .hasAppliedForFinancialAid ? (
                 <Label className="pl-3 flex gap-2 items-center">
                   <CircleCheckBig className="w-3 h-3 text-[#2EB88A]" />
                   Has tried applying for financial aid earlier

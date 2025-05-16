@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
 export function UserButton() {
@@ -18,10 +18,10 @@ export function UserButton() {
   const email = Cookies.get("adminEmail");
 
   const handleLogout = () => {
-    Cookies.remove('adminAccessToken');
-    Cookies.remove('adminRefreshToken');
-    Cookies.remove('adminId');
-    Cookies.remove('adminEmail');
+    Cookies.remove("adminAccessToken");
+    Cookies.remove("adminRefreshToken");
+    Cookies.remove("adminId");
+    Cookies.remove("adminEmail");
     localStorage.clear();
     router.push("/login");
   };
@@ -34,12 +34,16 @@ export function UserButton() {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel className="cursor-pointer">
+          My Account
+        </DropdownMenuLabel>
         {/* <DropdownMenuSeparator />
         <DropdownMenuItem>Profile</DropdownMenuItem>
         <DropdownMenuItem>Settings</DropdownMenuItem> */}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+          Log Out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

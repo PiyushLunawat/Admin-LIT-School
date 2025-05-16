@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  createProgram,
+  getPrograms,
+  updateProgram,
+  updateProgramStatus,
+} from "@/app/api/programs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,13 +17,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, SquarePen } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { getPrograms, createProgram, updateProgramStatus, updateProgram } from "@/app/api/programs";
 import { useToast } from "@/hooks/use-toast";
+import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Program {
   _id: string;
@@ -43,12 +54,14 @@ export default function ProgramsPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [programLoading, setProgramLoading] = useState(false);
-  const [newProgram, setNewProgram] = useState<Omit<Program, "_id" | "status">>({
-    name: "",
-    description: "",
-    duration: 0,
-    prefix: "",
-  });
+  const [newProgram, setNewProgram] = useState<Omit<Program, "_id" | "status">>(
+    {
+      name: "",
+      description: "",
+      duration: 0,
+      prefix: "",
+    }
+  );
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -70,10 +83,12 @@ export default function ProgramsPage() {
 
   const validateFields = () => {
     const duplicateName = programs.some(
-      (program) => program.name === newProgram.name && program._id !== selectedProgram
+      (program) =>
+        program.name === newProgram.name && program._id !== selectedProgram
     );
     const duplicatePrefix = programs.some(
-      (program) => program.prefix === newProgram.prefix && program._id !== selectedProgram
+      (program) =>
+        program.prefix === newProgram.prefix && program._id !== selectedProgram
     );
 
     const newErrors = {
@@ -97,27 +112,44 @@ export default function ProgramsPage() {
 
   const handleCreateOrUpdateProgram = async () => {
     setProgramLoading(true);
+
     try {
-      if (editMode && selectedProgram) {
-        if (!validateFields()) {
-          return;
-        }
-        await updateProgram(selectedProgram, newProgram);
-        toast({ title: "Program updated successfully!", variant: "success" });
-      } else {
-        if (!validateFields()) {
-          return;
-        }
-        await createProgram(newProgram);
-        toast({ title: "Program created successfully!", variant: "success" });
+      // Validate fields first
+      if (!validateFields()) {
+        toast({ title: "Please fix the errors", variant: "destructive" });
+        setProgramLoading(false);
+        return;
       }
+
+      if (editMode && selectedProgram) {
+        // Update existing program
+        await updateProgram(selectedProgram, newProgram);
+        toast({ title: "Program updated successfully!", variant: "default" });
+      } else {
+        // Create new program
+        await createProgram(newProgram);
+        toast({ title: "Program created successfully!", variant: "default" });
+      }
+
+      // Refresh the programs list
       await fetchPrograms();
+
+      // Close the dialog and reset form ONLY after successful operation
       setOpen(false);
+      setEditMode(false);
+      setSelectedProgram(null);
+      setNewProgram({ name: "", description: "", duration: 0, prefix: "" });
+      setErrors({});
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
-      toast({ title: "Failed to create program", description: errorMessage, variant: "destructive" });
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      toast({
+        title: "Failed to save program",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
-    setProgramLoading(false);
+      setProgramLoading(false);
     }
   };
 
@@ -136,12 +168,27 @@ export default function ProgramsPage() {
 
   const toggleProgramStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const res = await updateProgramStatus(id, !currentStatus);
-      // console.log("loggdss",res);
-      toast({ title: `Program successfully ${currentStatus ? "Disabled" : "Enabled"}!`, variant: "success" });
+      await updateProgramStatus(id, !currentStatus);
+      toast({
+        title: `Program successfully ${
+          currentStatus ? "Disabled" : "Enabled"
+        }!`,
+        variant: "default",
+      });
       await fetchPrograms();
     } catch (error) {
       console.error("Failed to update program status:", error);
+    }
+  };
+
+  // Function to reset form state when dialog closes
+  const handleDialogClose = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setEditMode(false);
+      setSelectedProgram(null);
+      setNewProgram({ name: "", description: "", duration: 0, prefix: "" });
+      setErrors({});
     }
   };
 
@@ -149,18 +196,7 @@ export default function ProgramsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Programs</h1>
-        <Dialog
-          open={open}
-          onOpenChange={(isOpen) => {
-            setOpen(isOpen);
-            if (!isOpen) {
-              setEditMode(false);
-              setSelectedProgram(null);
-              setNewProgram({ name: "", description: "", duration: 0, prefix: "" });
-              setErrors({});
-            }
-          }}
-        >
+        <Dialog open={open} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditMode(false)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -169,7 +205,9 @@ export default function ProgramsPage() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editMode ? "Edit Program" : "Create New Program"}</DialogTitle>
+              <DialogTitle>
+                {editMode ? "Edit Program" : "Create New Program"}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -178,9 +216,13 @@ export default function ProgramsPage() {
                   id="name"
                   placeholder="e.g., Creator Marketer"
                   value={newProgram.name}
-                  onChange={(e) => setNewProgram({ ...newProgram, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewProgram({ ...newProgram, name: e.target.value })
+                  }
                 />
-                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                {errors.name && (
+                  <p className="text-red-500 text-sm">{errors.name}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -188,9 +230,16 @@ export default function ProgramsPage() {
                   id="description"
                   placeholder="Brief summary of the program"
                   value={newProgram.description}
-                  onChange={(e) => setNewProgram({ ...newProgram, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewProgram({
+                      ...newProgram,
+                      description: e.target.value,
+                    })
+                  }
                 />
-                {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+                {errors.description && (
+                  <p className="text-red-500 text-sm">{errors.description}</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -201,10 +250,15 @@ export default function ProgramsPage() {
                     placeholder="6"
                     value={newProgram.duration || ""}
                     onChange={(e) =>
-                      setNewProgram({ ...newProgram, duration: e.target.value ? Number(e.target.value) : 0 })
+                      setNewProgram({
+                        ...newProgram,
+                        duration: e.target.value ? Number(e.target.value) : 0,
+                      })
                     }
                   />
-                  {errors.duration && <p className="text-red-500 text-sm">{errors.duration}</p>}
+                  {errors.duration && (
+                    <p className="text-red-500 text-sm">{errors.duration}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -215,17 +269,32 @@ export default function ProgramsPage() {
                     className="uppercase"
                     value={newProgram.prefix}
                     onChange={(e) => {
-                      const onlyAlphanumeric = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                      setNewProgram(prev => ({ ...prev, prefix: onlyAlphanumeric }));
+                      const onlyAlphanumeric = e.target.value
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, "");
+                      setNewProgram((prev) => ({
+                        ...prev,
+                        prefix: onlyAlphanumeric,
+                      }));
                     }}
                   />
-                  {errors.prefix && <p className="text-red-500 text-sm">{errors.prefix}</p>}
+                  {errors.prefix && (
+                    <p className="text-red-500 text-sm">{errors.prefix}</p>
+                  )}
                 </div>
               </div>
-              <Button className="w-full" onClick={handleCreateOrUpdateProgram} disabled={programLoading}>
-                {editMode ? 
-                  programLoading ? 'Updating...' : 'Update Program' :
-                  programLoading ? 'Creating...' : "Create Program"}
+              <Button
+                className="w-full"
+                onClick={handleCreateOrUpdateProgram}
+                disabled={programLoading}
+              >
+                {editMode
+                  ? programLoading
+                    ? "Updating..."
+                    : "Update Program"
+                  : programLoading
+                  ? "Creating..."
+                  : "Create Program"}
               </Button>
             </div>
           </DialogContent>
@@ -233,7 +302,9 @@ export default function ProgramsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">Loading...</div>
+        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
+          Loading...
+        </div>
       ) : programs.length > 0 ? (
         <Table>
           <TableHeader>
@@ -250,31 +321,56 @@ export default function ProgramsPage() {
             {programs.map((program) => (
               <TableRow key={program._id}>
                 <TableCell>{program.name}</TableCell>
-                <TableCell className="max-w-[500px]">{program.description}</TableCell>
+                <TableCell className="max-w-[500px]">
+                  {program.description}
+                </TableCell>
                 <TableCell>{program.duration} months</TableCell>
                 <TableCell>{program.prefix}</TableCell>
                 <TableCell>{program.status ? "Active" : "Inactive"}</TableCell>
                 <TableCell className="flex justify-start items-center">
-                  <Button variant="ghost" size="icon" onClick={() => handleEditProgram(program)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEditProgram(program)}
+                  >
                     Edit
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className={program.status ? "text-destructive" : "text-[#2EB88A]"}>
-                          {program.status ? "Disable" : "Enable"}
-                        </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={
+                          program.status ? "text-destructive" : "text-[#2EB88A]"
+                        }
+                      >
+                        {program.status ? "Disable" : "Enable"}
+                      </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle> {program.status ? "Disable" : "Enable"} Program</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {" "}
+                          {program.status ? "Disable" : "Enable"} Program
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to {program.status ? "Disable" : "Enable"} this Program?
+                          Are you sure you want to{" "}
+                          {program.status ? "Disable" : "Enable"} this Program?
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction className={`${program.status ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`} onClick={() => toggleProgramStatus(program._id, program.status)}>
-                        {program.status ? "Disable" : "Enable"}
+                        <AlertDialogAction
+                          className={`${
+                            program.status
+                              ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            toggleProgramStatus(program._id, program.status)
+                          }
+                        >
+                          {program.status ? "Disable" : "Enable"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -285,7 +381,9 @@ export default function ProgramsPage() {
           </TableBody>
         </Table>
       ) : (
-        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">No Programs Available</div>
+        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
+          No Programs Available
+        </div>
       )}
     </div>
   );

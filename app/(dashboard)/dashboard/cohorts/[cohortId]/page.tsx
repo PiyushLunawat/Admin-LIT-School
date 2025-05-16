@@ -1,6 +1,10 @@
 import { CohortDashboard } from "@/components/cohorts/dashboard/cohort-dashboard";
 
-export default async function CohortDashboardPage({ params }: { params: Promise<{ cohortId: string}> }) {
+export default async function CohortDashboardPage({
+  params,
+}: {
+  params: Promise<{ cohortId: string }>;
+}) {
   const cohortId = (await params).cohortId;
   return <CohortDashboard cohortId={cohortId} />;
 }

@@ -1,45 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { updateCohort } from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plus,
-  Trash2,
-  GripVertical,
-  XIcon,
-  FolderPlus,
-  FileIcon,
-  Link2Icon,
-  PlusIcon,
-  FileLineChart,
-  SmileIcon,
-  LoaderCircle,
-} from "lucide-react";
-import { z } from "zod";
-import {
-  useForm,
-  useFieldArray,
-  Controller,
-  UseFormReturn,
-} from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -47,14 +11,46 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { updateCohort } from "@/app/api/cohorts";
-
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  S3Client,
-  DeleteObjectCommand
-} from "@aws-sdk/client-s3";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import {
+  FileIcon,
+  FolderPlus,
+  GripVertical,
+  Link2Icon,
+  LoaderCircle,
+  Plus,
+  PlusIcon,
+  Trash2,
+  XIcon,
+} from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  type UseFormReturn,
+} from "react-hook-form";
+import { z } from "zod";
+
 import { Progress } from "@/components/ui/progress";
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 const s3Client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -89,47 +85,51 @@ const formSchema = z.object({
         })
       ),
       resources: z.object({
-        resourceFiles: z.array(z.string().optional(),),
-        resourceLinks: z.array(z.string().url('Please enter a valid Link URL').optional(),),
+        resourceFiles: z.array(z.string().optional()),
+        resourceLinks: z.array(
+          z.string().url("Please enter a valid Link URL").optional()
+        ),
       }),
     })
   ),
-  scholarshipSlabs: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string().nonempty("Slab name is required"),
-      percentage: z.coerce.string().nonempty("Percentage is required"),
-      clearance: z.coerce.string().nonempty("Clearance is required"),
-      description: z.string().optional(),
-      cohortId: z.string().optional(),
-    })
-  ).superRefine((slabs, ctx) => {
-    const ranges = slabs.map((slab, index) => {
-      const [start, end] = slab.clearance.split('-').map(Number);
-      return { start, end, index };
-    });
-  
-    // Check for overlapping ranges
-    for (let i = 0; i < ranges.length; i++) {
-      for (let j = i + 1; j < ranges.length; j++) {
-        const a = ranges[i];
-        const b = ranges[j];
-  
-        if (a.start < b.end && b.start < a.end) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Clearance range overlaps with another slab",
-            path: [`scholarshipSlabs.${a.index}.clearance`],
-          });
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Clearance range overlaps with another slab",
-            path: [`scholarshipSlabs.${b.index}.clearance`],
-          });
+  scholarshipSlabs: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string().nonempty("Slab name is required"),
+        percentage: z.coerce.string().nonempty("Percentage is required"),
+        clearance: z.coerce.string().nonempty("Clearance is required"),
+        description: z.string().optional(),
+        cohortId: z.string().optional(),
+      })
+    )
+    .superRefine((slabs, ctx) => {
+      const ranges = slabs.map((slab, index) => {
+        const [start, end] = slab.clearance.split("-").map(Number);
+        return { start, end, index };
+      });
+
+      // Check for overlapping ranges
+      for (let i = 0; i < ranges.length; i++) {
+        for (let j = i + 1; j < ranges.length; j++) {
+          const a = ranges[i];
+          const b = ranges[j];
+
+          if (a.start < b.end && b.start < a.end) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Clearance range overlaps with another slab",
+              path: [`scholarshipSlabs.${a.index}.clearance`],
+            });
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Clearance range overlaps with another slab",
+              path: [`scholarshipSlabs.${b.index}.clearance`],
+            });
+          }
         }
       }
-    }
-  }),
+    }),
   litmusTestDuration: z.string().nonempty("Duration is required"),
 });
 
@@ -145,7 +145,8 @@ export function LitmusTestForm({
   onNext,
   onCohortCreated,
   initialData,
-}: LitmusTestFormProps) {const litmusTestDetail = initialData?.litmusTestDetail?.[0];
+}: LitmusTestFormProps) {
+  const litmusTestDetail = initialData?.litmusTestDetail?.[0];
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -156,7 +157,7 @@ export function LitmusTestForm({
           litmusTestDuration: litmusTestDetail.litmusTestDuration,
         }
       : {
-          litmusTasks:  [
+          litmusTasks: [
             {
               id: generateId(),
               title: "",
@@ -198,20 +199,31 @@ export function LitmusTestForm({
           litmusTestDuration: "",
         },
   });
-  const [loading, setLoading] = useState(false);  
-  const { control, handleSubmit, watch, setValue, setError, clearErrors, trigger, formState: { isValid, errors }, } = form;
+  const [loading, setLoading] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    setError,
+    clearErrors,
+    trigger,
+    formState: { isValid, errors },
+  } = form;
 
-  const scholarshipSlabs = watch('scholarshipSlabs');
+  const scholarshipSlabs = watch("scholarshipSlabs");
   function hasOverlap(slabs: { clearance: string }[]) {
-    const ranges = slabs.map((slab, index) => {
-      const [startStr, endStr] = (slab.clearance || "").split("-");
-      const start = Number(startStr);
-      const end = Number(endStr);
-      return { start, end, index };
-    }).filter(({ start, end }) => !isNaN(start) && !isNaN(end));
-  
+    const ranges = slabs
+      .map((slab, index) => {
+        const [startStr, endStr] = (slab.clearance || "").split("-");
+        const start = Number(startStr);
+        const end = Number(endStr);
+        return { start, end, index };
+      })
+      .filter(({ start, end }) => !isNaN(start) && !isNaN(end));
+
     const overlappingIndexes = new Set<number>();
-  
+
     for (let i = 0; i < ranges.length; i++) {
       for (let j = i + 1; j < ranges.length; j++) {
         const a = ranges[i];
@@ -222,9 +234,9 @@ export function LitmusTestForm({
         }
       }
     }
-  
+
     return overlappingIndexes.size > 0 ? Array.from(overlappingIndexes) : null;
-  }  
+  }
 
   useEffect(() => {
     const overlapIndexes = hasOverlap(scholarshipSlabs);
@@ -242,8 +254,7 @@ export function LitmusTestForm({
       });
     }
   }, [scholarshipSlabs, setError, clearErrors]);
-  
-  
+
   const {
     fields: taskFields,
     append: appendTask,
@@ -263,7 +274,7 @@ export function LitmusTestForm({
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setLoading(true)
+    setLoading(true);
     try {
       console.log("Form data before submission:", data);
       if (initialData?._id) {
@@ -278,15 +289,95 @@ export function LitmusTestForm({
     } catch (error) {
       console.error("Failed to update cohort:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleTaskDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const draggedTaskIndex = Number.parseInt(
+      e.dataTransfer.getData("text/plain"),
+      10
+    );
+    const taskCards = document.querySelectorAll('[id^="task-card-"]');
+
+    // Find the target card
+    let targetCard = e.target as HTMLElement;
+    while (targetCard && !targetCard.id?.startsWith("task-card-")) {
+      targetCard = targetCard.parentElement as HTMLElement;
+    }
+
+    if (!targetCard) return;
+
+    // Find the index of the target card
+    let targetIndex = -1;
+    taskCards.forEach((card, index) => {
+      if (card.id === targetCard.id) {
+        targetIndex = index;
+      }
+    });
+
+    if (targetIndex === -1 || targetIndex === draggedTaskIndex) return;
+
+    // Reorder tasks
+    const tasks = [...form.getValues("litmusTasks")];
+    const [draggedTask] = tasks.splice(draggedTaskIndex, 1);
+    tasks.splice(targetIndex, 0, draggedTask);
+
+    setValue("litmusTasks", tasks);
+  };
+
+  const handleSlabDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const draggedSlabIndex = Number.parseInt(
+      e.dataTransfer.getData("text/plain"),
+      10
+    );
+    const slabCards = document.querySelectorAll('[id^="slab-card-"]');
+
+    // Find the target card
+    let targetCard = e.target as HTMLElement;
+    while (targetCard && !targetCard.id?.startsWith("slab-card-")) {
+      targetCard = targetCard.parentElement as HTMLElement;
+    }
+
+    if (!targetCard) return;
+
+    // Find the index of the target card
+    let targetIndex = -1;
+    slabCards.forEach((card, index) => {
+      if (card.id === targetCard.id) {
+        targetIndex = index;
+      }
+    });
+
+    if (targetIndex === -1 || targetIndex === draggedSlabIndex) return;
+
+    // Reorder slabs
+    const slabs = [...form.getValues("scholarshipSlabs")];
+    const [draggedSlab] = slabs.splice(draggedSlabIndex, 1);
+    slabs.splice(targetIndex, 0, draggedSlab);
+
+    setValue("scholarshipSlabs", slabs);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="max-h-[80vh] space-y-6 py-4" >
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="max-h-[80vh] space-y-6 py-4"
+      >
         {/* LITMUS Tasks Section */}
-        <div className="space-y-4">
+        <div
+          className="space-y-4"
+          onDragOver={handleDragOver}
+          onDrop={handleTaskDrop}
+        >
           <h3 className="text-lg font-medium">LITMUS Tasks</h3>
           {taskFields.map((task, taskIndex) => (
             <TaskItem
@@ -296,10 +387,10 @@ export function LitmusTestForm({
               control={control}
               removeTask={removeTask}
               form={form}
-              setValue={setValue} 
+              setValue={setValue}
             />
           ))}
-          <Button 
+          <Button
             type="button"
             onClick={() =>
               appendTask({
@@ -331,20 +422,25 @@ export function LitmusTestForm({
         </div>
 
         {/* Scholarship Slabs Section */}
-        <div className="space-y-4">
+        <div
+          className="space-y-4"
+          onDragOver={handleDragOver}
+          onDrop={handleSlabDrop}
+        >
           <h3 className="text-lg font-medium">Scholarship Slabs</h3>
           {slabFields.map((slab, slabIndex) => (
             <ScholarshipSlabItem
-            key={slab.id}
-            slab={slab}
-            slabIndex={slabIndex}
-            control={control}
-            removeSlab={removeSlab}
-            form={form}
-            trigger={trigger}
+              key={slab.id}
+              slab={slab}
+              slabIndex={slabIndex}
+              control={control}
+              removeSlab={removeSlab}
+              form={form}
+              trigger={trigger}
             />
           ))}
-          <Button type="button"
+          <Button
+            type="button"
             onClick={() =>
               appendSlab({
                 id: generateId(),
@@ -371,7 +467,12 @@ export function LitmusTestForm({
               <FormItem>
                 <Label>LITMUS Test Duration (days)</Label>
                 <FormControl>
-                  <Input type="number" min="1" placeholder="5 days" {...field} />
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder="5 days"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -380,7 +481,14 @@ export function LitmusTestForm({
         </div>
 
         <Button type="submit" className="w-full" disabled={loading || !isValid}>
-          Next: Fee Structure
+          {loading ? (
+            <>
+              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            "Next: Fee Structure"
+          )}
         </Button>
       </form>
     </Form>
@@ -427,12 +535,41 @@ function TaskItem({
   });
 
   return (
-    <Card key={task.id}>
+    <Card key={task.id} id={`task-card-${task.id}`}>
       <CardContent className="flex pl-0 items-start pt-6">
-        <div className="cursor-grab px-4" onMouseDown={(e) => e.preventDefault()}>
+        <div
+          className="cursor-grab px-4 touch-none"
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData("text/plain", taskIndex.toString());
+            e.dataTransfer.effectAllowed = "move";
+
+            // Create a ghost image for dragging
+            const taskCard = document.getElementById(`task-card-${task.id}`);
+            if (taskCard) {
+              const rect = taskCard.getBoundingClientRect();
+              const ghostElement = taskCard.cloneNode(true) as HTMLElement;
+
+              ghostElement.style.width = `${rect.width}px`;
+              ghostElement.style.opacity = "0.5";
+              ghostElement.style.position = "absolute";
+              ghostElement.style.top = "-1000px";
+              ghostElement.style.backgroundColor = "white";
+              ghostElement.style.border = "1px dashed #ccc";
+
+              document.body.appendChild(ghostElement);
+              e.dataTransfer.setDragImage(ghostElement, 20, 20);
+
+              setTimeout(() => {
+                document.body.removeChild(ghostElement);
+              }, 0);
+            }
+          }}
+        >
           <GripVertical className="h-4 w-4" />
         </div>
         <div className="grid w-full gap-6">
+          {/* Rest of the component remains the same */}
           {/* Task Title */}
           <div className="flex justify-between items-end">
             <FormField
@@ -440,7 +577,9 @@ function TaskItem({
               name={`litmusTasks.${taskIndex}.title`}
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <Label className="text-[#00A3FF]">Task 0{taskIndex+1}</Label>
+                  <Label className="text-[#00A3FF]">
+                    Task 0{taskIndex + 1}
+                  </Label>
                   <FormControl>
                     <Input placeholder="e.g., Create a pitch deck" {...field} />
                   </FormControl>
@@ -450,21 +589,37 @@ function TaskItem({
             />
             {form.getValues("litmusTasks").length > 1 && (
               <Popover>
-              <PopoverTrigger asChild>
-                <Button type="button" variant="ghost" size="icon" className="text-destructive" >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
-                <div className="text-base font-medium mb-2">
-                  {`Are you sure you would like to delete ${form.getValues(`litmusTasks.${taskIndex}.title`)}?`}
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" >Cancel</Button>
-                  <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]" onClick={() => removeTask(taskIndex)}>Delete</Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  side="top"
+                  className="max-w-[345px] w-full"
+                >
+                  <div className="text-base font-medium mb-2">
+                    {`Are you sure you would like to delete ${form.getValues(
+                      `litmusTasks.${taskIndex}.title`
+                    )}?`}
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline">Cancel</Button>
+                    <Button
+                      className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
+                      onClick={() => removeTask(taskIndex)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             )}
           </div>
 
@@ -506,7 +661,9 @@ function TaskItem({
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="short">Short Answer</SelectItem>
+                              <SelectItem value="short">
+                                Short Answer
+                              </SelectItem>
                               <SelectItem value="long">Long Text</SelectItem>
                               <SelectItem value="image">Image</SelectItem>
                               <SelectItem value="video">Video</SelectItem>
@@ -529,7 +686,8 @@ function TaskItem({
                     )
                   )}
                 </div>
-                <Button type="button"
+                <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => removeSubmissionType(subIndex)}
@@ -538,7 +696,8 @@ function TaskItem({
                 </Button>
               </div>
             ))}
-            <Button type="button"
+            <Button
+              type="button"
               variant="secondary"
               className="flex flex-1 gap-2"
               onClick={() =>
@@ -572,10 +731,7 @@ function TaskItem({
                             Criteria 0{criIndex + 1}
                           </Label>
                           <FormControl>
-                            <Input
-                              placeholder="Type Here"
-                              {...field}
-                            />
+                            <Input placeholder="Type Here" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -588,7 +744,12 @@ function TaskItem({
                         <FormItem className="w-1/2">
                           <Label>Max Points</Label>
                           <FormControl>
-                            <Input type="number" placeholder="10" min="1" {...field} />
+                            <Input
+                              type="number"
+                              placeholder="10"
+                              min="1"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -609,7 +770,8 @@ function TaskItem({
                     )}
                   />
                 </div>
-                <Button type="button"
+                <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => removeJudgmentCriteria(criIndex)}
@@ -618,7 +780,8 @@ function TaskItem({
                 </Button>
               </div>
             ))}
-            <Button type="button"
+            <Button
+              type="button"
               variant="secondary"
               className="flex flex-1 gap-2"
               onClick={() =>
@@ -707,7 +870,7 @@ function renderConfigFields(
           />
         </>
       );
-      
+
     case "file":
       // Implement allowed file types if needed
       return (
@@ -746,39 +909,48 @@ function renderConfigFields(
               defaultValue={["All"]} // Initialize with "All" selected
               render={({ field }) => (
                 <div className="flex flex-wrap gap-1">
-                  {["All", "DOC", "PPT", "PDF", "XLS", "PSD", "EPF", "AI"].map((type) => (
-                    <div key={type} className="flex items-center">
-                      <Checkbox className="hidden"
-                        id={`${type}-${taskIndex}-${subIndex}`}
-                        checked={field.value?.includes(type)}
-                        onCheckedChange={(checked) => {
-                          let newSelectedTypes = field.value || [];
-                          if (checked) {
-                            if (type === "All") {
-                              newSelectedTypes = ["All"];
+                  {["All", "DOC", "PPT", "PDF", "XLS", "PSD", "EPF", "AI"].map(
+                    (type) => (
+                      <div key={type} className="flex items-center">
+                        <Checkbox
+                          className="hidden"
+                          id={`${type}-${taskIndex}-${subIndex}`}
+                          checked={field.value?.includes(type)}
+                          onCheckedChange={(checked) => {
+                            let newSelectedTypes = field.value || [];
+                            if (checked) {
+                              if (type === "All") {
+                                newSelectedTypes = ["All"];
+                              } else {
+                                newSelectedTypes = newSelectedTypes.filter(
+                                  (t: any) => t !== "All"
+                                );
+                                newSelectedTypes.push(type);
+                              }
                             } else {
-                              newSelectedTypes = newSelectedTypes.filter((t:any) => t !== "All");
-                              newSelectedTypes.push(type);
+                              newSelectedTypes = newSelectedTypes.filter(
+                                (t: any) => t !== type
+                              );
+                              if (newSelectedTypes.length === 0) {
+                                newSelectedTypes = ["All"];
+                              }
                             }
-                          } else {
-                            newSelectedTypes = newSelectedTypes.filter((t:any) => t !== type);
-                            if (newSelectedTypes.length === 0) {
-                              newSelectedTypes = ["All"];
-                            }
-                          }
-                          field.onChange(newSelectedTypes);
-                        }}
-                      />
-                      <Label
-                        htmlFor={`${type}-${taskIndex}-${subIndex}`}
-                        className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border ${
-                          field.value?.includes(type) ? "bg-[#6808FE]" : "bg-[#0A0A0A]"
-                        }`}
-                      >
-                        {type}
-                      </Label>
-                    </div>
-                  ))}
+                            field.onChange(newSelectedTypes);
+                          }}
+                        />
+                        <Label
+                          htmlFor={`${type}-${taskIndex}-${subIndex}`}
+                          className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border ${
+                            field.value?.includes(type)
+                              ? "bg-[#6808FE]"
+                              : "bg-[#0A0A0A]"
+                          }`}
+                        >
+                          {type}
+                        </Label>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             />
@@ -807,11 +979,7 @@ function renderConfigFields(
 }
 
 // Resources Section Component
-function ResourcesSection({
-  control,
-  setValue,
-  taskIndex,
-}: any) {
+function ResourcesSection({ control, setValue, taskIndex }: any) {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -834,7 +1002,7 @@ function ResourcesSection({
     control,
     name: `litmusTasks.${taskIndex}.resources.resourceFiles`,
   });
-  
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     setUploadProgress(1);
@@ -867,7 +1035,6 @@ function ResourcesSection({
 
       // Append the final S3 URL to resourcesFiles in the form
       appendFile(fileUrl);
-
     } catch (err: any) {
       console.error("Upload error:", err);
       setError(err.message || "Error uploading file");
@@ -906,15 +1073,18 @@ function ResourcesSection({
   const uploadDirect = async (file: File) => {
     // Step 1: Get presigned URL from your server
     // Make sure your endpoint returns something like { url: string }
-    const { data } = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url`, {
-      bucketName: "dev-application-portal",
-      key: generateUniqueFileName(file.name),
-    });
+    const { data } = await axios.post(
+      `${process.env.API_URL}/admin/generate-presigned-url`,
+      {
+        bucketName: "dev-application-portal",
+        key: generateUniqueFileName(file.name),
+      }
+    );
     const { url, key } = data; // Suppose your API returns both presigned `url` and `key`
-    console.log("whatatata",url.split("?")[0]);
+    console.log("whatatata", url.split("?")[0]);
 
     // Step 2: PUT file to that URL
-      const partResponse = await axios.put(url, file, {
+    const partResponse = await axios.put(url, file, {
       headers: { "Content-Type": file.type },
       onUploadProgress: (evt: any) => {
         if (!evt.total) return;
@@ -936,29 +1106,32 @@ function ResourcesSection({
   const uploadMultipart = async (file: File, chunkSize: number) => {
     // 1) Initiate upload to get an uploadId
     const fileName = generateUniqueFileName(file.name);
-    const initiateRes = await axios.post(`${process.env.API_URL}/admin/initiateUpload`, {
-      fileName,
-    });
+    const initiateRes = await axios.post(
+      `${process.env.API_URL}/admin/initiateUpload`,
+      {
+        fileName,
+      }
+    );
     const { uploadId } = initiateRes.data; // e.g. { uploadId: 'abc123' }
-  
+
     // 2) Calculate number of chunks
     const totalChunks = Math.ceil(file.size / chunkSize);
     let uploadedBytes = 0;
-  
+
     // We'll track overall progress across all chunks
     for (let i = 0; i < totalChunks; i++) {
       // Slice out this chunk
       const start = i * chunkSize;
       const end = Math.min(start + chunkSize, file.size);
       const chunk = file.slice(start, end);
-  
+
       // Create form data for the chunk
       const formData = new FormData();
       formData.append("file", chunk);
-      formData.append("index", `${i}`);          // chunk index
+      formData.append("index", `${i}`); // chunk index
       formData.append("fileName", fileName);
       formData.append("totalChunks", `${totalChunks}`);
-  
+
       // 3) Upload the chunk
       await axios.post(
         `${process.env.API_URL}/admin/upload-chunk?uploadId=${uploadId}`,
@@ -970,7 +1143,7 @@ function ResourcesSection({
             // We'll combine that with already-uploaded bytes
             const chunkUploadedSoFar = evt.loaded;
             const overallUploaded = uploadedBytes + chunkUploadedSoFar;
-  
+
             // Calculate overall percent
             const percentComplete = Math.round(
               (overallUploaded / file.size) * 100
@@ -979,23 +1152,25 @@ function ResourcesSection({
           },
         }
       );
-  
+
       // When this chunk is fully done, add its size to the total
       uploadedBytes += chunk.size;
     }
-  
+
     // 4) Complete the upload
     //    This tells your server: "All chunks are up, now merge them."
-    const completeRes = await axios.post(`${process.env.API_URL}/admin/completeUpload`, {
-      uploadId,
-      fileName,
-    });
-  
+    const completeRes = await axios.post(
+      `${process.env.API_URL}/admin/completeUpload`,
+      {
+        uploadId,
+        fileName,
+      }
+    );
+
     // The server should respond with the final file URL
     const { fileUrl } = completeRes.data;
     return fileUrl;
   };
-  
 
   // Just a helper to generate a unique file name
   const generateUniqueFileName = (originalName: string) => {
@@ -1017,25 +1192,25 @@ function ResourcesSection({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                <div className="relative flex items-center gap-2">
-                  <FileIcon className="absolute left-2 top-3 w-4 h-4" />
-                  <Input
-                    type="url"
-                    className="pl-8 pr-12 text-sm truncate text-white w-full" 
-                    placeholder="Enter resource link"
-                    {...field}
-                    readOnly
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1.5 h-7 rounded-full"
-                    onClick={() => handleDeleteFile(field.value, index)}
-                  >
-                    <XIcon className="h-4 w-4" />
-                  </Button>
-                </div>
+                  <div className="relative flex items-center gap-2">
+                    <FileIcon className="absolute left-2 top-3 w-4 h-4" />
+                    <Input
+                      type="url"
+                      className="pl-8 pr-12 text-sm truncate text-white w-full"
+                      placeholder="Enter resource link"
+                      {...field}
+                      readOnly
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1.5 h-7 rounded-full"
+                      onClick={() => handleDeleteFile(field.value, index)}
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -1051,12 +1226,23 @@ function ResourcesSection({
             <div className="text-sm truncate">{fileName}</div>
           </div>
           <div className="flex items-center gap-2">
-            {uploadProgress === 100 ? 
-            <LoaderCircle className="h-4 w-4 animate-spin" /> : 
-            <>
-              <Progress className="h-1 w-20" states={[ { value: uploadProgress, widt: uploadProgress, color: '#ffffff' }]} />
-              <span>{uploadProgress}%</span>
-            </>}
+            {uploadProgress === 100 ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Progress
+                  className="h-1 w-20"
+                  states={[
+                    {
+                      value: uploadProgress,
+                      widt: uploadProgress,
+                      color: "#ffffff",
+                    },
+                  ]}
+                />
+                <span>{uploadProgress}%</span>
+              </>
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -1082,7 +1268,7 @@ function ResourcesSection({
                     <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
                     <Input
                       type="url"
-                      className="pl-8 pr-12 text-sm truncate" 
+                      className="pl-8 pr-12 text-sm truncate"
                       placeholder="Enter resource link"
                       {...field}
                     />
@@ -1123,7 +1309,8 @@ function ResourcesSection({
           style={{ display: "none" }}
           onChange={handleFileChange}
         />
-        <Button type="button"
+        <Button
+          type="button"
           variant="secondary"
           className="flex flex-1 gap-2"
           onClick={() => appendLink("")}
@@ -1150,13 +1337,40 @@ function ScholarshipSlabItem({
   control: any;
   removeSlab: (index: number) => void;
   form: UseFormReturn<FormData>;
-  trigger: UseFormReturn<FormData>['trigger'];
+  trigger: UseFormReturn<FormData>["trigger"];
 }) {
-
   return (
-    <Card key={slab.id}>
+    <Card key={slab.id} id={`slab-card-${slab.id}`}>
       <CardContent className="flex pl-0 items-start pt-6">
-        <div className="cursor-grab px-4" onMouseDown={(e) => e.preventDefault()}>
+        <div
+          className="cursor-grab px-4 touch-none"
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData("text/plain", slabIndex.toString());
+            e.dataTransfer.effectAllowed = "move";
+
+            // Create a ghost image for dragging
+            const slabCard = document.getElementById(`slab-card-${slab.id}`);
+            if (slabCard) {
+              const rect = slabCard.getBoundingClientRect();
+              const ghostElement = slabCard.cloneNode(true) as HTMLElement;
+
+              ghostElement.style.width = `${rect.width}px`;
+              ghostElement.style.opacity = "0.5";
+              ghostElement.style.position = "absolute";
+              ghostElement.style.top = "-1000px";
+              ghostElement.style.backgroundColor = "white";
+              ghostElement.style.border = "1px dashed #ccc";
+
+              document.body.appendChild(ghostElement);
+              e.dataTransfer.setDragImage(ghostElement, 20, 20);
+
+              setTimeout(() => {
+                document.body.removeChild(ghostElement);
+              }, 0);
+            }
+          }}
+        >
           <GripVertical className="h-4 w-4" />
         </div>
         <div className="grid w-full gap-4">
@@ -1176,21 +1390,37 @@ function ScholarshipSlabItem({
             />
             {form.getValues("scholarshipSlabs").length > 1 && (
               <Popover>
-              <PopoverTrigger asChild>
-                <Button type="button" variant="ghost" size="icon" className="text-destructive" >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
-                <div className="text-base font-medium mb-2">
-                  {`Are you sure you would like to delete ${form.getValues(`scholarshipSlabs.${slabIndex}.name`)}?`}
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" >Cancel</Button>
-                  <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]" onClick={() => removeSlab(slabIndex)}>Delete</Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  side="top"
+                  className="max-w-[345px] w-full"
+                >
+                  <div className="text-base font-medium mb-2">
+                    {`Are you sure you would like to delete ${form.getValues(
+                      `scholarshipSlabs.${slabIndex}.name`
+                    )}?`}
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline">Cancel</Button>
+                    <Button
+                      className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
+                      onClick={() => removeSlab(slabIndex)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             )}
           </div>
           <div className="flex gap-1.5 items-start">
@@ -1211,8 +1441,14 @@ function ScholarshipSlabItem({
               control={control}
               name={`scholarshipSlabs.${slabIndex}.clearance`}
               render={({ field, fieldState }) => {
-                const start = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : "";
-                const end = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : "";
+                const start =
+                  typeof field.value === "string" && field.value.includes("-")
+                    ? field.value.split("-")[0]
+                    : "";
+                const end =
+                  typeof field.value === "string" && field.value.includes("-")
+                    ? field.value.split("-")[1]
+                    : "";
 
                 return (
                   <FormItem className="w-1/2">
@@ -1228,7 +1464,11 @@ function ScholarshipSlabItem({
                           max={end || 99}
                           onChange={(e) => {
                             const value = e.target.value;
-                            const endValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[1] : "";
+                            const endValue =
+                              typeof field.value === "string" &&
+                              field.value.includes("-")
+                                ? field.value.split("-")[1]
+                                : "";
                             const newValue = `${value}-${endValue}`;
                             field.onChange(newValue); // Update form field
                             trigger(`scholarshipSlabs.${slabIndex}.clearance`); // 👈 Immediately trigger validation!
@@ -1244,11 +1484,15 @@ function ScholarshipSlabItem({
                           max={100}
                           onChange={(e) => {
                             const value = e.target.value;
-                            const startValue = typeof field.value === "string" && field.value.includes("-") ? field.value.split("-")[0] : "";
+                            const startValue =
+                              typeof field.value === "string" &&
+                              field.value.includes("-")
+                                ? field.value.split("-")[0]
+                                : "";
                             const newValue = `${startValue}-${value}`;
-                            field.onChange(newValue); 
+                            field.onChange(newValue);
                             trigger(`scholarshipSlabs.${slabIndex}.clearance`); // 👈 Immediately trigger validation!
-                          }}       
+                          }}
                         />
                       </div>
                     </FormControl>

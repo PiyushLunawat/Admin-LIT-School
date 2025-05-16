@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import internalNotes from "@/app/api/student";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -11,19 +11,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MessageSquare, Plus } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { MessageSquare, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import internalNotes from "@/app/api/student";
 
 interface InternalNotesTabProps {
   student: any;
   onApplicationUpdate: () => void;
 }
 
-export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotesTabProps) {
-  
-  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+export function InternalNotesTab({
+  student,
+  onApplicationUpdate,
+}: InternalNotesTabProps) {
+  const latestCohort =
+    student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId;
 
   const { toast } = useToast();
@@ -34,7 +37,7 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
   const [content, setContent] = useState<string>("");
 
   useEffect(() => {
-    setInternalNote(latestCohort?.internalNotes)
+    setInternalNote(latestCohort?.internalNotes);
   }, [latestCohort]);
 
   const handleSubmit = async () => {
@@ -46,11 +49,11 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
         cohortId: cohortDetails?._id,
         content: [content], // Wrapped in array as per your payload format
       };
-      
+
       const res = await internalNotes(payload);
 
-      setInternalNote(res?.internalNote)
-      toast({ description: res?.message, variant: "success", });
+      setInternalNote(res?.internalNote);
+      toast({ description: res?.message, variant: "default" });
 
       setContent(""); // Clear input
       setCategory(""); // Reset category
@@ -58,7 +61,7 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
     } catch (error: any) {
       toast({
         description: error.message || "An unexpected error occurred.",
-        variant: "warning",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -90,15 +93,19 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
-          <Button className="w-full" onClick={handleSubmit} disabled={loading || content === "" || category === "" }>
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={loading || content === "" || category === ""}
+          >
             <Plus className="h-4 w-4 mr-2" />
-            {loading ? 'Adding...' : 'Add Note'}
+            {loading ? "Adding..." : "Add Note"}
           </Button>
         </CardContent>
       </Card>
 
       {/* Notes List */}
-      {internalNote !== undefined &&
+      {internalNote !== undefined && (
         <Card>
           <CardHeader>
             <CardTitle>Internal Notes</CardTitle>
@@ -106,15 +113,19 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
           <CardContent>
             <div className="space-y-4">
               {internalNote?.notes?.map((note: any, index: any) => (
-                <div key={index} className="border rounded-lg p-4 space-y-2" >
+                <div key={index} className="border rounded-lg p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="capitalize">{note?.category}</Badge>
+                    <Badge variant="secondary" className="capitalize">
+                      {note?.category}
+                    </Badge>
                     <p className="text-sm text-muted-foreground uppercase">
                       {new Date(note.createdAt).toLocaleString()}
                     </p>
                   </div>
                   {note.content.map((item: string, index: number) => (
-                    <div className="pl-3" key={index}>{item}</div>
+                    <div className="pl-3" key={index}>
+                      {item}
+                    </div>
                   ))}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MessageSquare className="h-4 w-4" />
@@ -125,7 +136,7 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
             </div>
           </CardContent>
         </Card>
-      }
+      )}
     </div>
   );
 }

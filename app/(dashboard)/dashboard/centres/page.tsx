@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  createCentre,
+  getCentres,
+  updateCentre,
+  updateCentreStatus,
+} from "@/app/api/centres";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,15 +17,30 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, SquarePen } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
-import { getCentres, createCentre, updateCentre, updateCentreStatus } from "@/app/api/centres";
-import { useDispatch, useSelector } from "react-redux";
 import { getCentresData } from "@/lib/features/center/centerSlice";
+import { Plus } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 interface Centre {
   _id: string;
@@ -53,11 +64,11 @@ export default function CentresPage() {
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
-  const dispatch = useDispatch()
-  
-  const centerData = useSelector((state: any) => state.center.centers)
+  const dispatch = useDispatch();
 
-  const fetchCentres = async () => {
+  const centerData = useSelector((state: any) => state.center.centers);
+
+  const fetchCentres = useCallback(async () => {
     try {
       const centresData = await getCentres();
       setCentres(centresData.data);
@@ -66,18 +77,20 @@ export default function CentresPage() {
       console.error("Error fetching centres:", error);
     }
     setLoading(false);
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     fetchCentres(); // Initial load of centres
-  }, []);
+  }, [fetchCentres]);
 
   const validateFields = () => {
     const duplicateName = centres.some(
-      (centre) => centre.name === newCentre.name && centre._id !== selectedCentre
+      (centre) =>
+        centre.name === newCentre.name && centre._id !== selectedCentre
     );
     const duplicateSuffix = centres.some(
-      (centre) => centre.suffix === newCentre.suffix && centre._id !== selectedCentre
+      (centre) =>
+        centre.suffix === newCentre.suffix && centre._id !== selectedCentre
     );
 
     const newErrors = {
@@ -98,33 +111,46 @@ export default function CentresPage() {
     return !Object.values(newErrors).some(Boolean);
   };
 
-
-
   const handleCreateOrUpdateCentre = async () => {
-    setCenterLoading(true)
+    setCenterLoading(true);
+
     try {
-      if (editMode && selectedCentre) {
-        if (!validateFields()) {
-          toast({ title: "Please fix the errors", variant: "destructive" });
-          return;
-        }
-        await updateCentre(selectedCentre, newCentre);
-        toast({ title: "Centre updated successfully!", variant: "success" });
-      } else {
-        if (!validateFields()) {
-          toast({ title: "Please fix the errors", variant: "destructive" });
-          return;
-        }
-        await createCentre(newCentre);
-        toast({ title: "Centre created successfully!", variant: "success" });
+      // Validate fields first
+      if (!validateFields()) {
+        toast({ title: "Please fix the errors", variant: "destructive" });
+        setCenterLoading(false);
+        return;
       }
+
+      if (editMode && selectedCentre) {
+        // Update existing centre
+        await updateCentre(selectedCentre, newCentre);
+        toast({ title: "Centre updated successfully!", variant: "default" });
+      } else {
+        // Create new centre
+        await createCentre(newCentre);
+        toast({ title: "Centre created successfully!", variant: "default" });
+      }
+
+      // Refresh the centres list
       await fetchCentres();
-      setOpen(false); // Close the dialog
+
+      // Close the dialog and reset form ONLY after successful operation
+      setOpen(false);
+      setEditMode(false);
+      setSelectedCentre(null);
+      setNewCentre({ name: "", location: "", suffix: "" });
+      setErrors({});
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
-      toast({ title: "Failed to save centre", description: errorMessage, variant: "destructive" });
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      toast({
+        title: "Failed to save centre",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
-      setCenterLoading(false)
+      setCenterLoading(false);
     }
   };
 
@@ -143,27 +169,32 @@ export default function CentresPage() {
   const toggleCenterStatus = async (id: string, currentStatus: boolean) => {
     try {
       await updateCentreStatus(id, !currentStatus);
-      toast({ title: `Centre successfully ${currentStatus ? "Disabled" : "Enabled"}!`, variant: "success" });
+      toast({
+        title: `Centre successfully ${currentStatus ? "Disabled" : "Enabled"}!`,
+        variant: "default",
+      });
       await fetchCentres();
     } catch (error) {
       console.error("Failed to update centre status:", error);
     }
   };
 
+  // Function to reset form state when dialog closes
+  const handleDialogClose = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setEditMode(false);
+      setSelectedCentre(null);
+      setNewCentre({ name: "", location: "", suffix: "" });
+      setErrors({});
+    }
+  };
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Centres</h1>
-        <Dialog open={open} onOpenChange={(isOpen) => {
-          setOpen(isOpen);
-          if (!isOpen) {
-            setEditMode(false);
-            setSelectedCentre(null);
-            setNewCentre({ name: "", location: "", suffix: "" });
-            setErrors({});
-          }
-        }}>
+        <Dialog open={open} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditMode(false)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -172,7 +203,9 @@ export default function CentresPage() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editMode ? "Edit Centre" : "Create New Centre"}</DialogTitle>
+              <DialogTitle>
+                {editMode ? "Edit Centre" : "Create New Centre"}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -181,9 +214,13 @@ export default function CentresPage() {
                   id="name"
                   placeholder="e.g., Jayanagar Campus"
                   value={newCentre.name}
-                  onChange={(e) => setNewCentre({ ...newCentre, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewCentre({ ...newCentre, name: e.target.value })
+                  }
                 />
-                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                {errors.name && (
+                  <p className="text-red-500 text-sm">{errors.name}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
@@ -191,9 +228,13 @@ export default function CentresPage() {
                   id="location"
                   placeholder="e.g., Bangalore"
                   value={newCentre.location}
-                  onChange={(e) => setNewCentre({ ...newCentre, location: e.target.value })}
+                  onChange={(e) =>
+                    setNewCentre({ ...newCentre, location: e.target.value })
+                  }
                 />
-                {errors.location && <p className="text-red-500 text-sm">{errors.location}</p>}
+                {errors.location && (
+                  <p className="text-red-500 text-sm">{errors.location}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="suffix">Centre Suffix</Label>
@@ -203,24 +244,41 @@ export default function CentresPage() {
                   className="uppercase"
                   value={newCentre.suffix}
                   onChange={(e) => {
-                    const onlyAlphanumeric = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                    setNewCentre(prev => ({ ...prev, suffix: onlyAlphanumeric }));
-                  }}/>
-                {errors.suffix && <p className="text-red-500 text-sm">{errors.suffix}</p>}
+                    const onlyAlphanumeric = e.target.value
+                      .toUpperCase()
+                      .replace(/[^A-Z0-9]/g, "");
+                    setNewCentre((prev) => ({
+                      ...prev,
+                      suffix: onlyAlphanumeric,
+                    }));
+                  }}
+                />
+                {errors.suffix && (
+                  <p className="text-red-500 text-sm">{errors.suffix}</p>
+                )}
               </div>
-              <Button className="w-full" onClick={handleCreateOrUpdateCentre}>
-                {editMode ? 
-                  centerLoading ? 'Updating...' : "Update Centre" : 
-                  centerLoading ? 'Creating...' : "Create Centre"
-                }
+              <Button
+                className="w-full"
+                onClick={handleCreateOrUpdateCentre}
+                disabled={centerLoading}
+              >
+                {editMode
+                  ? centerLoading
+                    ? "Updating..."
+                    : "Update Centre"
+                  : centerLoading
+                  ? "Creating..."
+                  : "Create Centre"}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
-    
+
       {loading ? (
-        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">Loading...</div>
+        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
+          Loading...
+        </div>
       ) : centres.length > 0 ? (
         <Table>
           <TableHeader>
@@ -240,38 +298,62 @@ export default function CentresPage() {
                 <TableCell>{centre.suffix}</TableCell>
                 <TableCell>{centre.status ? "Active" : "Inactive"}</TableCell>
                 <TableCell className="flex justify-start items-center">
-                  <Button variant="ghost" size="icon" onClick={() => handleEditCentre(centre)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEditCentre(centre)}
+                  >
                     Edit
                   </Button>
                   <AlertDialog>
-              <AlertDialogTrigger asChild>
-                 <Button variant="ghost" size="sm" className={centre.status ? "text-destructive" : "text-[#2EB88A]"}>
-                    {centre.status ? "Disable" : "Enable"}
-                  </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle> {centre.status ? "Disable" : "Enable"} Centre</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to  {centre.status ? "Disable" : "Enable"} this center?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className={`${centre.status ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`} 
-                    onClick={() => toggleCenterStatus(centre._id, centre.status)}>
-                  {centre.status ? "Disable" : "Enable"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={
+                          centre.status ? "text-destructive" : "text-[#2EB88A]"
+                        }
+                      >
+                        {centre.status ? "Disable" : "Enable"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {" "}
+                          {centre.status ? "Disable" : "Enable"} Centre
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to{" "}
+                          {centre.status ? "Disable" : "Enable"} this center?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className={`${
+                            centre.status
+                              ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            toggleCenterStatus(centre._id, centre.status)
+                          }
+                        >
+                          {centre.status ? "Disable" : "Enable"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
-        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">No Centres Available</div>
+        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
+          No Centres Available
+        </div>
       )}
       <Toaster />
     </div>

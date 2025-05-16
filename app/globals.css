@@ -81,17 +81,16 @@
     @apply bg-background text-foreground;
     font-family: "Giest", Arial, sans-serif !important;
   }
-  
+
   ::-webkit-scrollbar {
     display: none;
   }
-  
+
   html {
-    scrollbar-width: thin; 
-  } 
-  
+    scrollbar-width: thin;
+  }
 }
 
-.recharts-layer .recharts-cartesian-axis-tick{
+.recharts-layer .recharts-cartesian-axis-tick {
   font-size: 12px;
 }
