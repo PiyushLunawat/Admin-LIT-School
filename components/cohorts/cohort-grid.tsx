@@ -1,10 +1,8 @@
 "use client";
 
-import { Download, Edit, Trash2, PlayCircle, ArrowRight, Archive, RotateCcw, LayoutDashboard } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { getCentres } from "@/app/api/centres";
+import { deleteCohort, updateCohortStatus } from "@/app/api/cohorts";
+import { getPrograms } from "@/app/api/programs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,15 +14,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getPrograms } from "@/app/api/programs";
-import { getCentres } from "@/app/api/centres";
-import { deleteCohort, updateCohortStatus } from "@/app/api/cohorts";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { toast } from "sonner";
 import { formatAmount } from "@/lib/utils/helpers";
+import {
+  Archive,
+  ArrowRight,
+  Edit,
+  LayoutDashboard,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 interface Program {
   _id: string;
@@ -43,8 +54,19 @@ interface Centre {
   status: boolean;
 }
 
-type CohortStatus = "Draft" | "Open" | "Full" | "Closed" | "Archived" | (string & {});
-type BadgeVariant = "default" | "secondary" | "success" | "destructive" | "warning";
+type CohortStatus =
+  | "Draft"
+  | "Open"
+  | "Full"
+  | "Closed"
+  | "Archived"
+  | (string & {});
+type BadgeVariant =
+  | "default"
+  | "secondary"
+  | "success"
+  | "destructive"
+  | "warning";
 
 interface Cohort {
   _id: string;
@@ -68,21 +90,32 @@ interface CohortGridProps {
   onStatusChange: () => void;
 }
 
-export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange }: CohortGridProps) {
+export function CohortGrid({
+  cohorts,
+  onEditCohort,
+  onOpenDialog,
+  onStatusChange,
+}: CohortGridProps) {
   const { toast } = useToast();
-  const uniquePrograms = Array.from(new Set(cohorts.map((cohort) => cohort.programDetail))); 
-  const [programs, setPrograms] = useState<Program[]>([]);  
+  const uniquePrograms = Array.from(
+    new Set(cohorts.map((cohort) => cohort.programDetail))
+  );
+  const [programs, setPrograms] = useState<Program[]>([]);
   const [centres, setCentres] = useState<Centre[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
+      setIsLoading(true);
       try {
         const programsData = await getPrograms();
         setPrograms(programsData.data);
         const centresData = await getCentres();
         setCentres(centresData.data);
       } catch (error) {
-        console.error("Error fetching programs:", error);
+        console.error("Error fetching programs and centres:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchData();
@@ -124,7 +157,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
           router.push(`/dashboard/cohorts/${cohortId}/preview`);
           break;
         case "continue":
-          const cohort = cohorts.find(c => c.cohortId === cohortId);
+          const cohort = cohorts.find((c) => c.cohortId === cohortId);
           if (cohort) {
             onEditCohort(cohort);
             onOpenDialog();
@@ -160,48 +193,61 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
     }
   };
 
+  const handleUpdateStatus = async (
+    cohortId: string,
+    newStatus: CohortStatus
+  ) => {
+    try {
+      await updateCohortStatus(cohortId, newStatus);
+      toast({
+        title: `Cohort status updated to ${newStatus}`,
+        variant: "default",
+      });
+      onStatusChange();
+    } catch (error) {
+      console.error("Failed to update cohort status:", error);
+      toast({
+        title: "Failed to update cohort status",
+        description: "An error occurred while updating the cohort status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteCohort = async (cohortId: string) => {
+    try {
+      await deleteCohort(cohortId);
+      toast({ title: "Cohort deleted successfully!", variant: "default" });
+      onStatusChange();
+    } catch (error: any) {
+      console.error("Failed to delete cohort:", error);
+      toast({
+        title: "Failed to delete cohort",
+        description:
+          error.message || "An error occurred while deleting the cohort.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderActions = (cohort: Cohort) => {
-    const handleUpdateStatus = async (cohortId: string, newStatus: CohortStatus) => {
-      try {
-        await updateCohortStatus(cohortId, newStatus);
-        onStatusChange();
-      } catch (error) {
-        console.error("Failed to update cohort status:", error);
-      }
-    };
-
-    const handleDeleteCohort = async (cohortId: string) => {
-      try {
-        await deleteCohort(cohortId);
-        onStatusChange(); 
-        toast({ title: "Cohort deleted successfully!", variant: "success" });
-      } catch (error: any) {
-        console.error("Failed to delete cohort:", error);
-        toast({ title: "Failed to delete cohort", description: error, variant: "destructive" });
-      }
-    };
-
     switch (cohort.status) {
       case "Draft":
         return (
           <div className="flex gap-2 w-full">
-            <Button 
-              variant="outline" 
-              className="flex-1" 
+            <Button
+              variant="outline"
+              className="flex-1"
               size="sm"
               onClick={() => handleAction(cohort.cohortId, "continue")}
             >
               <Edit className="h-4 w-4 mr-2" />
-              {cohort.collaborators.length > 0 ? 'Edit' : 'Continue'}
+              {cohort.collaborators.length > 0 ? "Edit" : "Continue"}
             </Button>
             {cohort.collaborators.length > 0 && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="default" 
-                    className="flex-1" 
-                    size="sm"
-                  >
+                  <Button variant="default" className="flex-1" size="sm">
                     Begin Enrolment
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -210,12 +256,15 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                   <AlertDialogHeader>
                     <AlertDialogTitle>Begin Enrolment</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to begin enrolment for this cohort? This will make the cohort live and open for applications.
+                      Are you sure you want to begin enrolment for this cohort?
+                      This will make the cohort live and open for applications.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleUpdateStatus(cohort._id, "Open")}>
+                    <AlertDialogAction
+                      onClick={() => handleUpdateStatus(cohort._id, "Open")}
+                    >
                       Begin Enrolment
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -224,10 +273,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
             )}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                >
+                <Button variant="destructive" size="sm">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
@@ -235,12 +281,15 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Cohort</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete this cohort? This action cannot be undone.
+                    Are you sure you want to delete this cohort? This action
+                    cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => { handleDeleteCohort(cohort._id);}}>
+                  <AlertDialogAction
+                    onClick={() => handleDeleteCohort(cohort._id)}
+                  >
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -250,23 +299,24 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
         );
 
       case "Open":
-        case "Full":
+      case "Full":
         return (
           <div className="flex gap-2 w-full">
             {
-            // cohort.filledSeats.length < 1 &&
-            <Button 
-              variant="outline" 
-              className="px-4" 
-              size="sm"
-              onClick={() => handleAction(cohort.cohortId, "continue")}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>}
-            <Button 
-              variant="outline" 
-              className="flex-1" 
+              // cohort.filledSeats.length < 1 &&
+              <Button
+                variant="outline"
+                className="px-4"
+                size="sm"
+                onClick={() => handleAction(cohort.cohortId, "continue")}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            }
+            <Button
+              variant="outline"
+              className="flex-1"
               size="sm"
               onClick={() => handleAction(cohort._id, "dashboard")}
             >
@@ -275,10 +325,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                >
+                <Button variant="ghost" size="sm">
                   <Archive className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
@@ -286,12 +333,15 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                 <AlertDialogHeader>
                   <AlertDialogTitle>Archive Cohort</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to archive this cohort? This will move it to the archived section.
+                    Are you sure you want to archive this cohort? This will move
+                    it to the archived section.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleUpdateStatus(cohort._id, "Archived")}>
+                  <AlertDialogAction
+                    onClick={() => handleUpdateStatus(cohort._id, "Archived")}
+                  >
                     Archive
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -303,9 +353,9 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
       case "Closed":
         return (
           <div className="flex gap-2 w-full">
-            <Button 
-              variant="outline" 
-              className="flex-1" 
+            <Button
+              variant="outline"
+              className="flex-1"
               size="sm"
               onClick={() => handleUpdateStatus(cohort._id, "Open")}
             >
@@ -314,10 +364,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                >
+                <Button variant="ghost" size="sm">
                   <Archive className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
@@ -325,12 +372,15 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
                 <AlertDialogHeader>
                   <AlertDialogTitle>Archive Cohort</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to archive this cohort? Archived cohorts can be viewed in the archived section.
+                    Are you sure you want to archive this cohort? Archived
+                    cohorts can be viewed in the archived section.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleUpdateStatus(cohort._id, "Archived")}>
+                  <AlertDialogAction
+                    onClick={() => handleUpdateStatus(cohort._id, "Archived")}
+                  >
                     Archive
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -342,9 +392,9 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
       case "Archived":
         return (
           <div className="flex gap-2 w-full">
-            <Button 
-              variant="outline" 
-              className="flex-1" 
+            <Button
+              variant="outline"
+              className="flex-1"
               size="sm"
               onClick={() => handleUpdateStatus(cohort._id, "Open")}
             >
@@ -357,122 +407,183 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
       default:
         return (
           <div className="flex gap-2 w-full">
-            <Button 
-              variant="outline" 
-              className="flex-1" 
+            <Button
+              variant="outline"
+              className="flex-1"
               size="sm"
               onClick={() => handleUpdateStatus(cohort._id, "Open")}
             >
-              open {cohort._id}
+              Open {cohort._id}
             </Button>
           </div>
-        )
+        );
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
+        Loading cohort data...
+      </div>
+    );
+  }
+
   return (
     <Tabs defaultValue="all" className="space-y-4">
-        <TabsList variant='ghost'>
-          <TabsTrigger variant='xs' value="all">All ({cohorts.length})</TabsTrigger>
-          {uniquePrograms.map((program) => (
+      <TabsList variant="ghost">
+        <TabsTrigger variant="xs" value="all">
+          All ({cohorts.length})
+        </TabsTrigger>
+        {uniquePrograms.map((program) => (
           <TabsTrigger key={program} variant="xs" value={program}>
-            {getProgramName(program)} ({cohorts.filter(cohort => cohort.programDetail === program).length})
+            {getProgramName(program)} (
+            {
+              cohorts.filter((cohort) => cohort.programDetail === program)
+                .length
+            }
+            )
           </TabsTrigger>
-         ))}
-        </TabsList>
-        <TabsContent value="all">
-        
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {cohorts.map((cohort) => (
-        <Card key={cohort.cohortId} className="flex flex-col h-[371px]">
-          <CardHeader className="space-y-1 bg-[#64748B33] rounded-t-lg cursor-pointer" onClick={() => handleAction(cohort._id, "dashboard")}>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-muted-foreground">{cohort.cohortId}</p>
-                <h3 className="font-semibold text-lg">{getProgramName(cohort.programDetail)}</h3>
-              </div>
-              <Badge variant={getStatusColor(cohort.status)}>{cohort.status}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="flex-1 space-y-4 mt-4 cursor-pointer" onClick={() => handleAction(cohort._id, "dashboard")}>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">{getCentreName(cohort.centerDetail)}</p>
-              {/* <p className="text-sm text-muted-foreground">{cohort?.schedule}</p> */}
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
-                {new Date(cohort.startDate).toLocaleDateString()} - {new Date(cohort.endDate).toLocaleDateString()}
-              </p>
-              <p className="text-sm font-medium">₹{formatAmount(Number(cohort.baseFee))}</p>
-            </div>
-            {cohort.status !== "Draft" && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Seats Filled</span>
-                  <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
+        ))}
+      </TabsList>
+      <TabsContent value="all">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cohorts.map((cohort) => (
+            <Card key={cohort.cohortId} className="flex flex-col h-[371px]">
+              <CardHeader
+                className="space-y-1 bg-[#64748B33] rounded-t-lg cursor-pointer"
+                onClick={() => handleAction(cohort._id, "dashboard")}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {cohort.cohortId}
+                    </p>
+                    <h3 className="font-semibold text-lg">
+                      {getProgramName(cohort.programDetail)}
+                    </h3>
+                  </div>
+                  <Badge variant={getStatusColor(cohort.status)}>
+                    {cohort.status}
+                  </Badge>
                 </div>
-                <Progress 
-                  states={[
-                    { value: cohort.filledSeats.length, widt: (cohort.filledSeats.length / cohort.totalSeats) * 100, color: '#2EB88A' }
-                  ]} />
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="border-t pt-4">
-            {renderActions(cohort)}
-          </CardFooter>
-        </Card>
-      ))}
-    </div>
-    </TabsContent>
-    {uniquePrograms.map((program) => (
+              </CardHeader>
+              <CardContent
+                className="flex-1 space-y-4 mt-4 cursor-pointer"
+                onClick={() => handleAction(cohort._id, "dashboard")}
+              >
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">
+                    {getCentreName(cohort.centerDetail)}
+                  </p>
+                  {/* <p className="text-sm text-muted-foreground">{cohort?.schedule}</p> */}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(cohort.startDate).toLocaleDateString()} -{" "}
+                    {new Date(cohort.endDate).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm font-medium">
+                    ₹{formatAmount(Number(cohort.baseFee))}
+                  </p>
+                </div>
+                {cohort.status !== "Draft" && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Seats Filled</span>
+                      <span>
+                        {cohort.filledSeats.length}/{cohort.totalSeats}
+                      </span>
+                    </div>
+                    <Progress
+                      states={[
+                        {
+                          value: cohort.filledSeats.length,
+                          widt:
+                            (cohort.filledSeats.length / cohort.totalSeats) *
+                            100,
+                          color: "#2EB88A",
+                        },
+                      ]}
+                    />
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter className="border-t pt-4">
+                {renderActions(cohort)}
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </TabsContent>
+      {uniquePrograms.map((program) => (
         <TabsContent key={program} value={program}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cohorts
               .filter((cohort) => cohort.programDetail === program)
               .map((cohort) => (
                 <Card key={cohort.cohortId} className="flex flex-col h-[371px]">
-          <CardHeader className="space-y-1 bg-[#64748B33] rounded-t-lg">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-muted-foreground">{cohort.cohortId}</p>
-                <h3 className="font-semibold text-lg">{getProgramName(cohort.programDetail)}</h3>
-              </div>
-              <Badge variant={getStatusColor(cohort.status)}>{cohort.status}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="flex-1 space-y-4 mt-4">
-            <div className="space-y-1">
-              <p className="text-sm font-medium">{getCentreName(cohort.centerDetail)}</p>
-              {/* <p className="text-sm text-muted-foreground">{cohort?.schedule}</p> */}
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
-                {new Date(cohort.startDate).toLocaleDateString()} - {new Date(cohort.endDate).toLocaleDateString()}
-              </p>
-              <p className="text-sm font-medium">₹{formatAmount(Number(cohort.baseFee))}</p>
-            </div>
-            {cohort.status !== "Draft" && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Seats Filled</span>
-                  <span>{cohort.filledSeats.length}/{cohort.totalSeats}</span>
-                </div>
-                <Progress
-                  states={[
-                    { value: cohort.filledSeats.length, widt: (cohort.filledSeats.length / cohort.totalSeats) * 100, color: '#2EB88A' }
-                  ]} />
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="border-t pt-4">
-            {renderActions(cohort)}
-          </CardFooter>
-        </Card>
+                  <CardHeader className="space-y-1 bg-[#64748B33] rounded-t-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {cohort.cohortId}
+                        </p>
+                        <h3 className="font-semibold text-lg">
+                          {getProgramName(cohort.programDetail)}
+                        </h3>
+                      </div>
+                      <Badge variant={getStatusColor(cohort.status)}>
+                        {cohort.status}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 space-y-4 mt-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        {getCentreName(cohort.centerDetail)}
+                      </p>
+                      {/* <p className="text-sm text-muted-foreground">{cohort?.schedule}</p> */}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(cohort.startDate).toLocaleDateString()} -{" "}
+                        {new Date(cohort.endDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm font-medium">
+                        ₹{formatAmount(Number(cohort.baseFee))}
+                      </p>
+                    </div>
+                    {cohort.status !== "Draft" && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Seats Filled</span>
+                          <span>
+                            {cohort.filledSeats.length}/{cohort.totalSeats}
+                          </span>
+                        </div>
+                        <Progress
+                          states={[
+                            {
+                              value: cohort.filledSeats.length,
+                              widt:
+                                (cohort.filledSeats.length /
+                                  cohort.totalSeats) *
+                                100,
+                              color: "#2EB88A",
+                            },
+                          ]}
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                  <CardFooter className="border-t pt-4">
+                    {renderActions(cohort)}
+                  </CardFooter>
+                </Card>
               ))}
           </div>
         </TabsContent>
       ))}
-  </Tabs>
+    </Tabs>
   );
 }

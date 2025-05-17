@@ -1,13 +1,21 @@
 "use client";
 
+import type React from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
 
 export interface Task {
   id: string;
@@ -37,9 +45,16 @@ interface TaskBuilderProps {
   };
 }
 
-export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions }: TaskBuilderProps) {
+export function TaskBuilder({
+  tasks,
+  onTasksChange,
+  typeOptions,
+  fileTypeOptions,
+}: TaskBuilderProps) {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
-  const [openTypeSelect, setOpenTypeSelect] = useState<string | null>(null);
+  const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
+  const dragNodeRef = useRef<HTMLDivElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const addTask = () => {
     onTasksChange([
@@ -67,17 +82,56 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
   const updateTaskConfig = (id: string, config: Partial<Task["config"]>) => {
     onTasksChange(
       tasks.map((task) =>
-        task.id === id ? { ...task, config: { ...task.config, ...config } } : task
+        task.id === id
+          ? { ...task, config: { ...task.config, ...config } }
+          : task
       )
     );
   };
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    // Store the dragged task ID
     setDraggedTaskId(taskId);
+    setIsDragging(true);
+
+    // Set drag image (optional - makes the drag preview look better)
+    const taskCard = document.getElementById(`task-card-${taskId}`);
+    if (taskCard) {
+      // Create a ghost image for dragging
+      const rect = taskCard.getBoundingClientRect();
+      const ghostElement = taskCard.cloneNode(true) as HTMLElement;
+
+      // Style the ghost element
+      ghostElement.style.width = `${rect.width}px`;
+      ghostElement.style.opacity = "0.5";
+      ghostElement.style.position = "absolute";
+      ghostElement.style.top = "-1000px";
+      ghostElement.style.backgroundColor = "white";
+      ghostElement.style.border = "1px dashed #ccc";
+
+      // Add the ghost element to the document
+      document.body.appendChild(ghostElement);
+
+      // Set the drag image
+      e.dataTransfer.setDragImage(ghostElement, 20, 20);
+
+      // Clean up the ghost element after a short delay
+      setTimeout(() => {
+        document.body.removeChild(ghostElement);
+      }, 0);
+    }
+
     e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedTaskId || draggedTaskId === targetId) return;
+
+    setDragOverTaskId(targetId);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
     if (!draggedTaskId || draggedTaskId === targetId) return;
 
@@ -88,10 +142,14 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
     const [draggedTask] = newTasks.splice(draggedIndex, 1);
     newTasks.splice(targetIndex, 0, draggedTask);
     onTasksChange(newTasks);
+
+    setDragOverTaskId(null);
   };
 
   const handleDragEnd = () => {
     setDraggedTaskId(null);
+    setDragOverTaskId(null);
+    setIsDragging(false);
   };
 
   const renderConfigFields = (task: Task) => {
@@ -107,7 +165,7 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
               value={task.config.characterLimit || ""}
               onChange={(e) =>
                 updateTaskConfig(task.id, {
-                  characterLimit: parseInt(e.target.value) || undefined,
+                  characterLimit: Number.parseInt(e.target.value) || undefined,
                 })
               }
             />
@@ -127,7 +185,7 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
                 value={task.config.maxFiles || ""}
                 onChange={(e) =>
                   updateTaskConfig(task.id, {
-                    maxFiles: parseInt(e.target.value) || undefined,
+                    maxFiles: Number.parseInt(e.target.value) || undefined,
                   })
                 }
               />
@@ -140,7 +198,7 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
                 value={task.config.maxFileSize || ""}
                 onChange={(e) =>
                   updateTaskConfig(task.id, {
-                    maxFileSize: parseInt(e.target.value) || undefined,
+                    maxFileSize: Number.parseInt(e.target.value) || undefined,
                   })
                 }
               />
@@ -180,21 +238,27 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
       {tasks.map((task) => (
         <Card
           key={task.id}
-          draggable
-          onDragStart={(e) => handleDragStart(e, task.id)}
-          onDragOver={(e) => handleDragOver(e, task.id)}
-          onDragEnd={handleDragEnd}
-          className={`transition-opacity ${
+          id={`task-card-${task.id}`}
+          className={`transition-all ${
             draggedTaskId === task.id ? "opacity-50" : ""
+          } ${
+            dragOverTaskId === task.id
+              ? "border-2 border-primary border-dashed"
+              : ""
           }`}
+          onDragOver={(e) => handleDragOver(e, task.id)}
+          onDrop={(e) => handleDrop(e, task.id)}
         >
           <CardContent className="pt-6">
             <div className="grid gap-4">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-4 flex-1">
                   <div
-                    className="cursor-move p-2 hover:bg-muted rounded"
-                    onMouseDown={(e) => e.preventDefault()}
+                    className="cursor-grab p-2 hover:bg-muted rounded touch-none"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, task.id)}
+                    onDragEnd={handleDragEnd}
+                    ref={draggedTaskId === task.id ? dragNodeRef : null}
                   >
                     <GripVertical className="h-4 w-4" />
                   </div>
@@ -203,7 +267,9 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
                     <Input
                       placeholder="Enter task title"
                       value={task.title}
-                      onChange={(e) => updateTask(task.id, { title: e.target.value })}
+                      onChange={(e) =>
+                        updateTask(task.id, { title: e.target.value })
+                      }
                     />
                   </div>
                 </div>

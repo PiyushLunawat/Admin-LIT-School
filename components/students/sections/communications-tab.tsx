@@ -1,10 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,7 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Mail, MessageSquare, Send } from "lucide-react";
+import Image from "next/image";
 
 interface CommunicationsTabProps {
   studentId: string;
@@ -75,8 +76,12 @@ export function CommunicationsTab({ studentId }: CommunicationsTabProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="status-update">Status Update</SelectItem>
-                  <SelectItem value="payment-reminder">Payment Reminder</SelectItem>
-                  <SelectItem value="interview">Interview Information</SelectItem>
+                  <SelectItem value="payment-reminder">
+                    Payment Reminder
+                  </SelectItem>
+                  <SelectItem value="interview">
+                    Interview Information
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -105,10 +110,7 @@ export function CommunicationsTab({ studentId }: CommunicationsTabProps) {
         <CardContent>
           <div className="space-y-4">
             {communications.history.map((comm) => (
-              <div
-                key={comm.id}
-                className="border rounded-lg p-4 space-y-2"
-              >
+              <div key={comm.id} className="border rounded-lg p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {comm.type === "Email" && (
@@ -134,9 +136,7 @@ export function CommunicationsTab({ studentId }: CommunicationsTabProps) {
                     {comm.status}
                   </Badge>
                 </div>
-                {comm.subject && (
-                  <p className="font-medium">{comm.subject}</p>
-                )}
+                {comm.subject && <p className="font-medium">{comm.subject}</p>}
                 <p className="text-sm">{comm.message}</p>
                 <p className="text-sm text-muted-foreground">
                   {new Date(comm.date).toLocaleDateString()}
@@ -159,7 +159,13 @@ export function CommunicationsTab({ studentId }: CommunicationsTabProps) {
               Send Email
             </Button>
             <Button variant="outline">
-              <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
+              <Image
+                src="/assets/images/whatsapp-icon.svg"
+                width={16}
+                height={16}
+                className="h-4 w-4 mr-2"
+                alt="WhatsApp"
+              />
               Send WhatsApp
             </Button>
           </div>
