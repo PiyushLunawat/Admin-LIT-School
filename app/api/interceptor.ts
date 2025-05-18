@@ -1,6 +1,7 @@
 import fetchIntercept from "fetch-intercept";
 import Cookies from "js-cookie";
 import { adminRefreshToken } from "./auth";
+import { log } from "console";
 
 const API_BASE_URL = process.env.API_URL;
 
@@ -48,7 +49,8 @@ export const RegisterInterceptor = () => {
       }
 
       if (!isPublic && !accesstoken && !reftoken) {
-        clearAuthAndRedirect();
+        console.log("logout", url);
+        await clearAuthAndRedirect();
       }
 
       config.headers = {
@@ -76,5 +78,5 @@ const clearAuthAndRedirect = () => {
   Cookies.remove("adminId");
   Cookies.remove("adminEmail");
   localStorage.clear();
-  // window.location.href = "/login";
+  window.location.href = "/login";
 };

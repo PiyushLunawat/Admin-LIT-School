@@ -162,7 +162,9 @@ export default function ProgramsPage() {
           }}
         >
           <DialogTrigger asChild>
-            <Button onClick={() => setEditMode(false)}>
+            <Button onClick={() => {
+              setEditMode(false), 
+              setNewProgram({ name: "", description: "", duration: 0, prefix: "" });}}>
               <Plus className="mr-2 h-4 w-4" />
               Create Program
             </Button>

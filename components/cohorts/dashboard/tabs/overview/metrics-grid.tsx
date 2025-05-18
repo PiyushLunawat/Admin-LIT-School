@@ -56,118 +56,104 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
   const [totalTokenAmountPaid, setTotalTokenAmountPaid] = useState(0);
   const [droppedCount, setDroppedCount] = useState(0);
 
-  useEffect(() => {
-    if (applications && Array.isArray(applications)) {
-      // Total Applications
-      setTotalApplicationsCount(applications.length);
+useEffect(() => {
+  if (!Array.isArray(applications)) {
+    console.log("Applications data is not an array or is undefined.");
+    return;
+  }
 
-      // Under Review Count
-      const underReview = applications.filter(
-        (application) =>
-          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() ===
-          "under review"
-      );
-      setUnderReviewCount(underReview.length);
+  let totalApplications = applications.length;
+  let underReview = 0;
+  let interviewsScheduled = 0;
+  let admissionFee = 0;
+  let litmusTests = 0;
+  let dropped = 0;
+  let totalScholarshipAmount = 0;
+  let totalScholarshipPercentage = 0;
+  let scholarshipCount = 0;
+  let percentageCount = 0;
+  let totalTokenPaid = 0;
+  let oneShotAmountPaid = 0;
+  let installmentAmountPaid = 0;
 
-      // Interviews Scheduled Count
-      const interviewsScheduled = applications.filter(
-        (application) =>
-          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() === "interview scheduled"
-      );
-      setInterviewsScheduledCount(interviewsScheduled.length);
+  applications.forEach((application) => {
+    const cohorts = application?.appliedCohorts;
+    if (!cohorts?.length) return;
 
-      // Admission Fee Count
-      const admissionFee = applications.filter(
-        (application) =>
-          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status === 'enrolled'
-      );
-      setAdmissionFeeCount(admissionFee.length);
+    const latestCohort = application?.appliedCohorts[application?.appliedCohorts.length - 1];
 
-      // Litmus Tests Count
-      const litmusTests = applications.filter(
-        (application) =>
-          ![undefined, 'pending'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.status)
-      );
-      setLitmusTestsCount(litmusTests.length);
-
-      const dropped = applications.filter(
-        (application) =>
-          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.status?.toLowerCase() ===
-          "dropped"
-      );
-      setDroppedCount(dropped.length);
-      
-      // Total Scholarship and Average Scholarships Percentage
-      let totalScholarship = 0;
-      let scholarshipCount = 0;
-      let totalPercentage = 0;
-      let percentageCount = 0;
+    const cohortStatus = latestCohort?.status?.toLowerCase();
+    const applicationStatus = latestCohort?.applicationDetails?.applicationStatus?.toLowerCase();
+    const applicationInterviews = latestCohort?.applicationDetails?.applicationTestInterviews;
+    const litmusStatus = latestCohort?.litmusTestDetails?.status;
+    const scholarship = latestCohort?.litmusTestDetails?.scholarshipDetail;
+    const baseFee = latestCohort?.cohortId?.baseFee || 0;
+    const percentage = scholarship?.scholarshipPercentage;
+    const lastInterview = applicationInterviews?.[applicationInterviews?.length - 1];
   
-      applications?.forEach((application) => {
-        const scholarship = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail;
-        const baseFee = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.baseFee || 0;
-        
-        if (scholarship && baseFee) {
-          totalScholarship += scholarship?.scholarshipPercentage * baseFee * 0.01;
-          scholarshipCount += 1;
-        }
-        const percentage = application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
-        if (percentage) {
-          totalPercentage += application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.litmusTestDetails?.scholarshipDetail?.scholarshipPercentage;
-          percentageCount += 1;
-        }
-      });
+    const currentTime = new Date();
   
-      setTotalScholarshipsAmount(totalScholarship);
-      setAvgScholarshipsPercentage((totalPercentage / percentageCount));
-  
-      // Total Token Amount Paid
-      const tokensPaid = applications.reduce((sum, application) => {
-        const tokenAmount = Number(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
-        const lastEnrollment = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
-        if (lastEnrollment?.tokenFeeDetails?.verificationStatus === 'paid') {
-          return sum + (tokenAmount || 0);
-        }
-        return sum;
-      }, 0);
-  
-      setTotalTokenAmountPaid(tokensPaid);
-
-      let oneShotAmountPaid = 0;
-      let installmentAmountPaid = 0;
-
-      applications?.forEach((application) => {
-        const lastEnrolled = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
-        if (!lastEnrolled) return;
-
-        // One-Shot Payment Processing
-        if (lastEnrolled?.feeSetup?.installmentType === 'one shot payment') {
-          const oneShotDetails = lastEnrolled?.oneShotPayment;
-          if (oneShotDetails) {
-            if (oneShotDetails?.verificationStatus === 'paid') {
-              oneShotAmountPaid += oneShotDetails?.amountPayable;
-            }
-          }
-        }
-        // Installments Processing
-        if (lastEnrolled?.feeSetup?.installmentType === 'instalments') {
-          lastEnrolled?.installmentDetails?.forEach((semesterDetail: any) => {
-            const installments = semesterDetail?.installments;
-            installments?.forEach((installment: any) => {
-              if (installment?.verificationStatus === 'paid') {
-                installmentAmountPaid += installment?.amountPayable;
-              }
-            });
-          });
-        }       
-      });
-
-      setPaymentsCount(oneShotAmountPaid+installmentAmountPaid+tokensPaid)
-
-    } else {
-      console.log("Applications data is not an array or is undefined.");
+    if (lastInterview?.meetingDate && lastInterview?.endTime) {
+      const meetingEnd = new Date(
+        new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime
+      );
+      if (meetingEnd >= currentTime) interviewsScheduled++;
     }
-  }, [applications]);
+
+    // Status counts
+    if (applicationStatus === 'under review') underReview++;
+    // if (applicationStatus === 'interview scheduled') interviewsScheduled++;
+    if (cohortStatus === 'enrolled') admissionFee++;
+    if (![undefined, 'pending'].includes(litmusStatus)) litmusTests++;
+    if (cohortStatus === 'dropped') dropped++;
+
+    // Scholarship totals
+    if (percentage && baseFee) {
+      totalScholarshipAmount += percentage * baseFee * 0.01;
+      scholarshipCount++;
+    }
+    if (percentage) {
+      totalScholarshipPercentage += percentage;
+      percentageCount++;
+    }
+
+    // Token Fee
+    const tokenFee = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
+    if (latestCohort?.tokenFeeDetails?.verificationStatus === 'paid') {
+      totalTokenPaid += tokenFee;
+    }
+
+    // One-shot payment
+    if (latestCohort?.feeSetup?.installmentType === 'one shot payment') {
+      const oneShot = latestCohort?.oneShotPayment;
+      if (oneShot?.verificationStatus === 'paid') {
+        oneShotAmountPaid += oneShot.amountPayable;
+      }
+    }
+
+    // Installment payment
+    if (latestCohort?.feeSetup?.installmentType === 'instalments') {
+      latestCohort?.installmentDetails?.forEach((semester: any) => {
+        semester?.installments?.forEach((inst: any) => {
+          if (inst?.verificationStatus === 'paid') {
+            installmentAmountPaid += inst.amountPayable;
+          }
+        });
+      });
+    }
+  });
+
+  setTotalApplicationsCount(totalApplications);
+  setUnderReviewCount(underReview);
+  setInterviewsScheduledCount(interviewsScheduled);
+  setAdmissionFeeCount(admissionFee);
+  setLitmusTestsCount(litmusTests);
+  setDroppedCount(dropped);
+  setTotalScholarshipsAmount(totalScholarshipAmount);
+  setAvgScholarshipsPercentage(totalScholarshipPercentage / (percentageCount || 1));
+  setTotalTokenAmountPaid(totalTokenPaid);
+  setPaymentsCount(oneShotAmountPaid + installmentAmountPaid + totalTokenPaid);
+}, [applications]);
 
   const metrics = [
     {

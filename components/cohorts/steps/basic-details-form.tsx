@@ -188,7 +188,7 @@ function removeFormatting(value: string): string {
       cohortId: cohortId, 
       programDetail: selectedProgram, 
       centerDetail: selectedCentre,
-      status: "Draft",
+      status: initialData?.status || "Draft",
       isGSTIncluded: values.isGSTIncluded
     };
     setLoading(true);

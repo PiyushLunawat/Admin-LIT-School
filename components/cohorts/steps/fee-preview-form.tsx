@@ -58,10 +58,10 @@ interface FeePreviewFormProps {
 
 export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePreviewFormProps) {
   const [loading, setLoading] = useState(false);  
-  const [newBaseFee, setNewBaseFee] = useState(0);
-  const [isGST, setIsGST] = useState(true);
-  const [GSTAmount, setGSTAmount] = useState(1);
-  const [withoutGSTAmount, setWithoutGSTAmount] = useState(1);
+  const [newBaseFee, setNewBaseFee] = useState(initialData?.baseFee);
+  const [isGST, setIsGST] = useState(false);
+  const [GSTAmount, setGSTAmount] = useState(1.18);
+  const [withoutGSTAmount, setWithoutGSTAmount] = useState(1.18);
   const [editableDates, setEditableDates] = useState<Record<string, string>>({});
   const uniqueId = useId();
 
@@ -71,16 +71,6 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
       ...slab,
       id: `${uniqueId}-${index}`, // unique ID
     })) || [];
-
-  useEffect(() => {
-    if (initialData?.isGSTIncluded === false) {
-      setIsGST(false);
-      setGSTAmount(1.18);
-    } else {
-      setWithoutGSTAmount(1.18);
-    }
-    setNewBaseFee((initialData?.baseFee * 1.18 - initialData?.cohortFeesDetail?.tokenFee) / 1.18)
-  }, [initialData]);
 
   // Handle date changes in the <input type="date">
   const handleDateChange = (semesterIndex: number, installmentIndex: number, newDate: string) => {
@@ -96,30 +86,31 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
 
     let installmentPercents: any;
 
-      switch (installmentsPerSemester) {
-        case '2':
-          installmentPercents = [0.6, 0.4];
-          break;
-        case '3':
-          installmentPercents = [0.4, 0.4, 0.2];
-          break;
-        case '4':
-          installmentPercents = [0.3, 0.3, 0.3, 0.1];
-          break;
-        default:
-          installmentPercents = Array.from({ length: installmentsPerSemester }, () => 1 / installmentsPerSemester);
-          break;
-      }    
+    switch (installmentsPerSemester) {
+      case '2':
+        installmentPercents = [0.6, 0.4];
+        break;
+      case '3':
+        installmentPercents = [0.4, 0.4, 0.2];
+        break;
+      case '4':
+        installmentPercents = [0.3, 0.3, 0.3, 0.1];
+        break;
+      default:
+        installmentPercents = Array.from({ length: installmentsPerSemester }, () => 1 / installmentsPerSemester);
+        break;
+    }    
 
     const startDate = new Date(initialData?.startDate);
     const endDate = new Date(initialData?.endDate);
     const daysBetween = differenceInDays(endDate, startDate);
     const monthsPerInstallment = daysBetween / (totalSemesters * installmentsPerSemester * 30);
+   
+    let scholarshipAmount = newBaseFee * (slab.percentage / 100);
 
-    let remainingFee = newBaseFee;
+    let remainingFee = (newBaseFee - newBaseFee * (slab.percentage/100))*GSTAmount + scholarshipAmount - initialData?.cohortFeesDetail?.tokenFee;
     const perSemesterFee = remainingFee / totalSemesters;  
 
-    let scholarshipAmount = newBaseFee * (slab.percentage / 100);
 
     // Build the installments
     const semesterInstallments = Array.from({ length: installmentsPerSemester }).map((_, i) => {
@@ -173,7 +164,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
     );
     const totalScholarshipAmount = installments.reduce((sum, i) => sum + i.scholarshipAmount, 0);
     const totalpayableAmount =
-      installments.reduce((sum, i) => sum + i.amountPayable * GSTAmount + i.scholarshipAmount, 0);
+      installments.reduce((sum, i) => sum + i.amountPayable + i.scholarshipAmount, 0);
 
     return {
       totalInstallmentAmount,

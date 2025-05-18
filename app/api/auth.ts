@@ -81,8 +81,6 @@ export async function resendOtp(resendPayload: { otpRequestToken: string }) {
 
 export async function adminRefreshToken(refreshPayload: any) {
   try {
-    console.log("refffff", JSON.stringify(refreshPayload));
-
     const response = await fetch(
       `${process.env.API_URL}/auth/admin-refresh-token`,
       {

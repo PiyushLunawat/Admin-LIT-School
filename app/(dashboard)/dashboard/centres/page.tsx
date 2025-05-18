@@ -165,7 +165,9 @@ export default function CentresPage() {
           }
         }}>
           <DialogTrigger asChild>
-            <Button onClick={() => setEditMode(false)}>
+            <Button onClick={() => {setEditMode(false)
+              setNewCentre({ name: "", location: "", suffix: "" });
+            }}>
               <Plus className="mr-2 h-4 w-4" />
               Create Centre
             </Button>

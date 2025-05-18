@@ -140,7 +140,7 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
             className="px-3 text-base h-[125px]"
             onChange={handleChangeForReasons}
             onKeyDown={handleKeyDownForReasons}
-            placeholder="Type here..."
+            placeholder="Press Enter to start typing..."
             rows={3}
             cols={40}
           />

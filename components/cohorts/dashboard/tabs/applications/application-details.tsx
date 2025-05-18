@@ -324,13 +324,13 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                 interview?.feedback[interview?.feedback.length - 1] && 
                 <Card key={index} className="p-4 space-y-2">
                     <h5 className="font-medium text-base text-muted-foreground">Feedback:</h5>
-                    {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
+                    {/* {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
                       <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                         <li className="text-sm" key={i}>
                           {item}
                         </li>
                       </ul>
-                    ))}
+                    ))} */}
                   <div className="flex justify-between items-center">
                     <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
                     <div className="font-medium text-sm text-muted-foreground">{new Date(interview?.feedback[interview?.feedback.length - 1]?.date).toLocaleDateString()}</div>
@@ -374,13 +374,13 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                 {applicationDetails?.applicationTasks?.[applicationDetails?.applicationTasks.length - 1]?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 &&
                   <div className="">
                     <h5 className="font-medium text-muted-foreground">Feedback</h5>
-                    {applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
+                    {/* {applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
                       <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                         <li className="text-sm" key={i}>
                           {item}
                         </li>
                       </ul>
-                    ))}
+                    ))} */}
                   </div>
                 }
               </div>
@@ -393,13 +393,13 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                   feedback?.feedback.length > 0 &&
                     <div key={index} className="">
                       <h5 className="font-medium text-base text-muted-foreground">Reason:</h5>
-                      {feedback?.feedback.map((item: any, i: any) => (
+                      {/* {feedback?.feedback.map((item: any, i: any) => (
                         <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                           <li className="text-sm" key={i}>
                             {item}
                           </li>
                         </ul>
-                      ))}
+                      ))} */}
                       <div className="flex justify-between items-center mt-2">
                         <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
                         <div className="font-medium text-sm text-muted-foreground">{new Date(feedback?.date).toLocaleDateString()}</div>

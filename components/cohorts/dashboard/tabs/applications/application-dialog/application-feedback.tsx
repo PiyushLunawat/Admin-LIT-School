@@ -445,7 +445,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
                             onKeyDown={(e) =>
                               handleFeedbackKeyDownForFeedback(taskList[index]?._id, idx, e)
                             }
-                            placeholder="Type here..."
+                            placeholder="Press Enter to start typing..."
                             rows={3}
                             cols={40}
                           />
@@ -470,7 +470,7 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
               className="px-3 text-base"
               onChange={handleChangeForReasons}
               onKeyDown={handleKeyDownForReasons}
-              placeholder="Type here..."
+              placeholder="Press Enter to start typing..."
               rows={5}
               cols={40}
               />

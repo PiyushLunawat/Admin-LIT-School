@@ -176,7 +176,7 @@ export function ApplicationsList({
                 </TableCell>
                 <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
                 <TableCell className="max-w-[42px] truncate" onClick={() => {navigator.clipboard.writeText(application._id)}}>
-                  {application?._id || "--"}
+                  {applicationDetails?.applicationId || "--"}
                 </TableCell>
                 <TableCell>
                   {applicationDetails?.updatedAt ? new Date(applicationDetails?.updatedAt).toLocaleDateString() : "--"}

@@ -103,33 +103,35 @@ const formSchema = z.object({
       description: z.string().optional(),
       cohortId: z.string().optional(),
     })
-  ).superRefine((slabs, ctx) => {
-    const ranges = slabs.map((slab, index) => {
-      const [start, end] = slab.clearance.split('-').map(Number);
-      return { start, end, index };
-    });
+  )
+  // .superRefine((slabs, ctx) => {
+  //   const ranges = slabs.map((slab, index) => {
+  //     const [start, end] = slab.clearance.split('-').map(Number);
+  //     return { start, end, index };
+  //   });
   
-    // Check for overlapping ranges
-    for (let i = 0; i < ranges.length; i++) {
-      for (let j = i + 1; j < ranges.length; j++) {
-        const a = ranges[i];
-        const b = ranges[j];
+  //   // Check for overlapping ranges
+  //   for (let i = 0; i < ranges.length; i++) {
+  //     for (let j = i + 1; j < ranges.length; j++) {
+  //       const a = ranges[i];
+  //       const b = ranges[j];
   
-        if (a.start < b.end && b.start < a.end) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Clearance range overlaps with another slab",
-            path: [`scholarshipSlabs.${a.index}.clearance`],
-          });
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Clearance range overlaps with another slab",
-            path: [`scholarshipSlabs.${b.index}.clearance`],
-          });
-        }
-      }
-    }
-  }),
+  //       if (a.start < b.end && b.start < a.end) {
+  //         ctx.addIssue({
+  //           code: z.ZodIssueCode.custom,
+  //           message: "Clearance range overlaps with another slab",
+  //           path: [`scholarshipSlabs.${a.index}.clearance`],
+  //         });
+  //         ctx.addIssue({
+  //           code: z.ZodIssueCode.custom,
+  //           message: "Clearance range overlaps with another slab",
+  //           path: [`scholarshipSlabs.${b.index}.clearance`],
+  //         });
+  //       }
+  //     }
+  //   }
+  // }),
+  ,
   litmusTestDuration: z.string().nonempty("Duration is required"),
 });
 
@@ -241,7 +243,7 @@ export function LitmusTestForm({
         clearErrors(`scholarshipSlabs.${index}.clearance`);
       });
     }
-  }, [scholarshipSlabs, setError, clearErrors]);
+  }, [isValid, scholarshipSlabs]);
   
   
   const {
@@ -263,6 +265,21 @@ export function LitmusTestForm({
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const overlapIndexes = hasOverlap(scholarshipSlabs);
+    if (overlapIndexes) {
+      overlapIndexes.forEach((index) => {
+        setError(`scholarshipSlabs.${index}.clearance`, {
+          type: "manual",
+          message: "Clearance range overlaps with another slab.",
+        });
+      });
+      return
+    } else {
+      scholarshipSlabs.forEach((_, index) => {
+        clearErrors(`scholarshipSlabs.${index}.clearance`);
+      });
+    }
+
     setLoading(true)
     try {
       console.log("Form data before submission:", data);
@@ -379,7 +396,7 @@ export function LitmusTestForm({
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading || !isValid}>
+        <Button type="submit" className="w-full" disabled={loading}>
           Next: Fee Structure
         </Button>
       </form>

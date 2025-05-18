@@ -73,6 +73,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
   const uniquePrograms = Array.from(new Set(cohorts.map((cohort) => cohort.programDetail))); 
   const [programs, setPrograms] = useState<Program[]>([]);  
   const [centres, setCentres] = useState<Centre[]>([]);
+  const [isCohortComplete, setIsCohortComplete] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -181,6 +182,31 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
       }
     };
 
+    function checkIfCohortDataIsEmpty(cohort: any) {
+      const {
+        applicationFormDetail,
+        collaborators,
+        feeStructureDetails,
+        litmusTestDetail,
+        cohortFeesDetail,
+      } = cohort || {};
+
+      const isApplicationFormEmpty = !applicationFormDetail || applicationFormDetail.length === 0;
+      const isCollaboratorsEmpty = !collaborators || collaborators.length === 0;
+      const isFeeStructureEmpty = !feeStructureDetails || feeStructureDetails.length === 0;
+      const isLitmusTestEmpty = !litmusTestDetail || litmusTestDetail.length === 0;
+      const isCohortFeesDetailEmpty =
+        !cohortFeesDetail || Object.keys(cohortFeesDetail).length === 0;
+
+      return (
+        isApplicationFormEmpty &&
+        isCollaboratorsEmpty &&
+        isFeeStructureEmpty &&
+        isLitmusTestEmpty &&
+        isCohortFeesDetailEmpty
+      );
+    }
+
     switch (cohort.status) {
       case "Draft":
         return (
@@ -192,9 +218,9 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
               onClick={() => handleAction(cohort.cohortId, "continue")}
             >
               <Edit className="h-4 w-4 mr-2" />
-              {cohort.collaborators.length > 0 ? 'Edit' : 'Continue'}
+              {!checkIfCohortDataIsEmpty(cohort) ? 'Edit' : 'Continue'}
             </Button>
-            {cohort.collaborators.length > 0 && (
+            {!checkIfCohortDataIsEmpty(cohort) && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 
