@@ -315,7 +315,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </>
               );
             })()}
-            {status === 'interview scheduled' &&
+            {status === 'interview concluded' &&
             <Button className="w-full flex gap-2" onClick={() => {setOpen(true);}}>
               <FileSignature className=""/>Review Submission
             </Button>}
