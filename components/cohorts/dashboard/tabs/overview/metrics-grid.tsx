@@ -93,16 +93,15 @@ useEffect(() => {
   
     const currentTime = new Date();
   
-    if (lastInterview?.meetingDate && lastInterview?.endTime) {
+    
+    // Status counts
+    if (applicationStatus === 'under review') underReview++;
+    if (lastInterview) {
       const meetingEnd = new Date(
         new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime
       );
-      if (meetingEnd >= currentTime) interviewsScheduled++;
+      if (applicationStatus === 'interview scheduled' && meetingEnd >= currentTime) interviewsScheduled++;
     }
-
-    // Status counts
-    if (applicationStatus === 'under review') underReview++;
-    // if (applicationStatus === 'interview scheduled') interviewsScheduled++;
     if (cohortStatus === 'enrolled') admissionFee++;
     if (![undefined, 'pending'].includes(litmusStatus)) litmusTests++;
     if (cohortStatus === 'dropped') dropped++;

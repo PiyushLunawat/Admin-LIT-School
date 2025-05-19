@@ -255,7 +255,7 @@ export function PersonalDetailsTab({ student, onUpdateStatus }: PersonalDetailsT
             </div>
             <div className="space-y-2">
               <Label className="pl-3" >Current Status</Label>
-              <Select disabled value={student?.qualification}>
+              <Select disabled value={latestCohort?.qualification}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

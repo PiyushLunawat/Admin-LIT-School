@@ -211,7 +211,7 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                           <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
                         </div>
                       </div>
-                      {(index !== 0 && interview?.meetingStatus === 'confirmed') ?
+                      {(index !== 0 && interview?.meetingStatus === 'scheduled') ?
                         <p className="capitalize">Int. Time Elapsed</p> :
                         (index === 0 && status === 'interview concluded') ?
                           <p className="capitalize">Int. Time Elapsed</p> :
@@ -321,16 +321,16 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
             <div className="space-y-2">
               <h5 className="font-medium ">Interview</h5>
               {applicationDetails?.applicationTestInterviews.map((interview: any, index: any) => (
-                interview?.feedback[interview?.feedback.length - 1] && 
+                interview?.feedback?.[interview?.feedback.length - 1] && 
                 <Card key={index} className="p-4 space-y-2">
                     <h5 className="font-medium text-base text-muted-foreground">Feedback:</h5>
-                    {/* {interview?.feedback[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
+                    {interview?.feedback?.[interview?.feedback.length - 1]?.comments.map((item: any, i: any) => (
                       <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                         <li className="text-sm" key={i}>
                           {item}
                         </li>
                       </ul>
-                    ))} */}
+                    ))}
                   <div className="flex justify-between items-center">
                     <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
                     <div className="font-medium text-sm text-muted-foreground">{new Date(interview?.feedback[interview?.feedback.length - 1]?.date).toLocaleDateString()}</div>
@@ -374,13 +374,13 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
                 {applicationDetails?.applicationTasks?.[applicationDetails?.applicationTasks.length - 1]?.applicationTasks[0]?.tasks[index]?.feedback?.length > 0 &&
                   <div className="">
                     <h5 className="font-medium text-muted-foreground">Feedback</h5>
-                    {/* {applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks[index]?.feedback.map((item: any, i: any) => (
+                    {applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks[index]?.feedback?.[applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.tasks[index]?.feedback.length - 1]?.feedbackData.map((item: any, i: any) => (
                       <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                         <li className="text-sm" key={i}>
                           {item}
                         </li>
                       </ul>
-                    ))} */}
+                    ))}
                   </div>
                 }
               </div>
@@ -390,18 +390,18 @@ export function ApplicationDetails({ application, onClose, onApplicationUpdate  
               <Card className="p-4 space-y-2">
                 <h5 className="font-medium ">Application On Hold</h5>
                 {[...(applicationDetails?.applicationTasks[0]?.applicationTasks[0]?.overallFeedback || [])].reverse().map((feedback: any, index: any) => (
-                  feedback?.feedback.length > 0 &&
+                  feedback?.feedbackData.length > 0 &&
                     <div key={index} className="">
                       <h5 className="font-medium text-base text-muted-foreground">Reason:</h5>
-                      {/* {feedback?.feedback.map((item: any, i: any) => (
+                      {feedback?.feedbackData.map((item: any, i: any) => (
                         <ul key={i} className="ml-4 sm:ml-6 space-y-2 list-disc">
                           <li className="text-sm" key={i}>
                             {item}
                           </li>
                         </ul>
-                      ))} */}
+                      ))}
                       <div className="flex justify-between items-center mt-2">
-                        <div className="font-medium text-sm text-muted-foreground">Updated by Admin</div>
+                        <div className="font-medium text-sm text-muted-foreground">Updated by {feedback?.addedBy}</div>
                         <div className="font-medium text-sm text-muted-foreground">{new Date(feedback?.date).toLocaleDateString()}</div>
                       </div>
                     </div>

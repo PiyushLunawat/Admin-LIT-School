@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CircleCheck, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
-import { getCurrentStudents, updateStudentData } from "@/app/api/student";
+import { CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import { updateStudentData } from "@/app/api/student";
 import { getCentres } from "@/app/api/centres";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -312,7 +312,7 @@ export function PersonalDetailsTab({ student, onApplicationUpdate }: PersonalDet
             </div>
             <div className="space-y-2">
               <Label className="pl-3" >Current Status</Label>
-              <Select disabled value={student?.qualification}>
+              <Select disabled value={latestCohort?.qualification}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

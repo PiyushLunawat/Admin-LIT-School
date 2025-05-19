@@ -204,7 +204,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                       <Calendar className="w-4 h-4"/>{new Date(interview?.meetingDate).toLocaleDateString()}
                     </div>
                   </div>
-                  {(index !== 0 && interview?.meetingStatus === 'confirmed') ?
+                  {(index !== 0 && interview?.meetingStatus === 'scheduled') ?
                     <p className="capitalize">Int. Time Elapsed</p> :
                     (index === 0 && status === 'interview concluded') ?
                       <p className="capitalize">Int. Time Elapsed</p> :
@@ -213,25 +213,6 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </div>
               ))}
             </div>
-            {/* {status !== 'completed' &&
-            <Select disabled={['pending', 'interview scheduled', 'completed'].includes(status)} 
-              value={status || "pending"}
-              onValueChange={handleStatusChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Change status" />
-              </SelectTrigger>
-              <SelectContent>
-                {!['pending', 'under review', 'completed'].includes(status) &&
-                  <SelectItem className="capitalize" value={status}>
-                    <span className="capitalize">{status}</span>
-                  </SelectItem>
-                }
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="under review">Under Review</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
-            } */}
           </div>
 
           <Separator />
@@ -334,7 +315,7 @@ export function LitmusTestDetails({ application, onClose, onApplicationUpdate }:
                 </>
               );
             })()}
-            {status === 'interview concluded' &&
+            {status === 'interview scheduled' &&
             <Button className="w-full flex gap-2" onClick={() => {setOpen(true);}}>
               <FileSignature className=""/>Review Submission
             </Button>}
