@@ -1,5 +1,9 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -8,25 +12,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
-import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
-import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
-import { DocumentsTab } from "../applications/application-dialog/document-tab";
 import { Calendar, Clock4Icon, Eye } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useEffect, useMemo, useState } from "react";
-import { ReviewComponent } from "./litmus-test-dialog/review";
-import { getStudents } from "@/app/api/student";
-import { DateRange } from "react-day-picker";
+import { useEffect, useState } from "react";
+import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
+import { DocumentsTab } from "../applications/application-dialog/document-tab";
+import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
+import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
 
-type BadgeVariant = "destructive" | "onhold" | "pending" | "success" | "lemon" | "default";
+type BadgeVariant =
+  | "destructive"
+  | "onhold"
+  | "pending"
+  | "success"
+  | "lemon"
+  | "default";
 
 interface LitmusTestListProps {
-  applications: any
+  applications: any;
   onSubmissionSelect: (id: any) => void;
   selectedIds: any[];
   onApplicationUpdate: () => void;
@@ -40,9 +43,10 @@ export function LitmusTestList({
   onApplicationUpdate,
   onSelectedIdsChange,
 }: LitmusTestListProps) {
-
   const [open, setOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+    null
+  );
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   const getStatusColor = (status: string): BadgeVariant => {
@@ -74,7 +78,9 @@ export function LitmusTestList({
 
   const toggleSelectStudent = (student: any) => {
     if (selectedIds.some((s: any) => s._id === student._id)) {
-      onSelectedIdsChange(selectedIds.filter((s: any) => s._id !== student._id));
+      onSelectedIdsChange(
+        selectedIds.filter((s: any) => s._id !== student._id)
+      );
     } else {
       onSelectedIdsChange([...selectedIds, student]);
     }
@@ -90,31 +96,33 @@ export function LitmusTestList({
   };
 
   useEffect(() => {
-    if (applications.length > 0) {      
+    if (applications.length > 0) {
       const firstApplication = applications[0];
-      setSelectedRowId(firstApplication._id); 
-      onSubmissionSelect(firstApplication); 
+      setSelectedRowId(firstApplication._id);
+      onSubmissionSelect(firstApplication);
     } else {
       setSelectedRowId(null);
       onSubmissionSelect(null);
     }
-  }, [applications]);
+  }, [applications, onSubmissionSelect]);
 
   function checkInterviewStatus(interviews: any): string {
-    let status = 'interview scheduled';
-  
+    let status = "interview scheduled";
+
     if (interviews.length > 1) {
-      status = 'interview rescheduled';
+      status = "interview rescheduled";
     }
-  
+
     const lastInterview = interviews[interviews.length - 1];
     const currentTime = new Date();
-  
+
     if (lastInterview?.meetingDate && lastInterview?.endTime) {
       const meetingEnd = new Date(
-        new Date(lastInterview.meetingDate).toDateString() + ' ' + lastInterview.endTime
+        new Date(lastInterview.meetingDate).toDateString() +
+          " " +
+          lastInterview.endTime
       );
-  
+
       // console.log("timee", meetingEnd < currentTime, meetingEnd, currentTime);
       if (meetingEnd < currentTime) {
         status = "interview concluded";
@@ -123,18 +131,21 @@ export function LitmusTestList({
     return status;
   }
 
-  return (
-    applications.length === 0 ?
+  return applications.length === 0 ? (
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
-      <div >No Students found.</div>
-    </div> :
-      <div className="border rounded-lg">
+      <div>No Students found.</div>
+    </div>
+  ) : (
+    <div className="border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-12">
               <Checkbox
-                checked={applications.length > 0 && selectedIds.length === applications.length}
+                checked={
+                  applications.length > 0 &&
+                  selectedIds.length === applications.length
+                }
                 onCheckedChange={toggleSelectAll}
                 disabled={applications.length === 0}
               />
@@ -149,107 +160,159 @@ export function LitmusTestList({
         </TableHeader>
         <TableBody>
           {applications.map((application: any) => {
-            
-            const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+            const latestCohort =
+              application?.appliedCohorts?.[
+                application?.appliedCohorts.length - 1
+              ];
             const litmusTestDetails = latestCohort?.litmusTestDetails;
-            const lastInterview = latestCohort?.litmusTestDetails?.litmusTestInterviews[latestCohort?.litmusTestDetails?.litmusTestInterviews.length - 1];
-            return(
-            <TableRow
-              key={application._id}
-              className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
-              onClick={() => {
-                console.log("student -",application)
-                onSubmissionSelect(application)
-                setSelectedRowId(application._id);
-              }}
-            >
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <Checkbox
-                  checked={selectedIds.some( (s: any) => s._id === application?._id)}
-                  onCheckedChange={() => toggleSelectStudent(application)}
-                />
-              </TableCell>
-              <TableCell className="font-medium">
-                {`${application?.firstName || ""} ${application?.lastName || ""}`.trim()}
-              </TableCell>
-              <TableCell>
-                {new Date(litmusTestDetails?.updatedAt).toLocaleDateString() || "--"}
-              </TableCell>
-              <TableCell className="">
-                {latestCohort?.status === 'dropped' ?
-                  <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(latestCohort?.status)}>
-                    {latestCohort?.status}
-                  </Badge> :
-                  litmusTestDetails?.status === 'interview scheduled' ?
-                  <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(checkInterviewStatus(litmusTestDetails?.litmusTestInterviews))}>
-                    {checkInterviewStatus(litmusTestDetails?.litmusTestInterviews)}
-                  </Badge> :
-                  <Badge className="capitalize max-w-28 truncate" variant={getStatusColor(litmusTestDetails?.status || "pending")}>
-                    {litmusTestDetails?.status || "pending"}
-                  </Badge>
-                }
-              </TableCell>
-              <TableCell>
-                {lastInterview ? (lastInterview?.ownerFirstName+' '+lastInterview?.ownerLastName) : "--"}
-              </TableCell>
-              <TableCell>
-              {lastInterview ? (
-                <div className="space-y-0.5">
-                  <div className="flex items-center text-xs">
-                    <Clock4Icon className="h-3 w-3 mr-1" />
-                    {lastInterview?.startTime}
-                  </div>
-                  <div className="flex items-center text-xs">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(lastInterview?.meetingDate).toLocaleDateString() || "--"}
-                  </div>
-                </div>
-              ) : "--"}
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-black"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEyeClick(application);
-                  }}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          )})}
+            const lastInterview =
+              latestCohort?.litmusTestDetails?.litmusTestInterviews[
+                latestCohort?.litmusTestDetails?.litmusTestInterviews.length - 1
+              ];
+            return (
+              <TableRow
+                key={application._id}
+                className={`cursor-pointer ${
+                  selectedRowId === application._id ? "bg-muted" : ""
+                }`}
+                onClick={() => {
+                  console.log("student -", application);
+                  onSubmissionSelect(application);
+                  setSelectedRowId(application._id);
+                }}
+              >
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selectedIds.some(
+                      (s: any) => s._id === application?._id
+                    )}
+                    onCheckedChange={() => toggleSelectStudent(application)}
+                  />
+                </TableCell>
+                <TableCell className="font-medium">
+                  {`${application?.firstName || ""} ${
+                    application?.lastName || ""
+                  }`.trim()}
+                </TableCell>
+                <TableCell>
+                  {new Date(
+                    litmusTestDetails?.updatedAt
+                  ).toLocaleDateString() || "--"}
+                </TableCell>
+                <TableCell className="">
+                  {latestCohort?.status === "dropped" ? (
+                    <Badge
+                      className="capitalize max-w-28 truncate"
+                      variant={getStatusColor(latestCohort?.status)}
+                    >
+                      {latestCohort?.status}
+                    </Badge>
+                  ) : litmusTestDetails?.status === "interview scheduled" ? (
+                    <Badge
+                      className="capitalize max-w-28 truncate"
+                      variant={getStatusColor(
+                        checkInterviewStatus(
+                          litmusTestDetails?.litmusTestInterviews
+                        )
+                      )}
+                    >
+                      {checkInterviewStatus(
+                        litmusTestDetails?.litmusTestInterviews
+                      )}
+                    </Badge>
+                  ) : (
+                    <Badge
+                      className="capitalize max-w-28 truncate"
+                      variant={getStatusColor(
+                        litmusTestDetails?.status || "pending"
+                      )}
+                    >
+                      {litmusTestDetails?.status || "pending"}
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {lastInterview
+                    ? lastInterview?.ownerFirstName +
+                      " " +
+                      lastInterview?.ownerLastName
+                    : "--"}
+                </TableCell>
+                <TableCell>
+                  {lastInterview ? (
+                    <div className="space-y-0.5">
+                      <div className="flex items-center text-xs">
+                        <Clock4Icon className="h-3 w-3 mr-1" />
+                        {lastInterview?.startTime}
+                      </div>
+                      <div className="flex items-center text-xs">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(
+                          lastInterview?.meetingDate
+                        ).toLocaleDateString() || "--"}
+                      </div>
+                    </div>
+                  ) : (
+                    "--"
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-black"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEyeClick(application);
+                    }}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
 
       <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTitle></DialogTitle>
-      <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+        <DialogTitle></DialogTitle>
+        <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
-            <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
+            <StudentApplicationHeader
+              student={selectedStudentId}
+              onUpdateStatus={() => onApplicationUpdate()}
+            />
           )}
 
-      <Tabs defaultValue="personal" className="space-y-6">
-        <TabsList className="w-full">
-          <TabsTrigger value="personal">Personal Details</TabsTrigger>
-          <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-        </TabsList>
+          <Tabs defaultValue="personal" className="space-y-6">
+            <TabsList className="w-full">
+              <TabsTrigger value="personal">Personal Details</TabsTrigger>
+              <TabsTrigger value="payment">Payment</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="personal">
-          <PersonalDetailsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate}/>
-        </TabsContent>
+            <TabsContent value="personal">
+              <PersonalDetailsTab
+                student={selectedStudentId}
+                onUpdateStatus={handleStatusUpdate}
+              />
+            </TabsContent>
 
-        <TabsContent value="payment">
-          <PaymentInformationTab student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
-        </TabsContent>
+            <TabsContent value="payment">
+              <PaymentInformationTab
+                student={selectedStudentId}
+                onUpdateStatus={() => onApplicationUpdate()}
+              />
+            </TabsContent>
 
-        <TabsContent value="documents">
-          <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="documents">
+              <DocumentsTab
+                student={selectedStudentId}
+                onUpdateStatus={handleStatusUpdate}
+              />
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

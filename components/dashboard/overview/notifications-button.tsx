@@ -1,26 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import io, { Socket } from "socket.io-client";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Banknote, Bell, Bot, FileText, Megaphone, Users, Wallet, XIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Cookies from "js-cookie";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useRouter } from "next/navigation";
 import { markNotificationsAsRead } from "@/app/api/auth";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import Cookies from "js-cookie";
+import {
+  Banknote,
+  Bell,
+  Bot,
+  FileText,
+  Megaphone,
+  Users,
+  Wallet,
+  XIcon,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import io, { type Socket } from "socket.io-client";
 
 const NETWORK_CHECK_INTERVAL = 15000; // 15 seconds
-
-const socket: Socket = io(process.env.API_URL!, {
-  autoConnect: false,
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 3000,
-  transports: ["websocket"],
-});
 
 type ConnectionStatus = {
   connected: boolean;
@@ -40,12 +45,13 @@ interface Notification {
 }
 
 export function NotificationsButton() {
+  // Replace the direct socket initialization with:
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [adminId, setAdminId] = useState<string | undefined>();
   const [status, setStatus] = useState<ConnectionStatus>({
     connected: false,
-    // online: navigator.onLine,
-    online: true,
+    online: typeof navigator !== "undefined" ? navigator.onLine : true,
     lastActivity: new Date().toISOString(),
   });
   const router = useRouter();
@@ -56,27 +62,25 @@ export function NotificationsButton() {
   useEffect(() => {
     const id = Cookies.get("adminId");
     setAdminId(id);
-    // console.log("Admin ID from cookies:", id);
   }, []);
 
   // Periodic network checking
   useEffect(() => {
     const checkNetwork = () => {
-      // const isOnline = navigator.onLine;
-      const isOnline = true;
+      const isOnline = navigator.onLine;
 
       if (isOnline && !status.online) {
         console.log("Network restored.");
         setStatus((prev) => ({ ...prev, online: true }));
-        socket.emit("network_status", { online: true });
-        if (!socket.connected && adminId) {
+        if (socket) socket.emit("network_status", { online: true });
+        if (socket && !socket.connected && adminId) {
           socket.connect();
         }
       } else if (!isOnline && status.online) {
         console.log("Network disconnected.");
         setStatus((prev) => ({ ...prev, online: false }));
-        socket.emit("network_status", { online: false });
-        socket.disconnect();
+        if (socket) socket.emit("network_status", { online: false });
+        if (socket) socket.disconnect();
       }
     };
 
@@ -93,24 +97,40 @@ export function NotificationsButton() {
       window.removeEventListener("offline", handleOffline);
       clearInterval(networkCheckRef.current);
     };
-  }, [status.online]);
+  }, [status.online, socket, adminId]);
 
   // Socket connection and handlers
   useEffect(() => {
-    if (status.online && adminId && !socket.connected) {
+    if (typeof window !== "undefined") {
+      const socketIo = io(process.env.API_URL!, {
+        autoConnect: false,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 3000,
+        transports: ["websocket"],
+      });
+      setSocket(socketIo);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (status.online && adminId && socket && !socket.connected) {
       console.log("Connecting socket...");
       socket.connect();
     }
 
     const updateActivity = () => {
-      setStatus((prev) => ({ ...prev, lastActivity: new Date().toISOString() }));
+      setStatus((prev) => ({
+        ...prev,
+        lastActivity: new Date().toISOString(),
+      }));
     };
 
     const handleConnect = () => {
       console.log("Socket connected!");
       setStatus((prev) => ({ ...prev, connected: true }));
 
-      if (adminId) {
+      if (adminId && socket) {
         socket.emit("login", adminId, (response: any) => {
           if (response.success) {
             console.log("Login successful:", adminId);
@@ -127,7 +147,7 @@ export function NotificationsButton() {
     };
 
     const handlePing = () => {
-      if (status.online) {
+      if (status.online && socket) {
         socket.emit("pong");
         console.log("Responded with pong");
       }
@@ -135,7 +155,7 @@ export function NotificationsButton() {
 
     const handleNewNotification = (data: Notification) => {
       console.log("Received notification:", data);
-      setNotifications((prev) => [data, ...prev]); 
+      setNotifications((prev) => [data, ...prev]);
       // toast.info(data.message);
       updateActivity();
     };
@@ -154,23 +174,27 @@ export function NotificationsButton() {
     };
 
     const userEvents = ["mousemove", "keydown", "click", "scroll"];
-    userEvents?.forEach((event) => window.addEventListener(event, updateActivity));
+    userEvents?.forEach((event) =>
+      window.addEventListener(event, updateActivity)
+    );
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
-    socket.on("ping", handlePing);
-    socket.on("newNotification", handleNewNotification);
-    socket.on("unreadNotifications", handleUnreadNotifications);
+    if (socket) socket.on("connect", handleConnect);
+    if (socket) socket.on("disconnect", handleDisconnect);
+    if (socket) socket.on("ping", handlePing);
+    if (socket) socket.on("newNotification", handleNewNotification);
+    if (socket) socket.on("unreadNotifications", handleUnreadNotifications);
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
-      socket.off("ping", handlePing);
-      socket.off("newNotification", handleNewNotification);
-      socket.off("unreadNotifications", handleUnreadNotifications);
-      userEvents?.forEach((event) => window.removeEventListener(event, updateActivity));
+      if (socket) socket.off("connect", handleConnect);
+      if (socket) socket.off("disconnect", handleDisconnect);
+      if (socket) socket.off("ping", handlePing);
+      if (socket) socket.off("newNotification", handleNewNotification);
+      if (socket) socket.off("unreadNotifications", handleUnreadNotifications);
+      userEvents?.forEach((event) =>
+        window.removeEventListener(event, updateActivity)
+      );
     };
-  }, [adminId, status.online]);
+  }, [adminId, status.online, socket]);
 
   // Color and Icon Mapping
   function getStatusColor(status: string): string {
@@ -221,23 +245,28 @@ export function NotificationsButton() {
       default:
         return `${origin}/dashboard/cohorts/${cohortId}`;
     }
-  };  
+  };
 
-  async function handleRemoveNotification(notificationId: string, adminId: string) {
+  async function handleRemoveNotification(
+    notificationId: string,
+    adminId: string
+  ) {
     try {
       const payload = {
         notificationIds: [notificationId],
         userId: adminId,
-      }
+      };
       const res = await markNotificationsAsRead(payload);
-      console.log("vf",res);
-      
+      console.log("vf", res);
+
       // Optionally, you can update UI state here after successful API call
-      setNotifications((prev) => prev.filter((n) => n.notificationId !== adminId));
+      setNotifications((prev) =>
+        prev.filter((n) => n.notificationId !== adminId)
+      );
       console.log("Notification marked as read:", notificationId);
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
-    }  
+    }
   }
 
   return (
@@ -259,33 +288,49 @@ export function NotificationsButton() {
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent align="end" className="flex flex-col w-[400px] p-1 max-h-[400px] min-h-[80px] justify-center">
+        <PopoverContent
+          align="end"
+          className="flex flex-col w-[400px] p-1 max-h-[400px] min-h-[80px] justify-center"
+        >
           {notifications.length === 0 ? (
             <Label className="text-base text-center text-muted-foreground font-normal">
               No notifications
             </Label>
-            ) : (
+          ) : (
             <div className="flex flex-col justify-center">
               <div className="flex flex-col gap-1.5 max-h-[360px] min-h-[80px] overflow-y-auto">
                 {notifications.map((notification) => (
                   <div
                     key={notification.notificationId}
                     className="flex flex-col gap-1 rounded-lg items-start p-2 cursor-pointer"
-                    style={{ backgroundColor: `${getStatusColor(notification.status || "")}20` }}
-                    onClick={() => router.push(getUrl(notification.cohortId, notification.type))}
+                    style={{
+                      backgroundColor: `${getStatusColor(
+                        notification.status || ""
+                      )}20`,
+                    }}
+                    onClick={() =>
+                      router.push(
+                        getUrl(notification.cohortId, notification.type)
+                      )
+                    }
                   >
                     <div className="flex items-center justify-between text-[10px] w-full">
                       <div className="text-muted-foreground">
-                      {new Date(notification.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
+                        {new Date(notification.timestamp).toLocaleTimeString(
+                          [],
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          }
+                        )}
                       </div>
                       <div
                         className="rounded px-1 font-semibold"
                         style={{
-                          backgroundColor: `${getStatusColor(notification.status || "")}40`,
+                          backgroundColor: `${getStatusColor(
+                            notification.status || ""
+                          )}40`,
                         }}
                       >
                         {notification.cohortTitle}
@@ -297,7 +342,9 @@ export function NotificationsButton() {
                         <div
                           className="p-4 rounded-full"
                           style={{
-                            backgroundColor: `${getStatusColor(notification.status || "")}40`,
+                            backgroundColor: `${getStatusColor(
+                              notification.status || ""
+                            )}40`,
                           }}
                         >
                           {geCohortIcon(notification.type || "")}
@@ -305,34 +352,46 @@ export function NotificationsButton() {
                         <div>
                           <div
                             className="text-base font-medium"
-                            style={{ color: notification.status ? getStatusColor(notification.status || "") : "#ffffff" }}
+                            style={{
+                              color: notification.status
+                                ? getStatusColor(notification.status || "")
+                                : "#ffffff",
+                            }}
                           >
                             {notification.title}
                           </div>
                           <p className="text-xs">{notification.message}</p>
                         </div>
                       </div>
-                      {adminId &&
+                      {adminId && (
                         <Button
                           variant="ghost"
-                          size="icon" className="z-10"
+                          size="icon"
+                          className="z-10"
                           onClick={(e) => {
                             e.stopPropagation(); // ✅ Prevent parent div onClick
-                            handleRemoveNotification(notification.notificationId, adminId);
-                          }}                      >
+                            handleRemoveNotification(
+                              notification.notificationId,
+                              adminId
+                            );
+                          }}
+                        >
                           <XIcon className="w-4 h-4" />
                         </Button>
-                      }
+                      )}
                     </div>
                   </div>
-                  ))}
+                ))}
               </div>
-              <Button variant={'link'} className="text-xs text-muted-foreground underline mx-auto"
-                onClick={() => setNotifications([])}>
-                  Clear All
+              <Button
+                variant={"link"}
+                className="text-xs text-muted-foreground underline mx-auto"
+                onClick={() => setNotifications([])}
+              >
+                Clear All
               </Button>
             </div>
-            )}
+          )}
         </PopoverContent>
       </Popover>
 

@@ -12,7 +12,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, RefreshCcw, RotateCcw } from "lucide-react";
+import { ArrowLeft, RotateCcw } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import router from "next/router";
 
@@ -20,7 +21,7 @@ export default function Error({
   error,
   reset,
 }: {
-  error: Error ;
+  error: Error;
   reset: () => void;
 }): JSX.Element {
   const showTrace = process.env.NODE_ENV !== "production";
@@ -34,10 +35,12 @@ export default function Error({
     <Drawer>
       <div className="flex flex-col gap-8 items-center justify-center h-screen text-center">
         <Link href="/" className="items-center space-x-2 flex">
-          <img
+          <Image
             className="h-32"
             src="/assets/images/lit-logo.svg"
             alt="The LIT School"
+            width={128}
+            height={128}
           />
         </Link>
 
@@ -53,7 +56,7 @@ export default function Error({
               <RotateCcw className="w-4 h-4" />
               Reset
             </Button>
-            <Separator orientation="vertical"/>
+            <Separator orientation="vertical" />
             <Button
               variant="link"
               className="flex gap-2 items-center text-base"
