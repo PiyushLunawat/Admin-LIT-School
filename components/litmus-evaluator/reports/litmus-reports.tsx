@@ -1,22 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { getCohorts } from "@/app/api/cohorts";
+import { getStudents } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
 import { Download, RefreshCw } from "lucide-react";
-import { PerformanceMetrics } from "./performance-metrics";
-import { EvaluationInsights } from "./evaluation-insights";
-import { ReportFilters } from "./report-filters";
+import { useEffect, useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { getStudents } from "@/app/api/student";
-import { getCohorts } from "@/app/api/cohorts";
+import { EvaluationInsights } from "./evaluation-insights";
+import { PerformanceMetrics } from "./performance-metrics";
+import { ReportFilters } from "./report-filters";
 
 interface LitmusReportsProps {
   initialApplications: any;
   setInitialApplications: (apps: any) => void;
 }
 
-export function LitmusReports({ initialApplications, setInitialApplications }: LitmusReportsProps) {
+export function LitmusReports({
+  initialApplications,
+  setInitialApplications,
+}: LitmusReportsProps) {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [cohorts, setCohorts] = useState<any[]>([]);
@@ -30,11 +32,12 @@ export function LitmusReports({ initialApplications, setInitialApplications }: L
     async function fetchStudents() {
       try {
         const response = await getStudents();
-        const mappedStudents =
-          response.data.filter(
-            (student: any) =>
-              ['reviewing', 'enrolled'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
-          )     
+        const mappedStudents = response.data.filter((student: any) =>
+          ["reviewing", "enrolled"].includes(
+            student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+              ?.status
+          )
+        );
         setApplications(mappedStudents);
         setInitialApplications(mappedStudents);
         const cohortsData = await getCohorts();
@@ -46,18 +49,22 @@ export function LitmusReports({ initialApplications, setInitialApplications }: L
       }
     }
     fetchStudents();
-  }, []);
+  }, [setInitialApplications]);
 
   const filteredAndSortedApplications = useMemo(() => {
-    
     // Filter by cohort
     const filteredByCohort = applications.filter((app: any) => {
       if (selectedCohort === "all-cohorts") {
         return true;
       }
-      const matchedCohort = cohorts.find((cohort) => cohort.cohortId === selectedCohort);
+      const matchedCohort = cohorts.find(
+        (cohort) => cohort.cohortId === selectedCohort
+      );
       setCurrentCohort(matchedCohort || null);
-      return app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId?.cohortId === selectedCohort;
+      return (
+        app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId
+          ?.cohortId === selectedCohort
+      );
     });
 
     // Filter by date range
@@ -69,7 +76,7 @@ export function LitmusReports({ initialApplications, setInitialApplications }: L
     });
 
     return filteredByDate;
-  }, [applications, dateRange, selectedCohort]);
+  }, [applications, cohorts, dateRange, selectedCohort]);
 
   const handleExport = (format: "pdf" | "excel") => {
     console.log(`Exporting report in ${format} format`);
@@ -95,23 +102,24 @@ export function LitmusReports({ initialApplications, setInitialApplications }: L
           </Button>
           <Button
             variant="outline"
-            size={'icon'}
+            size={"icon"}
             // onClick={handleApplicationUpdate}
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
 
-      <ReportFilters setDateRange={setDateRange}
+      <ReportFilters
+        setDateRange={setDateRange}
         cohorts={cohorts}
         selectedCohort={selectedCohort}
         onCohortChange={setSelectedCohort}
-        />
+      />
 
       <div className="grid gap-6">
-        <PerformanceMetrics applications={filteredAndSortedApplications}/>
+        <PerformanceMetrics applications={filteredAndSortedApplications} />
         <EvaluationInsights applications={filteredAndSortedApplications} />
       </div>
     </div>

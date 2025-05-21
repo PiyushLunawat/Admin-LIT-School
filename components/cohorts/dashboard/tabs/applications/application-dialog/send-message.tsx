@@ -1,21 +1,20 @@
 "use client";
 
-import { CalendarIcon, CheckCircle, Clock4Icon, Mail } from "lucide-react";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
+import { CalendarIcon, Clock4Icon, Mail } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
-
 
 interface SendMessageProps {
   type: string;
   recipient: string;
 }
 
-export function SendMessage({ type, recipient }:  SendMessageProps) {
+export function SendMessage({ type, recipient }: SendMessageProps) {
   const [message, setMessage] = useState("Subject: ");
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = e.target.value;
 
@@ -27,13 +26,23 @@ export function SendMessage({ type, recipient }:  SendMessageProps) {
     }
   };
 
-    const currentDate = new Date();
-    const currentTime = format(currentDate, "HH:mm"); 
+  const currentDate = new Date();
+  const currentTime = format(currentDate, "HH:mm");
 
   return (
     <div className="space-y-4 ">
       <div className="flex items-center gap-2">
-        {type === "email" ? <Mail className="w-6 h-6"/> : <img src="/assets/images/whatsapp-icon.svg" className="w-6 h-6"/>}
+        {type === "email" ? (
+          <Mail className="w-6 h-6" />
+        ) : (
+          <Image
+            alt="whatsapp"
+            src="/assets/images/whatsapp-icon.svg"
+            width={24}
+            height={24}
+            className="w-6 h-6"
+          />
+        )}
         <h3 className="text-lg font-medium capitalize">{type}</h3>
       </div>
 
@@ -51,28 +60,34 @@ export function SendMessage({ type, recipient }:  SendMessageProps) {
       <div className="space-y-2">
         <div className="">
           <p className="text-sm text-muted-foreground mb-1">Recipient</p>
-          <p className="border text-sm rounded-lg p-2 font-medium">{recipient}</p>
+          <p className="border text-sm rounded-lg p-2 font-medium">
+            {recipient}
+          </p>
         </div>
 
-        {type === "email" ?
-        <>
-          <div className="">
-            <p className="text-sm text-muted-foreground mb-1">Subject</p>
-            <Input type="text" placeholder="Enter subject" />
-          </div>
+        {type === "email" ? (
+          <>
+            <div className="">
+              <p className="text-sm text-muted-foreground mb-1">Subject</p>
+              <Input type="text" placeholder="Enter subject" />
+            </div>
 
+            <div className="">
+              <p className="text-sm text-muted-foreground mb-1">Message</p>
+              <Textarea placeholder="Type your message here" rows={4} />
+            </div>
+          </>
+        ) : (
           <div className="">
             <p className="text-sm text-muted-foreground mb-1">Message</p>
-            <Textarea placeholder="Type your message here" rows={4} />
+            <Textarea
+              placeholder="Type your message here"
+              rows={6}
+              value={message}
+              onChange={handleChange}
+            />
           </div>
-          </> : 
-          <div className="">
-            <p className="text-sm text-muted-foreground mb-1">Message</p>
-            <Textarea placeholder="Type your message here" rows={6} value={message}
-      onChange={handleChange}
-      />
-          </div>
-        }
+        )}
       </div>
     </div>
   );

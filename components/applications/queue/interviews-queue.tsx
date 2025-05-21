@@ -1,22 +1,33 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ApplicationDetails } from "./application-details";
-import { Button } from "@/components/ui/button";
-import { Download, RefreshCw } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { getCohorts } from "@/app/api/cohorts";
-import { DateRange } from "react-day-picker";
 import { getStudents } from "@/app/api/student";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Download, RefreshCw } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
+import { ApplicationDetails } from "./application-details";
 import { CohortDetails } from "./cohort-details";
-import { InterviewsList } from "./interviews-list";
 import { InterviewsFilters } from "./interviews-filters";
+import { InterviewsList } from "./interviews-list";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "pending" | "onhold" | "default";
+type BadgeVariant =
+  | "destructive"
+  | "warning"
+  | "secondary"
+  | "success"
+  | "pending"
+  | "onhold"
+  | "default";
 
 export function InterviewsQueue() {
-  const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
-  const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<string | null>(
+    null
+  );
+  const [selectedApplicationIds, setSelectedApplicationIds] = useState<
+    string[]
+  >([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [cohorts, setCohorts] = useState<any[]>([]);
   const [currentCohort, setCurrentCohort] = useState<any>();
@@ -32,40 +43,41 @@ export function InterviewsQueue() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all-status");
   const [sortBy, setSortBy] = useState<string>("newest");
 
-  const [refreshKey, setRefreshKey] = useState(0); 
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
     async function fetchStudents() {
       try {
         const response = await getStudents();
-        const mappedStudents =
-        response.data.filter(
-          (student: any) =>
-            ['reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
-        )    
-          mappedStudents.sort((a: any, b: any) => {
-            const dateA = new Date(a?.updatedAt);
-            const dateB = new Date(b?.updatedAt);
-            
-            if (dateA > dateB) return -1;
-            if (dateA < dateB) return 1;
-            
-            const monthA = dateA.getMonth();
-            const monthB = dateB.getMonth();
-            
-            if (monthA > monthB) return -1;
-            if (monthA < monthB) return 1;
-            
-            const yearA = dateA.getFullYear(); 
-            const yearB = dateB.getFullYear(); 
-            
-            if (yearA > yearB) return -1; 
-            if (yearA < yearB) return 1; 
-            
-            return 0;
-          });
-          
+        const mappedStudents = response.data.filter((student: any) =>
+          ["reviewing", "enrolled", "dropped"].includes(
+            student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+              ?.status
+          )
+        );
+        mappedStudents.sort((a: any, b: any) => {
+          const dateA = new Date(a?.updatedAt);
+          const dateB = new Date(b?.updatedAt);
+
+          if (dateA > dateB) return -1;
+          if (dateA < dateB) return 1;
+
+          const monthA = dateA.getMonth();
+          const monthB = dateB.getMonth();
+
+          if (monthA > monthB) return -1;
+          if (monthA < monthB) return 1;
+
+          const yearA = dateA.getFullYear();
+          const yearB = dateB.getFullYear();
+
+          if (yearA > yearB) return -1;
+          if (yearA < yearB) return 1;
+
+          return 0;
+        });
+
         setApplications(mappedStudents);
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
@@ -79,35 +91,51 @@ export function InterviewsQueue() {
   }, [refreshKey]);
 
   const filteredAndSortedApplications = useMemo(() => {
-    
     // Filter by cohort
     const filteredByCohort = applications.filter((app: any) => {
       if (selectedCohort === "all-cohorts") {
         return true;
       }
-      const matchedCohort = cohorts.find((cohort) => cohort.cohortId === selectedCohort);
+      const matchedCohort = cohorts.find(
+        (cohort) => cohort.cohortId === selectedCohort
+      );
       setCurrentCohort(matchedCohort || null);
-      return app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId?.cohortId === selectedCohort;
+      return (
+        app?.appliedCohorts?.[app?.appliedCohorts.length - 1].cohortId
+          ?.cohortId === selectedCohort
+      );
     });
 
     setApplied(
       applications.filter(
-        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationFeeDetail?.status === 'paid' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
+        (student: any) =>
+          student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+            ?.applicationDetails?.applicationFeeDetail?.status === "paid" &&
+          student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+            ?.cohortId?.cohortId === selectedCohort
       ).length
     );
-    
+
     setIntCleared(
       applications.filter(
-        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === 'selected' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
+        (student: any) =>
+          student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+            ?.applicationDetails?.applicationStatus === "selected" &&
+          student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+            ?.cohortId?.cohortId === selectedCohort
       ).length
     );
 
     setFeePaid(
       applications.filter(
-        (student: any) => student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.tokenFeeDetails?.verificationStatus === 'paid' && student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId?.cohortId === selectedCohort
+        (student: any) =>
+          student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+            ?.tokenFeeDetails?.verificationStatus === "paid" &&
+          student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+            ?.cohortId?.cohortId === selectedCohort
       ).length
-    );   
-    
+    );
+
     // Filter by date range
     const filteredByDate = filteredByCohort.filter((app: any) => {
       if (!dateRange) return true;
@@ -120,7 +148,9 @@ export function InterviewsQueue() {
     const filteredBySearch = filteredByDate.filter((app: any) => {
       if (searchQuery.trim()) {
         const lowerSearch = searchQuery.toLowerCase();
-        const name = `${app.firstName ?? ""} ${app.lastName ?? ""}`.toLowerCase();
+        const name = `${app.firstName ?? ""} ${
+          app.lastName ?? ""
+        }`.toLowerCase();
         return name.includes(lowerSearch);
       }
       return true;
@@ -129,7 +159,10 @@ export function InterviewsQueue() {
     // b) Status filter
     const filteredByStatus = filteredBySearch.filter((app: any) => {
       if (selectedStatus !== "all-status") {
-        const status = app?.appliedCohorts?.[app?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
+        const status =
+          app?.appliedCohorts?.[
+            app?.appliedCohorts.length - 1
+          ]?.applicationDetails?.applicationStatus?.toLowerCase() || "pending";
         return status === selectedStatus;
       }
       return true;
@@ -140,39 +173,71 @@ export function InterviewsQueue() {
     switch (sortBy) {
       case "newest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(
+            a?.appliedCohorts?.[
+              a?.appliedCohorts.length - 1
+            ]?.applicationDetails?.updatedAt
+          ).getTime();
+          const dateB = new Date(
+            b?.appliedCohorts?.[
+              b?.appliedCohorts.length - 1
+            ]?.applicationDetails?.updatedAt
+          ).getTime();
           return dateB - dateA; // newest first
         });
         break;
 
       case "oldest":
         sortedApplications.sort((a: any, b: any) => {
-          const dateA = new Date(a?.appliedCohorts?.[a?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
-          const dateB = new Date(b?.appliedCohorts?.[b?.appliedCohorts.length - 1]?.applicationDetails?.updatedAt).getTime();
+          const dateA = new Date(
+            a?.appliedCohorts?.[
+              a?.appliedCohorts.length - 1
+            ]?.applicationDetails?.updatedAt
+          ).getTime();
+          const dateB = new Date(
+            b?.appliedCohorts?.[
+              b?.appliedCohorts.length - 1
+            ]?.applicationDetails?.updatedAt
+          ).getTime();
           return dateA - dateB; // oldest first
         });
         break;
 
       case "name-asc":
         sortedApplications.sort((a: any, b: any) => {
-          const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
-          const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
+          const nameA = `${a.firstName ?? ""} ${
+            a.lastName ?? ""
+          }`.toLowerCase();
+          const nameB = `${b.firstName ?? ""} ${
+            b.lastName ?? ""
+          }`.toLowerCase();
           return nameA.localeCompare(nameB);
         });
         break;
 
       case "name-desc":
         sortedApplications.sort((a: any, b: any) => {
-          const nameA = `${a.firstName ?? ""} ${a.lastName ?? ""}`.toLowerCase();
-          const nameB = `${b.firstName ?? ""} ${b.lastName ?? ""}`.toLowerCase();
+          const nameA = `${a.firstName ?? ""} ${
+            a.lastName ?? ""
+          }`.toLowerCase();
+          const nameB = `${b.firstName ?? ""} ${
+            b.lastName ?? ""
+          }`.toLowerCase();
           return nameB.localeCompare(nameA);
         });
         break;
     }
 
     return sortedApplications;
-  }, [applications, searchQuery, selectedStatus, sortBy, dateRange, selectedCohort]);
+  }, [
+    applications,
+    sortBy,
+    selectedCohort,
+    cohorts,
+    dateRange,
+    searchQuery,
+    selectedStatus,
+  ]);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -190,7 +255,7 @@ export function InterviewsQueue() {
       case "waitlist":
         return "onhold";
       case "interview scheduled":
-        case "interview rescheduled":
+      case "interview rescheduled":
         return "default";
       case "interview concluded":
         return "pending";
@@ -226,16 +291,16 @@ export function InterviewsQueue() {
           </Button>
           <Button
             variant="outline"
-            size={'icon'}
+            size={"icon"}
             onClick={handleApplicationUpdate}
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
 
-      <InterviewsFilters 
+      <InterviewsFilters
         setDateRange={setDateRange}
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
@@ -248,13 +313,14 @@ export function InterviewsQueue() {
         onSortByChange={setSortBy}
       />
 
-      {selectedCohort !== 'all-cohorts' &&
-       <CohortDetails 
-        cohort={currentCohort}
-        applied={applied}
-        intCleared={intCleared}
-        feePaid={feePaid} />
-      }
+      {selectedCohort !== "all-cohorts" && (
+        <CohortDetails
+          cohort={currentCohort}
+          applied={applied}
+          intCleared={intCleared}
+          feePaid={feePaid}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -263,7 +329,7 @@ export function InterviewsQueue() {
             onApplicationSelect={(id) => setSelectedApplication(id)}
             selectedIds={selectedApplicationIds}
             onSelectedIdsChange={setSelectedApplicationIds}
-            onApplicationUpdate={handleApplicationUpdate} 
+            onApplicationUpdate={handleApplicationUpdate}
           />
         </div>
         <div className="lg:col-span-1">
