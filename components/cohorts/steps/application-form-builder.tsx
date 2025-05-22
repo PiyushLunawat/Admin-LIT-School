@@ -55,6 +55,7 @@ const s3Client = new S3Client({
   },
 });
 
+// Modified schema to ensure numeric fields are always defined with default values
 const formSchema = z.object({
   applicationFormDetail: z.array(
     z.object({
@@ -66,10 +67,10 @@ const formSchema = z.object({
           config: z.array(
             z.object({
               type: z.string().nonempty("Task type is required"),
-              characterLimit: z.coerce.number().min(1).optional(),
-              maxFiles: z.coerce.number().min(1).optional(),
-              maxFileSize: z.coerce.number().min(1).optional(),
-              allowedTypes: z.array(z.string()).optional(),
+              characterLimit: z.coerce.number().min(1).default(1000),
+              maxFiles: z.coerce.number().min(1).default(1),
+              maxFileSize: z.coerce.number().min(1).default(500),
+              allowedTypes: z.array(z.string()).default(["All"]),
             })
           ),
           resources: z.object({
@@ -112,9 +113,9 @@ export function ApplicationFormBuilder({
                     config: [
                       {
                         type: "",
-                        characterLimit: undefined,
-                        maxFiles: undefined,
-                        maxFileSize: undefined,
+                        characterLimit: 1000, // Default value
+                        maxFiles: 1, // Default value
+                        maxFileSize: 500, // Default value
                         allowedTypes: ["All"],
                       },
                     ],
@@ -204,9 +205,9 @@ function TaskList({ nestIndex, control, form }: any) {
         config: [
           {
             type: "",
-            characterLimit: undefined,
-            maxFiles: undefined,
-            maxFileSize: undefined,
+            characterLimit: 1000, // Default value
+            maxFiles: 1, // Default value
+            maxFileSize: 500, // Default value
             allowedTypes: ["All"],
           },
         ],
@@ -244,9 +245,9 @@ function TaskList({ nestIndex, control, form }: any) {
             config: [
               {
                 type: "",
-                characterLimit: undefined,
-                maxFiles: undefined,
-                maxFileSize: undefined,
+                characterLimit: 1000, // Default value
+                maxFiles: 1, // Default value
+                maxFileSize: 500, // Default value
                 allowedTypes: ["All"],
               },
             ],
@@ -400,9 +401,9 @@ function Task({
               onClick={() =>
                 appendConfig({
                   type: "",
-                  characterLimit: undefined,
-                  maxFiles: undefined,
-                  maxFileSize: undefined,
+                  characterLimit: 1000, // Default value
+                  maxFiles: 1, // Default value
+                  maxFileSize: 500, // Default value
                   allowedTypes: ["All"],
                 })
               }
@@ -429,6 +430,16 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState("");
+  const [fileSizeInput, setFileSizeInput] = useState<string>("500");
+
+  // Add this after the useState declarations in ResourcesSection
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+    else if (bytes < 1024 * 1024 * 1024)
+      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    else return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+  };
 
   const {
     fields: linkFields,
@@ -461,7 +472,10 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
     const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB in bytes
     if (file.size > MAX_FILE_SIZE) {
       setError(
-        `File size exceeds the 500 MB limit. Please select a smaller file.`
+        `File size exceeds the 500 MB limit. Current size: ${(
+          file.size /
+          (1024 * 1024)
+        ).toFixed(2)} MB. Please select a smaller file.`
       );
       e.target.value = ""; // Clear the file input
       return;
@@ -756,13 +770,14 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
           }}
         >
           <FileIcon className="w-4 h-4" />
-          Upload Resource File
+          Upload Resource File (Max: 500 MB)
         </Button>
         <input
           type="file"
           id={`file-upload-${taskIndex}`}
           style={{ display: "none" }}
           onChange={handleFileChange}
+          accept="*/*" // You can restrict this further if needed
         />
         <Button
           type="button"
@@ -773,7 +788,11 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
           <Link2Icon className="w-4 h-4" /> Attach Resource Link
         </Button>
       </div>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 rounded-md p-2 mt-2">
+          <p className="text-red-500 text-sm font-medium">{error}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -852,6 +871,14 @@ function Config({
                     type="number"
                     placeholder="Enter maximum characters"
                     {...field}
+                    value={field.value || 1000} // Ensure value is never undefined
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === ""
+                          ? 1000
+                          : Number.parseInt(e.target.value);
+                      field.onChange(value);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -869,7 +896,19 @@ function Config({
                 <FormItem>
                   <Label>Max No. of Files</Label>
                   <FormControl>
-                    <Input type="number" placeholder="00" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="00"
+                      {...field}
+                      value={field.value || 1} // Ensure value is never undefined
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === ""
+                            ? 1
+                            : Number.parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -882,7 +921,19 @@ function Config({
                 <FormItem>
                   <Label>Max Size per File (MB)</Label>
                   <FormControl>
-                    <Input type="number" placeholder="15 MB" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="15 MB"
+                      {...field}
+                      value={field.value.toString()} // Ensure value is never undefined
+                      onChange={(e) => {
+                        const value = Number.parseInt(e.target.value);
+                        // Limit to 500 MB maximum
+                        const limitedValue = Math.min(value, 500);
+                        field.onChange(limitedValue);
+                      }}
+                      max={500} // HTML attribute to limit input
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -900,7 +951,19 @@ function Config({
                 <FormItem>
                   <Label>Max No. of Files</Label>
                   <FormControl>
-                    <Input type="number" placeholder="00" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="00"
+                      {...field}
+                      value={field.value || 1} // Ensure value is never undefined
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === ""
+                            ? 1
+                            : Number.parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -913,7 +976,19 @@ function Config({
                 <FormItem>
                   <Label>Max Size per File (MB)</Label>
                   <FormControl>
-                    <Input type="number" placeholder="15 MB" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="15 MB"
+                      {...field}
+                      value={field.value.toString()} // Ensure value is never undefined
+                      onChange={(e) => {
+                        const value = Number.parseInt(e.target.value);
+                        // Limit to 500 MB maximum
+                        const limitedValue = Math.min(value, 500);
+                        field.onChange(limitedValue);
+                      }}
+                      max={500} // HTML attribute to limit input
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -956,7 +1031,19 @@ function Config({
               <FormItem>
                 <Label>Max No. of Links</Label>
                 <FormControl>
-                  <Input type="number" placeholder="00" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="00"
+                    {...field}
+                    value={field.value || 1} // Ensure value is never undefined
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === ""
+                          ? 1
+                          : Number.parseInt(e.target.value);
+                      field.onChange(value);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

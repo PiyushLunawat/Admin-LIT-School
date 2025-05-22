@@ -11,7 +11,7 @@ const InterviewDetails = dynamic(
     import("@/components/interviews/details/interview-details").then(
       (m) => m.InterviewDetails
     ),
-  { ssr: false }
+  { ssr: true }
 );
 
 export async function generateStaticParams() {

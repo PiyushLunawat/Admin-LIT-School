@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
+  PopoverClose,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
@@ -180,36 +182,8 @@ export function CollaboratorsForm({
     const role = form.getValues(`collaborators.${index}.role`);
     form.setValue(`collaborators.${index}.email`, emailVal);
     form.clearErrors(`collaborators.${index}.email`);
-    if (!emailVal) {
-      form.setError(`collaborators.${index}.email`, {
-        type: "manual",
-        message: "Please enter a valid email address",
-      });
-    }
-  };
 
-  // Add a new function to handle blur validation
-  const handleEmailBlur = async (index: number) => {
-    const emailVal = form.getValues(`collaborators.${index}.email`).trim();
-    const role = form.getValues(`collaborators.${index}.role`);
-
-    // Clear any existing errors first
-    form.clearErrors(`collaborators.${index}.email`);
-
-    // Only validate if there's actually an email to check
-    if (!emailVal) return;
-
-    // Check if it's a complete email format
-    const isCompleteEmail =
-      emailVal.includes("@") &&
-      emailVal.includes(".") &&
-      emailVal.indexOf("@") < emailVal.lastIndexOf(".") &&
-      emailVal.lastIndexOf(".") < emailVal.length - 1;
-
-    if (
-      isCompleteEmail &&
-      ["interviewer", "Litmus_test_reviewer"].includes(role)
-    ) {
+    if (emailVal && ["interviewer", "Litmus_test_reviewer"].includes(role)) {
       const result = await checkEmailExists(emailVal);
       if (!result.success) {
         form.setError(`collaborators.${index}.email`, {
@@ -217,12 +191,6 @@ export function CollaboratorsForm({
           message: "This email doesn't have an account on CalendLIT",
         });
       }
-    } else if (emailVal && !isCompleteEmail) {
-      // If there's text but it's not a valid email format
-      form.setError(`collaborators.${index}.email`, {
-        type: "manual",
-        message: "Please enter a valid email address",
-      });
     }
   };
 
@@ -444,7 +412,9 @@ export function CollaboratorsForm({
                             )}?`}
                           </div>
                           <div className="flex gap-2 justify-end">
-                            <Button variant="outline">Cancel</Button>
+                            <PopoverClose asChild>
+                              <Button variant="outline">Cancel</Button>
+                            </PopoverClose>
                             <Button
                               className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
                               onClick={() =>
@@ -478,7 +448,6 @@ export function CollaboratorsForm({
                               placeholder="email@example.com"
                               value={field.value || ""}
                               onChange={(e) => handleCheckEmail(e, index)}
-                              onBlur={() => handleEmailBlur(index)}
                             />
                             {fields.length > 1 && (
                               <Popover>
@@ -502,7 +471,9 @@ export function CollaboratorsForm({
                                     )}?`}
                                   </div>
                                   <div className="flex gap-2 justify-end">
-                                    <Button variant="outline">Cancel</Button>
+                                    <PopoverClose asChild>
+                                      <Button variant="outline">Cancel</Button>
+                                    </PopoverClose>
                                     <Button
                                       className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
                                       onClick={() =>
@@ -606,7 +577,12 @@ export function CollaboratorsForm({
         <div className="flex gap-2">
           {anyNotInvited && (
             <Button
-              disabled={!form.formState.isValid}
+              disabled={fields.every(
+                (field, i) =>
+                  !field.email ||
+                  !field.role ||
+                  !!form.formState.errors?.collaborators?.[i]
+              )}
               variant="outline"
               type="button"
               className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"

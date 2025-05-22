@@ -5,7 +5,7 @@ const StudentDetails = dynamic(
     import("@/components/students/student-details").then(
       (m) => m.StudentDetails
     ),
-  { ssr: false }
+  { ssr: true }
 );
 
 export default async function StudentDetailsPage({
