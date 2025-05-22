@@ -1,9 +1,17 @@
 "use client";
 
-import { cn } from "@/lib/utils/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutDashboard, School, Building2, Users, ClipboardList, Calendar, GraduationCap, CreditCard, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils/utils";
+import {
+  BookOpen,
+  Building2,
+  ChevronLeft,
+  LayoutDashboard,
+  School,
+  Users,
+} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -62,26 +70,55 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className={cn(
-      "relative border-r bg-background",
-      isCollapsed ? "w-[60px]" : "w-[240px]",
-      "transition-all duration-300 ease-in-out"
-    )}>
+    <div
+      className={cn(
+        "relative border-r bg-background",
+        isCollapsed ? "w-[60px]" : "w-[240px]",
+        "transition-all duration-300 ease-in-out"
+      )}
+    >
       <div className="h-full px-3 py-4">
         <div className="mb-10 flex h-[60px] items-center px-2">
-          <Link href="/dashboard" className={cn(
-            "flex items-center",
-            isCollapsed ? "justify-center" : "px-2"
-          )}>
+          <Link
+            href="/dashboard"
+            className={cn(
+              "flex items-center",
+              isCollapsed ? "justify-center" : "px-2"
+            )}
+          >
             {isCollapsed ? (
               <>
-                <img src="/assets/images/lit-logo.svg" alt="LIT" className=" h-6 hidden dark:block" />
-                <img src="/assets/images/lit-logo-dark.svg" alt="LIT" className=" h-46 dark:hidden" />        
+                <Image
+                  src="/assets/images/lit-logo.svg"
+                  alt="LIT"
+                  width={32}
+                  height={32}
+                  className="h-6 w-6 hidden dark:block"
+                />
+                <Image
+                  src="/assets/images/lit-logo-dark.svg"
+                  alt="LIT"
+                  width={32}
+                  height={32}
+                  className="h-6 w-6 dark:hidden"
+                />
               </>
             ) : (
               <h1 className="flex items-center gap-1 text-2xl font-bold light:hidden">
-                <img src="/assets/images/lit-logo.svg" alt="LIT" className=" h-8 hidden dark:block" />
-                <img src="/assets/images/lit-logo-dark.svg" alt="LIT" className=" h-8 dark:hidden" />                
+                <Image
+                  src="/assets/images/lit-logo.svg"
+                  alt="LIT"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 hidden dark:block"
+                />
+                <Image
+                  src="/assets/images/lit-logo-dark.svg"
+                  alt="LIT"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 dark:hidden"
+                />
                 School
               </h1>
             )}
@@ -101,7 +138,9 @@ export function Sidebar() {
                 asChild
               >
                 <Link href={route.href} className="flex items-center">
-                  <route.icon className={cn("h-6 w-6", !isCollapsed && "mr-2")} />
+                  <route.icon
+                    className={cn("h-6 w-6", !isCollapsed && "mr-2")}
+                  />
                   {!isCollapsed && route.label}
                 </Link>
               </Button>

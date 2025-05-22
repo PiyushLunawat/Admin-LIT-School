@@ -1,5 +1,11 @@
 "use client";
 
+import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
+import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -8,17 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Eye, CheckCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
-import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
-import { DocumentsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { CheckCircle, Eye } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ApplicationsListProps {
   applications: any;
@@ -28,7 +32,14 @@ interface ApplicationsListProps {
   onApplicationUpdate: () => void;
 }
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "onhold" | "pending" | "default";
+type BadgeVariant =
+  | "destructive"
+  | "warning"
+  | "secondary"
+  | "success"
+  | "onhold"
+  | "pending"
+  | "default";
 
 export function ApplicationsList({
   applications,
@@ -37,9 +48,10 @@ export function ApplicationsList({
   onSelectedIdsChange,
   onApplicationUpdate,
 }: ApplicationsListProps) {
-
   const [open, setOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+    null
+  );
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   const toggleSelectAll = () => {
@@ -52,7 +64,9 @@ export function ApplicationsList({
 
   const toggleSelectApplication = (id: string) => {
     if (selectedIds.includes(id)) {
-      onSelectedIdsChange(selectedIds.filter(selectedId => selectedId !== id));
+      onSelectedIdsChange(
+        selectedIds.filter((selectedId) => selectedId !== id)
+      );
     } else {
       onSelectedIdsChange([...selectedIds, id]);
     }
@@ -92,16 +106,16 @@ export function ApplicationsList({
     }
   };
 
-    useEffect(() => {
-      if (applications.length > 0) {
-        const firstApplication = applications[0];
-        setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
-        onApplicationSelect(firstApplication); // Call the onApplicationSelect function for the first application
-      } else {
-        setSelectedRowId(null);
-        onApplicationSelect(null);
-      }
-    }, [applications]);
+  useEffect(() => {
+    if (applications.length > 0) {
+      const firstApplication = applications[0];
+      setSelectedRowId(firstApplication._id); // Set the selected row ID to the first application
+      onApplicationSelect(firstApplication); // Call the onApplicationSelect function for the first application
+    } else {
+      setSelectedRowId(null);
+      onApplicationSelect(null);
+    }
+  }, [applications, onApplicationSelect]);
 
   return (
     <div className="border rounded-lg">
@@ -123,90 +137,132 @@ export function ApplicationsList({
         </TableHeader>
         <TableBody>
           {applications.map((application: any) => {
-            const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+            const latestCohort =
+              application?.appliedCohorts?.[
+                application?.appliedCohorts.length - 1
+              ];
             const applicationDetails = latestCohort?.applicationDetails;
-           
-           return (
-            <TableRow 
-              key={application._id}
-              className={`cursor-pointer ${selectedRowId === application._id ? "bg-muted" : ""}`}            
-              onClick={() => {
-                onApplicationSelect(application)
-                setSelectedRowId(application._id);
-              }}
-            >
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <Checkbox
-                  checked={selectedIds.includes(application._id)}
-                  onCheckedChange={() => toggleSelectApplication(application._id)}
-                />
-              </TableCell>
-              <TableCell className="font-medium">{application?.firstName || '-'} {application?.lastName || '-'}</TableCell>
-              <TableCell className="">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger className="max-w-[100px] truncate">{application?._id || "--"}</TooltipTrigger>
-                    <TooltipContent>
-                      <p>{application?._id || "--"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <div className="w-fit px-1.5 py-0.5 text-xs font-normal bg-[#FFFFFF]/10 rounded-sm">
-                  {latestCohort?.cohortId?.cohortId}
-                </div>
-              </TableCell>
-              <TableCell>
-                {new Date(applicationDetails?.updatedAt).toLocaleDateString() || "--"}
-              </TableCell>
-              <TableCell>
-                {applicationDetails?.applicationStatus ?
-                <Badge className="capitalize" variant={getStatusColor(['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
-                  'accepted' : applicationDetails?.applicationStatus || "--")}>
-                  {['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
-                  'accepted' : applicationDetails?.applicationStatus }
-                </Badge> : "--"}
-                {(applicationDetails?.applicationStatus === 'under review' && applicationDetails?.applicationTasks?.length > 1) &&
-                <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
-                  <CheckCircle className="w-3 h-3"/> App. Revised
-                </Badge>}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEyeClick(application);
-                  }}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          )})}
+
+            return (
+              <TableRow
+                key={application._id}
+                className={`cursor-pointer ${
+                  selectedRowId === application._id ? "bg-muted" : ""
+                }`}
+                onClick={() => {
+                  onApplicationSelect(application);
+                  setSelectedRowId(application._id);
+                }}
+              >
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selectedIds.includes(application._id)}
+                    onCheckedChange={() =>
+                      toggleSelectApplication(application._id)
+                    }
+                  />
+                </TableCell>
+                <TableCell className="font-medium">
+                  {application?.firstName || "-"} {application?.lastName || "-"}
+                </TableCell>
+                <TableCell className="">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="max-w-[100px] truncate">
+                        {application?._id || "--"}
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{application?._id || "--"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <div className="w-fit px-1.5 py-0.5 text-xs font-normal bg-[#FFFFFF]/10 rounded-sm">
+                    {latestCohort?.cohortId?.cohortId}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {new Date(
+                    applicationDetails?.updatedAt
+                  ).toLocaleDateString() || "--"}
+                </TableCell>
+                <TableCell>
+                  {applicationDetails?.applicationStatus ? (
+                    <Badge
+                      className="capitalize"
+                      variant={getStatusColor(
+                        [
+                          "interview scheduled",
+                          "waitlist",
+                          "selected",
+                          "not qualified",
+                        ].includes(applicationDetails?.applicationStatus)
+                          ? "accepted"
+                          : applicationDetails?.applicationStatus || "--"
+                      )}
+                    >
+                      {[
+                        "interview scheduled",
+                        "waitlist",
+                        "selected",
+                        "not qualified",
+                      ].includes(applicationDetails?.applicationStatus)
+                        ? "accepted"
+                        : applicationDetails?.applicationStatus}
+                    </Badge>
+                  ) : (
+                    "--"
+                  )}
+                  {applicationDetails?.applicationStatus === "under review" &&
+                    applicationDetails?.applicationTasks?.length > 1 && (
+                      <Badge className="capitalize flex items-center gap-1 bg-[#00A3FF1A] text-[#00A3FF] hover:bg-[#00A3FF]/20 w-fit">
+                        <CheckCircle className="w-3 h-3" /> App. Revised
+                      </Badge>
+                    )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEyeClick(application);
+                    }}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
       <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTitle></DialogTitle>
+        <DialogTitle></DialogTitle>
         <DialogContent className="flex flex-col gap-4 max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {selectedStudentId && (
-            <StudentApplicationHeader student={selectedStudentId} onUpdateStatus={() => onApplicationUpdate()}/>
+            <StudentApplicationHeader
+              student={selectedStudentId}
+              onUpdateStatus={() => onApplicationUpdate()}
+            />
           )}
 
-            <Tabs defaultValue="personal" className="space-y-6">
-              <TabsList className="w-full">
-                <TabsTrigger value="personal">Personal Details</TabsTrigger>
-                {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
-              </TabsList>
+          <Tabs defaultValue="personal" className="space-y-6">
+            <TabsList className="w-full">
+              <TabsTrigger value="personal">Personal Details</TabsTrigger>
+              {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
+            </TabsList>
 
-              <TabsContent value="personal">
-                <PersonalDetailsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate}/>
-              </TabsContent>
-             {/* 
+            <TabsContent value="personal">
+              <PersonalDetailsTab
+                student={selectedStudentId}
+                onUpdateStatus={handleStatusUpdate}
+              />
+            </TabsContent>
+            {/* 
               <TabsContent value="documents">
                 <DocumentsTab student={selectedStudentId} onUpdateStatus={handleStatusUpdate} />
               </TabsContent> */}
-            </Tabs>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

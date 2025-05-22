@@ -1,23 +1,39 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect, useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Form, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Form, FormMessage, } from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
-import { checkEmailExists, deleteCollaborator, editCollaborator, inviteCollaborators, updateCohort } from "@/app/api/cohorts";
+import {
+  checkEmailExists,
+  deleteCollaborator,
+  editCollaborator,
+  inviteCollaborators,
+  updateCohort,
+} from "@/app/api/cohorts";
 import { useToast } from "@/hooks/use-toast";
+import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
 
-// Roles array 
+// Roles array
 const roles = [
   // { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
@@ -52,7 +68,7 @@ export function CollaboratorsForm({
   initialData,
 }: CollaboratorsFormProps) {
   const formatCollaborators = (collaborators: any[] = []) => {
-    return collaborators.flatMap(collab =>
+    return collaborators.flatMap((collab) =>
       (collab.roles || []).map((roleObj: any) => ({
         email: collab.email || "",
         role: roleObj.role || "Unknown Role",
@@ -64,16 +80,26 @@ export function CollaboratorsForm({
       }))
     );
   };
-  
+
   // Usage
-  const formattedCollaborators = formatCollaborators(initialData?.collaborators || []);
+  const formattedCollaborators = formatCollaborators(
+    initialData?.collaborators || []
+  );
   console.log("one", formatCollaborators(initialData?.collaborators));
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       collaborators: formatCollaborators(initialData?.collaborators || []) || [
-        { email: "", role: "", isInvited: false, isAccepted: false, cohortId: "", collaboratorId: "", roleId: ""  },
+        {
+          email: "",
+          role: "",
+          isInvited: false,
+          isAccepted: false,
+          cohortId: "",
+          collaboratorId: "",
+          roleId: "",
+        },
       ],
     },
   });
@@ -82,7 +108,9 @@ export function CollaboratorsForm({
   const [inviteLoading, setInviteLoading] = useState(false);
   const [deleteLoading, setdeleteLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [editingCollaborator, setEditingCollaborator] = useState<number | null>(null);
+  const [editingCollaborator, setEditingCollaborator] = useState<number | null>(
+    null
+  );
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -91,7 +119,15 @@ export function CollaboratorsForm({
 
   useEffect(() => {
     if (fields.length === 0) {
-      append({ email: "", role: "", isInvited: false, isAccepted: false, cohortId: "", collaboratorId: "", roleId: "" });
+      append({
+        email: "",
+        role: "",
+        isInvited: false,
+        isAccepted: false,
+        cohortId: "",
+        collaboratorId: "",
+        roleId: "",
+      });
     }
   }, [fields, append]);
 
@@ -111,27 +147,30 @@ export function CollaboratorsForm({
   };
 
   const handleRoleChange = async (value: string, index: number) => {
-    form.setValue(`collaborators.${index}.role`, value);  // Directly set the role value
-    form.clearErrors(`collaborators.${index}.email`);  // Clear email errors
-  
-    if (['interviewer', 'Litmus_test_reviewer'].includes(value)) {
+    form.setValue(`collaborators.${index}.role`, value); // Directly set the role value
+    form.clearErrors(`collaborators.${index}.email`); // Clear email errors
+
+    if (["interviewer", "Litmus_test_reviewer"].includes(value)) {
       const emailVal = form.getValues(`collaborators.${index}.email`).trim();
-  
+
       // Check if email exists if the role is interviewer or evaluator
       if (emailVal) {
         const result = await checkEmailExists(emailVal);
         if (!result.success) {
-          form.setError(`collaborators.${index}.email`, {
-            type: "manual",
-            message: "This email doesn't have an account on Cal.LIT",
-          });
+          // Only show error if the email looks complete (contains "@" and ".")
+          if (emailVal.includes("@") && emailVal.includes(".")) {
+            form.setError(`collaborators.${index}.email`, {
+              type: "manual",
+              message: "This email doesn't have an account on Cal.LIT",
+            });
+          }
         } else {
           // Clear previous errors if email is valid
           form.clearErrors(`collaborators.${index}.email`);
         }
       }
     }
-  };  
+  };
 
   const handleCheckEmail = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -142,7 +181,7 @@ export function CollaboratorsForm({
     form.setValue(`collaborators.${index}.email`, emailVal);
     form.clearErrors(`collaborators.${index}.email`);
 
-    if (emailVal && ['interviewer', 'Litmus_test_reviewer'].includes(role)) {
+    if (emailVal && ["interviewer", "Litmus_test_reviewer"].includes(role)) {
       const result = await checkEmailExists(emailVal);
       if (!result.success) {
         form.setError(`collaborators.${index}.email`, {
@@ -158,7 +197,7 @@ export function CollaboratorsForm({
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setLoading(true)
+    setLoading(true);
     try {
       if (initialData?._id) {
         const collaboratorsToUpdate = data.collaborators.map((collab) => ({
@@ -172,26 +211,26 @@ export function CollaboratorsForm({
         const createdCohort = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
         });
-        console.log("A",createdCohort);
+        console.log("A", createdCohort);
 
         form.reset({
           collaborators: formatCollaborators(createdCohort.data.collaborators),
         });
         onCohortCreated(createdCohort.data);
-        onComplete(); 
+        onComplete();
       } else {
         console.error("Cohort ID is missing. Unable to update.");
       }
     } catch (error) {
       console.error("Failed to update cohort:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   const handleInvite = async (data: z.infer<typeof formSchema>) => {
     try {
-      setInviteLoading(true)
+      setInviteLoading(true);
       if (initialData?._id) {
         const collaboratorsToUpdate = data.collaborators.map((collab) => ({
           email: collab.email,
@@ -201,7 +240,7 @@ export function CollaboratorsForm({
         const updatedCohort = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
         });
-        console.log("updateCohort",updatedCohort);
+        console.log("updateCohort", updatedCohort);
         form.reset({
           collaborators: formatCollaborators(updatedCohort.data.collaborators),
         });
@@ -209,76 +248,113 @@ export function CollaboratorsForm({
 
         const invited = await inviteCollaborators(initialData._id);
 
-        console.log("invited",updatedCohort);
+        console.log("invited", updatedCohort);
 
-        toast({ title: "Collaborators invited successfully!", variant: "success" });
+        toast({
+          title: "Collaborators invited successfully!",
+          variant: "success",
+        });
 
         onCohortCreated(invited.data);
 
         form.reset({
           collaborators: invited.data.collaborators,
         });
-
       } else {
-        toast({ title: "Cohort ID is missing. Unable to invite collaborators!", variant: "destructive" });
+        toast({
+          title: "Cohort ID is missing. Unable to invite collaborators!",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Failed to invite collaborators:", error);
-      toast({ title: `Failed to invite collaborators:`, description:`${error}!`, variant: "destructive" });
+      toast({
+        title: `Failed to invite collaborators:`,
+        description: `${error}!`,
+        variant: "destructive",
+      });
     } finally {
-      setInviteLoading(false)
+      setInviteLoading(false);
     }
   };
 
-  const handleDeleteCollab = async (cId?: string, collabId?: string, role?: string,index?: number) => {
+  const handleDeleteCollab = async (
+    cId?: string,
+    collabId?: string,
+    role?: string,
+    index?: number
+  ) => {
     try {
       setdeleteLoading(true);
-      
-      if (cId && collabId && role && typeof index === 'number') {
-        const deletePayload = { 
-          cohortId: cId, 
-          collaboratorId: collabId, 
-          roleId: role 
+
+      if (cId && collabId && role && typeof index === "number") {
+        const deletePayload = {
+          cohortId: cId,
+          collaboratorId: collabId,
+          roleId: role,
         };
-        
-        const deleteRes = await deleteCollaborator(deletePayload);        
+
+        const deleteRes = await deleteCollaborator(deletePayload);
         if (index !== undefined) {
           remove(index);
         }
-        
-        toast({ title: "Collaborator deleted successfully!", variant: "success" });
-      } else if (typeof index === 'number') {
+
+        toast({
+          title: "Collaborator deleted successfully!",
+          variant: "success",
+        });
+      } else if (typeof index === "number") {
         remove(index);
       }
     } catch (error) {
       console.error("Failed to delete collaborators:", error);
-      toast({ title: `Failed to delete collaborator: ${error}!`, variant: "warning" });
+      toast({
+        title: `Failed to delete collaborator: ${error}!`,
+        variant: "warning",
+      });
     } finally {
       setdeleteLoading(false);
     }
   };
 
-  const handleSaveEdit = async (roleId?: string, collabId?: string, role?: string) => {
+  const handleSaveEdit = async (
+    roleId?: string,
+    collabId?: string,
+    role?: string
+  ) => {
     try {
-      setSaveLoading(true)
-      
-      const editPayload = { roleId: roleId, collaboratorId: collabId, role: role };
+      setSaveLoading(true);
+
+      const editPayload = {
+        roleId: roleId,
+        collaboratorId: collabId,
+        role: role,
+      };
       if (roleId && collabId && role) {
         const editResp = await editCollaborator(editPayload);
-        console.log("edited",editResp);
-        
-        // onCohortCreated(editResp.data);
-        toast({ title: "Collaborator edited successfully!", variant: "success" });
+        console.log("edited", editResp);
 
+        // onCohortCreated(editResp.data);
+        toast({
+          title: "Collaborator edited successfully!",
+          variant: "success",
+        });
       } else {
-        toast({ title: "Cohort ID is missing. Unable to edit collaborators!", variant: "warning" });
+        toast({
+          title: "Cohort ID is missing. Unable to edit collaborators!",
+          variant: "warning",
+        });
       }
     } catch (error) {
       console.error("Failed to edit collaborators:", error);
-      toast({ title: `Failed to edit collaborator:`,description: `${error}!`, variant: "warning" });
+      toast({
+        title: `Failed to edit collaborator:`,
+        description: `${error}!`,
+        variant: "warning",
+      });
     } finally {
-      setSaveLoading(false)
-      setEditingCollaborator(null)
+      setSaveLoading(false);
+      setEditingCollaborator(null);
     }
   };
 
@@ -294,7 +370,7 @@ export function CollaboratorsForm({
           {fields.map((collaborator, index) => (
             <Card key={collaborator.id}>
               <CardContent className="pt-6">
-                {(editingCollaborator !== index && collaborator.isInvited) ? (
+                {editingCollaborator !== index && collaborator.isInvited ? (
                   <div className="w-full flex grid-cols-3 justify-between items-center">
                     <div className="w-3/5 flex-1">{collaborator.email}</div>
                     <div className="w-1/5 flex gap-1 mx-auto items-center">
@@ -302,7 +378,6 @@ export function CollaboratorsForm({
                       <CheckCircle className="w-4 h-4 text-[#2EB88A]" />
                     </div>
                     <div className="flex gap-1 flex-1 justify-end items-center">
-
                       <div className="px-3 py-2 capitalize bg-[#262626] rounded">
                         {getRole(collaborator.role)}
                       </div>
@@ -311,8 +386,8 @@ export function CollaboratorsForm({
                         size="icon"
                         type="button"
                         onClick={() => handleEdit(index)} // On click, edit this collaborator
-                        >
-                        <SquarePen className="w-4 h-4"/>
+                      >
+                        <SquarePen className="w-4 h-4" />
                       </Button>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -320,7 +395,7 @@ export function CollaboratorsForm({
                             variant="ghost"
                             size="icon"
                             className="text-destructive"
-                            >
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </PopoverTrigger>
@@ -328,7 +403,7 @@ export function CollaboratorsForm({
                           align="end"
                           side="top"
                           className="max-w-[345px] w-full"
-                          >
+                        >
                           <div className="text-base font-medium mb-2">
                             {`Are you sure you would like to delete ${form.getValues(
                               `collaborators.${index}.email`
@@ -338,8 +413,15 @@ export function CollaboratorsForm({
                             <Button variant="outline">Cancel</Button>
                             <Button
                               className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
-                              onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId, index)}
-                              >
+                              onClick={() =>
+                                handleDeleteCollab(
+                                  collaborator.cohortId,
+                                  collaborator.collaboratorId,
+                                  collaborator.roleId,
+                                  index
+                                )
+                              }
+                            >
                               Delete
                             </Button>
                           </div>
@@ -348,107 +430,136 @@ export function CollaboratorsForm({
                     </div>
                   </div>
                 ) : (
-                <div className="grid gap-4">
-                  <div className="grid gap-3 flex-1">
-                    <Label>Email Address</Label>
+                  <div className="grid gap-4">
+                    <div className="grid gap-3 flex-1">
+                      <Label>Email Address</Label>
                       <Controller
-                      control={form.control}
-                      name={`collaborators.${index}.email`}
-                      render={({ field }) => (
-                        <div className="flex justify-between items-center">
-                          <Input
-                            disabled={collaborator.isInvited}
-                            type="email"
-                            placeholder="email@example.com"
-                            value={field.value || ""}
-                            onChange={(e) => handleCheckEmail(e, index)}               
-                          />
-                          {fields.length > 1 && (
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                align="end"
-                                side="top"
-                                className="max-w-[345px] w-full"
-                              >
-                                <div className="text-base font-medium mb-2">
-                                  {`Are you sure you would like to delete ${form.getValues(
-                                    `collaborators.${index}.email`
-                                  )}?`}
-                                </div>
-                                <div className="flex gap-2 justify-end">
-                                  <Button variant="outline">Cancel</Button>
+                        control={form.control}
+                        name={`collaborators.${index}.email`}
+                        render={({ field }) => (
+                          <div className="flex justify-between items-center">
+                            <Input
+                              disabled={collaborator.isInvited}
+                              type="email"
+                              placeholder="email@example.com"
+                              value={field.value || ""}
+                              onChange={(e) => handleCheckEmail(e, index)}
+                            />
+                            {fields.length > 1 && (
+                              <Popover>
+                                <PopoverTrigger asChild>
                                   <Button
-                                    className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
-                                    onClick={() => handleDeleteCollab(collaborator.cohortId, collaborator.collaboratorId, collaborator.roleId, index )}
-                                    disabled={deleteLoading}
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-destructive"
                                   >
-                                    Delete
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          )}
-                        </div>
-                      )}
-                    />
-                    {/* Display any validation or manual error messages */}
-                    <FormMessage>
-                      {form.formState.errors?.collaborators?.[index]?.email?.message}
-                    </FormMessage>
-                  </div>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  align="end"
+                                  side="top"
+                                  className="max-w-[345px] w-full"
+                                >
+                                  <div className="text-base font-medium mb-2">
+                                    {`Are you sure you would like to delete ${form.getValues(
+                                      `collaborators.${index}.email`
+                                    )}?`}
+                                  </div>
+                                  <div className="flex gap-2 justify-end">
+                                    <Button variant="outline">Cancel</Button>
+                                    <Button
+                                      className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
+                                      onClick={() =>
+                                        handleDeleteCollab(
+                                          collaborator.cohortId,
+                                          collaborator.collaboratorId,
+                                          collaborator.roleId,
+                                          index
+                                        )
+                                      }
+                                      disabled={deleteLoading}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                          </div>
+                        )}
+                      />
+                      {/* Display any validation or manual error messages */}
+                      <FormMessage>
+                        {
+                          form.formState.errors?.collaborators?.[index]?.email
+                            ?.message
+                        }
+                      </FormMessage>
+                    </div>
 
-                  {/* -- Role Select -- */}
-                  <div className="grid gap-3">
-                    <Label>Role</Label>
-                    <Controller
-                      control={form.control}
-                      name={`collaborators.${index}.role`}
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={(value) => handleRoleChange(value, index)} // Only update the role value
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {roles.map((role) => (
-                              <SelectItem
-                                key={role.value}
-                                value={role.value}
-                                disabled={
-                                  // Example logic: only one "collector" allowed
-                                  role.value === "fee_collector" &&
-                                  fields.some(
-                                    (f) => f.role === role.value && f.id !== collaborator.id
-                                  )
-                                }
-                              >
-                                {role.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                    <FormMessage>
-                      {form.formState.errors?.collaborators?.[index]?.role?.message}
-                    </FormMessage>
+                    {/* -- Role Select -- */}
+                    <div className="grid gap-3">
+                      <Label>Role</Label>
+                      <Controller
+                        control={form.control}
+                        name={`collaborators.${index}.role`}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={(value) =>
+                              handleRoleChange(value, index)
+                            } // Only update the role value
+                            value={field.value}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {roles.map((role) => (
+                                <SelectItem
+                                  key={role.value}
+                                  value={role.value}
+                                  disabled={
+                                    // Example logic: only one "collector" allowed
+                                    role.value === "fee_collector" &&
+                                    fields.some(
+                                      (f) =>
+                                        f.role === role.value &&
+                                        f.id !== collaborator.id
+                                    )
+                                  }
+                                >
+                                  {role.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      <FormMessage>
+                        {
+                          form.formState.errors?.collaborators?.[index]?.role
+                            ?.message
+                        }
+                      </FormMessage>
+                    </div>
                   </div>
-                </div>
                 )}
                 {editingCollaborator === index && (
                   <div className="mt-3">
-                    <Button type="button" disabled={saveLoading} onClick={() => handleSaveEdit(collaborator.roleId, collaborator.collaboratorId, form.getValues(`collaborators.${index}.role`))}>Save</Button>
+                    <Button
+                      type="button"
+                      disabled={saveLoading}
+                      onClick={() =>
+                        handleSaveEdit(
+                          collaborator.roleId,
+                          collaborator.collaboratorId,
+                          form.getValues(`collaborators.${index}.role`)
+                        )
+                      }
+                    >
+                      Save
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -458,17 +569,18 @@ export function CollaboratorsForm({
 
         {/* Invite and add collaborator buttons */}
         <div className="flex gap-2">
-          {anyNotInvited &&
+          {anyNotInvited && (
             <Button
+              disabled={!form.formState.isValid}
               variant="outline"
               type="button"
               className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
               onClick={() => handleInvite(form.getValues())}
             >
               <Send className="mr-2 h-4 w-4" />
-              {inviteLoading ? 'Sending Invite...' : 'Invite Collaborator'}
+              {inviteLoading ? "Sending Invite..." : "Invite Collaborator"}
             </Button>
-          }
+          )}
           <Button
             onClick={() => append({ email: "", role: "", isInvited: false })}
             variant="outline"

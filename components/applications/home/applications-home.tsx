@@ -1,18 +1,20 @@
 "use client";
 
+import { getStudents } from "@/app/api/student";
+import { useEffect, useState } from "react";
 import { MetricsGrid } from "./metrics-grid";
 import { RecentActivity } from "./recent-activity";
 import { UpcomingDeadlines } from "./upcoming-deadlines";
-import { QuickActions } from "./quick-actions";
-import { useEffect, useState } from "react";
-import { getStudents } from "@/app/api/student";
 
 interface ApplicationsHomeProps {
   initialApplications: any;
   setInitialApplications: (apps: any) => void;
 }
 
-export function ApplicationsHome({ initialApplications, setInitialApplications }: ApplicationsHomeProps) {
+export function ApplicationsHome({
+  initialApplications,
+  setInitialApplications,
+}: ApplicationsHomeProps) {
   const [applications, setApplications] = useState<any>(initialApplications);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -24,9 +26,11 @@ export function ApplicationsHome({ initialApplications, setInitialApplications }
         const response = await getStudents();
 
         // 2) Filter Out Students with No Application Details
-        const validStudents = response.data.filter(
-          (student: any) => 
-            ['applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+        const validStudents = response.data.filter((student: any) =>
+          ["applied", "reviewing", "enrolled", "dropped"].includes(
+            student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+              ?.status
+          )
         );
         setApplications(validStudents);
         setInitialApplications(validStudents);
@@ -37,16 +41,18 @@ export function ApplicationsHome({ initialApplications, setInitialApplications }
       }
     }
     fetchAndFilterStudents();
-  }, []);
+  }, [setInitialApplications]);
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Welcome back, Sarah!</h2>
-        <p className="text-muted-foreground">Here&apos;s an overview of your review queue</p>
+        <p className="text-muted-foreground">
+          Here&apos;s an overview of your review queue
+        </p>
       </div>
 
-      <MetricsGrid applications={applications}/>
+      <MetricsGrid applications={applications} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
