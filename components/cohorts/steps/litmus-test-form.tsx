@@ -60,6 +60,7 @@ const s3Client = new S3Client({
   },
 });
 
+// Modified schema to ensure numeric fields have default values
 const formSchema = z.object({
   litmusTasks: z.array(
     z.object({
@@ -70,10 +71,10 @@ const formSchema = z.object({
         z.object({
           id: z.string(),
           type: z.string().nonempty("Submission type is required"),
-          characterLimit: z.coerce.number().min(1).optional(),
-          maxFiles: z.coerce.string().min(1).optional(),
-          maxFileSize: z.coerce.string().min(1).optional(),
-          allowedTypes: z.array(z.string()).optional(),
+          characterLimit: z.coerce.number().min(1).default(1000),
+          maxFiles: z.coerce.string().min(1).default("1"),
+          maxFileSize: z.coerce.string().min(1).default("500"),
+          allowedTypes: z.array(z.string()).default(["All"]),
         })
       ),
       judgmentCriteria: z.array(
@@ -102,33 +103,6 @@ const formSchema = z.object({
       cohortId: z.string().optional(),
     })
   ),
-  // .superRefine((slabs, ctx) => {
-  //   const ranges = slabs.map((slab, index) => {
-  //     const [start, end] = slab.clearance.split('-').map(Number);
-  //     return { start, end, index };
-  //   });
-
-  //   // Check for overlapping ranges
-  //   for (let i = 0; i < ranges.length; i++) {
-  //     for (let j = i + 1; j < ranges.length; j++) {
-  //       const a = ranges[i];
-  //       const b = ranges[j];
-
-  //       if (a.start < b.end && b.start < a.end) {
-  //         ctx.addIssue({
-  //           code: z.ZodIssueCode.custom,
-  //           message: "Clearance range overlaps with another slab",
-  //           path: [`scholarshipSlabs.${a.index}.clearance`],
-  //         });
-  //         ctx.addIssue({
-  //           code: z.ZodIssueCode.custom,
-  //           message: "Clearance range overlaps with another slab",
-  //           path: [`scholarshipSlabs.${b.index}.clearance`],
-  //         });
-  //       }
-  //     }
-  //   }
-  // }),
   litmusTestDuration: z.string().nonempty("Duration is required"),
 });
 
@@ -165,9 +139,9 @@ export function LitmusTestForm({
                 {
                   id: generateId(),
                   type: "",
-                  characterLimit: undefined,
-                  maxFiles: undefined,
-                  maxFileSize: undefined,
+                  characterLimit: 1000, // Default value
+                  maxFiles: "1", // Default value
+                  maxFileSize: "500", // Default value
                   allowedTypes: ["All"],
                 },
               ],
@@ -338,9 +312,9 @@ export function LitmusTestForm({
                   {
                     id: generateId(),
                     type: "",
-                    characterLimit: undefined,
-                    maxFiles: undefined,
-                    maxFileSize: undefined,
+                    characterLimit: 1000, // Default value
+                    maxFiles: "1", // Default value
+                    maxFileSize: "500", // Default value
                     allowedTypes: ["All"],
                   },
                 ],
@@ -604,9 +578,9 @@ function TaskItem({
                 appendSubmissionType({
                   id: generateId(),
                   type: "",
-                  characterLimit: undefined,
-                  maxFiles: undefined,
-                  maxFileSize: undefined,
+                  characterLimit: 1000, // Default value
+                  maxFiles: "1", // Default value
+                  maxFileSize: "500", // Default value
                   allowedTypes: [],
                 })
               }
@@ -731,6 +705,14 @@ function renderConfigFields(
                   type="number"
                   placeholder="Enter maximum characters"
                   {...field}
+                  value={field.value || 1000} // Ensure value is never undefined
+                  onChange={(e) => {
+                    const value =
+                      e.target.value === ""
+                        ? 1000
+                        : Number.parseInt(e.target.value);
+                    field.onChange(value);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -749,7 +731,17 @@ function renderConfigFields(
               <FormItem>
                 <Label>Max No. of Files</Label>
                 <FormControl>
-                  <Input type="number" placeholder="00" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="00"
+                    {...field}
+                    value={field.value || "1"} // Ensure value is never undefined
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "1" : e.target.value;
+                      field.onChange(value);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -762,7 +754,19 @@ function renderConfigFields(
               <FormItem>
                 <Label>Max Size per File(MB)</Label>
                 <FormControl>
-                  <Input type="number" placeholder="15 MB" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="15 MB"
+                    {...field}
+                    value={field.value.toString()} // Ensure value is never undefined
+                    onChange={(e) => {
+                      const value = Number.parseInt(e.target.value);
+                      // Limit to 500 MB maximum
+                      const limitedValue = Math.min(value, 500);
+                      field.onChange(limitedValue);
+                    }}
+                    max={500} // HTML attribute to limit input
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -782,7 +786,17 @@ function renderConfigFields(
               <FormItem>
                 <Label>Max No. of Files</Label>
                 <FormControl>
-                  <Input type="number" placeholder="00" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="00"
+                    {...field}
+                    value={field.value || "1"} // Ensure value is never undefined
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "1" : e.target.value;
+                      field.onChange(value);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -795,7 +809,19 @@ function renderConfigFields(
               <FormItem>
                 <Label>Max Size per File(MB)</Label>
                 <FormControl>
-                  <Input type="number" placeholder="15 MB" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="15 MB"
+                    {...field}
+                    value={field.value.toString()} // Ensure value is never undefined
+                    onChange={(e) => {
+                      const value = Number.parseInt(e.target.value);
+                      // Limit to 500 MB maximum
+                      const limitedValue = Math.min(value, 500);
+                      field.onChange(limitedValue);
+                    }}
+                    max={500} // HTML attribute to limit input
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -866,7 +892,16 @@ function renderConfigFields(
             <FormItem className="w-1/2">
               <Label>Max No. of Links</Label>
               <FormControl>
-                <Input type="number" placeholder="00" {...field} />
+                <Input
+                  type="number"
+                  placeholder="00"
+                  {...field}
+                  value={field.value || "1"} // Ensure value is never undefined
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? "1" : e.target.value;
+                    field.onChange(value);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -884,6 +919,15 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState("");
+
+  // Add this helper function to format file sizes
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+    else if (bytes < 1024 * 1024 * 1024)
+      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    else return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+  };
 
   const {
     fields: linkFields,
@@ -905,7 +949,7 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
-    setUploadProgress(1);
+    setUploadProgress(0);
 
     const selectedFiles = e.target.files;
     if (!selectedFiles || selectedFiles.length === 0) return;
@@ -916,13 +960,17 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
     const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB in bytes
     if (file.size > MAX_FILE_SIZE) {
       setError(
-        `File size exceeds the 500 MB limit. Please select a smaller file.`
+        `File size exceeds the 500 MB limit. Current size: ${(
+          file.size /
+          (1024 * 1024)
+        ).toFixed(2)} MB. Please select a smaller file.`
       );
       e.target.value = ""; // Clear the file input
       return;
     }
 
     setFileName(file.name);
+    const fileKey = generateUniqueFileName(file.name);
 
     // Example size limit for direct vs. multipart: 5MB
     const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -1212,13 +1260,14 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
           }}
         >
           <FileIcon className="w-4 h-4" />
-          Upload Resource File
+          Upload Resource File (Max: 500 MB)
         </Button>
         <input
           type="file"
           id={`file-upload-${taskIndex}`}
           style={{ display: "none" }}
           onChange={handleFileChange}
+          accept="*/*" // You can restrict this further if needed
         />
         <Button
           type="button"
@@ -1229,7 +1278,11 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
           <Link2Icon className="w-4 h-4" /> Attach Resource Link
         </Button>
       </div>
-      {error && <p className="text-red-500">{error}</p>}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 rounded-md p-2 mt-2">
+          <p className="text-red-500 text-sm font-medium">{error}</p>
+        </div>
+      )}
     </div>
   );
 }

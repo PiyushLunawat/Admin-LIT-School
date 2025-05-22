@@ -5,7 +5,7 @@ const CohortDashboard = dynamic(
     import("@/components/cohorts/dashboard/cohort-dashboard").then(
       (m) => m.CohortDashboard
     ),
-  { ssr: false }
+  { ssr: true }
 );
 
 export default async function CohortDashboardPage({
