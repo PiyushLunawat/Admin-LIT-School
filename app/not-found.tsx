@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import router from "next/router";
+
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   // Show the "Debug Trace" drawer only in non-production environments.
@@ -17,7 +18,6 @@ export default function NotFound() {
   const traceTitle = "Debug Trace";
 
   return (
-    // <Drawer>
     <div className="flex flex-col items-center justify-center h-screen text-center">
       <Link href="/" className="items-center space-x-2 flex">
         <Image
@@ -43,32 +43,6 @@ export default function NotFound() {
           back
         </Button>
       </div>
-
-      {/* {showTrace && (
-          <DrawerTrigger asChild>
-            <Button variant="link">View Trace</Button>
-          </DrawerTrigger>
-        )} */}
     </div>
-
-    //   {showTrace && (
-    //     <DrawerContent>
-    //       <div className="mx-auto w-full">
-    //         <DrawerHeader>
-    //           <DrawerTitle>Debug Trace</DrawerTitle>
-    //           <DrawerDescription>{traceTitle}</DrawerDescription>
-    //         </DrawerHeader>
-    //         <div className="w-full p-4 pb-0 overflow-y-auto h-[70vh]">
-    //           <pre>{stackTrace}</pre>
-    //         </div>
-    //         <DrawerFooter>
-    //           <DrawerClose asChild>
-    //             <Button variant="outline">Close</Button>
-    //           </DrawerClose>
-    //         </DrawerFooter>
-    //       </div>
-    //     </DrawerContent>
-    //   )}
-    // </Drawer>
   );
 }

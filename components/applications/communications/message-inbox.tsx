@@ -1,26 +1,26 @@
 "use client";
 
+import { Mail, Search } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Mail } from "lucide-react";
-import { MessageThread } from "./message-thread";
+import { Message } from "@/types/components/applications/communications/message-inbox";
 
-interface Message {
-  id: string;
-  applicantName: string;
-  applicationId: string;
-  lastMessage: string;
-  timestamp: string;
-  unread: boolean;
-}
+const MessageThread = dynamic(
+  () => import("./message-thread").then((mod) => mod.MessageThread),
+  {
+    ssr: false,
+  }
+);
 
 export function MessageInbox() {
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
-  
+
   const messages: Message[] = [
     {
       id: "1",

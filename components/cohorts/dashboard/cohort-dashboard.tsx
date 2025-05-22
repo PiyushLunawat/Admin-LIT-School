@@ -1,23 +1,53 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CohortHeader } from "@/components/cohorts/dashboard/cohort-header";
-import { OverviewTab } from "@/components/cohorts/dashboard/tabs/overview/overview-tab";
-import { ApplicationsTab } from "@/components/cohorts/dashboard/tabs/applications/applications-tab";
-import { LitmusTab } from "@/components/cohorts/dashboard/tabs/litmus/litmus-tab";
-import { PaymentsTab } from "@/components/cohorts/dashboard/tabs/payments/payments-tab";
-import { CommunicationsTab } from "@/components/cohorts/dashboard/tabs/communications/communications-tab";
-
+import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 
-interface CohortDashboardProps {
-  cohortId: string;
-}
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export function CohortDashboard({ cohortId }: CohortDashboardProps) {
+const CohortHeader = dynamic(
+  () =>
+    import("@/components/cohorts/dashboard/cohort-header").then(
+      (m) => m.CohortHeader
+    ),
+  { ssr: false }
+);
+
+const OverviewTab = dynamic(
+  () =>
+    import("@/components/cohorts/dashboard/tabs/overview/overview-tab").then(
+      (m) => m.OverviewTab
+    ),
+  { ssr: false }
+);
+
+const ApplicationsTab = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/applications-tab"
+    ).then((m) => m.ApplicationsTab),
+  { ssr: false }
+);
+
+const LitmusTab = dynamic(
+  () =>
+    import("@/components/cohorts/dashboard/tabs/litmus/litmus-tab").then(
+      (m) => m.LitmusTab
+    ),
+  { ssr: false }
+);
+
+const PaymentsTab = dynamic(
+  () =>
+    import("@/components/cohorts/dashboard/tabs/payments/payments-tab").then(
+      (m) => m.PaymentsTab
+    ),
+  { ssr: false }
+);
+
+export function CohortDashboard({ cohortId }: { cohortId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabQueryParam = searchParams.get("tab") || "overview";

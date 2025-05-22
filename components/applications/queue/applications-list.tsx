@@ -1,7 +1,5 @@
 "use client";
 
-import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
-import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,25 +19,30 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  ApplicationsListProps,
+  BadgeVariant,
+} from "@/types/components/applications/queue/application-list";
 import { CheckCircle, Eye } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+const StudentApplicationHeader = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header"
+    ).then((m) => m.StudentApplicationHeader),
+  {
+    ssr: false,
+  }
+);
 
-interface ApplicationsListProps {
-  applications: any;
-  onApplicationSelect: (id: any) => void;
-  selectedIds: string[];
-  onSelectedIdsChange: (ids: string[]) => void;
-  onApplicationUpdate: () => void;
-}
-
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "onhold"
-  | "pending"
-  | "default";
+const PersonalDetailsTab = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab"
+    ).then((m) => m.PersonalDetailsTab),
+  { ssr: false }
+);
 
 export function ApplicationsList({
   applications,

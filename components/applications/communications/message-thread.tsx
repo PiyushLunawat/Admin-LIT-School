@@ -1,28 +1,27 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send } from "lucide-react";
 
-interface MessageThreadProps {
-  threadId: string;
-}
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MessageThreadProps } from "@/types/components/applications/communications/message-thread";
 
-export function MessageThread({ threadId }: MessageThreadProps) {
-  // In a real app, fetch messages based on threadId
+export function MessageThread({}: MessageThreadProps) {
   const messages = [
     {
       id: "1",
       sender: "reviewer",
-      content: "Hello! I've reviewed your application and need some additional information.",
+      content:
+        "Hello! I've reviewed your application and need some additional information.",
       timestamp: "10:30 AM",
     },
     {
       id: "2",
       sender: "applicant",
-      content: "Sure, I'd be happy to provide more details. What information do you need?",
+      content:
+        "Sure, I'd be happy to provide more details. What information do you need?",
       timestamp: "10:35 AM",
     },
   ];

@@ -1,26 +1,21 @@
 "use client";
 
-import { getStudents } from "@/app/api/student";
 import { useEffect, useState } from "react";
+
+import { getStudents } from "@/app/api/student";
+import { ApplicationsHomeProps } from "@/types/components/applications/home/application-home";
 import { MetricsGrid } from "./metrics-grid";
 import { RecentActivity } from "./recent-activity";
 import { UpcomingDeadlines } from "./upcoming-deadlines";
-
-interface ApplicationsHomeProps {
-  initialApplications: any;
-  setInitialApplications: (apps: any) => void;
-}
 
 export function ApplicationsHome({
   initialApplications,
   setInitialApplications,
 }: ApplicationsHomeProps) {
   const [applications, setApplications] = useState<any>(initialApplications);
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchAndFilterStudents() {
-      setLoading(true);
       try {
         // 1) Fetch All Students
         const response = await getStudents();
@@ -36,8 +31,6 @@ export function ApplicationsHome({
         setInitialApplications(validStudents);
       } catch (error) {
         console.error("Error fetching students:", error);
-      } finally {
-        setLoading(false);
       }
     }
     fetchAndFilterStudents();

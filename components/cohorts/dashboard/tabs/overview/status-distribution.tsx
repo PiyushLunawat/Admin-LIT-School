@@ -1,59 +1,69 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 
-interface StatusDistributionProps {
-  applications: any;
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusDistributionProps } from "@/types/components/cohorts/dashboard/tabs/overview/status-distribution";
 
 export function StatusDistribution({ applications }: StatusDistributionProps) {
-    const [underReviewCount, setUnderReviewCount] = useState(0);
-    const [acceptedCount, setAcceptedCount] = useState(0);
-    const [onHoldCount, setOnHoldCount] = useState(0);
-    const [rejectedCount, setRejectedCount] = useState(0);
-  
-    useEffect(() => {
-      if (applications && Array.isArray(applications)) {
-  
-        // Under Review Count
-        const underReview = applications.filter(
-          (application) =>
-            application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus === "under review"
-        );
-        setUnderReviewCount(underReview.length);
-  
-        // Interviews Scheduled Count
-        const onhold = applications.filter(
-          (application) =>
-            ['on hold', 'waitlist'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus)
-        );
-        setOnHoldCount(onhold.length);
-  
-        const accepted = applications.filter(
-          (application) =>
-            ['accepted', 'waitlist', 'selected'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus)
-        );
-        setAcceptedCount(accepted.length);
+  const [underReviewCount, setUnderReviewCount] = useState(0);
+  const [acceptedCount, setAcceptedCount] = useState(0);
+  const [onHoldCount, setOnHoldCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
 
-        const rejected = applications.filter(
-          (application) =>
-            ['rejected', 'not qualified'].includes(application?.appliedCohorts?.[application?.appliedCohorts.length - 1]?.applicationDetails?.applicationStatus)
-        );
-        setRejectedCount(rejected.length);
+  useEffect(() => {
+    if (applications && Array.isArray(applications)) {
+      // Under Review Count
+      const underReview = applications.filter(
+        (application) =>
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]
+            ?.applicationDetails?.applicationStatus === "under review"
+      );
+      setUnderReviewCount(underReview.length);
 
-  
-      } else {
-        console.log("Applications data is not an array or is undefined.");
-      }
-    }, [applications]);
-    
+      // Interviews Scheduled Count
+      const onhold = applications.filter((application) =>
+        ["on hold", "waitlist"].includes(
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]
+            ?.applicationDetails?.applicationStatus
+        )
+      );
+      setOnHoldCount(onhold.length);
+
+      const accepted = applications.filter((application) =>
+        ["accepted", "waitlist", "selected"].includes(
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]
+            ?.applicationDetails?.applicationStatus
+        )
+      );
+      setAcceptedCount(accepted.length);
+
+      const rejected = applications.filter((application) =>
+        ["rejected", "not qualified"].includes(
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1]
+            ?.applicationDetails?.applicationStatus
+        )
+      );
+      setRejectedCount(rejected.length);
+    } else {
+      console.log("Applications data is not an array or is undefined.");
+    }
+  }, [applications]);
+
   const data = [
-    { name: "Under Review", value: underReviewCount, color: "hsl(var(--chart-1))" },
+    {
+      name: "Under Review",
+      value: underReviewCount,
+      color: "hsl(var(--chart-1))",
+    },
     { name: "Shortlisted", value: acceptedCount, color: "hsl(var(--chart-2))" },
     { name: "On Hold", value: onHoldCount, color: "hsl(var(--muted))" },
-    { name: "Rejected", value: rejectedCount, color: "hsl(var(--destructive))" },
+    {
+      name: "Rejected",
+      value: rejectedCount,
+      color: "hsl(var(--destructive))",
+    },
   ];
 
   return (
@@ -75,7 +85,11 @@ export function StatusDistribution({ applications }: StatusDistributionProps) {
                 dataKey="value"
               >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color}
+                    stroke="none"
+                  />
                 ))}
               </Pie>
             </PieChart>

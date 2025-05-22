@@ -1,12 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, Clock } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, AlertTriangle } from "lucide-react";
-
-
-type BadgeVariant = "destructive" | "warning" | "secondary" | "default";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { BadgeVariant } from "@/types/components/applications/home/upcoming-deadlines";
 
 export function UpcomingDeadlines() {
   const deadlines = [
@@ -59,10 +58,7 @@ export function UpcomingDeadlines() {
       </CardHeader>
       <CardContent className="space-y-4">
         {deadlines.map((deadline) => (
-          <div
-            key={deadline.id}
-            className="space-y-1 p-4 border rounded-lg"
-          >
+          <div key={deadline.id} className="space-y-1 p-4 border rounded-lg">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -80,14 +76,14 @@ export function UpcomingDeadlines() {
                 Review Now
               </Button>
             </div>
-              <div className="flex justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Cohort ID: {deadline.applicationId}
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  Assigned to {deadline.assigineeName}
-                </div>
+            <div className="flex justify-between">
+              <p className="text-sm text-muted-foreground">
+                Cohort ID: {deadline.applicationId}
+              </p>
+              <div className="text-sm text-muted-foreground">
+                Assigned to {deadline.assigineeName}
               </div>
+            </div>
           </div>
         ))}
       </CardContent>

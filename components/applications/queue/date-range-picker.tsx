@@ -1,9 +1,10 @@
 "use client";
 
-import { CalendarIcon, X } from "lucide-react";
 import { addDays, format } from "date-fns";
+import { CalendarIcon, X } from "lucide-react";
+import { useCallback, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { cn } from "@/lib/utils/utils";
+
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -18,11 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
-
-interface DateRangePickerProps {
-  setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
-}
+import { cn } from "@/lib/utils/utils";
+import { DateRangePickerProps } from "@/types/components/applications/queue/date-range-picker";
 
 export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -58,7 +56,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
   return (
     <div className="flex items-center gap-4">
       <Select
-        value={selectedValue} 
+        value={selectedValue}
         onValueChange={(value) => {
           setSelectedValue(value);
           if (value === "all") {
@@ -67,7 +65,10 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
             const preset = presets.find((p) => p.value === value);
             if (preset) {
               const to = new Date();
-              const from = preset.days !== undefined ? addDays(to, preset.days) : undefined;
+              const from =
+                preset.days !== undefined
+                  ? addDays(to, preset.days)
+                  : undefined;
               handleDateChange({ from, to });
             }
           }
@@ -122,11 +123,16 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
           />
         </PopoverContent>
       </Popover>
-      {(date !== undefined ||  selectedValue !== "all") &&
-        <Button variant="ghost" size="icon" className="-ml-3" onClick={resetDateRange}>
+      {(date !== undefined || selectedValue !== "all") && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="-ml-3"
+          onClick={resetDateRange}
+        >
           <X className="h-4 w-4" />
         </Button>
-      }
+      )}
     </div>
   );
 }

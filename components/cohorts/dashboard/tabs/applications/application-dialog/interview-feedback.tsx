@@ -1,23 +1,22 @@
-import React, { useEffect, useState, ChangeEvent } from "react";
+"use client";
+
+import React, { ChangeEvent, useState } from "react";
+
+import { updateInterviewStatus } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { updateInterviewStatus } from "@/app/api/student";
 import { formatInput } from "@/lib/utils/helpers";
+import { InterviewFeedbackProps } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/interview-feedback";
 
-interface InterviewFeedbackProps {
-  name: string;
-  email: string;
-  phone: string;
-  applicationId: string;
-  initialStatus: string;
-  interview: any;
-  onClose: () => void;
-  onUpdateStatus: (status: string, feedback: { [key: string]: string[] }) => void;
-}
-
-const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
+export function InterviewFeedback({
   name,
   email,
   phone,
@@ -26,10 +25,12 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   interview,
   onClose,
   onUpdateStatus,
-}) => {
+}: InterviewFeedbackProps) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string>(initialStatus || "concluded");
-  const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[] }>({});
+  const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[] }>(
+    {}
+  );
   const [reason, setReason] = useState<string[]>([]);
   const [reasonItemValue, setReasonItemValue] = useState("• ");
 
@@ -39,8 +40,10 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
       setReasonItemValue("• ");
     }
   };
-  
-  const handleKeyDownForReasons = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+
+  const handleKeyDownForReasons = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     if (e.key === "Enter") {
       e.preventDefault();
       setReasonItemValue((prevValue) => {
@@ -66,17 +69,20 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
   };
 
   const canUpdate = (): boolean => {
-    return (reason.length > 0 && ['not qualified', 'waitlist', 'selected'].includes(status)); 
+    return (
+      reason.length > 0 &&
+      ["not qualified", "waitlist", "selected"].includes(status)
+    );
   };
 
   async function handleInterviewUpdate(newStatus: string) {
     setLoading(true);
     try {
       const validReasons = reason
-      .map((line) => line.trim().replace(/^•\s*/, "")) // Remove bullets and trim spaces
-      .filter((r) => r.trim() !== "");
+        .map((line) => line.trim().replace(/^•\s*/, "")) // Remove bullets and trim spaces
+        .filter((r) => r.trim() !== "");
       const meetingId = interview?._id;
-  
+
       // Build a normal object (not FormData)
       const payload = {
         meetingId,
@@ -86,11 +92,11 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
         applicationStatus: newStatus,
       };
       console.log("Interview update response", payload);
-  
+
       // Send it as JSON
       const response = await updateInterviewStatus(JSON.stringify(payload));
       console.log("Interview update response", response);
-  
+
       onUpdateStatus(newStatus, feedbacks);
       onClose();
     } catch (error) {
@@ -99,7 +105,6 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
       setLoading(false);
     }
   }
-  
 
   return (
     <div>
@@ -120,11 +125,11 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              {!['not qualified', 'waitlist', 'selected'].includes(status) &&
+              {!["not qualified", "waitlist", "selected"].includes(status) && (
                 <SelectItem className="capitalize" value={status}>
                   <span className="capitalize">{status}</span>
                 </SelectItem>
-              }
+              )}
               <SelectItem value="waitlist">Waitlist</SelectItem>
               <SelectItem value="selected">Accepted</SelectItem>
               <SelectItem value="not qualified">Rejected</SelectItem>
@@ -149,15 +154,14 @@ const InterviewFeedback: React.FC<InterviewFeedbackProps> = ({
         <Button
           className="w-full mt-4"
           onClick={() => handleInterviewUpdate(status)}
-          disabled={!canUpdate() || loading
+          disabled={
+            !canUpdate() || loading
             //  || latestCohort?.status === 'dropped'
-            }
+          }
         >
           Update Interview Status
         </Button>
       </div>
     </div>
   );
-};
-
-export default InterviewFeedback;
+}

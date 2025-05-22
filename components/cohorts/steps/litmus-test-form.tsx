@@ -39,12 +39,13 @@ import {
   Trash2,
   XIcon,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import {
   Controller,
   useFieldArray,
   useForm,
-  UseFormReturn,
+  type UseFormReturn,
 } from "react-hook-form";
 import { z } from "zod";
 
@@ -910,6 +911,17 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
     if (!selectedFiles || selectedFiles.length === 0) return;
 
     const file = selectedFiles[0];
+
+    // Add file size validation - 500 MB limit
+    const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+      setError(
+        `File size exceeds the 500 MB limit. Please select a smaller file.`
+      );
+      e.target.value = ""; // Clear the file input
+      return;
+    }
+
     setFileName(file.name);
 
     // Example size limit for direct vs. multipart: 5MB

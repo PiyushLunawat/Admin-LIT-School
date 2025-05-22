@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AvailabilitySettings } from "./availability-settings";
 import { ProfileSettings } from "./profile-settings";
 import { SecuritySettings } from "./security-settings";
-import { AvailabilitySettings } from "./availability-settings";
 
 export function SettingsTab() {
   return (

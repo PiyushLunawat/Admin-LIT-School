@@ -1,14 +1,13 @@
 "use client";
 
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { ScholarshipDistributionProps } from "@/types/components/cohorts/dashboard/tabs/overview/scholarship-distribution";
 
-interface ScholarshipDistributionProps {
-  cohortId: string;
-}
-
-export function ScholarshipDistribution({ cohortId }: ScholarshipDistributionProps) {
-  // In a real application, this data would be fetched based on the cohortId
+export function ScholarshipDistribution({
+  cohortId,
+}: ScholarshipDistributionProps) {
   const data = [
     {
       name: "Smart Mouth",

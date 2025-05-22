@@ -1,26 +1,11 @@
 "use client";
 
+import type React from "react";
+
+import { updateCohort } from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Trash2, GripVertical, XIcon, FolderPlus, Link2Icon, FileIcon, LoaderCircle } from "lucide-react";
-import { z } from "zod";
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -28,16 +13,39 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { updateCohort } from "@/app/api/cohorts";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useEffect, useState } from "react";
-import { Progress } from "@/components/ui/progress";
-import axios from "axios";
-
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  S3Client,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import {
+  FileIcon,
+  FolderPlus,
+  GripVertical,
+  Link2Icon,
+  LoaderCircle,
+  Plus,
+  Trash2,
+  XIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 const s3Client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -65,8 +73,10 @@ const formSchema = z.object({
             })
           ),
           resources: z.object({
-            resourceFiles: z.array(z.string().optional(),),
-            resourceLinks: z.array(z.string().url('Please enter a valid Link URL').optional(),),
+            resourceFiles: z.array(z.string().optional()),
+            resourceLinks: z.array(
+              z.string().url("Please enter a valid Link URL").optional()
+            ),
           }),
         })
       ),
@@ -89,7 +99,8 @@ export function ApplicationFormBuilder({
     resolver: zodResolver(formSchema),
     defaultValues: {
       applicationFormDetail:
-        initialData?.applicationFormDetail && initialData.applicationFormDetail.length > 0
+        initialData?.applicationFormDetail &&
+        initialData.applicationFormDetail.length > 0
           ? initialData.applicationFormDetail
           : [
               {
@@ -116,19 +127,17 @@ export function ApplicationFormBuilder({
               },
             ],
     },
-  });  
-  const [loading, setLoading] = useState(false);  
+  });
+  const [loading, setLoading] = useState(false);
   const { control, handleSubmit } = form;
 
-  const {
-    fields: applicationFormFields,
-  } = useFieldArray({
+  const { fields: applicationFormFields } = useFieldArray({
     control,
     name: "applicationFormDetail",
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setLoading(true)
+    setLoading(true);
     try {
       console.log("Form data before submission:", data);
 
@@ -145,7 +154,7 @@ export function ApplicationFormBuilder({
     } catch (error) {
       console.error("Failed to update cohort:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -155,15 +164,17 @@ export function ApplicationFormBuilder({
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-6 max-h-[80vh] p-4"
       >
-        {applicationFormFields.map((applicationFormField, applicationFormIndex) => (
-          <div key={applicationFormField.id} className="space-y-4">
-            <TaskList
-              nestIndex={applicationFormIndex}
-              control={control}
-              form={form}
-            />
-          </div>
-        ))}
+        {applicationFormFields.map(
+          (applicationFormField, applicationFormIndex) => (
+            <div key={applicationFormField.id} className="space-y-4">
+              <TaskList
+                nestIndex={applicationFormIndex}
+                control={control}
+                form={form}
+              />
+            </div>
+          )
+        )}
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={loading}>
@@ -227,7 +238,7 @@ function TaskList({ nestIndex, control, form }: any) {
         className="w-full flex gap-2 items-center"
         onClick={() =>
           appendTask({
-            id: Math.random().toString(36).substr(2, 9),
+            id: Math.random().toString(36).substring(2, 9),
             title: "",
             description: "",
             config: [
@@ -281,15 +292,15 @@ function Task({
       setUploadedFile(e.target.files[0]);
     }
   };
-  
+
   const handleRemoveFile = () => {
     setUploadedFile(null);
   };
-  
+
   const handleAddLink = () => {
     setAddedLink(resourceLink);
   };
-  
+
   const handleRemoveLink = () => {
     setAddedLink(null);
   };
@@ -307,7 +318,7 @@ function Task({
             name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.title`}
             render={({ field }: any) => (
               <FormItem>
-                <Label className="text-[#00A3FF]">Task 0{taskIndex+1}</Label>
+                <Label className="text-[#00A3FF]">Task 0{taskIndex + 1}</Label>
                 <FormControl>
                   <div className="flex gap-2">
                     <Input
@@ -316,20 +327,36 @@ function Task({
                     />
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button type="button" variant="ghost" size="icon" className="text-destructive" >
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent align="end" side="top" className="max-w-[345px] w-full">
+                      <PopoverContent
+                        align="end"
+                        side="top"
+                        className="max-w-[345px] w-full"
+                      >
                         <div className="text-base font-medium mb-2">
-                          {`Are you sure you would like to delete ${form.getValues(`applicationFormDetail.${nestIndex}.task.${taskIndex}.title`)}?`}
+                          {`Are you sure you would like to delete ${form.getValues(
+                            `applicationFormDetail.${nestIndex}.task.${taskIndex}.title`
+                          )}?`}
                         </div>
                         <div className="flex gap-2 justify-end">
-                          <Button variant="outline" >Cancel</Button>
-                          <Button className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]" onClick={() => removeTask(taskIndex)}>Delete</Button>
+                          <Button variant="outline">Cancel</Button>
+                          <Button
+                            className="bg-[#FF503D]/20 hover:bg-[#FF503D]/30 text-[#FF503D]"
+                            onClick={() => removeTask(taskIndex)}
+                          >
+                            Delete
+                          </Button>
                         </div>
                       </PopoverContent>
-                    </Popover> 
+                    </Popover>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -397,12 +424,7 @@ function Task({
   );
 }
 
-function ResourcesSection({
-  control,
-  setValue,
-  nestIndex,
-  taskIndex,
-}: any) {
+function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -425,7 +447,7 @@ function ResourcesSection({
     control,
     name: `applicationFormDetail.${nestIndex}.task.${taskIndex}.resources.resourceFiles`,
   });
-  
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     setUploadProgress(0);
@@ -434,7 +456,18 @@ function ResourcesSection({
     if (!selectedFiles || selectedFiles.length === 0) return;
 
     const file = selectedFiles[0];
-    const fileKey = generateUniqueFileName(file.name)
+
+    // Add file size validation - 500 MB limit
+    const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+      setError(
+        `File size exceeds the 500 MB limit. Please select a smaller file.`
+      );
+      e.target.value = ""; // Clear the file input
+      return;
+    }
+
+    const fileKey = generateUniqueFileName(file.name);
     setFileName(fileKey);
 
     // Example size limit for direct vs. multipart: 5MB
@@ -459,7 +492,6 @@ function ResourcesSection({
 
       // Append the final S3 URL to resourcesFiles in the form
       appendFile(fileUrl);
-
     } catch (err: any) {
       console.error("Upload error:", err);
       setError(err.message || "Error uploading file");
@@ -468,44 +500,46 @@ function ResourcesSection({
     }
   };
 
-    const handleDeleteFile = async (fileKey: string, index?: number) => {
-      try {
-  
-        if (!fileKey) {
-          console.error("Invalid file URL:", fileKey);
-          return;
-        }
-  
-        // AWS S3 DeleteObject Command
-        const deleteCommand = new DeleteObjectCommand({
-          Bucket: "dev-application-portal", // Replace with your bucket name
-          Key: fileKey, // Key extracted from file URL
-        });
-  
-        await s3Client.send(deleteCommand);
-        console.log("File deleted successfully from S3:", fileKey);
-  
-        // Remove from UI
-        removeFile(index);
-      } catch (error) {
-        console.error("Error deleting file:", error);
-        setError("Failed to delete file. Try again.");
+  const handleDeleteFile = async (fileKey: string, index?: number) => {
+    try {
+      if (!fileKey) {
+        console.error("Invalid file URL:", fileKey);
+        return;
       }
-    };
+
+      // AWS S3 DeleteObject Command
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: "dev-application-portal", // Replace with your bucket name
+        Key: fileKey, // Key extracted from file URL
+      });
+
+      await s3Client.send(deleteCommand);
+      console.log("File deleted successfully from S3:", fileKey);
+
+      // Remove from UI
+      removeFile(index);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      setError("Failed to delete file. Try again.");
+    }
+  };
 
   // Direct upload to S3 using a single presigned URL
-  const uploadDirect = async (file: File, fileKey:string) => {
+  const uploadDirect = async (file: File, fileKey: string) => {
     // Step 1: Get presigned URL from your server
     // Make sure your endpoint returns something like { url: string }
-    const { data } = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url`, {
-      bucketName: "dev-application-portal",
-      key: fileKey,
-    });
+    const { data } = await axios.post(
+      `${process.env.API_URL}/admin/generate-presigned-url`,
+      {
+        bucketName: "dev-application-portal",
+        key: fileKey,
+      }
+    );
     const { url, key } = data; // Suppose your API returns both presigned `url` and `key`
-    console.log("whatatata",url.split("?")[0]);
+    console.log("whatatata", url.split("?")[0]);
 
     // Step 2: PUT file to that URL
-      const partResponse = await axios.put(url, file, {
+    const partResponse = await axios.put(url, file, {
       headers: { "Content-Type": file.type },
       onUploadProgress: (evt: any) => {
         if (!evt.total) return;
@@ -524,13 +558,20 @@ function ResourcesSection({
    * - generate-presigned-url-part
    * - complete-multipart-upload
    */
-  const uploadMultipart = async (file: File, chunkSize: number, fileKey:string) => {
+  const uploadMultipart = async (
+    file: File,
+    chunkSize: number,
+    fileKey: string
+  ) => {
     // Step 1: Initiate
     const uniqueKey = fileKey;
-    const initiateRes = await axios.post(`${process.env.API_URL}/admin/initiate-multipart-upload`, {
-      bucketName: "dev-application-portal",
-      key: uniqueKey,
-    });
+    const initiateRes = await axios.post(
+      `${process.env.API_URL}/admin/initiate-multipart-upload`,
+      {
+        bucketName: "dev-application-portal",
+        key: uniqueKey,
+      }
+    );
     const { uploadId } = initiateRes.data;
 
     // Step 2: Upload each chunk
@@ -543,12 +584,15 @@ function ResourcesSection({
       const end = Math.min(start + chunkSize, file.size);
       const chunk = file.slice(start, end);
 
-      const partRes = await axios.post(`${process.env.API_URL}/admin/generate-presigned-url-part`, {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-        uploadId,
-        partNumber: i + 1,
-      });
+      const partRes = await axios.post(
+        `${process.env.API_URL}/admin/generate-presigned-url-part`,
+        {
+          bucketName: "dev-application-portal",
+          key: uniqueKey,
+          uploadId,
+          partNumber: i + 1,
+        }
+      );
       const { url } = partRes.data;
 
       // Upload the chunk
@@ -565,12 +609,15 @@ function ResourcesSection({
     }
 
     // Step 3: Complete
-    const partRes = await axios.post(`${process.env.API_URL}/admin/complete-multipart-upload`, {
-      bucketName: "dev-application-portal",
-      key: uniqueKey,
-      uploadId,
-      parts,
-    });
+    const partRes = await axios.post(
+      `${process.env.API_URL}/admin/complete-multipart-upload`,
+      {
+        bucketName: "dev-application-portal",
+        key: uniqueKey,
+        uploadId,
+        parts,
+      }
+    );
 
     // Return final S3 URL
     return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
@@ -597,25 +644,27 @@ function ResourcesSection({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                <div className="relative flex items-center gap-2">
-                  <FileIcon className="absolute left-2 top-3 w-4 h-4" />
-                  <Input
-                    type="url"
-                    className="pl-8 pr-12 text-sm truncate text-white w-full" 
-                    placeholder="Enter resource link"
-                    {...field}
-                    readOnly
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1.5 h-7 rounded-full"
-                    onClick={() => handleDeleteFile(field.value.split("/").pop(), index)}
-                  >
-                    <XIcon className="h-4 w-4" />
-                  </Button>
-                </div>
+                  <div className="relative flex items-center gap-2">
+                    <FileIcon className="absolute left-2 top-3 w-4 h-4" />
+                    <Input
+                      type="url"
+                      className="pl-8 pr-12 text-sm truncate text-white w-full"
+                      placeholder="Enter resource link"
+                      {...field}
+                      readOnly
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1.5 h-7 rounded-full"
+                      onClick={() =>
+                        handleDeleteFile(field.value.split("/").pop(), index)
+                      }
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -631,12 +680,23 @@ function ResourcesSection({
             <div className="text-sm truncate">{fileName}</div>
           </div>
           <div className="flex items-center gap-2">
-            {uploadProgress === 100 ? 
-              <LoaderCircle className="h-4 w-4 animate-spin" /> : 
-            <>
-              <Progress className="h-1 w-20" states={[ { value: uploadProgress, widt: uploadProgress, color: '#ffffff' }]} />
-              <span>{uploadProgress}%</span>
-            </>}
+            {uploadProgress === 100 ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Progress
+                  className="h-1 w-20"
+                  states={[
+                    {
+                      value: uploadProgress,
+                      widt: uploadProgress,
+                      color: "#ffffff",
+                    },
+                  ]}
+                />
+                <span>{uploadProgress}%</span>
+              </>
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -663,7 +723,7 @@ function ResourcesSection({
                     <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
                     <Input
                       type="url"
-                      className="pl-8 text-sm pl-8 pr-12 text-sm truncate"
+                      className="pl-8 text-sm pr-12 truncate"
                       placeholder="Enter resource link"
                       {...field}
                     />
@@ -704,7 +764,8 @@ function ResourcesSection({
           style={{ display: "none" }}
           onChange={handleFileChange}
         />
-        <Button type="button"
+        <Button
+          type="button"
           variant="secondary"
           className="flex flex-1 gap-2"
           onClick={() => appendLink("")}
@@ -755,7 +816,9 @@ function Config({
           name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.type`}
           render={({ field }: any) => (
             <FormItem className="flex flex-col flex-1 ">
-              <Label className="text-[#00A3FF] mt-2 mb-[3px]">Submission Type 0{configIndex+1}</Label>
+              <Label className="text-[#00A3FF] mt-2 mb-[3px]">
+                Submission Type 0{configIndex + 1}
+              </Label>
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
@@ -785,7 +848,11 @@ function Config({
               <FormItem>
                 <Label>Character Limit</Label>
                 <FormControl>
-                  <Input type="number" placeholder="Enter maximum characters" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="Enter maximum characters"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -853,26 +920,31 @@ function Config({
               )}
             />
             <div className="grid gap-2 mt-1">
-            <Label>Allowed File Types</Label> 
+              <Label>Allowed File Types</Label>
               <div className="flex flex-wrap gap-1">
-              {["All", "DOC", "PPT", "PDF", "XLS", "PSD", "EPF", "AI"].map((type) => (
-                <div key={type} className="flex items-center">
-                <Checkbox id={type} className="hidden"
-                  onClick={() => toggleFileType(type)}
-                  checked={selectedTypes.includes(type)}
-                  onChange={() => toggleFileType(type)}/>
-                <Label
-                  htmlFor={type}
-                  className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border ${
+                {["All", "DOC", "PPT", "PDF", "XLS", "PSD", "EPF", "AI"].map(
+                  (type) => (
+                    <div key={type} className="flex items-center">
+                      <Checkbox
+                        id={type}
+                        className="hidden"
+                        onClick={() => toggleFileType(type)}
+                        checked={selectedTypes.includes(type)}
+                        onChange={() => toggleFileType(type)}
+                      />
+                      <Label
+                        htmlFor={type}
+                        className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border $ {
                     selectedTypes.includes(type) ? "bg-[#6808FE]" : "bg-[#0A0A0A]"
                   }`}
-                >
-                  {type}
-                </Label>
+                      >
+                        {type}
+                      </Label>
+                    </div>
+                  )
+                )}
               </div>
-              ))}
             </div>
-          </div>
           </>
         ) : null}
 

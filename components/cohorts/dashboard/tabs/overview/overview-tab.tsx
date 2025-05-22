@@ -1,16 +1,25 @@
 "use client";
 
-import { getStudents } from "@/app/api/student";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
-import { ApplicationFunnel } from "./application-funnel";
-import { MetricsGrid } from "./metrics-grid";
-import { StatusDistribution } from "./status-distribution";
 
-interface OverviewTabProps {
-  cohortId: string;
-  selectedDateRange: DateRange | undefined;
-}
+import { getStudents } from "@/app/api/student";
+import { OverviewTabProps } from "@/types/components/cohorts/dashboard/tabs/overview/overview-tab";
+
+const ApplicationFunnel = dynamic(
+  () => import("./application-funnel").then((m) => m.ApplicationFunnel),
+  { ssr: false }
+);
+
+const MetricsGrid = dynamic(
+  () => import("./metrics-grid").then((m) => m.MetricsGrid),
+  { ssr: false }
+);
+
+const StatusDistribution = dynamic(
+  () => import("./status-distribution").then((m) => m.StatusDistribution),
+  { ssr: false }
+);
 
 export function OverviewTab({ cohortId, selectedDateRange }: OverviewTabProps) {
   const [applications, setApplications] = useState<any>([]);

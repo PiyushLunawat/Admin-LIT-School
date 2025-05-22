@@ -1,23 +1,35 @@
 "use client";
 
+import { Download } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
+
 import { getCentres } from "@/app/api/centres";
 import { getCohorts } from "@/app/api/cohorts";
 import { getPrograms } from "@/app/api/programs";
 import { getStudents } from "@/app/api/student";
-import { StudentsFilters } from "@/components/students/students-filters";
-import { StudentsList } from "@/components/students/students-list";
 import { Button } from "@/components/ui/button";
 import { handleBulkExport } from "@/lib/utils/helpers";
-import { Download } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+
+const StudentsFilters = dynamic(
+  () =>
+    import("@/components/students/students-filters").then(
+      (m) => m.StudentsFilters
+    ),
+  { ssr: false }
+);
+
+const StudentsList = dynamic(
+  () =>
+    import("@/components/students/students-list").then((m) => m.StudentsList),
+  { ssr: false }
+);
 
 export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<any>([]);
   const [selectedStudents, setSelectedStudents] = useState<any[]>([]);
 
-  // --- FILTER STATES ---
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState("all-programs");
   const [selectedCohort, setSelectedCohort] = useState("all-cohorts");
@@ -27,14 +39,10 @@ export default function StudentsPage() {
 
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Option data (used for the <Select> items)
   const [programs, setPrograms] = useState<any[]>([]);
   const [cohorts, setCohorts] = useState<any[]>([]);
   const [centres, setCentres] = useState<any[]>([]);
 
-  const router = useRouter();
-
-  // Fetch programs, cohorts, centres for the filter dropdowns
   useEffect(() => {
     async function fetchData() {
       try {
@@ -76,7 +84,7 @@ export default function StudentsPage() {
   }, [refreshKey]);
 
   const handleApplicationUpdate = () => {
-    setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   const filteredAndSortedApplications = useMemo(() => {
@@ -217,30 +225,12 @@ export default function StudentsPage() {
     selectedPaymentStatus,
   ]);
 
-  // --- ACTION HANDLERS ---
-  const handleBulkEmail = () => {
-    console.log("Sending bulk email to:", selectedStudents);
-  };
-
-  const escapeCSV = (field: string): string => {
-    if (!field) return "";
-    return `"${field.replace(/"/g, '""')}"`;
-  };
-
   return (
     <div className="p-6 space-y-6">
       {/* Page header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Students</h1>
         <div className="flex gap-2">
-          {/* <Button
-            variant="outline"
-            onClick={handleBulkEmail}
-            disabled={selectedStudents.length === 0}
-          >
-            <Mail className="h-4 w-4 mr-2" />
-            Bulk Email
-          </Button> */}
           <Button
             variant="outline"
             onClick={() => handleBulkExport(selectedStudents)}
@@ -266,7 +256,6 @@ export default function StudentsPage() {
         onAppStatusChange={setSelectedAppStatus}
         selectedPaymentStatus={selectedPaymentStatus}
         onPaymentStatusChange={setSelectedPaymentStatus}
-        // You can pass centres if you need them
       />
 
       {/* Students List */}

@@ -1,11 +1,11 @@
-"use client"
-import { FeeDashboard } from "@/components/fees/fee-dashboard";
-import { Suspense } from "react";
+"use client";
+import dynamic from "next/dynamic";
+
+const FeeDashboard = dynamic(
+  () => import("@/components/fees/fee-dashboard").then((m) => m.FeeDashboard),
+  { ssr: false }
+);
 
 export default function FeePage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <FeeDashboard />
-    </Suspense>
-  );
+  return <FeeDashboard />;
 }

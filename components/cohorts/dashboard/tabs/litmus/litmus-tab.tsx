@@ -1,20 +1,30 @@
 "use client";
 
+import { Download, RefreshCw } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
+
 import { getStudents } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { handleBulkExport } from "@/lib/utils/helpers";
-import { Download, RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { DateRange } from "react-day-picker";
-import { LitmusTestDetails } from "./litmus-test-details";
-import { LitmusTestFilters } from "./litmus-test-filters";
-import { LitmusTestList } from "./litmus-test-list";
+import { LitmusTabProps } from "@/types/components/cohorts/dashboard/tabs/litmus/litmus-tab";
 
-interface LitmusTabProps {
-  cohortId: string;
-  selectedDateRange: DateRange | undefined;
-}
+const LitmusTestDetails = dynamic(
+  () => import("./litmus-test-details").then((m) => m.LitmusTestDetails),
+  { ssr: false }
+);
+
+const LitmusTestFilters = dynamic(
+  () => import("./litmus-test-filters").then((m) => m.LitmusTestFilters),
+  { ssr: false }
+);
+
+const LitmusTestList = dynamic(
+  () => import("./litmus-test-list").then((m) => m.LitmusTestList),
+  { ssr: false }
+);
 
 export function LitmusTab({ cohortId, selectedDateRange }: LitmusTabProps) {
   const [loading, setLoading] = useState(true);

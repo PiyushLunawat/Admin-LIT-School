@@ -1,17 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import { getStudents } from "@/app/api/student";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { ApplicationsHome } from "./home/applications-home";
-import { ApplicationsQueue } from "./queue/applications-queue";
-import { CommunicationsTab } from "./communications/communications-tab";
-import { SettingsTab } from "./settings/settings-tab";
-import { InterviewsQueue } from "./queue/interviews-queue";
-import { getStudents } from "@/app/api/student";
+const ApplicationsHome = dynamic(
+  () => import("./home/applications-home").then((mod) => mod.ApplicationsHome),
+  {
+    ssr: false,
+  }
+);
 
+const ApplicationsQueue = dynamic(
+  () =>
+    import("./queue/applications-queue").then((mod) => mod.ApplicationsQueue),
+  {
+    ssr: false,
+  }
+);
+
+const InterviewsQueue = dynamic(
+  () => import("./queue/interviews-queue").then((mod) => mod.InterviewsQueue),
+  {
+    ssr: false,
+  }
+);
 
 export function ApplicationDashboard() {
   const router = useRouter();
@@ -27,30 +43,32 @@ export function ApplicationDashboard() {
         const response = await getStudents();
 
         // 2) Filter Out Students with No Application Details
-        const validStudents = response.data.filter(
-          (student: any) => 
-            ['applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
+        const validStudents = response.data.filter((student: any) =>
+          ["applied", "reviewing", "enrolled", "dropped"].includes(
+            student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+              ?.status
+          )
         );
 
         validStudents.sort((a: any, b: any) => {
           const dateA = new Date(a?.updatedAt);
           const dateB = new Date(b?.updatedAt);
-          
+
           if (dateA > dateB) return -1;
           if (dateA < dateB) return 1;
-          
+
           const monthA = dateA.getMonth();
           const monthB = dateB.getMonth();
-          
+
           if (monthA > monthB) return -1;
           if (monthA < monthB) return 1;
-          
-          const yearA = dateA.getFullYear(); 
-          const yearB = dateB.getFullYear(); 
-          
-          if (yearA > yearB) return -1; 
-          if (yearA < yearB) return 1; 
-          
+
+          const yearA = dateA.getFullYear();
+          const yearB = dateB.getFullYear();
+
+          if (yearA > yearB) return -1;
+          if (yearA < yearB) return 1;
+
           return 0;
         });
 
@@ -86,11 +104,17 @@ export function ApplicationDashboard() {
         </TabsList>
 
         <TabsContent value="home">
-          <ApplicationsHome initialApplications={initialApplications} setInitialApplications={setInitialApplications}/>
+          <ApplicationsHome
+            initialApplications={initialApplications}
+            setInitialApplications={setInitialApplications}
+          />
         </TabsContent>
 
         <TabsContent value="applications">
-          <ApplicationsQueue initialApplications={initialApplications} setInitialApplications={setInitialApplications} />
+          <ApplicationsQueue
+            initialApplications={initialApplications}
+            setInitialApplications={setInitialApplications}
+          />
         </TabsContent>
 
         <TabsContent value="interviews">

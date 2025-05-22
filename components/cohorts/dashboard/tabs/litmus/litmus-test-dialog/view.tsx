@@ -1,9 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { SelectSeparator } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { formatInput } from "@/lib/utils/helpers";
+"use client";
+
 import {
   ArrowUpRight,
   Download,
@@ -16,15 +12,16 @@ import {
 import Image from "next/image";
 import React, { ChangeEvent, useEffect, useState } from "react";
 
-interface ReviewComponentProps {
-  application: any;
-  onApplicationUpdate: () => void; // Add this line
-}
-
-interface Section {
-  title: string;
-  data?: [];
-}
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SelectSeparator } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { formatInput } from "@/lib/utils/helpers";
+import {
+  ReviewComponentProps,
+  Section,
+} from "@/types/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/view";
 
 export function ViewComponent({
   application,

@@ -1,9 +1,11 @@
 "use client";
 
+import { format } from "date-fns";
+import { CalendarIcon, SaveIcon } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -12,8 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, SaveIcon, Send } from "lucide-react";
-import { format } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
 
 export function CreateTemplate() {
   const [communicationType, setCommunicationType] = useState<string>("");
@@ -47,9 +48,15 @@ export function CreateTemplate() {
                 <SelectItem value="all">All Students</SelectItem>
                 <SelectItem value="applicants">All Applicants</SelectItem>
                 <SelectItem value="payment-pending">Payment Pending</SelectItem>
-                <SelectItem value="token-fee-pending">Admission Fee Pending</SelectItem>
-                <SelectItem value="interview-scheduled">interview scheduled</SelectItem>
-                <SelectItem value="presentation-scheduled">Presentation Scheduled</SelectItem>
+                <SelectItem value="token-fee-pending">
+                  Admission Fee Pending
+                </SelectItem>
+                <SelectItem value="interview-scheduled">
+                  interview scheduled
+                </SelectItem>
+                <SelectItem value="presentation-scheduled">
+                  Presentation Scheduled
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -101,7 +108,10 @@ export function CreateTemplate() {
         </div>
 
         {/* Save Button */}
-        <Button className="w-full mt-4 flex gap-2 items-center" onClick={() => console.log("Save Template")}>
+        <Button
+          className="w-full mt-4 flex gap-2 items-center"
+          onClick={() => console.log("Save Template")}
+        >
           <SaveIcon className="h-4 w-4" />
           Save Template
         </Button>

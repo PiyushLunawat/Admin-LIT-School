@@ -1,14 +1,5 @@
 "use client";
 
-import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
-import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import {
   Calendar,
   Clock4,
@@ -20,25 +11,54 @@ import {
   UserMinus,
   X,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { AwardScholarship } from "./litmus-test-dialog/award-scholarship";
-import { ReviewComponent } from "./litmus-test-dialog/review";
-import { ViewComponent } from "./litmus-test-dialog/view";
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "pending"
-  | "onhold"
-  | "default";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  BadgeVariant,
+  LitmusTestDetailsProps,
+} from "@/types/components/cohorts/dashboard/tabs/litmus/litmus-test-details";
 
-interface LitmusTestDetailsProps {
-  application: any;
-  onClose: () => void;
-  onApplicationUpdate: () => void;
-}
+const AwardScholarship = dynamic(
+  () =>
+    import("./litmus-test-dialog/award-scholarship").then(
+      (m) => m.AwardScholarship
+    ),
+  { ssr: false }
+);
+
+const ReviewComponent = dynamic(
+  () => import("./litmus-test-dialog/review").then((m) => m.ReviewComponent),
+  { ssr: false }
+);
+
+const ViewComponent = dynamic(
+  () => import("./litmus-test-dialog/view").then((m) => m.ViewComponent),
+  { ssr: false }
+);
+
+const SchedulePresentation = dynamic(
+  () =>
+    import("@/components/common-dialog/schedule-presentation").then(
+      (m) => m.SchedulePresentation
+    ),
+  { ssr: false }
+);
+
+const MarkedAsDialog = dynamic(
+  () =>
+    import("@/components/students/sections/drop-dialog").then(
+      (m) => m.MarkedAsDialog
+    ),
+  { ssr: false }
+);
 
 export function LitmusTestDetails({
   application,

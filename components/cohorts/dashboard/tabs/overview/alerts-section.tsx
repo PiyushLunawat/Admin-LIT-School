@@ -1,69 +1,62 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { 
+import {
   AlertTriangle,
   Calendar,
+  CreditCard,
   GraduationCap,
-  CreditCard
 } from "lucide-react";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
-interface Alert {
-  id: string;
-  type: 'interview' | 'evaluation' | 'payment';
-  message: string;
-  priority: 'high' | 'medium' | 'low';
-}
-
-interface AlertsSectionProps {
-  cohortId: string;
-}
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Alert,
+  AlertsSectionProps,
+  BadgeVariant,
+} from "@/types/components/cohorts/dashboard/tabs/overview/alerts-section";
 
 export function AlertsSection({ cohortId }: AlertsSectionProps) {
-  // In a real application, this data would be fetched based on the cohortId
   const alerts: Alert[] = [
     {
       id: "1",
       type: "interview",
       message: "5 interviews scheduled for tomorrow",
-      priority: "high"
+      priority: "high",
     },
     {
       id: "2",
       type: "evaluation",
       message: "8 LITMUS tests pending evaluation",
-      priority: "medium"
+      priority: "medium",
     },
     {
       id: "3",
       type: "payment",
       message: "3 payment deadlines approaching",
-      priority: "high"
-    }
+      priority: "high",
+    },
   ];
 
-  const getAlertIcon = (type: Alert['type']) => {
+  const getAlertIcon = (type: Alert["type"]) => {
     switch (type) {
-      case 'interview':
+      case "interview":
         return <Calendar className="h-4 w-4" />;
-      case 'evaluation':
+      case "evaluation":
         return <GraduationCap className="h-4 w-4" />;
-      case 'payment':
+      case "payment":
         return <CreditCard className="h-4 w-4" />;
     }
   };
 
-  const getPriorityColor = (priority: Alert['priority']): BadgeVariant => {
+  const getPriorityColor = (priority: Alert["priority"]): BadgeVariant => {
     switch (priority) {
-      case 'high':
-        return 'destructive';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'secondary';
+      case "high":
+        return "destructive";
+      case "medium":
+        return "warning";
+      case "low":
+        return "secondary";
     }
   };
 

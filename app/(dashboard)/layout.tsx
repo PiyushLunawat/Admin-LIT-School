@@ -1,5 +1,16 @@
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { Header } from "@/components/dashboard/header";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const Sidebar = dynamic(
+  () => import("@/components/dashboard/sidebar").then((m) => m.Sidebar),
+  { ssr: false }
+);
+
+const Header = dynamic(
+  () => import("@/components/dashboard/header").then((m) => m.Header),
+  { ssr: false }
+);
 
 export default function DashboardLayout({
   children,
@@ -12,9 +23,7 @@ export default function DashboardLayout({
         <Sidebar />
         <main className="flex-1 h-full">
           <Header />
-          <div className="h-[calc(100vh-4rem)] overflow-y-auto">
-            {children}
-          </div>
+          <div className="h-[calc(100vh-4rem)] overflow-y-auto">{children}</div>
         </main>
       </div>
     </div>

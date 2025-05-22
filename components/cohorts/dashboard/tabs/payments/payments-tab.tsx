@@ -1,5 +1,9 @@
 "use client";
 
+import { Download, RefreshCw } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+
 import { getCohortById } from "@/app/api/cohorts";
 import { getStudents } from "@/app/api/student";
 import {
@@ -11,18 +15,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { handleBulkExport } from "@/lib/utils/helpers";
-import { Download, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
-import { PaymentDetails } from "./payment-details";
-import { PaymentsFilters } from "./payments-filters";
-import { PaymentsList } from "./payments-list";
-import { PaymentsSummary } from "./payments-summary";
+import { PaymentsTabProps } from "@/types/components/cohorts/dashboard/tabs/payments/payments-tab";
 
-interface PaymentsTabProps {
-  cohortId: string;
-  selectedDateRange: DateRange | undefined;
-}
+const PaymentDetails = dynamic(
+  () => import("./payment-details").then((m) => m.PaymentDetails),
+  {
+    ssr: false,
+  }
+);
+
+const PaymentsFilters = dynamic(
+  () => import("./payments-filters").then((m) => m.PaymentsFilters),
+  {
+    ssr: false,
+  }
+);
+
+const PaymentsList = dynamic(
+  () => import("./payments-list").then((m) => m.PaymentsList),
+  {
+    ssr: false,
+  }
+);
+
+const PaymentsSummary = dynamic(
+  () => import("./payments-summary").then((m) => m.PaymentsSummary),
+  {
+    ssr: false,
+  }
+);
 
 export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
   const [applications, setApplications] = useState<any[]>([]);

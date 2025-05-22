@@ -1,73 +1,66 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  UserPlus, 
-  Calendar, 
-  GraduationCap, 
-  CreditCard, 
+import {
+  Calendar,
+  Clock,
+  CreditCard,
+  GraduationCap,
   UserMinus,
-  Clock
+  UserPlus,
 } from "lucide-react";
 
-interface Activity {
-  id: string;
-  type: 'application' | 'interview' | 'litmus' | 'payment' | 'dropped';
-  description: string;
-  timestamp: string;
-}
-
-interface RecentActivityProps {
-  applications: any;
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Activity,
+  RecentActivityProps,
+} from "@/types/components/cohorts/dashboard/tabs/overview/recent-activity";
 
 export function RecentActivity({ applications }: RecentActivityProps) {
-  // In a real application, this data would be fetched based on the cohortId
   const activities: Activity[] = [
     {
       id: "1",
       type: "application",
       description: "New application received from John Doe",
-      timestamp: "2 minutes ago"
+      timestamp: "2 minutes ago",
     },
     {
       id: "2",
       type: "interview",
       description: "Interview completed with Sarah Smith",
-      timestamp: "1 hour ago"
+      timestamp: "1 hour ago",
     },
     {
       id: "3",
       type: "litmus",
       description: "LITMUS test submitted by Mike Johnson",
-      timestamp: "3 hours ago"
+      timestamp: "3 hours ago",
     },
     {
       id: "4",
       type: "payment",
       description: "Admission fee received from Emily Brown",
-      timestamp: "5 hours ago"
+      timestamp: "5 hours ago",
     },
     {
       id: "5",
       type: "dropped",
       description: "Alex Wilson marked as dropped",
-      timestamp: "1 day ago"
-    }
+      timestamp: "1 day ago",
+    },
   ];
 
-  const getActivityIcon = (type: Activity['type']) => {
+  const getActivityIcon = (type: Activity["type"]) => {
     switch (type) {
-      case 'application':
+      case "application":
         return <UserPlus className="h-4 w-4" />;
-      case 'interview':
+      case "interview":
         return <Calendar className="h-4 w-4" />;
-      case 'litmus':
+      case "litmus":
         return <GraduationCap className="h-4 w-4" />;
-      case 'payment':
+      case "payment":
         return <CreditCard className="h-4 w-4" />;
-      case 'dropped':
+      case "dropped":
         return <UserMinus className="h-4 w-4" />;
     }
   };

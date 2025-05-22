@@ -1,7 +1,9 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Search, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -9,20 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dispatch, SetStateAction } from "react";
-import { Search, X } from "lucide-react";
-
-interface PaymentsFiltersProps {
-  searchQuery: string;
-  onSearchQueryChange: (value: string) => void;
-  scholarship: any[];
-  selectedScholarship: string;
-  onScholarshipChange: (value: string) => void;
-  selectedPaymentStatus: string;
-  onPaymentStatusChange: (value: string) => void;
-  selectedPaymentPlan: string;
-  onPaymentPlanChange: (value: string) => void;
-}
+import { PaymentsFiltersProps } from "@/types/components/cohorts/dashboard/tabs/payments/payments-filters";
 
 export function PaymentsFilters({
   searchQuery,
@@ -75,10 +64,7 @@ export function PaymentsFilters({
         </Select>
 
         {/* Payment Plan Filter */}
-        <Select
-          value={selectedPaymentPlan}
-          onValueChange={onPaymentPlanChange}
-        >
+        <Select value={selectedPaymentPlan} onValueChange={onPaymentPlanChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Payment Plan" />
           </SelectTrigger>
@@ -90,10 +76,7 @@ export function PaymentsFilters({
         </Select>
 
         {/* Scholarship Filter */}
-        <Select
-          value={selectedScholarship}
-          onValueChange={onScholarshipChange}
-        >
+        <Select value={selectedScholarship} onValueChange={onScholarshipChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Scholarship" />
           </SelectTrigger>
@@ -108,11 +91,16 @@ export function PaymentsFilters({
         </Select>
 
         {/* Reset Button */}
-        {!(searchQuery === "" && selectedPaymentStatus === "all" && selectedPaymentPlan === "all" && selectedScholarship === "all") &&
+        {!(
+          searchQuery === "" &&
+          selectedPaymentStatus === "all" &&
+          selectedPaymentPlan === "all" &&
+          selectedScholarship === "all"
+        ) && (
           <Button variant="ghost" size="icon" onClick={handleReset}>
             <X className="h-4 w-4" />
           </Button>
-        }
+        )}
       </div>
     </div>
   );

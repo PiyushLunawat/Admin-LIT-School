@@ -1,14 +1,20 @@
 "use client";
 
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { ApplicationTimelineProps } from "@/types/components/cohorts/dashboard/tabs/overview/application-timeline";
 
-interface ApplicationTimelineProps {
-  applications: any;
-}
-
-export function ApplicationTimeline({ applications }: ApplicationTimelineProps) {
-  // In a real application, this data would be fetched based on the cohortId
+export function ApplicationTimeline({
+  applications,
+}: ApplicationTimelineProps) {
   const data = [
     { date: "Week 1", applications: 12 },
     { date: "Week 2", applications: 19 },
@@ -29,7 +35,15 @@ export function ApplicationTimeline({ applications }: ApplicationTimelineProps) 
             <LineChart data={data}>
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip  formatter={(value) => [`${value}`]} labelFormatter={() => ''} contentStyle={{ color: 'foreground', background: "background", border: "none"}}/>
+              <Tooltip
+                formatter={(value) => [`${value}`]}
+                labelFormatter={() => ""}
+                contentStyle={{
+                  color: "foreground",
+                  background: "background",
+                  border: "none",
+                }}
+              />
               <Line
                 type="monotone"
                 dataKey="applications"

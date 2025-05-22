@@ -1,20 +1,36 @@
 "use client";
 
+import { Download, RefreshCw } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
+
 import { getStudents } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { handleBulkExport } from "@/lib/utils/helpers";
-import { Download, RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { DateRange } from "react-day-picker";
-import { ApplicationDetails } from "./application-details";
-import { ApplicationFilters } from "./application-filters";
-import { ApplicationsList } from "./applications-list";
+import { ApplicationsTabProps } from "@/types/components/cohorts/dashboard/tabs/applications/applications-tab";
 
-interface ApplicationsTabProps {
-  cohortId: string;
-  selectedDateRange: DateRange | undefined;
-}
+const ApplicationDetails = dynamic(
+  () => import("./application-details").then((mod) => mod.ApplicationDetails),
+  {
+    ssr: false,
+  }
+);
+
+const ApplicationFilters = dynamic(
+  () => import("./application-filters").then((mod) => mod.ApplicationFilters),
+  {
+    ssr: false,
+  }
+);
+
+const ApplicationsList = dynamic(
+  () => import("./applications-list").then((mod) => mod.ApplicationsList),
+  {
+    ssr: false,
+  }
+);
 
 export function ApplicationsTab({
   cohortId,

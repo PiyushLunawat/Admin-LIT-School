@@ -1,7 +1,10 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Search, X } from "lucide-react";
+import { useCallback } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -9,17 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, X } from "lucide-react";
-import { Dispatch, SetStateAction, useCallback } from "react";
-
-interface LitmusTestFiltersProps {
-  searchTerm: string;
-  onSearchTermChange: Dispatch<SetStateAction<string>>;
-  selectedStatus: string;
-  onSelectedStatusChange: Dispatch<SetStateAction<string>>;
-  sortBy: string;
-  onSortByChange: Dispatch<SetStateAction<string>>;
-}
+import { LitmusTestFiltersProps } from "@/types/components/cohorts/dashboard/tabs/litmus/litmus-test-filters";
 
 export function LitmusTestFilters({
   searchTerm,
@@ -29,7 +22,6 @@ export function LitmusTestFilters({
   sortBy,
   onSortByChange,
 }: LitmusTestFiltersProps) {
-
   const handleClearFilters = useCallback(() => {
     onSearchTermChange("");
     onSelectedStatusChange("all-status");
@@ -62,16 +54,15 @@ export function LitmusTestFilters({
             <SelectItem value="all-status">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="submitted">Submitted Task</SelectItem>
-            <SelectItem value="interview scheduled">Presentation Scheduled</SelectItem>
+            <SelectItem value="interview scheduled">
+              Presentation Scheduled
+            </SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="dropped">Dropped</SelectItem>
           </SelectContent>
         </Select>
 
-        <Select
-          value={sortBy}
-          onValueChange={(value) => onSortByChange(value)}
-        >
+        <Select value={sortBy} onValueChange={(value) => onSortByChange(value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -83,11 +74,15 @@ export function LitmusTestFilters({
           </SelectContent>
         </Select>
 
-        {!(searchTerm === "" && selectedStatus === "all-status" && sortBy === "newest") &&
+        {!(
+          searchTerm === "" &&
+          selectedStatus === "all-status" &&
+          sortBy === "newest"
+        ) && (
           <Button variant="ghost" size="icon" onClick={handleClearFilters}>
             <X className="h-4 w-4" />
           </Button>
-        }
+        )}
       </div>
     </div>
   );

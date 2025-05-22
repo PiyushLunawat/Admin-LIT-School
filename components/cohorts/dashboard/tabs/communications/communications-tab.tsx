@@ -1,21 +1,24 @@
 "use client";
 
+import { Download } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AutomationSettings } from "./automation-settings";
 import { CommunicationLog } from "./communication-log";
 import { ComposeMessage } from "./compose-message";
-import { TemplatesTab } from "./templates-tab";
 import { InboxTab } from "./inbox-tab";
-import { AutomationSettings } from "./automation-settings";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { TemplatesTab } from "./templates-tab";
 
 interface CommunicationsTabProps {
   cohortId: string;
 }
 
 export function CommunicationsTab({ cohortId }: CommunicationsTabProps) {
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    null
+  );
 
   const handleExport = () => {
     console.log("Exporting communications log");

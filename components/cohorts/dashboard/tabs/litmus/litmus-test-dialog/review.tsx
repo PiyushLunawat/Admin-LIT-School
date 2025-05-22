@@ -1,14 +1,5 @@
-import { updateLitmusTaskStatus } from "@/app/api/student";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { SelectSeparator } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { Textarea } from "@/components/ui/textarea";
-import { formatInput } from "@/lib/utils/helpers";
+"use client";
+
 import {
   ArrowUpRight,
   Download,
@@ -22,16 +13,21 @@ import {
 import Image from "next/image";
 import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 
-interface ReviewComponentProps {
-  application: any;
-  onApplicationUpdate: () => void;
-  onClose: () => void;
-}
-
-interface Section {
-  title: string;
-  data?: string[];
-}
+import { updateLitmusTaskStatus } from "@/app/api/student";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { SelectSeparator } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { formatInput } from "@/lib/utils/helpers";
+import {
+  ReviewComponentProps,
+  Section,
+} from "@/types/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/review";
 
 export function ReviewComponent({
   application,

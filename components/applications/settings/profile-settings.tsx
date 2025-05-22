@@ -1,12 +1,13 @@
 "use client";
 
+import { Camera, Save } from "lucide-react";
 import { useState } from "react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Save } from "lucide-react";
 
 export function ProfileSettings() {
   const [isEditing, setIsEditing] = useState(false);
@@ -34,17 +35,16 @@ export function ProfileSettings() {
             </div>
             <div className="space-y-1">
               <h3 className="font-medium">Sarah Admin</h3>
-              <p className="text-sm text-muted-foreground">Application Reviewer</p>
+              <p className="text-sm text-muted-foreground">
+                Application Reviewer
+              </p>
             </div>
           </div>
 
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label>Full Name</Label>
-              <Input
-                defaultValue="Sarah Admin"
-                disabled={!isEditing}
-              />
+              <Input defaultValue="Sarah Admin" disabled={!isEditing} />
             </div>
             <div className="grid gap-2">
               <Label>Email</Label>
@@ -56,18 +56,12 @@ export function ProfileSettings() {
             </div>
             <div className="grid gap-2">
               <Label>Phone Number</Label>
-              <Input
-                defaultValue="+91 98765 43210"
-                disabled={!isEditing}
-              />
+              <Input defaultValue="+91 98765 43210" disabled={!isEditing} />
             </div>
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsEditing(!isEditing)}
-            >
+            <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
               {isEditing ? "Cancel" : "Edit Profile"}
             </Button>
             {isEditing && (
