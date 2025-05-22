@@ -241,7 +241,7 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
       });
       console.log("Cohort updated successfully:", updated);
       onCohortCreated(updated.data);
-      // onNext();
+      onNext();
     } catch (error) {
       console.error("Failed to update cohort:", error);
     } finally {
