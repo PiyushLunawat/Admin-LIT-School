@@ -1,16 +1,11 @@
 "use client";
 
+import { format } from "date-fns";
+import { CalendarIcon, Send } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -18,22 +13,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon, Send } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils/utils";
-import { useState } from "react";
 
-interface ComposeMessageProps {
-  cohortId: string;
-}
-
-export function ComposeMessage({ cohortId }: ComposeMessageProps) {
+export function ComposeMessage({ cohortId }: { cohortId: string }) {
   const [date, setDate] = useState<Date>();
   const [communicationType, setCommunicationType] = useState<string>("email");
   const [subject, setSubject] = useState<string>("");
@@ -44,22 +41,30 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <div className="grid grid-cols-3 gap-4">
-<div className="space-y-2">
-  <Label>Recipients</Label>
-  <Select>
-    <SelectTrigger>
-      <SelectValue placeholder="Select recipients" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="all">All Students</SelectItem>
-      <SelectItem value="applicants">All Applicants</SelectItem>
-      <SelectItem value="payment-pending">Payment Pending</SelectItem>
-      <SelectItem value="token-fee-pending">Admission Fee Pending</SelectItem>
-      <SelectItem value="interview-scheduled">interview scheduled</SelectItem>
-      <SelectItem value="presentation-scheduled">Presentation Scheduled</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
+            <div className="space-y-2">
+              <Label>Recipients</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recipients" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Students</SelectItem>
+                  <SelectItem value="applicants">All Applicants</SelectItem>
+                  <SelectItem value="payment-pending">
+                    Payment Pending
+                  </SelectItem>
+                  <SelectItem value="token-fee-pending">
+                    Admission Fee Pending
+                  </SelectItem>
+                  <SelectItem value="interview-scheduled">
+                    interview scheduled
+                  </SelectItem>
+                  <SelectItem value="presentation-scheduled">
+                    Presentation Scheduled
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Communication Type</Label>
               <Select onValueChange={(value) => setCommunicationType(value)}>
@@ -80,11 +85,21 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="misc">+ New Misc.</SelectItem>
-                  <SelectItem value="application-status">Application Status Update</SelectItem>
-                  <SelectItem value="payment-pending">Payment Pending</SelectItem>
-                  <SelectItem value="interview-reminder">Interview Reminder</SelectItem>
-                  <SelectItem value="token-fee-pending">Admission Fee Pending</SelectItem>
-                  <SelectItem value="announcement">General Announcement</SelectItem>
+                  <SelectItem value="application-status">
+                    Application Status Update
+                  </SelectItem>
+                  <SelectItem value="payment-pending">
+                    Payment Pending
+                  </SelectItem>
+                  <SelectItem value="interview-reminder">
+                    Interview Reminder
+                  </SelectItem>
+                  <SelectItem value="token-fee-pending">
+                    Admission Fee Pending
+                  </SelectItem>
+                  <SelectItem value="announcement">
+                    General Announcement
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -92,7 +107,11 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
 
           <div className="space-y-2">
             <Label>Subject</Label>
-            <Input placeholder="Enter message subject" value={subject} onChange={(e) => setSubject(e.target.value)}/>
+            <Input
+              placeholder="Enter message subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
           </div>
 
           <div className="space-y-2">
@@ -100,7 +119,8 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
             <Textarea
               placeholder="Type your message here..."
               className="min-h-[200px]"
-              value={message} onChange={(e) => setMessage(e.target.value)}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
             />
           </div>
 
@@ -137,41 +157,56 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
         </div>
 
         <div className="lg:col-span-1">
-        <div className="sticky top-6">
-        <Card className="h-[calc(100vh-10rem)] overflow-hidden">
-          <CardHeader>
-            <CardTitle>Message Preview</CardTitle>
-            <CardDescription>
-              Preview how your message will appear to recipients
-            </CardDescription>
-          </CardHeader>
-          {communicationType === "email" ? (
-          <CardContent className="email">
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-2">Subject:</p>
-                <p className="font-medium">{subject || "Your message subject here"}</p>
-              </div>
-              <div className="border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-2">Message:</p>
-                <p>{message || "Your message content will appear here..."}</p>
-              </div>
-            </div>
-          </CardContent>) : (
-            <CardContent className="whatsapp">
-            <div className="border rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-2">Message:</p>
-              <div className="flex items-center gap-1">
-                <span className="text-sm ">Subject:</span>
-                <p className="font-medium">{subject || "Your message subject here"}</p>
-              </div>
-              <p className="mt-3">{message || "Your message content will appear here..."}</p>
-            </div>
-          </CardContent>
-          )}
-        </Card>
-        </div>
-        {/*  <Card>
+          <div className="sticky top-6">
+            <Card className="h-[calc(100vh-10rem)] overflow-hidden">
+              <CardHeader>
+                <CardTitle>Message Preview</CardTitle>
+                <CardDescription>
+                  Preview how your message will appear to recipients
+                </CardDescription>
+              </CardHeader>
+              {communicationType === "email" ? (
+                <CardContent className="email">
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Subject:
+                      </p>
+                      <p className="font-medium">
+                        {subject || "Your message subject here"}
+                      </p>
+                    </div>
+                    <div className="border rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Message:
+                      </p>
+                      <p>
+                        {message || "Your message content will appear here..."}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              ) : (
+                <CardContent className="whatsapp">
+                  <div className="border rounded-lg p-4">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Message:
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm ">Subject:</span>
+                      <p className="font-medium">
+                        {subject || "Your message subject here"}
+                      </p>
+                    </div>
+                    <p className="mt-3">
+                      {message || "Your message content will appear here..."}
+                    </p>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          </div>
+          {/*  <Card>
           <CardHeader>
             <CardTitle>Variables</CardTitle>
             <CardDescription>
@@ -195,10 +230,8 @@ export function ComposeMessage({ cohortId }: ComposeMessageProps) {
             </div>
           </CardContent>
         </Card> */}
+        </div>
       </div>
-      </div>
-
-      
     </div>
   );
 }

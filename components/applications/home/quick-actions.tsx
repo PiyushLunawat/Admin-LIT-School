@@ -1,13 +1,14 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { 
-  PlayCircle, 
-  ClipboardList, 
-  MessageSquare, 
-  AlertTriangle 
+import {
+  AlertTriangle,
+  ClipboardList,
+  MessageSquare,
+  PlayCircle,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function QuickActions() {
   const actions = [

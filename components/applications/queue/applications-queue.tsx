@@ -1,30 +1,38 @@
 "use client";
 
+import { Download, RefreshCw } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
+
 import { getCohorts } from "@/app/api/cohorts";
 import { getStudents } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Download, RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { DateRange } from "react-day-picker";
-import { ApplicationDetails } from "./application-details";
-import { ApplicationFilters } from "./application-filters";
-import { ApplicationsList } from "./applications-list";
-import { CohortDetails } from "./cohort-details";
+import {
+  ApplicationsQueueProps,
+  BadgeVariant,
+} from "@/types/components/applications/queue/applications-queue";
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "pending"
-  | "onhold"
-  | "default";
+const ApplicationDetails = dynamic(
+  () => import("./application-details").then((m) => m.ApplicationDetails),
+  { ssr: false }
+);
 
-interface ApplicationsQueueProps {
-  initialApplications: any;
-  setInitialApplications: (apps: any) => void;
-}
+const ApplicationFilters = dynamic(
+  () => import("./application-filters").then((m) => m.ApplicationFilters),
+  { ssr: false }
+);
+
+const ApplicationsList = dynamic(
+  () => import("./applications-list").then((m) => m.ApplicationsList),
+  { ssr: false }
+);
+
+const CohortDetails = dynamic(
+  () => import("./cohort-details").then((m) => m.CohortDetails),
+  { ssr: false }
+);
 
 export function ApplicationsQueue({
   initialApplications,

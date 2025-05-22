@@ -1,11 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import dynamic from "next/dynamic";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageInbox } from "./message-inbox";
-import { ComposeMessage } from "./compose-message";
-import { TemplatesManager } from "./templates-manager";
-import { NotificationSettings } from "./notification-settings";
+
+const MessageInbox = dynamic(
+  () => import("./message-inbox").then((mod) => mod.MessageInbox),
+  {
+    ssr: false,
+  }
+);
+
+const ComposeMessage = dynamic(
+  () => import("./compose-message").then((mod) => mod.ComposeMessage),
+  {
+    ssr: false,
+  }
+);
+
+const TemplatesManager = dynamic(
+  () => import("./templates-manager").then((mod) => mod.TemplatesManager),
+  {
+    ssr: false,
+  }
+);
+
+const NotificationSettings = dynamic(
+  () =>
+    import("./notification-settings").then((mod) => mod.NotificationSettings),
+  {
+    ssr: false,
+  }
+);
 
 export function CommunicationsTab() {
   return (

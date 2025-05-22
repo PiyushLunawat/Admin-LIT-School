@@ -1,22 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { updateScholarship } from "@/app/api/student";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react";
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "default";
-
-interface AwardScholarshipProps {
-  student: any;
-}
+import { AwardScholarshipProps } from "@/types/components/cohorts/dashboard/tabs/litmus/litmus-test-dialog/award-scholarship";
 
 export function AwardScholarship({ student }: AwardScholarshipProps) {
   const [loading, setLoading] = useState(false);

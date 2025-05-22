@@ -1,16 +1,13 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { CalendarIcon, Clock4Icon, Mail } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
-interface SendMessageProps {
-  type: string;
-  recipient: string;
-}
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { SendMessageProps } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/send-message";
 
 export function SendMessage({ type, recipient }: SendMessageProps) {
   const [message, setMessage] = useState("Subject: ");

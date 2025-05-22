@@ -1,5 +1,9 @@
 "use client";
 
+import { Plus } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import {
   createCentre,
   getCentres,
@@ -35,20 +39,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { getCentresData } from "@/lib/features/center/centerSlice";
-import { Plus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
-interface Centre {
-  _id: string;
-  name: string;
-  location: string;
-  suffix: string;
-  status: boolean;
-}
+import { Centre } from "@/types/dashboard/centres/centres";
 
 export default function CentresPage() {
   const { toast } = useToast();
@@ -346,7 +339,6 @@ export default function CentresPage() {
           No Centres Available
         </div>
       )}
-      <Toaster />
     </div>
   );
 }

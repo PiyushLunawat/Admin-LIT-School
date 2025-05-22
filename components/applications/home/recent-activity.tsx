@@ -1,9 +1,9 @@
 "use client";
 
+import { CheckCircle, Clock, RotateCcw } from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle, Clock, RotateCcw, XCircle } from "lucide-react";
 
 export function RecentActivity() {
   const activities = [
@@ -78,13 +78,16 @@ export function RecentActivity() {
                   <p className="text-sm text-muted-foreground">
                     {activity.description}
                   </p>
-                <div className="flex gap-1">
-                  {activity.cohort.map((id: any, index: any) => (
-                    <div key={index} className="text-xs bg-[#FFF552]/10 p-1 rounded">
-                      {id}
-                    </div>
-                  ))}
-                </div>
+                  <div className="flex gap-1">
+                    {activity.cohort.map((id: any, index: any) => (
+                      <div
+                        key={index}
+                        className="text-xs bg-[#FFF552]/10 p-1 rounded"
+                      >
+                        {id}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}

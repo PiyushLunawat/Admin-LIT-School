@@ -1,7 +1,8 @@
 "use client";
 
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Save } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,15 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Save } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
-interface AutomationSettingsProps {
-  cohortId: string;
-}
-
-export function AutomationSettings({ cohortId }: AutomationSettingsProps) {
+export function AutomationSettings({ cohortId }: { cohortId: string }) {
   const automationGroups = [
     {
       title: "Application Status",
@@ -32,7 +29,7 @@ export function AutomationSettings({ cohortId }: AutomationSettingsProps) {
       settings: [
         {
           id: "app-received",
-          label: "Application Received", 
+          label: "Application Received",
           description: "Send confirmation when application is submitted",
           enabled: true,
           template: "application-received",
@@ -146,10 +143,16 @@ export function AutomationSettings({ cohortId }: AutomationSettingsProps) {
             </CardHeader>
             <CardContent className="space-y-6">
               {group.settings.map((setting) => (
-                <div key={setting.id} className="flex items-start justify-between">
+                <div
+                  key={setting.id}
+                  className="flex items-start justify-between"
+                >
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <Switch id={setting.id} defaultChecked={setting.enabled} />
+                      <Switch
+                        id={setting.id}
+                        defaultChecked={setting.enabled}
+                      />
                       <Label htmlFor={setting.id}>{setting.label}</Label>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -162,10 +165,18 @@ export function AutomationSettings({ cohortId }: AutomationSettingsProps) {
                         <SelectValue placeholder="Select template" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="application-received">Application Received</SelectItem>
-                        <SelectItem value="status-update">Status Update</SelectItem>
-                        <SelectItem value="interview-confirmation">Interview Confirmation</SelectItem>
-                        <SelectItem value="payment-reminder">Payment Reminder</SelectItem>
+                        <SelectItem value="application-received">
+                          Application Received
+                        </SelectItem>
+                        <SelectItem value="status-update">
+                          Status Update
+                        </SelectItem>
+                        <SelectItem value="interview-confirmation">
+                          Interview Confirmation
+                        </SelectItem>
+                        <SelectItem value="payment-reminder">
+                          Payment Reminder
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <Input

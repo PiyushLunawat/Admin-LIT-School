@@ -1,26 +1,19 @@
 "use client";
 
+import { getStudents } from "@/app/api/student";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { DateRange } from "react-day-picker";
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
   Tooltip,
-  Legend,
+  XAxis,
+  YAxis,
 } from "recharts";
 import { ScholarshipDistribution } from "./scholarship-distribution";
-import { DateRange } from "react-day-picker";
-import { useEffect, useState } from "react";
-import { getStudents } from "@/app/api/student";
-
 
 interface ChartsSectionProps {
   selectedDateRange: DateRange | undefined;
@@ -28,7 +21,12 @@ interface ChartsSectionProps {
   selectedProgram: string;
   selectedCohort: string;
 }
-export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram, selectedCohort }: ChartsSectionProps) {
+export function ChartsSection({
+  selectedDateRange,
+  searchQuery,
+  selectedProgram,
+  selectedCohort,
+}: ChartsSectionProps) {
   const [applications, setApplications] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [appliedCount, setAppliedCount] = useState(0);
@@ -37,125 +35,136 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
   const [interviewedCount, setInterviewedCount] = useState(0);
   const [enrolledCount, setEnrolledCount] = useState(0);
 
-    useEffect(() => {
-      async function fetchAndFilterStudents() {
-        setLoading(true);
-        try {
-          // 1) Fetch All Students
-          const response = await getStudents();
-  
-          // 2) Filter Out Students with No Application Details
-          const validStudents = response.data.filter(
-            (student: any) =>
-              ['initiated', 'applied', 'reviewing', 'enrolled', 'dropped'].includes(student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.status)
-          );
-  
-          // 3) Filter Based on Date Range, Search Query, Program, Cohort
-          const filteredApplications = validStudents.filter((app: any) => {
-            
-            const latestCohort = app?.appliedCohorts?.[app?.appliedCohorts.length - 1];
-            const cohortDetails = latestCohort?.cohortId;
-            const applicationDetails = latestCohort?.applicationDetails;
-            const litmusTestDetails = latestCohort?.litmusTestDetails;
-            const tokenFeeDetails = latestCohort?.tokenFeeDetails;
-            const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+  useEffect(() => {
+    async function fetchAndFilterStudents() {
+      setLoading(true);
+      try {
+        // 1) Fetch All Students
+        const response = await getStudents();
 
-            // --- Date Range Check ---
-            if (selectedDateRange) {
-              const appDate = new Date(app.updatedAt);
-              const { from, to } = selectedDateRange;
-              if ((from && appDate < from) || (to && appDate > to)) {
-                return false;
-              }
+        // 2) Filter Out Students with No Application Details
+        const validStudents = response.data.filter((student: any) =>
+          ["initiated", "applied", "reviewing", "enrolled", "dropped"].includes(
+            student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
+              ?.status
+          )
+        );
+
+        // 3) Filter Based on Date Range, Search Query, Program, Cohort
+        const filteredApplications = validStudents.filter((app: any) => {
+          const latestCohort =
+            app?.appliedCohorts?.[app?.appliedCohorts.length - 1];
+          const cohortDetails = latestCohort?.cohortId;
+          const applicationDetails = latestCohort?.applicationDetails;
+          const litmusTestDetails = latestCohort?.litmusTestDetails;
+          const tokenFeeDetails = latestCohort?.tokenFeeDetails;
+          const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
+
+          // --- Date Range Check ---
+          if (selectedDateRange) {
+            const appDate = new Date(app.updatedAt);
+            const { from, to } = selectedDateRange;
+            if ((from && appDate < from) || (to && appDate > to)) {
+              return false;
             }
-  
-            // --- Search Query (by Name, Email, etc.) ---
-            if (searchQuery) {
-              const lowerSearch = searchQuery.toLowerCase();
-              // Adjust fields as needed (name, email, phone, etc.)
-              const matchesSearch =
-                ((app.firstName+' '+app.lastName) || "").toLowerCase().includes(lowerSearch) ||
-                (cohortDetails.programDetail.name || "").toLowerCase().includes(lowerSearch) ||
-                (cohortDetails.cohortId || "").toLowerCase().includes(lowerSearch);;
-  
-              if (!matchesSearch) return false;
+          }
+
+          // --- Search Query (by Name, Email, etc.) ---
+          if (searchQuery) {
+            const lowerSearch = searchQuery.toLowerCase();
+            // Adjust fields as needed (name, email, phone, etc.)
+            const matchesSearch =
+              (app.firstName + " " + app.lastName || "")
+                .toLowerCase()
+                .includes(lowerSearch) ||
+              (cohortDetails.programDetail.name || "")
+                .toLowerCase()
+                .includes(lowerSearch) ||
+              (cohortDetails.cohortId || "")
+                .toLowerCase()
+                .includes(lowerSearch);
+
+            if (!matchesSearch) return false;
+          }
+
+          // --- Program Check ---
+          if (selectedProgram !== "all-programs") {
+            // Suppose 'app.program' is how you store it
+            if (cohortDetails?.programDetail?.name !== selectedProgram) {
+              return false;
             }
-  
-            // --- Program Check ---
-            if (selectedProgram !== "all-programs") {
-              // Suppose 'app.program' is how you store it
-              if ((cohortDetails?.programDetail?.name) !== selectedProgram) {
-                return false;
-              }
+          }
+
+          // --- Cohort Check ---
+          if (selectedCohort !== "all-cohorts") {
+            // Suppose 'app.cohort' is how you store it
+            if (cohortDetails?.cohortId !== selectedCohort) {
+              return false;
             }
-  
-            // --- Cohort Check ---
-            if (selectedCohort !== "all-cohorts") {
-              // Suppose 'app.cohort' is how you store it
-              if ((cohortDetails?.cohortId) !== selectedCohort) {
-                return false;
-              }
-            }
-  
-            return true;
-          });
-  
-          // 4) Set Final Filtered Applications
-          setApplications(filteredApplications);
-        } catch (error) {
-          console.error("Error fetching students:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
-  
-      fetchAndFilterStudents();
-    }, [selectedDateRange, searchQuery, selectedProgram, selectedCohort]);
-    
-    useEffect(() => {
-      if (applications && Array.isArray(applications)) {
-        let appliedCount = 0;
-        let underReviewCount = 0;
-        let interviewedCount = 0;
-        let litmusCompleteCount = 0;
-        let enrolledCount = 0;
-    
-        applications.forEach((application) => {
-          const latestCohort = application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
-    
-          const applicationStatus = latestCohort?.applicationDetails?.applicationStatus?.toLowerCase();
-          const litmusStatus = latestCohort?.litmusTestDetails?.status?.toLowerCase();
-    
-          if (applicationStatus !== undefined) {
-            appliedCount++;
           }
-    
-          if (applicationStatus === "under review") {
-            underReviewCount++;
-          }
-    
-          if (applicationStatus === "complete") {
-            interviewedCount++;
-          }
-    
-          if (litmusStatus !== "pending" && litmusStatus !== undefined) {
-            litmusCompleteCount++;
-          }
-    
-          if (litmusStatus === "completed") {
-            enrolledCount++;
-          }
+
+          return true;
         });
-    
-        setAppliedCount(appliedCount);
-        setUnderReviewCount(underReviewCount);
-        setInterviewedCount(interviewedCount);
-        setLitmusCompleteCount(litmusCompleteCount);
-        setEnrolledCount(enrolledCount);
-      } else {
-        console.log("Applications data is not an array or is undefined.");
+
+        // 4) Set Final Filtered Applications
+        setApplications(filteredApplications);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
       }
-    }, [applications]);    
+    }
+
+    fetchAndFilterStudents();
+  }, [selectedDateRange, searchQuery, selectedProgram, selectedCohort]);
+
+  useEffect(() => {
+    if (applications && Array.isArray(applications)) {
+      let appliedCount = 0;
+      let underReviewCount = 0;
+      let interviewedCount = 0;
+      let litmusCompleteCount = 0;
+      let enrolledCount = 0;
+
+      applications.forEach((application) => {
+        const latestCohort =
+          application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+
+        const applicationStatus =
+          latestCohort?.applicationDetails?.applicationStatus?.toLowerCase();
+        const litmusStatus =
+          latestCohort?.litmusTestDetails?.status?.toLowerCase();
+
+        if (applicationStatus !== undefined) {
+          appliedCount++;
+        }
+
+        if (applicationStatus === "under review") {
+          underReviewCount++;
+        }
+
+        if (applicationStatus === "complete") {
+          interviewedCount++;
+        }
+
+        if (litmusStatus !== "pending" && litmusStatus !== undefined) {
+          litmusCompleteCount++;
+        }
+
+        if (litmusStatus === "completed") {
+          enrolledCount++;
+        }
+      });
+
+      setAppliedCount(appliedCount);
+      setUnderReviewCount(underReviewCount);
+      setInterviewedCount(interviewedCount);
+      setLitmusCompleteCount(litmusCompleteCount);
+      setEnrolledCount(enrolledCount);
+    } else {
+      console.log("Applications data is not an array or is undefined.");
+    }
+  }, [applications]);
 
   const funnelData = [
     { stage: "Applications", value: appliedCount },
@@ -164,7 +173,6 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
     { stage: "LITMUS Complete", value: litmusCompleteCount },
     { stage: "Enrolled", value: enrolledCount },
   ];
-
 
   // Applications trend data
   const trendData = [
@@ -185,12 +193,24 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
         </CardHeader>
         <CardContent>
           <div className="h-[300px]">
-            <ResponsiveContainer style={{marginLeft: "-15px"}} width="100%" height="100%">
+            <ResponsiveContainer
+              style={{ marginLeft: "-15px" }}
+              width="100%"
+              height="100%"
+            >
               <BarChart data={funnelData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="stage" type="category" width={100} />
-                <Tooltip formatter={(value) => [`${value}`]} labelFormatter={() => ''} contentStyle={{ color: 'foreground', background: "background", border: "none"}} />
+                <Tooltip
+                  formatter={(value) => [`${value}`]}
+                  labelFormatter={() => ""}
+                  contentStyle={{
+                    color: "foreground",
+                    background: "background",
+                    border: "none",
+                  }}
+                />
                 <Bar
                   dataKey="value"
                   fill="hsl(var(--primary))"
@@ -228,7 +248,6 @@ export function ChartsSection({ selectedDateRange, searchQuery, selectedProgram,
       </Card> */}
 
       <ScholarshipDistribution applications={applications} />
-      
     </div>
   );
 }

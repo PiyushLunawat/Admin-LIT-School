@@ -1,11 +1,29 @@
 "use client";
 
+import axios from "axios";
+import {
+  ArrowLeft,
+  Calendar,
+  Download,
+  DownloadIcon,
+  Eye,
+  EyeIcon,
+  LoaderCircle,
+  Star,
+  UploadIcon,
+  UserMinus,
+  X,
+  XIcon,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+
 import {
   uploadFeeReceipt,
   verifyFeeStatus,
   verifyTokenAmount,
 } from "@/app/api/student";
-import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,44 +42,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { formatAmount } from "@/lib/utils/helpers";
-import axios from "axios";
 import {
-  ArrowLeft,
-  Calendar,
-  Download,
-  DownloadIcon,
-  Eye,
-  EyeIcon,
-  LoaderCircle,
-  Star,
-  UploadIcon,
-  UserMinus,
-  X,
-  XIcon,
-} from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { AwardScholarship } from "../litmus/litmus-test-dialog/award-scholarship";
+  BadgeVariant,
+  PaymentDetailsProps,
+  UploadState,
+} from "@/types/components/cohorts/dashboard/tabs/payments/payment-details";
 
-type BadgeVariant =
-  | "lemon"
-  | "pending"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "default";
+const AwardScholarship = dynamic(
+  () =>
+    import("../litmus/litmus-test-dialog/award-scholarship").then(
+      (m) => m.AwardScholarship
+    ),
+  { ssr: false }
+);
 
-interface UploadState {
-  uploading: boolean;
-  uploadProgress: number;
-  fileName: string;
-}
-
-interface PaymentDetailsProps {
-  student: any;
-  onClose: () => void;
-  onApplicationUpdate: () => void;
-}
+const MarkedAsDialog = dynamic(
+  () =>
+    import("@/components/students/sections/drop-dialog").then(
+      (m) => m.MarkedAsDialog
+    ),
+  { ssr: false }
+);
 
 export function PaymentDetails({
   student,

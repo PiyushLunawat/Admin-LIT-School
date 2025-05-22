@@ -1,5 +1,9 @@
 "use client";
 
+import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,30 +17,50 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
-import { StudentApplicationHeader } from "./application-dialog/dialog-header";
-import { DocumentsTab } from "./application-dialog/document-tab";
-import { PaymentInformationTab } from "./application-dialog/payment-info-tab";
-import { PersonalDetailsTab } from "./application-dialog/personal-details-tab";
+import {
+  ApplicationsListProps,
+  BadgeVariant,
+} from "@/types/components/cohorts/dashboard/tabs/applications/applications-list";
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "lemon"
-  | "pending"
-  | "onhold"
-  | "default";
+const StudentApplicationHeader = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header"
+    ).then((mod) => mod.StudentApplicationHeader),
+  {
+    ssr: false,
+  }
+);
 
-interface ApplicationsListProps {
-  applications: any;
-  onApplicationSelect: (id: any) => void;
-  selectedIds: string[];
-  onSelectedIdsChange: (ids: any[]) => void;
-  onApplicationUpdate: () => void;
-}
+const DocumentsTab = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab"
+    ).then((mod) => mod.DocumentsTab),
+  {
+    ssr: false,
+  }
+);
+
+const PaymentInformationTab = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/payment-info-tab"
+    ).then((mod) => mod.PaymentInformationTab),
+  {
+    ssr: false,
+  }
+);
+
+const PersonalDetailsTab = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab"
+    ).then((mod) => mod.PersonalDetailsTab),
+  {
+    ssr: false,
+  }
+);
 
 export function ApplicationsList({
   applications,

@@ -1,10 +1,40 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { InterviewsHome } from "@/components/interviews/home/interviews-home";
-import { ScheduledInterviews } from "@/components/interviews/scheduled/scheduled-interviews";
-import { CommunicationsTab } from "@/components/interviews/communications/communications-tab";
-import { SettingsTab } from "@/components/interviews/settings/settings-tab";
+
+const InterviewsHome = dynamic(
+  () =>
+    import("@/components/interviews/home/interviews-home").then(
+      (m) => m.InterviewsHome
+    ),
+  { ssr: false }
+);
+
+const ScheduledInterviews = dynamic(
+  () =>
+    import("@/components/interviews/scheduled/scheduled-interviews").then(
+      (m) => m.ScheduledInterviews
+    ),
+  { ssr: false }
+);
+
+const CommunicationsTab = dynamic(
+  () =>
+    import("@/components/interviews/communications/communications-tab").then(
+      (m) => m.CommunicationsTab
+    ),
+  { ssr: false }
+);
+
+const SettingsTab = dynamic(
+  () =>
+    import("@/components/interviews/settings/settings-tab").then(
+      (m) => m.SettingsTab
+    ),
+  { ssr: false }
+);
 
 export default function InterviewsDashboard() {
   return (

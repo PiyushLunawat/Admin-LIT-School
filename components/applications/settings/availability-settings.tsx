@@ -1,6 +1,8 @@
 "use client";
 
+import { Save } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Save } from "lucide-react";
 
 export function AvailabilitySettings() {
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);

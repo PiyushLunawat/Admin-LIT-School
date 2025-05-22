@@ -1,5 +1,9 @@
 "use client";
 
+import { format } from "date-fns";
+import { CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { getCentres } from "@/app/api/centres";
 import { updateStudentData } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
@@ -14,14 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
-import { useEffect, useState } from "react";
-
-interface PersonalDetailsTabProps {
-  student: any;
-  onUpdateStatus: () => void;
-}
+import { PersonalDetailsTabProps } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
 
 export function PersonalDetailsTab({
   student,
@@ -36,8 +33,6 @@ export function PersonalDetailsTab({
     student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const studentDetail = applicationDetails?.studentDetails;
-
-  // console.log("vvsvsv",student);
 
   // Initialize formData with the new structure.
   const [formData, setFormData] = useState({

@@ -1,7 +1,10 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Search, X } from "lucide-react";
+import { useCallback } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -9,17 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, X } from "lucide-react";
-import { Dispatch, SetStateAction, useCallback } from "react";
-
-interface ApplicationFiltersProps {
-  searchTerm: string;
-  onSearchTermChange: Dispatch<SetStateAction<string>>;
-  selectedStatus: string;
-  onSelectedStatusChange: Dispatch<SetStateAction<string>>;
-  sortBy: string;
-  onSortByChange: Dispatch<SetStateAction<string>>;
-}
+import { ApplicationFiltersProps } from "@/types/components/cohorts/dashboard/tabs/applications/application-filters";
 
 export function ApplicationFilters({
   searchTerm,
@@ -30,22 +23,24 @@ export function ApplicationFilters({
   onSortByChange,
 }: ApplicationFiltersProps) {
   const handleClearFilters = useCallback(() => {
-      onSearchTermChange("");
-      onSelectedStatusChange("all-status");
-      onSortByChange("newest");
-    }, [onSearchTermChange, onSelectedStatusChange, onSortByChange]);
+    onSearchTermChange("");
+    onSelectedStatusChange("all-status");
+    onSortByChange("newest");
+  }, [onSearchTermChange, onSelectedStatusChange, onSortByChange]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       <div className="relative flex-1">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search applications..." className="pl-8" 
+        <Input
+          placeholder="Search applications..."
+          className="pl-8"
           value={searchTerm}
           onChange={(e) => onSearchTermChange(e.target.value)}
         />
       </div>
       <div className="flex gap-2">
-        <Select 
+        <Select
           value={selectedStatus}
           onValueChange={(value) => onSelectedStatusChange(value)}
         >
@@ -59,14 +54,13 @@ export function ApplicationFilters({
             <SelectItem value="accepted">Accepted</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
             <SelectItem value="on hold">On Hold</SelectItem>
-            <SelectItem value="interview scheduled">interview scheduled</SelectItem>
+            <SelectItem value="interview scheduled">
+              interview scheduled
+            </SelectItem>
             <SelectItem value="dropped">Dropped</SelectItem>
           </SelectContent>
         </Select>
-        <Select 
-          value={sortBy}
-          onValueChange={(value) => onSortByChange(value)}
-        >
+        <Select value={sortBy} onValueChange={(value) => onSortByChange(value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -77,12 +71,16 @@ export function ApplicationFilters({
             <SelectItem value="name-desc">Name Z-A</SelectItem>
           </SelectContent>
         </Select>
-        
-        {!(searchTerm === "" && selectedStatus === "all-status" && sortBy === "newest") &&
+
+        {!(
+          searchTerm === "" &&
+          selectedStatus === "all-status" &&
+          sortBy === "newest"
+        ) && (
           <Button variant="ghost" size="icon" onClick={handleClearFilters}>
             <X className="h-4 w-4" />
           </Button>
-        }
+        )}
       </div>
     </div>
   );

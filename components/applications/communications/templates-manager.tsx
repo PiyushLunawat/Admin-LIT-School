@@ -1,10 +1,9 @@
 "use client";
 
+import { Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -12,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus, Edit, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,29 +18,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-interface Template {
-  id: string;
-  name: string;
-  subject: string;
-  content: string;
-  category: string;
-}
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Template } from "@/types/components/applications/communications/templates-manager";
 
 export function TemplatesManager() {
-  const [templates, setTemplates] = useState<Template[]>([
+  const [templates, _setTemplates] = useState<Template[]>([
     {
       id: "1",
       name: "Request Additional Information",
       subject: "Additional Information Required",
-      content: "Dear {{name}}, We need additional information for your application...",
+      content:
+        "Dear {{name}}, We need additional information for your application...",
       category: "Information Request",
     },
     {
       id: "2",
       name: "Interview Invitation",
       subject: "Interview Invitation for {{id}}",
-      content: "Dear {{name}}, We are pleased to invite you for an interview...",
+      content:
+        "Dear {{name}}, We are pleased to invite you for an interview...",
       category: "Interview",
     },
   ]);
@@ -127,7 +123,9 @@ export function TemplatesManager() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">{template.content}</p>
+              <p className="text-sm text-muted-foreground">
+                {template.content}
+              </p>
             </CardContent>
           </Card>
         ))}

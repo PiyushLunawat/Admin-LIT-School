@@ -1,5 +1,9 @@
 "use client";
 
+import { Eye } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,39 +17,43 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye } from "lucide-react";
-import { useEffect, useState } from "react";
-import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
-import { DocumentsTab } from "../applications/application-dialog/document-tab";
-import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
-import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
+import {
+  BadgeVariant,
+  PaymentRecord,
+  PaymentsListProps,
+} from "@/types/components/cohorts/dashboard/tabs/payments/payments-list";
 
-type BadgeVariant =
-  | "pending"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "default"
-  | "destructive";
-interface PaymentRecord {
-  id: string;
-  studentName: string;
-  paymentPlan: "One-Shot" | "Instalments";
-  tokenPaid: boolean;
-  instalmentsPaid: number;
-  totalInstalments: number;
-  dueDate?: string;
-  status: string;
-  scholarship?: string;
-}
+const PersonalDetailsTab = dynamic(
+  () =>
+    import("../applications/application-dialog/personal-details-tab").then(
+      (m) => m.PersonalDetailsTab
+    ),
+  { ssr: false }
+);
 
-interface PaymentsListProps {
-  applications: any[];
-  onStudentSelect: (id: any) => void;
-  selectedIds: any[];
-  onApplicationUpdate: () => void;
-  onSelectedIdsChange: (ids: any[]) => void;
-}
+const StudentApplicationHeader = dynamic(
+  () =>
+    import("../applications/application-dialog/dialog-header").then(
+      (m) => m.StudentApplicationHeader
+    ),
+  { ssr: false }
+);
+
+const PaymentInformationTab = dynamic(
+  () =>
+    import("../applications/application-dialog/payment-info-tab").then(
+      (m) => m.PaymentInformationTab
+    ),
+  { ssr: false }
+);
+
+const DocumentsTab = dynamic(
+  () =>
+    import("../applications/application-dialog/document-tab").then(
+      (m) => m.DocumentsTab
+    ),
+  { ssr: false }
+);
 
 export function PaymentsList({
   applications,

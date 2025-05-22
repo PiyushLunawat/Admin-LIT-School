@@ -1,44 +1,68 @@
 "use client";
 
+import { Calendar, UserMinus } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useState } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { UserMinus, Calendar } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react";
-import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
+import { Separator } from "@/components/ui/separator";
+import {
+  BadgeVariant,
+  StudentHeaderProps,
+} from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+const MarkedAsDialog = dynamic(
+  () =>
+    import("@/components/students/sections/drop-dialog").then(
+      (mod) => mod.MarkedAsDialog
+    ),
+  {
+    ssr: false,
+  }
+);
 
-interface StudentHeaderProps {
-  student: any;
-  onUpdateStatus: () => void;
-}
+const SchedulePresentation = dynamic(
+  () =>
+    import("@/components/common-dialog/schedule-presentation").then(
+      (mod) => mod.SchedulePresentation
+    ),
+  {
+    ssr: false,
+  }
+);
 
-export function StudentApplicationHeader({ student, onUpdateStatus }: StudentHeaderProps) {
+export function StudentApplicationHeader({
+  student,
+  onUpdateStatus,
+}: StudentHeaderProps) {
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
   const [interviewOpen, setInterviewOpen] = useState(false);
 
-  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const latestCohort =
+    student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const litmusTestDetails = latestCohort?.litmusTestDetails;
   const scholarshipDetails = litmusTestDetails?.scholarshipDetail;
 
   const colorClasses = [
-    'text-emerald-600 !bg-emerald-600/20 border-emerald-600',
-    'text-[#3698FB] !bg-[#3698FB]/20 border-[#3698FB]',
-    'text-[#FA69E5] !bg-[#FA69E5]/20 border-[#FA69E5]',
-    'text-orange-600 !bg-orange-600/20 border-orange-600'
+    "text-emerald-600 !bg-emerald-600/20 border-emerald-600",
+    "text-[#3698FB] !bg-[#3698FB]/20 border-[#3698FB]",
+    "text-[#FA69E5] !bg-[#FA69E5]/20 border-[#FA69E5]",
+    "text-orange-600 !bg-orange-600/20 border-orange-600",
   ];
-  
+
   const getColor = (slabName: string): string => {
-    const index = latestCohort?.cohortId?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
-      (slab: any) => slab.name === slabName
-    );
-    
-    return index !== -1 ? colorClasses[index % colorClasses.length] : 'text-default';
+    const index =
+      latestCohort?.cohortId?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
+        (slab: any) => slab.name === slabName
+      );
+
+    return index !== -1
+      ? colorClasses[index % colorClasses.length]
+      : "text-default";
   };
 
   const getStatusColor = (status: string): BadgeVariant => {
@@ -63,36 +87,48 @@ export function StudentApplicationHeader({ student, onUpdateStatus }: StudentHea
 
   return (
     <div>
-        <div className="grid gap-3">
-          {/* Profile Section */}
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={student?.profileUrl} className="object-cover" />
-              <AvatarFallback>{student?.firstName?.[0] || "-"}{student?.lastName?.[0] || "-"}</AvatarFallback>
-            </Avatar>
-            <div className="space-y-1">
-              <h2 className="text-base font-semibold">{student?.firstName} {student?.lastName}</h2>
-              <div className="flex gap-2 h-5 items-center">
-                <p className="text-sm text-muted-foreground">{student?.email}</p>
-                <Separator orientation="vertical" />
-                <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>
-              </div>
+      <div className="grid gap-3">
+        {/* Profile Section */}
+        <div className="flex items-center gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={student?.profileUrl} className="object-cover" />
+            <AvatarFallback>
+              {student?.firstName?.[0] || "-"}
+              {student?.lastName?.[0] || "-"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="space-y-1">
+            <h2 className="text-base font-semibold">
+              {student?.firstName} {student?.lastName}
+            </h2>
+            <div className="flex gap-2 h-5 items-center">
+              <p className="text-sm text-muted-foreground">{student?.email}</p>
+              <Separator orientation="vertical" />
+              <p className="text-sm text-muted-foreground">
+                {student?.mobileNumber}
+              </p>
             </div>
           </div>
+        </div>
 
-          {/* Status Section */}
-          <div className="space-y-4 col-span-2 pt-3 border-t">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">Program & Cohort</p>
-                <p className="font-medium">{latestCohort?.cohortId?.programDetail.name}</p>
-                <p className="text-sm">{latestCohort?.cohortId?.cohortId}</p>
-              </div>
+        {/* Status Section */}
+        <div className="space-y-4 col-span-2 pt-3 border-t">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-muted-foreground">Program & Cohort</p>
+              <p className="font-medium">
+                {latestCohort?.cohortId?.programDetail.name}
+              </p>
+              <p className="text-sm">{latestCohort?.cohortId?.cohortId}</p>
+            </div>
 
-              {/* Action Buttons */}
-              {latestCohort?.status === 'dropped' ?
-                <Badge className="" variant={'destructive'}>Dropped</Badge> :
-                <div className="grid grid-cols-2 gap-2">
+            {/* Action Buttons */}
+            {latestCohort?.status === "dropped" ? (
+              <Badge className="" variant={"destructive"}>
+                Dropped
+              </Badge>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
                 {/* <Button variant="outline" className="justify-start">
                     <Mail className="h-4 w-4 mr-2" />
                     Send Email
@@ -101,77 +137,153 @@ export function StudentApplicationHeader({ student, onUpdateStatus }: StudentHea
                     <img src="/assets/images/whatsapp-icon.svg" className="h-4 w-4 mr-2" />
                     Send WhatsApp
                   </Button> */}
-                  <Button variant="outline" className="justify-start" disabled
+                <Button
+                  variant="outline"
+                  className="justify-start"
+                  disabled
                   // onClick={() => setInterviewOpen(true)}
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Schedule Interview
-                  </Button>
-                  <Button variant="outline" className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
-                    onClick={()=>setMarkedAsDialogOpen(true)} disabled={latestCohort?.status === 'dropped' || ['rejected', 'not qualified'].includes(applicationDetails?.applicationStatus)}>
-                    <UserMinus className="h-4 w-4 mr-2" />
-                    Mark as Dropped
-                  </Button>
-                </div>
-              }
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule Interview
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
+                  onClick={() => setMarkedAsDialogOpen(true)}
+                  disabled={
+                    latestCohort?.status === "dropped" ||
+                    ["rejected", "not qualified"].includes(
+                      applicationDetails?.applicationStatus
+                    )
+                  }
+                >
+                  <UserMinus className="h-4 w-4 mr-2" />
+                  Mark as Dropped
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Status Section */}
+          <div className="flex justify-between items-center py-3 border-t">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Application Status
+              </p>
+              {applicationDetails?.applicationStatus ? (
+                <Badge
+                  className="capitalize"
+                  variant={getStatusColor(
+                    [
+                      "interview scheduled",
+                      "waitlist",
+                      "selected",
+                      "not qualified",
+                    ].includes(applicationDetails?.applicationStatus)
+                      ? "accepted"
+                      : applicationDetails?.applicationStatus || "--"
+                  )}
+                >
+                  {[
+                    "interview scheduled",
+                    "waitlist",
+                    "selected",
+                    "not qualified",
+                  ].includes(applicationDetails?.applicationStatus)
+                    ? "accepted"
+                    : applicationDetails?.applicationStatus}
+                </Badge>
+              ) : (
+                "--"
+              )}
             </div>
-          
-            {/* Status Section */}
-            <div className="flex justify-between items-center py-3 border-t">
-              <div>
-                <p className="text-sm text-muted-foreground">Application Status</p>
-                {applicationDetails?.applicationStatus ?
-                <Badge className="capitalize" variant={getStatusColor(['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
-                  'accepted' : applicationDetails?.applicationStatus || "--")}>
-                  {['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ?
-                  'accepted' : applicationDetails?.applicationStatus }
-                </Badge> : "--"}
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Interview Status</p>
-                {['interview scheduled', 'waitlist', 'selected', 'not qualified'].includes(applicationDetails?.applicationStatus) ? 
-                <Badge className="capitalize" variant={getStatusColor(applicationDetails?.applicationStatus || "--")}>
+            <div>
+              <p className="text-sm text-muted-foreground">Interview Status</p>
+              {[
+                "interview scheduled",
+                "waitlist",
+                "selected",
+                "not qualified",
+              ].includes(applicationDetails?.applicationStatus) ? (
+                <Badge
+                  className="capitalize"
+                  variant={getStatusColor(
+                    applicationDetails?.applicationStatus || "--"
+                  )}
+                >
                   {applicationDetails?.applicationStatus}
-                </Badge> : "--"}
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">LITMUS Status</p>
-                {litmusTestDetails?.status ? 
-                <Badge className="capitalize" variant={getStatusColor(litmusTestDetails?.status || "--")}>
+                </Badge>
+              ) : (
+                "--"
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">LITMUS Status</p>
+              {litmusTestDetails?.status ? (
+                <Badge
+                  className="capitalize"
+                  variant={getStatusColor(litmusTestDetails?.status || "--")}
+                >
                   {litmusTestDetails?.status}
-                </Badge>  : "--"}
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Scholarship</p>
-                {scholarshipDetails ? 
-                <Badge className={`capitalize ${getColor(scholarshipDetails?.scholarshipName)}`} variant="secondary">
-                  {scholarshipDetails?.scholarshipName+' '+(scholarshipDetails?.scholarshipPercentage+'%')}
-                </Badge> : "--"}
-              </div> 
-              <div>
-                <p className="text-sm text-muted-foreground">Payment Status</p>
-                {student?.paymentStatus ? 
-                <Badge className="capitalize" variant={getStatusColor(student.paymentStatus)}>
+                </Badge>
+              ) : (
+                "--"
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Scholarship</p>
+              {scholarshipDetails ? (
+                <Badge
+                  className={`capitalize ${getColor(
+                    scholarshipDetails?.scholarshipName
+                  )}`}
+                  variant="secondary"
+                >
+                  {scholarshipDetails?.scholarshipName +
+                    " " +
+                    (scholarshipDetails?.scholarshipPercentage + "%")}
+                </Badge>
+              ) : (
+                "--"
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Payment Status</p>
+              {student?.paymentStatus ? (
+                <Badge
+                  className="capitalize"
+                  variant={getStatusColor(student.paymentStatus)}
+                >
                   {student?.paymentStatus}
-                </Badge> : "--"}
-              </div>
-            </div>           
+                </Badge>
+              ) : (
+                "--"
+              )}
+            </div>
           </div>
         </div>
+      </div>
 
-        <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
+      <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
         <DialogTitle></DialogTitle>
-          <DialogContent className="max-w-2xl">
-            <SchedulePresentation student={student} interviewr={['interviewer', 'evaluator']}/>
-          </DialogContent>
-        </Dialog>
-        
-        <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
-        <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
-          <MarkedAsDialog student={student} onUpdateStatus={() => onUpdateStatus()} onClose={() => setMarkedAsDialogOpen(false)}/>
+        <DialogContent className="max-w-2xl">
+          <SchedulePresentation
+            student={student}
+            interviewr={["interviewer", "evaluator"]}
+          />
         </DialogContent>
       </Dialog>
-      </div>
+
+      <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
+        <DialogTitle></DialogTitle>
+        <DialogContent className="max-w-4xl py-4 px-6">
+          <MarkedAsDialog
+            student={student}
+            onUpdateStatus={() => onUpdateStatus()}
+            onClose={() => setMarkedAsDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

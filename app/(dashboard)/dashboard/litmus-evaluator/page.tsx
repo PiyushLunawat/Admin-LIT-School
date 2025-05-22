@@ -1,12 +1,15 @@
-"use client"
+"use client";
 
-import { LitmusEvaluatorDashboard } from "@/components/litmus-evaluator/litmus-dashboard";
-import { Suspense } from "react";
+import dynamic from "next/dynamic";
+
+const LitmusEvaluatorDashboard = dynamic(
+  () =>
+    import("@/components/litmus-evaluator/litmus-dashboard").then(
+      (m) => m.LitmusEvaluatorDashboard
+    ),
+  { ssr: false }
+);
 
 export default function LitmusEvaluatorPage() {
-  return (
-    <Suspense >
-      <LitmusEvaluatorDashboard />
-    </Suspense>
-  );
+  return <LitmusEvaluatorDashboard />;
 }

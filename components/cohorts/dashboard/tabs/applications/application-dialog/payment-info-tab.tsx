@@ -1,19 +1,5 @@
 "use client";
 
-import {
-  uploadFeeReceipt,
-  verifyFeeStatus,
-  verifyTokenAmount,
-} from "@/app/api/student";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { formatAmount } from "@/lib/utils/helpers";
 import axios from "axios";
 import {
   ArrowLeft,
@@ -30,24 +16,25 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-type BadgeVariant =
-  | "onhold"
-  | "pending"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "default";
-
-interface UploadState {
-  uploading: boolean;
-  uploadProgress: number;
-  fileName: string;
-}
-
-interface PaymentInformationTabProps {
-  student: any;
-  onUpdateStatus: () => void;
-}
+import {
+  uploadFeeReceipt,
+  verifyFeeStatus,
+  verifyTokenAmount,
+} from "@/app/api/student";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { formatAmount } from "@/lib/utils/helpers";
+import {
+  BadgeVariant,
+  PaymentInformationTabProps,
+  UploadState,
+} from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/payment-info-tab";
 
 export function PaymentInformationTab({
   student,

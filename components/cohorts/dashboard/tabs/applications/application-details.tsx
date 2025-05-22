@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  Calendar,
+  Clock4,
+  EyeIcon,
+  FileSignature,
+  UserMinus,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
 import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -15,17 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  Calendar,
-  Clock4,
-  EyeIcon,
-  FileSignature,
-  UserMinus,
-  X,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import ApplicationFeedback from "./application-dialog/application-feedback";
-import InterviewFeedback from "./application-dialog/interview-feedback";
+
+import { ApplicationFeedback } from "./application-dialog/application-feedback";
+import { InterviewFeedback } from "./application-dialog/interview-feedback";
 import { SendMessage } from "./application-dialog/send-message";
 import SubmissionView from "./application-dialog/submission-view";
 

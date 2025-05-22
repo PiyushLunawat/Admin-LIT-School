@@ -1,11 +1,16 @@
 "use client";
 
-import ApplicationFeedback from "@/components/cohorts/dashboard/tabs/applications/application-dialog/application-feedback";
-import InterviewFeedback from "@/components/cohorts/dashboard/tabs/applications/application-dialog/interview-feedback";
-import { SendMessage } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/send-message";
-import SubmissionView from "@/components/cohorts/dashboard/tabs/applications/application-dialog/submission-view";
-import { SchedulePresentation } from "@/components/common-dialog/schedule-presentation";
-import { MarkedAsDialog } from "@/components/students/sections/drop-dialog";
+import {
+  Calendar,
+  Clock4,
+  EyeIcon,
+  FileSignature,
+  UserMinus,
+  X,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,28 +25,67 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
-  Calendar,
-  Clock4,
-  EyeIcon,
-  FileSignature,
-  UserMinus,
-  X,
-} from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+  ApplicationDetailsProps,
+  BadgeVariant,
+} from "@/types/components/applications/queue/application-details";
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "pending"
-  | "onhold"
-  | "default";
-interface ApplicationDetailsProps {
-  application: any;
-  onClose: () => void;
-  onApplicationUpdate: () => void;
-}
+const ApplicationFeedback = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/application-feedback"
+    ).then((m) => m.ApplicationFeedback),
+  {
+    ssr: false,
+  }
+);
+
+const InterviewFeedback = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/interview-feedback"
+    ).then((m) => m.InterviewFeedback),
+  {
+    ssr: false,
+  }
+);
+
+const SendMessage = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/send-message"
+    ).then((m) => m.SendMessage),
+  {
+    ssr: false,
+  }
+);
+
+const SubmissionView = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/submission-view"
+    ).then((m) => m.SubmissionView),
+  {
+    ssr: false,
+  }
+);
+
+const SchedulePresentation = dynamic(
+  () =>
+    import("@/components/common-dialog/schedule-presentation").then(
+      (m) => m.SchedulePresentation
+    ),
+  {
+    ssr: false,
+  }
+);
+
+const MarkedAsDialog = dynamic(
+  () =>
+    import("@/components/students/sections/drop-dialog").then(
+      (m) => m.MarkedAsDialog
+    ),
+  { ssr: false }
+);
 
 export function ApplicationDetails({
   application,
@@ -99,7 +143,6 @@ export function ApplicationDetails({
 
       if (endTime) {
         const endDate = getEndTimeDate(endTime);
-        console.log("timee", endDate < currentTime, endDate, currentTime);
         if (endDate < currentTime) {
           setStatus("Interview Concluded");
         }
@@ -113,9 +156,6 @@ export function ApplicationDetails({
 
     const currentStatus = applicationDetails.applicationStatus;
 
-    // If interview scheduled, check the time
-
-    // If status is in certain states, set interview to true
     if (
       [
         "interview scheduled",
@@ -150,7 +190,7 @@ export function ApplicationDetails({
     }
 
     const endTimeDate = new Date(currentDate);
-    endTimeDate.setHours(hoursInt, parseInt(minutes, 10), 0, 0); // Set the time on the current date
+    endTimeDate.setHours(hoursInt, parseInt(minutes, 10), 0, 0);
 
     return endTimeDate;
   }

@@ -1,25 +1,14 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { CalendarIcon, Clock4Icon, Mail } from "lucide-react";
 import Image from "next/image";
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "default";
-interface PreviousMessageProps {
-  type: string;
-  status: string;
-  date: string;
-  time: string;
-  recipient: string;
-  subject: string;
-  message: string;
-}
+import { Badge } from "@/components/ui/badge";
+import {
+  BadgeVariant,
+  PreviousMessageProps,
+} from "@/types/components/cohorts/dashboard/tabs/communications/communication-dialog/preview-message";
 
 export function PreviousMessage({
   type = "Email",

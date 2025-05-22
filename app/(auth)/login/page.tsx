@@ -1,6 +1,15 @@
 "use client";
 
 import { login, resendOtp, verifyOtp } from "@/app/api/auth";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Cookies from "js-cookie";
+import { Eye, EyeOff, MailIcon } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -18,31 +27,8 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Cookies from "js-cookie";
-import { Eye, EyeOff, MailIcon } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-// Validation schema using Zod
-const formSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
-const otpSchema = z.object({
-  otp: z
-    .string()
-    .length(6, { message: "OTP must be 6 digits" })
-    .regex(/^\d+$/, { message: "OTP must contain only numbers" }),
-  generalError: z.string().optional(),
-});
-
-type LoginFormValues = z.infer<typeof formSchema>;
+import { formSchema, otpSchema } from "@/schemas/auth/login.schema";
+import { LoginFormValues } from "@/types/auth/login";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,7 +45,6 @@ export default function LoginPage() {
     setTimer(59);
   }, []);
 
-  // Initialize React Hook Form
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {

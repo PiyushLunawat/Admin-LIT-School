@@ -1,9 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import axios from "axios";
 import {
   CircleCheckBig,
   Download,
@@ -18,22 +15,18 @@ import {
   updateDocumentStatus,
   uploadStudentDocuments,
 } from "@/app/api/student";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
-
-type BadgeVariant = "warning" | "success" | "pending" | "default";
-interface UploadState {
-  uploading: boolean;
-  uploadProgress: number;
-  fileName: string;
-}
-
-interface DocumentsTabProps {
-  student: any;
-  onUpdateStatus: () => void;
-}
+import {
+  BadgeVariant,
+  DocumentsTabProps,
+  UploadState,
+} from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
 
 export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
   const latestCohort =

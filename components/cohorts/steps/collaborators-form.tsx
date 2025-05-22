@@ -180,8 +180,36 @@ export function CollaboratorsForm({
     const role = form.getValues(`collaborators.${index}.role`);
     form.setValue(`collaborators.${index}.email`, emailVal);
     form.clearErrors(`collaborators.${index}.email`);
+    if (!emailVal) {
+      form.setError(`collaborators.${index}.email`, {
+        type: "manual",
+        message: "Please enter a valid email address",
+      });
+    }
+  };
 
-    if (emailVal && ["interviewer", "Litmus_test_reviewer"].includes(role)) {
+  // Add a new function to handle blur validation
+  const handleEmailBlur = async (index: number) => {
+    const emailVal = form.getValues(`collaborators.${index}.email`).trim();
+    const role = form.getValues(`collaborators.${index}.role`);
+
+    // Clear any existing errors first
+    form.clearErrors(`collaborators.${index}.email`);
+
+    // Only validate if there's actually an email to check
+    if (!emailVal) return;
+
+    // Check if it's a complete email format
+    const isCompleteEmail =
+      emailVal.includes("@") &&
+      emailVal.includes(".") &&
+      emailVal.indexOf("@") < emailVal.lastIndexOf(".") &&
+      emailVal.lastIndexOf(".") < emailVal.length - 1;
+
+    if (
+      isCompleteEmail &&
+      ["interviewer", "Litmus_test_reviewer"].includes(role)
+    ) {
       const result = await checkEmailExists(emailVal);
       if (!result.success) {
         form.setError(`collaborators.${index}.email`, {
@@ -189,6 +217,12 @@ export function CollaboratorsForm({
           message: "This email doesn't have an account on CalendLIT",
         });
       }
+    } else if (emailVal && !isCompleteEmail) {
+      // If there's text but it's not a valid email format
+      form.setError(`collaborators.${index}.email`, {
+        type: "manual",
+        message: "Please enter a valid email address",
+      });
     }
   };
 
@@ -444,6 +478,7 @@ export function CollaboratorsForm({
                               placeholder="email@example.com"
                               value={field.value || ""}
                               onChange={(e) => handleCheckEmail(e, index)}
+                              onBlur={() => handleEmailBlur(index)}
                             />
                             {fields.length > 1 && (
                               <Popover>

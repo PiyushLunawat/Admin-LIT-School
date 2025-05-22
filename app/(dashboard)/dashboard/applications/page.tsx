@@ -1,11 +1,15 @@
 "use client";
-import { ApplicationDashboard } from "@/components/applications/application-dashboard";
-import { Suspense } from "react";
+
+import dynamic from "next/dynamic";
+
+const ApplicationDashboard = dynamic(
+  () =>
+    import("@/components/applications/application-dashboard").then(
+      (m) => m.ApplicationDashboard
+    ),
+  { ssr: false }
+);
 
 export default function ApplicationsPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ApplicationDashboard />
-    </Suspense>
-  );
+  return <ApplicationDashboard />;
 }

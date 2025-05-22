@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { getCentres } from "@/app/api/centres";
 import { getCohortById } from "@/app/api/cohorts";
 import { getPrograms } from "@/app/api/programs";
@@ -8,30 +10,11 @@ import { DateRangePicker } from "@/components/dashboard/overview/date-range-pick
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
-
-interface CohortHeaderProps {
-  cohortId: string;
-  setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
-}
-
-interface Program {
-  _id: string;
-  name: string;
-  description: string;
-  duration: number;
-  prefix: string;
-  status: boolean;
-}
-
-interface Centre {
-  _id: string;
-  name: string;
-  location: string;
-  suffix: string;
-  status: boolean;
-}
+import {
+  Centre,
+  CohortHeaderProps,
+  Program,
+} from "@/types/components/cohorts/dashboard/cohort-header";
 
 export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
   const [cohort, setCohort] = useState<any>(null);

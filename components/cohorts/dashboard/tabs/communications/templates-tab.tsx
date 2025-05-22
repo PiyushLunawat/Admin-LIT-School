@@ -1,11 +1,11 @@
 "use client";
 
+import { Calendar, Clock4Icon, Eye, PlusIcon } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils/utils";
 import {
   Card,
   CardContent,
@@ -13,6 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -21,24 +24,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock4Icon, Eye, PlusIcon } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Edit, Trash2, Download } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { CreateTemplate } from "./communication-dialog/create-template";
+  BadgeVariant,
+  TemplatesTabProps,
+} from "@/types/components/cohorts/dashboard/tabs/communications/templates-tab";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
-interface TemplatesTabProps {
-  cohortId: string;
-}
+const CreateTemplate = dynamic(
+  () =>
+    import("./communication-dialog/create-template").then(
+      (m) => m.CreateTemplate
+    ),
+  {
+    ssr: false,
+  }
+);
 
 export function TemplatesTab({ cohortId }: TemplatesTabProps) {
   const [communicationType, setCommunicationType] = useState<string>("email");
@@ -105,80 +104,88 @@ export function TemplatesTab({ cohortId }: TemplatesTabProps) {
 
   return (
     <div className="space-y-4">
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div className="lg:col-span-2 space-y-4">
-      <div className="flex gap-4">
-        <Input placeholder="Search Templates..." className="" />
-        <Button className="flex gap-1 items-center" onClick={() => setOpen(true)}><PlusIcon className="w-4 h-4"/>Create Template</Button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex gap-4">
+            <Input placeholder="Search Templates..." className="" />
+            <Button
+              className="flex gap-1 items-center"
+              onClick={() => setOpen(true)}
+            >
+              <PlusIcon className="w-4 h-4" />
+              Create Template
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
-    </div>
 
-<Dialog open={open} onOpenChange={setOpen}>
-<DialogTitle></DialogTitle>
-  <DialogContent className="max-w-4xl">
-    <CreateTemplate />
-  </DialogContent>
-</Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTitle></DialogTitle>
+        <DialogContent className="max-w-4xl">
+          <CreateTemplate />
+        </DialogContent>
+      </Dialog>
 
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Recipients</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Last Updated</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {communications.map((comm) => (
+                  <TableRow key={comm.id}>
+                    <TableCell>{comm.recipients}</TableCell>
+                    <TableCell>{comm.subject}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{comm.type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {" "}
+                      <>
+                        <div className="flex items-center text-xs">
+                          <Clock4Icon className="h-3 w-3 mr-1" />
+                          {comm.time}
+                        </div>
+                        <div className="flex items-center text-xs">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {new Date(comm.date).toLocaleDateString()}
+                        </div>
+                      </>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+        <div className="lg:col-span-1">
+          <div className="sticky top-6">
+            <Card className="h-[calc(100vh-10rem)] overflow-y-auto">
+              <CardHeader>
+                <CardTitle>Message Details</CardTitle>
+                <CardDescription>
+                  Preview how your message will appear to recipients
+                </CardDescription>
+              </CardHeader>
 
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Recipients</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Last Updated</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {communications.map((comm) => (
-              <TableRow key={comm.id}>
-                <TableCell>{comm.recipients}</TableCell>
-                <TableCell>{comm.subject}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{comm.type}</Badge>
-                </TableCell>
-                <TableCell> <>
-                    <div className="flex items-center text-xs">
-                      <Clock4Icon className="h-3 w-3 mr-1" />
-                      {comm.time}
-                    </div>
-                    <div className="flex items-center text-xs">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(comm.date).toLocaleDateString()}
-                    </div>
-                  </></TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="icon">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      </div>
-      <div className="lg:col-span-1">
-        <div className="sticky top-6">
-        <Card className="h-[calc(100vh-10rem)] overflow-y-auto">
-          <CardHeader>
-            <CardTitle>Message Details</CardTitle>
-            <CardDescription>
-              Preview how your message will appear to recipients
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="email">
-            <div className="border-b space-y-2 pb-3">
-              <h4 className="">Type</h4>
-              <div className="flex gap-3">
-              <div className="flex items-center space-x-2">
+              <CardContent className="email">
+                <div className="border-b space-y-2 pb-3">
+                  <h4 className="">Type</h4>
+                  <div className="flex gap-3">
+                    <div className="flex items-center space-x-2">
                       <Checkbox
                         id="email"
                         checked={communicationType === "email"}
@@ -198,33 +205,49 @@ export function TemplatesTab({ cohortId }: TemplatesTabProps) {
                         Whatsapp
                       </label>
                     </div>
-              </div>
-            </div>
-          <h4 className="my-4">Message Preview</h4>
-          {communicationType === "email" ? (
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-2">Subject:</p>
-                <p className="font-medium">{ "Lorem ipsum dolor"}</p>
-              </div>
-              <div className="border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-2">Message:</p>
-                <p className="">{ "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et..."}</p>
-              </div>
-            </div>) : (
-            <div className="border rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-2">Message:</p>
-              <div className="flex items-center gap-1">
-                <span className="text-sm ">Subject:</span>
-                <p className="font-medium">{ "Lorem ipsum dolor"}</p>
-              </div>
-              <p className="mt-3">{ "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et..."}</p>
-            </div>
-          )}
-          </CardContent>
-          </Card>
+                  </div>
+                </div>
+                <h4 className="my-4">Message Preview</h4>
+                {communicationType === "email" ? (
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Subject:
+                      </p>
+                      <p className="font-medium">{"Lorem ipsum dolor"}</p>
+                    </div>
+                    <div className="border rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Message:
+                      </p>
+                      <p className="">
+                        {
+                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et..."
+                        }
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-4">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Message:
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm ">Subject:</span>
+                      <p className="font-medium">{"Lorem ipsum dolor"}</p>
+                    </div>
+                    <p className="mt-3">
+                      {
+                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et..."
+                      }
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
-    </div>);
+  );
 }

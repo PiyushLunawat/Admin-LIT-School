@@ -1,7 +1,10 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Search, X } from "lucide-react";
+import { useCallback } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -9,23 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, X } from "lucide-react";
-import { Dispatch, SetStateAction, useCallback } from "react";
+import { InterviewsFiltersProps } from "@/types/components/applications/queue/interviews-details";
 import { DateRangePicker } from "./date-range-picker";
-import { DateRange } from "react-day-picker";
-
-interface InterviewsFiltersProps {
-  setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
-  searchQuery: string;
-  onSearchQueryChange: Dispatch<SetStateAction<string>>;
-  cohorts: any[];
-  selectedCohort: string;
-  onCohortChange: (value: string) => void;
-  selectedStatus: string;
-  onSelectedStatusChange: Dispatch<SetStateAction<string>>;
-  sortBy: string;
-  onSortByChange: Dispatch<SetStateAction<string>>;
-}
 
 export function InterviewsFilters({
   setDateRange,
@@ -39,13 +27,17 @@ export function InterviewsFilters({
   sortBy,
   onSortByChange,
 }: InterviewsFiltersProps) {
-
   const handleClearFilters = useCallback(() => {
     onSearchQueryChange("");
-    onCohortChange("all-cohorts")
+    onCohortChange("all-cohorts");
     onSelectedStatusChange("all-status");
     onSortByChange("newest");
-  }, [onSearchQueryChange, onCohortChange, onSelectedStatusChange, onSortByChange]);
+  }, [
+    onSearchQueryChange,
+    onCohortChange,
+    onSelectedStatusChange,
+    onSortByChange,
+  ]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,8 +72,12 @@ export function InterviewsFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-status">All Status</SelectItem>
-              <SelectItem value="interview scheduled">interview scheduled</SelectItem>
-              <SelectItem value="interview cancelled">Interview Cancelled</SelectItem>
+              <SelectItem value="interview scheduled">
+                interview scheduled
+              </SelectItem>
+              <SelectItem value="interview cancelled">
+                Interview Cancelled
+              </SelectItem>
               <SelectItem value="under review">Interview Concluded</SelectItem>
               <SelectItem value="waitlist">Waitlist</SelectItem>
               <SelectItem value="selected">Selected</SelectItem>
@@ -102,11 +98,14 @@ export function InterviewsFilters({
             </SelectContent>
           </Select>
         </div>
-        {(searchQuery !== "" || selectedCohort !== "all-cohorts" || selectedStatus !== "all-status" || sortBy !== "newest") && 
-         <Button variant="ghost" size="icon" onClick={handleClearFilters}>
+        {(searchQuery !== "" ||
+          selectedCohort !== "all-cohorts" ||
+          selectedStatus !== "all-status" ||
+          sortBy !== "newest") && (
+          <Button variant="ghost" size="icon" onClick={handleClearFilters}>
             <X className="-ml-4 h-4 w-4" />
           </Button>
-        }
+        )}
       </div>
       <div className="">
         <DateRangePicker setDateRange={setDateRange} />

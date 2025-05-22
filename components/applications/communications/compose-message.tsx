@@ -1,9 +1,11 @@
 "use client";
 
+import { Paperclip, Send } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -11,8 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Send, Paperclip } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 export function ComposeMessage() {
   return (
@@ -40,8 +41,12 @@ export function ComposeMessage() {
                   <SelectValue placeholder="Select template" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="request-info">Request Information</SelectItem>
-                  <SelectItem value="interview">Interview Invitation</SelectItem>
+                  <SelectItem value="request-info">
+                    Request Information
+                  </SelectItem>
+                  <SelectItem value="interview">
+                    Interview Invitation
+                  </SelectItem>
                   <SelectItem value="feedback">Application Feedback</SelectItem>
                 </SelectContent>
               </Select>
@@ -79,13 +84,16 @@ export function ComposeMessage() {
           <h3 className="font-medium">Available Variables</h3>
           <div className="space-y-2">
             <p className="text-sm">
-              <code className="bg-muted px-1 rounded">{"{{name}}"}</code> - Applicant&apos;s name
+              <code className="bg-muted px-1 rounded">{"{{name}}"}</code> -
+              Applicant&apos;s name
             </p>
             <p className="text-sm">
-              <code className="bg-muted px-1 rounded">{"{{id}}"}</code> - Application ID
+              <code className="bg-muted px-1 rounded">{"{{id}}"}</code> -
+              Application ID
             </p>
             <p className="text-sm">
-              <code className="bg-muted px-1 rounded">{"{{status}}"}</code> - Application status
+              <code className="bg-muted px-1 rounded">{"{{status}}"}</code> -
+              Application status
             </p>
           </div>
         </CardContent>

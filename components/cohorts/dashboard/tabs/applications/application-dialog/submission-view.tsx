@@ -18,10 +18,7 @@ interface SubmissionViewProps {
   submission: any;
 }
 
-const SubmissionView: React.FC<SubmissionViewProps> = ({
-  tasks,
-  submission,
-}) => {
+export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
   return (
     <div className="">
       <div className="space-y-4">
@@ -287,6 +284,6 @@ const SubmissionView: React.FC<SubmissionViewProps> = ({
       ))}
     </div>
   );
-};
+}
 
 export default SubmissionView;

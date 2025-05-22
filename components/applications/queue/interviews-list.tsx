@@ -1,7 +1,9 @@
 "use client";
 
-import { StudentApplicationHeader } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header";
-import { PersonalDetailsTab } from "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
+import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,25 +23,30 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  BadgeVariant,
+  InterviewsListProps,
+} from "@/types/components/applications/queue/interviews-list";
 
-interface InterviewsListProps {
-  applications: any;
-  onApplicationSelect: (id: string) => void;
-  selectedIds: string[];
-  onSelectedIdsChange: (ids: string[]) => void;
-  onApplicationUpdate: () => void;
-}
+const StudentApplicationHeader = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/dialog-header"
+    ).then((m) => m.StudentApplicationHeader),
+  {
+    ssr: false,
+  }
+);
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "onhold"
-  | "pending"
-  | "default";
+const PersonalDetailsTab = dynamic(
+  () =>
+    import(
+      "@/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab"
+    ).then((m) => m.PersonalDetailsTab),
+  {
+    ssr: false,
+  }
+);
 
 export function InterviewsList({
   applications,

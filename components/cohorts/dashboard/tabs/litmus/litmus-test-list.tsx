@@ -1,5 +1,9 @@
 "use client";
 
+import { Calendar, Clock4Icon, Eye } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,28 +17,42 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock4Icon, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
-import { StudentApplicationHeader } from "../applications/application-dialog/dialog-header";
-import { DocumentsTab } from "../applications/application-dialog/document-tab";
-import { PaymentInformationTab } from "../applications/application-dialog/payment-info-tab";
-import { PersonalDetailsTab } from "../applications/application-dialog/personal-details-tab";
+import {
+  BadgeVariant,
+  LitmusTestListProps,
+} from "@/types/components/cohorts/dashboard/tabs/litmus/litmus-test-list";
 
-type BadgeVariant =
-  | "destructive"
-  | "onhold"
-  | "pending"
-  | "success"
-  | "lemon"
-  | "default";
+const StudentApplicationHeader = dynamic(
+  () =>
+    import("../applications/application-dialog/dialog-header").then(
+      (m) => m.StudentApplicationHeader
+    ),
+  { ssr: false }
+);
 
-interface LitmusTestListProps {
-  applications: any;
-  onSubmissionSelect: (id: any) => void;
-  selectedIds: any[];
-  onApplicationUpdate: () => void;
-  onSelectedIdsChange: (ids: any[]) => void;
-}
+const DocumentsTab = dynamic(
+  () =>
+    import("../applications/application-dialog/document-tab").then(
+      (m) => m.DocumentsTab
+    ),
+  { ssr: false }
+);
+
+const PaymentInformationTab = dynamic(
+  () =>
+    import("../applications/application-dialog/payment-info-tab").then(
+      (m) => m.PaymentInformationTab
+    ),
+  { ssr: false }
+);
+
+const PersonalDetailsTab = dynamic(
+  () =>
+    import("../applications/application-dialog/personal-details-tab").then(
+      (m) => m.PersonalDetailsTab
+    ),
+  { ssr: false }
+);
 
 export function LitmusTestList({
   applications,

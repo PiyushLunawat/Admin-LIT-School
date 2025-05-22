@@ -1,10 +1,18 @@
-// app/dashboard/students/[id]/page.tsx
+import dynamic from "next/dynamic";
 
-import { getCurrentStudents } from "@/app/api/student";
-import { StudentDetails } from "@/components/students/student-details";
-import { useEffect, useState } from "react";
+const StudentDetails = dynamic(
+  () =>
+    import("@/components/students/student-details").then(
+      (m) => m.StudentDetails
+    ),
+  { ssr: false }
+);
 
-export default async function StudentDetailsPage({ params }: { params: Promise<{ studentId: string}> }) {
+export default async function StudentDetailsPage({
+  params,
+}: {
+  params: Promise<{ studentId: string }>;
+}) {
   const studentId = (await params).studentId;
 
   return (

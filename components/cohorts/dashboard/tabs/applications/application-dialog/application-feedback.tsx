@@ -1,3 +1,17 @@
+"use client";
+
+import {
+  ArrowUpRight,
+  Download,
+  FileIcon,
+  ImageIcon,
+  Link2,
+  Link2Icon,
+  VideoIcon,
+} from "lucide-react";
+import Image from "next/image";
+import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
+
 import {
   updateStudentTaskFeedback,
   updateStudentTaskFeedbackAccep,
@@ -15,17 +29,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { formatInput } from "@/lib/utils/helpers";
-import {
-  ArrowUpRight,
-  Download,
-  FileIcon,
-  ImageIcon,
-  Link2,
-  Link2Icon,
-  VideoIcon,
-} from "lucide-react";
-import Image from "next/image";
-import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 
 interface Task {
   _id: string;
@@ -44,14 +47,14 @@ interface ApplicationFeedbackProps {
   ) => void;
 }
 
-const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
+export function ApplicationFeedback({
   application,
   initialStatus,
   ques,
   submission,
   onClose,
   onUpdateStatus,
-}) => {
+}: ApplicationFeedbackProps) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string>(initialStatus);
   const [feedbacks, setFeedbacks] = useState<{ [taskId: string]: string[] }>(
@@ -641,6 +644,4 @@ const ApplicationFeedback: React.FC<ApplicationFeedbackProps> = ({
       </div>
     </div>
   );
-};
-
-export default ApplicationFeedback;
+}
