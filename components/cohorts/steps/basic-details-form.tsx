@@ -26,6 +26,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  setCurrentStep,
+  updateBasicDetails,
+} from "@/lib/features/cohort/cohortSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { cn } from "@/lib/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths, format } from "date-fns";
@@ -44,7 +49,6 @@ const formSchema = z.object({
   endDate: z.date({
     required_error: "End date is required",
   }),
-  // schedule: z.string().min(1, "Schedule is required"),
   timeSlot: z.string().min(1, "Time slot is required"),
   totalSeats: z.coerce.number().min(1, "Minimum 1 seat is required"),
   baseFee: z.coerce.number().min(1, "Minimum base fee is required"),
@@ -74,7 +78,6 @@ interface Cohort {
   centerDetail: string;
   startDate: string;
   endDate: string;
-  // schedule: string;
   seats: number;
   filled: number;
   status: "Draft" | "Open" | "Full" | "Closed" | "Archived";
@@ -93,22 +96,36 @@ export function BasicDetailsForm({
   onCohortCreated,
   initialData,
 }: BasicDetailsFormProps) {
+  const dispatch = useAppDispatch();
+  const basicDetailsState = useAppSelector(
+    (state) => state.cohort.basicDetails
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      programDetail: initialData?.programDetail || "",
-      centerDetail: initialData?.centerDetail || "",
-      cohortId: initialData?.cohortId || "",
-      startDate: initialData?.startDate
+      programDetail:
+        basicDetailsState.programDetail || initialData?.programDetail || "",
+      centerDetail:
+        basicDetailsState.centerDetail || initialData?.centerDetail || "",
+      cohortId: basicDetailsState.cohortId || initialData?.cohortId || "",
+      startDate: basicDetailsState.startDate
+        ? new Date(basicDetailsState.startDate)
+        : initialData?.startDate
         ? new Date(initialData.startDate)
         : undefined,
-      endDate: initialData?.endDate ? new Date(initialData.endDate) : undefined,
-      // schedule: initialData?.schedule || "",
-      timeSlot: initialData?.timeSlot || "",
-      totalSeats: initialData?.totalSeats || "",
-      baseFee: initialData?.baseFee || "",
+      endDate: basicDetailsState.endDate
+        ? new Date(basicDetailsState.endDate)
+        : initialData?.endDate
+        ? new Date(initialData.endDate)
+        : undefined,
+      timeSlot: basicDetailsState.timeSlot || initialData?.timeSlot || "",
+      totalSeats: basicDetailsState.totalSeats || initialData?.totalSeats || "",
+      baseFee: basicDetailsState.baseFee || initialData?.baseFee || "",
       isGSTIncluded:
-        initialData?.isGSTIncluded !== undefined
+        basicDetailsState.isGSTIncluded !== undefined
+          ? basicDetailsState.isGSTIncluded
+          : initialData?.isGSTIncluded !== undefined
           ? initialData?.isGSTIncluded
           : false,
     },
@@ -160,13 +177,15 @@ export function BasicDetailsForm({
   }, []);
 
   const [selectedProgram, setSelectedProgram] = useState<string | null>(
-    initialData?.programDetail ?? null
+    basicDetailsState.programDetail || initialData?.programDetail || null
   );
   const [programDuration, setProgramDuration] = useState(6);
   const [selectedCentre, setSelectedCentre] = useState<string | null>(
-    initialData?.centerDetail ?? null
+    basicDetailsState.centerDetail || initialData?.centerDetail || null
   );
-  const [cohortId, setCohortId] = useState(initialData?.cohortId ?? "");
+  const [cohortId, setCohortId] = useState(
+    basicDetailsState.cohortId || initialData?.cohortId || ""
+  );
 
   useEffect(() => {
     form.setValue("programDetail", selectedProgram || "");
@@ -214,6 +233,15 @@ export function BasicDetailsForm({
   }, [programs, selectedProgram]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Save form data to Redux
+    dispatch(
+      updateBasicDetails({
+        ...values,
+        startDate: values.startDate ? values.startDate.toISOString() : null,
+        endDate: values.endDate ? values.endDate.toISOString() : null,
+      })
+    );
+
     const dataWithCohortId = {
       ...values,
       cohortId: cohortId,
@@ -222,6 +250,7 @@ export function BasicDetailsForm({
       status: initialData?.status || "Draft",
       isGSTIncluded: values.isGSTIncluded,
     };
+
     setLoading(true);
     try {
       if (initialData?._id) {
@@ -231,12 +260,14 @@ export function BasicDetailsForm({
         );
         console.log("Cohort updated successfully");
         onCohortCreated(createdCohort.data);
-        onNext();
       } else {
         const createdCohort = await createCohort(dataWithCohortId); // Call the API to create a cohort
         console.log("Cohort created:", createdCohort);
         onCohortCreated(createdCohort.data); // Pass the created cohort data to the parent
       }
+
+      // Update current step in Redux
+      dispatch(setCurrentStep(1));
       onNext();
     } catch (error) {
       console.error("Failed to create cohort:", error);
@@ -436,28 +467,6 @@ export function BasicDetailsForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          {/* <FormField
-            control={form.control}
-            name="schedule"
-            render={({ field }) => (
-              <FormItem>
-                <Label>Schedule</Label>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select schedule" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="M-W-F">M-W-F</SelectItem>
-                    <SelectItem value="T-T-S">T-T-S</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
-
           <FormField
             control={form.control}
             name="timeSlot"
@@ -519,26 +528,6 @@ export function BasicDetailsForm({
               </FormItem>
             )}
           />
-
-          {/* <FormField
-            control={form.control}
-            name="isGSTIncluded"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center gap-2">
-                <FormControl>
-                  <Checkbox
-                    disabled
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <Label className="text-sm font-normal !my-2">
-                  Include GST in base fee
-                </Label>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
