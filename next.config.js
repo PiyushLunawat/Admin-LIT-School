@@ -2,7 +2,7 @@
 const nextConfig = {
   // output: 'export',
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   images: { unoptimized: true },
   webpack: (config) => {
@@ -10,7 +10,7 @@ const nextConfig = {
     return config;
   },
   env: {
-    API_URL: process.env.API_URL ,
+    API_URL: process.env.API_URL,
   },
 };
 

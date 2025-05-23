@@ -1,10 +1,7 @@
 "use client";
 
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { updateCohort } from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -12,9 +9,17 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { updateCohort } from "@/app/api/cohorts";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  setCurrentStep,
+  updateFeeStructure,
+} from "@/lib/features/cohort/cohortSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface FeeStructureFormProps {
   onNext: () => void;
@@ -27,39 +32,76 @@ const formSchema = z.object({
   applicationFee: z.coerce.string().min(1, "Application fee is required"),
   tokenFee: z.coerce.string().min(1, "Admission fee is required"),
   semesters: z.coerce.string().min(1, "Number of semesters is required"),
-  installmentsPerSemester: z.coerce.string().min(1, "Installments per semester are required"),
-  oneShotDiscount: z.coerce.string().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100"),
+  installmentsPerSemester: z.coerce
+    .string()
+    .min(1, "Installments per semester are required"),
+  oneShotDiscount: z.coerce
+    .string()
+    .min(0, "Discount cannot be negative")
+    .max(100, "Discount cannot exceed 100"),
 });
 
-export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeStructureFormProps) {
+export function FeeStructureForm({
+  onNext,
+  onCohortCreated,
+  initialData,
+}: FeeStructureFormProps) {
+  const dispatch = useAppDispatch();
+  const feeStructureState = useAppSelector(
+    (state) => state.cohort.feeStructure
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      applicationFee: initialData?.cohortFeesDetail?.applicationFee || "" ,
-      tokenFee: initialData?.cohortFeesDetail?.tokenFee || "",
-      semesters: initialData?.cohortFeesDetail?.semesters || "",
-      installmentsPerSemester: initialData?.cohortFeesDetail?.installmentsPerSemester || "",
-      oneShotDiscount: initialData?.cohortFeesDetail?.oneShotDiscount || "",
-    }
+      applicationFee:
+        feeStructureState.applicationFee ||
+        initialData?.cohortFeesDetail?.applicationFee ||
+        "",
+      tokenFee:
+        feeStructureState.tokenFee ||
+        initialData?.cohortFeesDetail?.tokenFee ||
+        "",
+      semesters:
+        feeStructureState.semesters ||
+        initialData?.cohortFeesDetail?.semesters ||
+        "",
+      installmentsPerSemester:
+        feeStructureState.installmentsPerSemester ||
+        initialData?.cohortFeesDetail?.installmentsPerSemester ||
+        "",
+      oneShotDiscount:
+        feeStructureState.oneShotDiscount ||
+        initialData?.cohortFeesDetail?.oneShotDiscount ||
+        "",
+    },
   });
-  const [loading, setLoading] = useState(false);  
+  const [loading, setLoading] = useState(false);
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    // Save form data to Redux
+    dispatch(updateFeeStructure(data));
+
     if (!initialData?._id) {
       console.error("Cohort ID is missing. Unable to update.");
       return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       // Update cohort fee details
-      const createdCohort = await updateCohort(initialData._id, { cohortFeesDetail: data });
+      const createdCohort = await updateCohort(initialData._id, {
+        cohortFeesDetail: data,
+      });
       console.log("Cohort fees updated successfully:", createdCohort.data);
-      onCohortCreated(createdCohort.data); 
+      onCohortCreated(createdCohort.data);
+
+      // Update current step in Redux
+      dispatch(setCurrentStep(3));
       onNext(); // Proceed to the next step
     } catch (error) {
       console.error("Failed to update cohort fees:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -68,12 +110,15 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
     const numStr = value.toString();
     const lastThreeDigits = numStr.slice(-3); // Last 3 digits
     const otherDigits = numStr.slice(0, -3); // Digits before last 3
-    const formattedOtherDigits = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ","); // Add commas in groups of 2
+    const formattedOtherDigits = otherDigits.replace(
+      /\B(?=(\d{2})+(?!\d))/g,
+      ","
+    ); // Add commas in groups of 2
     return otherDigits
       ? `${formattedOtherDigits},${lastThreeDigits}`
       : lastThreeDigits; // Combine both parts
   }
-  
+
   // Remove formatting to get raw value
   function removeFormatting(value: string): string {
     return value.replace(/,/g, ""); // Remove commas
@@ -113,7 +158,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
                 <Label>Admission Fee (₹)</Label>
                 <FormControl>
                   <Input
-                    type="text" 
+                    type="text"
                     placeholder="₹50,000"
                     value={formatIndianCurrency(field.value)} // Format the value on render
                     onChange={(e) => {
@@ -136,11 +181,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
               <FormItem>
                 <Label>Number of Semesters</Label>
                 <FormControl>
-                  <Input
-                    type="number" min="1"
-                    placeholder="3"
-                    {...field}
-                  />
+                  <Input type="number" min="1" placeholder="3" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -154,11 +195,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
               <FormItem>
                 <Label>Installments per Semester</Label>
                 <FormControl>
-                  <Input
-                    type="number" min="1"
-                    placeholder="3"
-                    {...field}
-                  />
+                  <Input type="number" min="1" placeholder="3" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -173,11 +210,7 @@ export function FeeStructureForm({ onNext, onCohortCreated, initialData }: FeeSt
             <FormItem>
               <Label>One-Shot Payment Discount (%)</Label>
               <FormControl>
-                <Input
-                  type="number" min="1"
-                  placeholder="10%"
-                  {...field}
-                />
+                <Input type="number" min="1" placeholder="10%" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

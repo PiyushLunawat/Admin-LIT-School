@@ -1,15 +1,33 @@
-import { configureStore } from '@reduxjs/toolkit'
-import cohortSlice from '../features/cohort/cohortSlice'
-import centerSlice from '../features/center/centerSlice'
+import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers } from "redux";
+import { PersistConfig, persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
-export const makeStore = () => {
-  return configureStore({
-    reducer: { center: centerSlice},
-  })
-}
+import centerReducer from "../features/center/centerSlice";
+import cohortReducer from "../features/cohort/cohortSlice";
 
-// Infer the type of makeStore
-export type Store = ReturnType<typeof makeStore>
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<Store['getState']>
-export type AppDispatch = Store['dispatch']
+const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
+  key: "root",
+  storage,
+  whitelist: ["cohort", "center"],
+};
+
+const rootReducer = combineReducers({
+  cohort: cohortReducer,
+  center: centerReducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, // disable serializable check for redux-persist
+    }),
+});
+
+export const persistor = persistStore(store);
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
