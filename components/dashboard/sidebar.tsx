@@ -70,9 +70,10 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
+    <>
     <div
       className={cn(
-        "relative border-r bg-background",
+        "hidden sm:block relative border-r bg-background",
         isCollapsed ? "w-[60px]" : "w-[240px]",
         "transition-all duration-300 ease-in-out"
       )}
@@ -157,5 +158,29 @@ export function Sidebar() {
         <ChevronLeft className="h-4 w-4" />
       </Button>
     </div>
+
+    <div className="sm:hidden w-[100vw] h-[52px] text-white bg-[#262626]">
+      <div className="flex flex-1 items-center justify-between px-6 py-1 my-auto">
+        {routes.map((route) => (
+          <Button
+            key={route.href}
+            variant={pathname === route.href ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start",
+              pathname === route.href && "bg-[#09090b]",
+              isCollapsed ? "px-2" : ""
+            )}
+            asChild
+          >
+            <Link href={route.href} className="flex items-center">
+              <route.icon
+                className={cn("h-6 w-6", !isCollapsed && "mr-2")}
+              />
+            </Link>
+          </Button>
+        ))}
+      </div>
+    </div>
+    </>
   );
 }

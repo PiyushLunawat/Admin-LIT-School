@@ -223,15 +223,29 @@ export function MetricsGrid({ selectedDateRange, searchQuery, selectedProgram, s
   
         // Status based
         const applicationStatus = latestCohort?.applicationDetails?.applicationStatus?.toLowerCase();
+        const lastInterview = latestCohort?.applicationDetails?.applicationInterviews?.[latestCohort?.applicationDetails?.applicationInterviews?.length - 1];
         const tokenFeeStatus = latestCohort?.tokenFeeDetails?.verificationStatus;
         const litmusStatus = latestCohort?.litmusTestDetails?.status?.toLowerCase();
         const tokenAmount = Number(latestCohort?.cohortId?.cohortFeesDetail?.tokenFee) || 0;
         const baseFee = latestCohort?.cohortId?.baseFee || 0;
         const scholarshipDetails = latestCohort?.litmusTestDetails?.scholarshipDetail;
         const paymentDetails = latestCohort?.paymentDetails;
+
+        const currentTime = new Date();
   
         if (applicationStatus === "under review") underReview++;
-        if (applicationStatus === "interview scheduled") interviewsScheduled++;
+        if (lastInterview) {
+          const meetingEnd = new Date(
+            new Date(lastInterview.meetingDate).toDateString() +
+              " " +
+              lastInterview.endTime
+          );
+          if (
+            applicationStatus === "interview scheduled" &&
+            meetingEnd >= currentTime
+          )
+            interviewsScheduled++;
+        }
         if (tokenFeeStatus === "paid") admissionFee++;
   
         if (![undefined, '', 'pending', 'completed'].includes(litmusStatus)) litmusTests++;
