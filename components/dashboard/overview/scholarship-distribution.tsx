@@ -74,7 +74,7 @@ export function ScholarshipDistribution({ applications }: ScholarshipDistributio
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
           {scholarshipsData.map((item) => (
             <div key={item.name} className="flex items-center">
               <div

@@ -69,7 +69,7 @@ export function CohortDashboard({ cohortId }: { cohortId: string }) {
       <CohortHeader cohortId={cohortId} setDateRange={setDateRange} />
 
       <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="w-full">
+        <TabsList className="w-full flex-nowrap flex overflow-x-auto scrollbar-hide space-x-2 pl-24 sm:pl-0">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>

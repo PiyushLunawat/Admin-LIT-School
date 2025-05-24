@@ -398,7 +398,7 @@ export function CohortGrid({ cohorts, onEditCohort, onOpenDialog, onStatusChange
 
   return (
     <Tabs defaultValue="all" className="space-y-4">
-        <TabsList variant='ghost'>
+        <TabsList variant='ghost' className="w-full sm:w-fit flex-nowrap flex overflow-x-auto scrollbar-hide space-x-2 pl-72 sm:pl-0">
           <TabsTrigger variant='xs' value="all">All ({cohorts.length})</TabsTrigger>
           {uniquePrograms.map((program) => (
           <TabsTrigger key={program} variant="xs" value={program}>

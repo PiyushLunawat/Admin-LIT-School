@@ -56,7 +56,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
   };
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-wrap items-center gap-1 sm:gap-4">
       <Select
         value={selectedValue} 
         onValueChange={(value) => {
@@ -73,7 +73,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
           }
         }}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Select range" />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
           <Button
             variant="outline"
             className={cn(
-              "justify-start text-left font-normal w-[300px]",
+              "justify-start text-left font-normal w-auto flex-1 sm:w-[300px]",
               !date && "text-muted-foreground"
             )}
           >
@@ -123,7 +123,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
         </PopoverContent>
       </Popover>
       <Button variant="ghost" size="icon" className="-ml-3" onClick={resetDateRange}>
-        <X className="h-4 w-4" />
+        <X className="ml-4 sm:ml-0 h-4 w-4" />
       </Button>
     </div>
   );

@@ -27,9 +27,9 @@ export default function DashboardLayout({
       </div>
 
       {/* Main content */}
-      <main className="flex-1 h-[calc(100vh-52px)] sm:h-full order-1 sm:order-2">
+      <main className="flex-1 h-[calc(100vh-52px)] overf sm:h-full order-1 sm:order-2">
         <Header />
-        <div className="sm:h-[calc(100vh-4rem)] overflow-y-auto">{children}</div>
+        <div className="h-[calc(100vh-115px)] sm:h-[calc(100vh-4rem)] overflow-y-auto">{children}</div>
       </main>
     </div>
   </div>

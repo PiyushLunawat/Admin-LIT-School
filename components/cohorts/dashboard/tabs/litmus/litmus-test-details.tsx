@@ -152,51 +152,48 @@ export function LitmusTestDetails({
     }
   }
 
-  function handleDownloadAll() {
-    // Safety checks
-    const tasks = litmusTestDetails?.litmustasks[0] || [];
-    if (!Array.isArray(tasks)) return;
+  const handleDownload = async (url: string, fileName: string) => {
+    try {
+      // 1. Fetch the file as Blob
+      const response = await fetch(url);
+      const blob = await response.blob();
 
-    // Collect all file URLs
-    const urls: string[] = [];
+      // 2. Create a temporary object URL for that Blob
+      const blobUrl = URL.createObjectURL(blob);
 
-    tasks?.forEach((taskObj, index) => {
-      const task = taskObj?.task;
-      if (!task) return;
-
-      // Here you have access to task.files, task.images, task.videos, etc.
-      // console.log(`Task #${index} files:`, task.files);
-      // console.log(`Task #${index} images:`, task.images);
-      // console.log(`Task #${index} videos:`, task.videos);
-
-      urls.push(...(task.files || []));
-      urls.push(...(task.images || []));
-      urls.push(...(task.videos || []));
-    });
-
-    // Download each URL
-    urls?.forEach((url) => {
-      // Derive a filename from the URL (optional)
-      console.log(`URL:`, url);
-
-      const fileName = url.split("/").pop() || "download";
-
-      // Create an invisible <a> element
+      // 3. Create a hidden <a> and force download
       const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.style.display = "none";
-
-      // Add it to the document so we can click it
+      link.href = blobUrl;
+      link.download = fileName; // or "myImage.png"
       document.body.appendChild(link);
-
-      // Programmatically click the link to trigger download
       link.click();
 
-      // Remove it after the download starts
+      // Cleanup
       document.body.removeChild(link);
-    });
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed", err);
+    }
+  };
+
+  async function handleDownloadAll() {
+  const tasks = litmusTestDetails?.litmusTasks?.[0]?.tasks || [];
+  if (!Array.isArray(tasks)) return;
+
+  const urls: string[] = [];
+
+  tasks.forEach((taskObj) => {
+    if (!taskObj) return;
+    urls.push(...(taskObj.files || []));
+    urls.push(...(taskObj.images || []));
+    urls.push(...(taskObj.videos || []));
+  });
+
+  for (const url of urls) {
+    const fileName = url.split("/").pop() || "download";
+    await handleDownload(url, fileName);
   }
+}
 
   return (
     <div className="h-full flex flex-col">

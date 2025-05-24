@@ -307,7 +307,7 @@ export function PersonalDetailsTab({
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Full Name</Label>
               <Input
@@ -403,7 +403,7 @@ export function PersonalDetailsTab({
           <CardTitle>Contact Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Email Address</Label>
               <Input type="email" defaultValue={student?.email} disabled />
@@ -452,7 +452,7 @@ export function PersonalDetailsTab({
           <CardTitle>Current Address</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Street Address</Label>
               <Input
@@ -522,7 +522,7 @@ export function PersonalDetailsTab({
           <CardTitle>Previous Education</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <div className="space-y-2">
               <Label className="pl-3">
                 Highest Level of Education Attained
@@ -603,7 +603,7 @@ export function PersonalDetailsTab({
             </div>
           </div>
           {formData.studentDetailData.workExperience.isExperienced && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
               <div className="space-y-2">
                 <Label className="pl-3">Experience Type</Label>
                 <Select
@@ -695,7 +695,7 @@ export function PersonalDetailsTab({
           <CardTitle>Emergency Contact</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             {isEditing ? (
               <>
                 <div className="space-y-2">
@@ -791,7 +791,7 @@ export function PersonalDetailsTab({
           <CardTitle>Parental Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             {/* Father's Information */}
             {isEditing ? (
               <>

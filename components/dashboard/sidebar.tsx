@@ -130,7 +130,7 @@ export function Sidebar() {
             {routes.map((route) => (
               <Button
                 key={route.href}
-                variant={pathname === route.href ? "secondary" : "ghost"}
+                variant={[`${route.href}`].includes(pathname) ? "secondary" : "ghost"}
                 className={cn(
                   "w-full justify-start",
                   pathname === route.href && "bg-secondary",
@@ -160,21 +160,20 @@ export function Sidebar() {
     </div>
 
     <div className="sm:hidden w-[100vw] h-[52px] text-white bg-[#262626]">
-      <div className="flex flex-1 items-center justify-between px-6 py-1 my-auto">
+      <div className="flex flex-1 items-center justify-between px-6 py-1.5 my-auto">
         {routes.map((route) => (
           <Button
             key={route.href}
-            variant={pathname === route.href ? "secondary" : "ghost"}
+            variant={[`${route.href}`].includes(pathname) ? "secondary" : "ghost"}
             className={cn(
               "w-full justify-start",
-              pathname === route.href && "bg-[#09090b]",
-              isCollapsed ? "px-2" : ""
+              [`${route.href}`].includes(pathname) && "bg-[#09090b]",
             )}
             asChild
           >
-            <Link href={route.href} className="flex items-center">
+            <Link href={route.href} className="flex items-center justify-center">
               <route.icon
-                className={cn("h-6 w-6", !isCollapsed && "mr-2")}
+                className={cn("h-6 w-6")}
               />
             </Link>
           </Button>
