@@ -702,7 +702,7 @@ export function PaymentDetails({
                     Amount Payable: ₹{formatAmount(tokenAmount)}
                   </p>
 
-                  {tokenFeeDetails && (
+                  {(tokenFeeDetails && tokenFeeDetails?.verificationStatus !== "paid") && (
                     <p className="flex text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
                       Uploaded on{" "}
@@ -903,7 +903,7 @@ export function PaymentDetails({
                 )}
             </div>
 
-            {paymentDetails?.paymentPlan === "one-shot" ? (
+            {paymentDetails?.paymentPlan === "one-shot" &&
               <Card className="p-4 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
@@ -1179,7 +1179,8 @@ export function PaymentDetails({
                   </label>
                 )}
               </Card>
-            ) : (
+            }
+            {paymentDetails?.paymentPlan === "instalment" &&
               <div className="space-y-2">
                 <Tabs defaultValue="1" className="space-y-4">
                   <TabsList variant="ghost" className="w-full pl-">
@@ -1459,7 +1460,7 @@ export function PaymentDetails({
                 </Button>
               )} */}
               </div>
-            )}
+            }
           </div>
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>

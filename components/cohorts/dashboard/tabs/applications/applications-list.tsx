@@ -162,7 +162,7 @@ export function ApplicationsList({
       setSelectedRowId(null);
       onApplicationSelect(null);
     }
-  }, [applications, onApplicationSelect]);
+  }, [applications]);
 
   return applications.length === 0 ? (
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">

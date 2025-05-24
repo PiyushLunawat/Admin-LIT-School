@@ -124,7 +124,7 @@ export function PaymentsList({
       setSelectedRowId(null);
       onStudentSelect(null);
     }
-  }, [applications, onStudentSelect]);
+  }, [applications]);
 
   return applications.length === 0 ? (
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">

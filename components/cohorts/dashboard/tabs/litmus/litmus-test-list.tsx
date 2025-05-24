@@ -122,7 +122,7 @@ export function LitmusTestList({
       setSelectedRowId(null);
       onSubmissionSelect(null);
     }
-  }, [applications, onSubmissionSelect]);
+  }, [applications]);
 
   function checkInterviewStatus(interviews: any): string {
     let status = "interview scheduled";
