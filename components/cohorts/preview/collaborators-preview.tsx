@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
-import { CollaboratorsForm } from "../steps/collaborators-form";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export function CollaboratorsPreview() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -35,18 +35,23 @@ export function CollaboratorsPreview() {
       </CardHeader>
       <CardContent className="space-y-4">
         {collaborators.map((collaborator, index) => (
-          <div key={index} className="flex justify-between items-center border-b py-2 last:border-0">
+          <div
+            key={index}
+            className="flex justify-between items-center border-b py-2 last:border-0"
+          >
             <div>
               <p className="font-medium">{collaborator.email}</p>
-              <p className="text-sm text-muted-foreground">{collaborator.role}</p>
+              <p className="text-sm text-muted-foreground">
+                {collaborator.role}
+              </p>
             </div>
           </div>
         ))}
       </CardContent>
-      
+
       {/* Dialog for Collaborators Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTitle></DialogTitle>
+        <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <CollaboratorsForm onComplete={() => console.log("Form complete")} /> */}
         </DialogContent>

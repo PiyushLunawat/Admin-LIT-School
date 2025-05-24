@@ -1,0 +1,5 @@
+export interface LitmusTestFormProps {
+  onNext: () => void;
+  onCohortCreated: (cohort: any) => void;
+  initialData?: any;
+}

@@ -1,5 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { addMonths, format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
 import { getCentres } from "@/app/api/centres";
 import { createCohort, getCohorts, updateCohort } from "@/app/api/cohorts";
 import { getPrograms } from "@/app/api/programs";
@@ -32,64 +39,13 @@ import {
 } from "@/lib/features/cohort/cohortSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { cn } from "@/lib/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { addMonths, format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
-const formSchema = z.object({
-  programDetail: z.string().min(1, "Program is required"),
-  centerDetail: z.string().min(1, "Centre is required"),
-  cohortId: z.string().optional(),
-  startDate: z.date({
-    required_error: "Start date is required",
-  }),
-  endDate: z.date({
-    required_error: "End date is required",
-  }),
-  timeSlot: z.string().min(1, "Time slot is required"),
-  totalSeats: z.coerce.number().min(1, "Minimum 1 seat is required"),
-  baseFee: z.coerce.number().min(1, "Minimum base fee is required"),
-  isGSTIncluded: z.boolean().default(false),
-});
-
-interface Program {
-  _id: string;
-  name: string;
-  description: string;
-  duration: number;
-  prefix: string;
-  status: boolean;
-}
-
-interface Centre {
-  _id: string;
-  name: string;
-  location: string;
-  suffix: string;
-  status: boolean;
-}
-
-interface Cohort {
-  id: string;
-  programDetail: string;
-  centerDetail: string;
-  startDate: string;
-  endDate: string;
-  seats: number;
-  filled: number;
-  status: "Draft" | "Open" | "Full" | "Closed" | "Archived";
-  baseFee: string;
-  isComplete: boolean;
-}
-
-interface BasicDetailsFormProps {
-  onNext: () => void;
-  onCohortCreated: (cohort: any) => void;
-  initialData?: any;
-}
+import { formSchema } from "@/schemas/components/cohorts/steps/basic-details-form.schema";
+import {
+  BasicDetailsFormProps,
+  Centre,
+  Cohort,
+  Program,
+} from "@/types/components/cohorts/steps/basic-details-form";
 
 export function BasicDetailsForm({
   onNext,

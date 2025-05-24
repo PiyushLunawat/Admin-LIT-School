@@ -1,11 +1,17 @@
 "use client";
 
+import { Edit } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Edit } from "lucide-react"; 
-import { BasicDetailsForm } from "../steps/basic-details-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+
+const BasicDetailsForm = dynamic(
+  () => import("../steps/basic-details-form").then((m) => m.BasicDetailsForm),
+  { ssr: false }
+);
 
 export function BasicDetailsPreview() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -65,7 +71,7 @@ export function BasicDetailsPreview() {
 
       {/* Dialog for Edit Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTitle></DialogTitle>
+        <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <BasicDetailsForm onNext={() => console.log("Next clicked")} initialData={details} /> */}
         </DialogContent>

@@ -1,5 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { updateCohort } from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,30 +21,8 @@ import {
   updateFeeStructure,
 } from "@/lib/features/cohort/cohortSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-interface FeeStructureFormProps {
-  onNext: () => void;
-  onCohortCreated: (cohort: any) => void;
-  initialData?: any;
-}
-
-// Define the Zod schema
-const formSchema = z.object({
-  applicationFee: z.coerce.string().min(1, "Application fee is required"),
-  tokenFee: z.coerce.string().min(1, "Admission fee is required"),
-  semesters: z.coerce.string().min(1, "Number of semesters is required"),
-  installmentsPerSemester: z.coerce
-    .string()
-    .min(1, "Installments per semester are required"),
-  oneShotDiscount: z.coerce
-    .string()
-    .min(0, "Discount cannot be negative")
-    .max(100, "Discount cannot exceed 100"),
-});
+import { formSchema } from "@/schemas/components/cohorts/steps/fee-structure-form.schema";
+import { FeeStructureFormProps } from "@/types/components/cohorts/steps/fee-structure-form";
 
 export function FeeStructureForm({
   onNext,

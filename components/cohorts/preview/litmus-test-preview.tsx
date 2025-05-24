@@ -1,11 +1,11 @@
 "use client";
 
+import { Edit, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Edit, ExternalLink } from "lucide-react"; 
-import { LitmusTestForm } from "../steps/litmus-test-form";
 
 export function LitmusTestPreview() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -33,7 +33,7 @@ export function LitmusTestPreview() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
-      <div className="space-y-4">
+        <div className="space-y-4">
           <h4 className="font-medium">Tasks</h4>
           {tasks.map((task, index) => (
             <div key={index} className="border rounded-lg p-4 space-y-2">
@@ -49,7 +49,9 @@ export function LitmusTestPreview() {
             {scholarshipSlabs.map((slab, index) => (
               <div key={index} className="border rounded-lg p-4 space-y-2">
                 <h4 className="font-medium">{slab.name}</h4>
-                <p className="text-sm text-muted-foreground">{slab.percentage}% (10-30% test Clearance)</p>
+                <p className="text-sm text-muted-foreground">
+                  {slab.percentage}% (10-30% test Clearance)
+                </p>
                 <p className="text-sm">Amount: {slab.amount}</p>
               </div>
             ))}
@@ -57,13 +59,16 @@ export function LitmusTestPreview() {
         </div>
         <div className="space-y-2">
           <h4 className="font-medium">Interview Scheduler</h4>
-          <p className="text-sm text-muted-foreground flex gap-2 items-center"><ExternalLink className="w-4 text-white" />Calendly integration configured</p>
+          <p className="text-sm text-muted-foreground flex gap-2 items-center">
+            <ExternalLink className="w-4 text-white" />
+            Calendly integration configured
+          </p>
         </div>
       </CardContent>
 
       {/* Dialog for Litmus Test Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTitle></DialogTitle>
+        <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <LitmusTestForm onNext={() => console.log("Navigating to fee-structure")} /> */}
         </DialogContent>

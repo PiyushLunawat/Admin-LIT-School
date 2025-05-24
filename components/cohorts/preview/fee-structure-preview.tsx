@@ -1,22 +1,25 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { FeePreviewForm } from "../steps/fee-preview-form";
+import dynamic from "next/dynamic";
 import { useState } from "react";
-import { FeeStructureForm } from "../steps/fee-structure-form";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const FeePreviewForm = dynamic(
+  () => import("../steps/fee-preview-form").then((m) => m.FeePreviewForm),
+  { ssr: false }
+);
 
 export function FeeStructurePreview() {
-
   const [editingCohort, setEditingCohort] = useState<any | null>(null);
 
   const handleCohortCreated = (cohort: any) => {
-    setEditingCohort(cohort); 
+    setEditingCohort(cohort);
     // fetchCohorts();
-    console.log("111",editingCohort)
   };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -62,67 +65,91 @@ export function FeeStructurePreview() {
             <p className="font-medium">{feeDetails.semesters}</p>
           </div>
         </div>
-        
+
         <Tabs defaultValue="effort_excellence" className="space-y-4">
-        <h4 className="font-medium">Installment Schedule</h4>
-        <TabsList variant='ghost'>
-          <TabsTrigger variant='xs' value="effort_excellence">Effort Excellence (5%)</TabsTrigger>
-          <TabsTrigger variant='xs' value="strategic_scholar">Strategic Scholar (8%)</TabsTrigger>
-          <TabsTrigger variant='xs' value="innovative_initiator">Innovative Initiator (12%)</TabsTrigger>
-          <TabsTrigger variant='xs' value="creative_crusader">Creative Crusader (15%)</TabsTrigger>
-        </TabsList>
-        <TabsContent value="effort_excellence">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Card >
-              <CardHeader className="">
-              <div className="text-[#00A3FF]">Semester 01</div>
-              </CardHeader>
-            <CardContent className="">
-            
-            {installments.map((installment, index) => (
-              <div key={index} className="flex justify-between items-center border-b py-2">
-                <span className="text-sm">{installment.date}</span>
-                <span className="font-medium">{installment.amount}</span>
+          <h4 className="font-medium">Installment Schedule</h4>
+          <TabsList variant="ghost">
+            <TabsTrigger variant="xs" value="effort_excellence">
+              Effort Excellence (5%)
+            </TabsTrigger>
+            <TabsTrigger variant="xs" value="strategic_scholar">
+              Strategic Scholar (8%)
+            </TabsTrigger>
+            <TabsTrigger variant="xs" value="innovative_initiator">
+              Innovative Initiator (12%)
+            </TabsTrigger>
+            <TabsTrigger variant="xs" value="creative_crusader">
+              Creative Crusader (15%)
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="effort_excellence">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Card>
+                  <CardHeader className="">
+                    <div className="text-[#00A3FF]">Semester 01</div>
+                  </CardHeader>
+                  <CardContent className="">
+                    {installments.map((installment, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center border-b py-2"
+                      >
+                        <span className="text-sm">{installment.date}</span>
+                        <span className="font-medium">
+                          {installment.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="">
+                    <div className="text-[#00A3FF]">Semester 02</div>
+                    {installments.map((installment, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center border-b py-2"
+                      >
+                        <span className="text-sm">{installment.date}</span>
+                        <span className="font-medium">
+                          {installment.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="">
+                    <div className="text-[#00A3FF] ">Semester 03</div>
+                    {installments.map((installment, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center border-b py-2 mb-2"
+                      >
+                        <span className="text-sm">{installment.date}</span>
+                        <span className="font-medium">
+                          {installment.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               </div>
-            ))}
-            </CardContent>
-            </Card>
-            <Card >
-            <CardContent className="">
-            <div className="text-[#00A3FF]">Semester 02</div>
-            {installments.map((installment, index) => (
-              <div key={index} className="flex justify-between items-center border-b py-2">
-                <span className="text-sm">{installment.date}</span>
-                <span className="font-medium">{installment.amount}</span>
-              </div>
-            ))}
-            </CardContent>
-            </Card>
-            <Card >
-            <CardContent className="">
-            <div className="text-[#00A3FF] ">Semester 03</div>
-            {installments.map((installment, index) => (
-              <div key={index} className="flex justify-between items-center border-b py-2 mb-2">
-                <span className="text-sm">{installment.date}</span>
-                <span className="font-medium">{installment.amount}</span>
-              </div>
-            ))}
-            </CardContent>
-            </Card>
-          </div>
-        </div>
-        </TabsContent>
+            </div>
+          </TabsContent>
         </Tabs>
-        
       </CardContent>
-      
+
       {/* Dialog for Fee Structure Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTitle></DialogTitle>
+        <DialogTitle></DialogTitle>
         <DialogContent className="max-w-4xl p-6">
           {/* <FeeStructureForm onNext={() => console.log("Navigating to collaborators")} /> */}
-          <FeePreviewForm onNext={() => console.log("Navigating to collaborators")} onCohortCreated={handleCohortCreated}/>
+          <FeePreviewForm
+            onNext={() => console.log("Navigating to collaborators")}
+            onCohortCreated={handleCohortCreated}
+          />
         </DialogContent>
       </Dialog>
     </Card>

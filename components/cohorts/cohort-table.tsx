@@ -1,5 +1,7 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,12 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
-interface CohortTableProps {
-  type: "active" | "archived";
-}
+import { CohortTableProps } from "@/types/components/cohorts/cohort-table";
 
 export function CohortTable({ type }: CohortTableProps) {
   const cohorts = [
@@ -59,9 +56,7 @@ export function CohortTable({ type }: CohortTableProps) {
               {cohort.filled}/{cohort.seats}
             </TableCell>
             <TableCell>
-              <Badge
-                variant={type === "active" ? "default" : "secondary"}
-              >
+              <Badge variant={type === "active" ? "default" : "secondary"}>
                 {cohort.status}
               </Badge>
             </TableCell>
