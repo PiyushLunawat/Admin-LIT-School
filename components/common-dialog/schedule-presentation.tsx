@@ -1,19 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+"use client";
+
 import Image from "next/image";
 import { useState } from "react";
 
-type BadgeVariant =
-  | "destructive"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "default";
-
-interface SchedulePresentationProps {
-  student: any;
-  interviewr: string[];
-}
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SchedulePresentationProps } from "@/types/components/common-dialog/schedule-presentation";
 
 export function SchedulePresentation({
   student,

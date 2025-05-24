@@ -1,11 +1,19 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import {
+  checkEmailExists,
+  deleteCollaborator,
+  editCollaborator,
+  inviteCollaborators,
+  updateCohort,
+} from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormMessage } from "@/components/ui/form";
@@ -24,45 +32,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import {
-  checkEmailExists,
-  deleteCollaborator,
-  editCollaborator,
-  inviteCollaborators,
-  updateCohort,
-} from "@/app/api/cohorts";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
+import { formSchema } from "@/schemas/components/cohorts/steps/collaborators-form.schema";
+import { CollaboratorsFormProps } from "@/types/components/cohorts/steps/collaborators-form";
 
-// Roles array
 const roles = [
-  // { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
   { value: "fee_collector", label: "Fee Collector" },
   { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
 ];
-
-// Zod schema
-const formSchema = z.object({
-  collaborators: z.array(
-    z.object({
-      email: z.string().email("Invalid email address"),
-      role: z.string().nonempty("Role is required"),
-      isInvited: z.boolean().optional(),
-      isAccepted: z.boolean().optional(),
-      cohortId: z.string().optional(),
-      collaboratorId: z.string().optional(),
-      roleId: z.string().optional(),
-    })
-  ),
-});
-
-interface CollaboratorsFormProps {
-  onComplete: () => void;
-  onCohortCreated: (cohort: any) => void;
-  initialData?: any;
-}
 
 export function CollaboratorsForm({
   onComplete,
@@ -83,12 +61,6 @@ export function CollaboratorsForm({
     );
   };
 
-  // Usage
-  const formattedCollaborators = formatCollaborators(
-    initialData?.collaborators || []
-  );
-  console.log("one", formatCollaborators(initialData?.collaborators));
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -105,6 +77,7 @@ export function CollaboratorsForm({
       ],
     },
   });
+
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);

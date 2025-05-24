@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock } from "lucide-react";
 
-type BadgeVariant = "destructive" | "warning" | "secondary" | "success" | "default";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BadgeVariant } from "@/types/components/dashboard/overview/alerts-section";
 
 export function AlertsSection() {
   const alerts = [

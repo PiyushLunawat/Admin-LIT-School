@@ -1,6 +1,22 @@
 "use client";
 
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import {
+  FileIcon,
+  FolderPlus,
+  GripVertical,
+  Link2Icon,
+  LoaderCircle,
+  Plus,
+  Trash2,
+  XIcon,
+} from "lucide-react";
 import type React from "react";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { updateCohort } from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
@@ -29,23 +45,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import {
-  FileIcon,
-  FolderPlus,
-  GripVertical,
-  Link2Icon,
-  LoaderCircle,
-  Plus,
-  Trash2,
-  XIcon,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
-
-import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 const s3Client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -283,29 +282,6 @@ function Task({
     name: `applicationFormDetail.${nestIndex}.task.${taskIndex}.config`,
   });
 
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [resourceLink, setResourceLink] = useState("");
-  const [isLinkInputVisible, setIsLinkInputVisible] = useState(false);
-  const [addedLink, setAddedLink] = useState<string | null>(null);
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setUploadedFile(e.target.files[0]);
-    }
-  };
-
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
-  };
-
-  const handleAddLink = () => {
-    setAddedLink(resourceLink);
-  };
-
-  const handleRemoveLink = () => {
-    setAddedLink(null);
-  };
-
   return (
     <Card key={taskField.id}>
       <CardContent className="flex pl-0 items-start pt-6">
@@ -431,15 +407,6 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState("");
   const [fileSizeInput, setFileSizeInput] = useState<string>("500");
-
-  // Add this after the useState declarations in ResourcesSection
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
-    else if (bytes < 1024 * 1024 * 1024)
-      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-    else return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
-  };
 
   const {
     fields: linkFields,

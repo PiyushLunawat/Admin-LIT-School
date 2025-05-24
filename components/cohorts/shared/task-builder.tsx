@@ -1,43 +1,31 @@
 "use client";
 
+import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import {
+  Task,
+  TaskBuilderProps,
+} from "@/types/components/cohorts/shared/task-builder";
 
-export interface Task {
-  id: string;
-  title: string;
-  type: string;
-  description: string;
-  config: {
-    characterLimit?: number;
-    maxFiles?: number;
-    maxFileSize?: number;
-    allowedTypes?: string[];
-  };
-}
-
-interface TaskBuilderProps {
-  tasks: Task[];
-  onTasksChange: (tasks: Task[]) => void;
-  typeOptions: {
-    value: string;
-    label: string;
-  }[];
-  fileTypeOptions?: {
-    [key: string]: {
-      value: string;
-      label: string;
-    }[];
-  };
-}
-
-export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions }: TaskBuilderProps) {
+export function TaskBuilder({
+  tasks,
+  onTasksChange,
+  typeOptions,
+  fileTypeOptions,
+}: TaskBuilderProps) {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [openTypeSelect, setOpenTypeSelect] = useState<string | null>(null);
 
@@ -67,7 +55,9 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
   const updateTaskConfig = (id: string, config: Partial<Task["config"]>) => {
     onTasksChange(
       tasks.map((task) =>
-        task.id === id ? { ...task, config: { ...task.config, ...config } } : task
+        task.id === id
+          ? { ...task, config: { ...task.config, ...config } }
+          : task
       )
     );
   };
@@ -203,7 +193,9 @@ export function TaskBuilder({ tasks, onTasksChange, typeOptions, fileTypeOptions
                     <Input
                       placeholder="Enter task title"
                       value={task.title}
-                      onChange={(e) => updateTask(task.id, { title: e.target.value })}
+                      onChange={(e) =>
+                        updateTask(task.id, { title: e.target.value })
+                      }
                     />
                   </div>
                 </div>

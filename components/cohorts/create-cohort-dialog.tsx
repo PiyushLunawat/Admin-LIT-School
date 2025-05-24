@@ -1,6 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -8,44 +10,73 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BasicDetailsForm } from "@/components/cohorts/steps/basic-details-form";
-import { ApplicationFormBuilder } from "@/components/cohorts/steps/application-form-builder";
-import { LitmusTestForm } from "@/components/cohorts/steps/litmus-test-form";
-import { FeeStructureForm } from "@/components/cohorts/steps/fee-structure-form";
-import { FeePreviewForm } from "@/components/cohorts/steps/fee-preview-form";
-import { CollaboratorsForm } from "@/components/cohorts/steps/collaborators-form";
+import {
+  Cohort,
+  CreateCohortDialogProps,
+} from "@/types/components/cohorts/create-cohort-dialog";
 
-interface Cohort {
-  _id: string;
-  programDetail: string;
-  centerDetail: string;
-  cohortId: string;
-  startDate: string;
-  endDate: string;
-  schedule: string;
-  seats: number;
-  filled: number;
-  status: "Draft" | "Open" | "Full" | "Closed" | "Archived";
-  baseFee: string;
-  isComplete: boolean;
-}
-interface CreateCohortDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  editingCohort?: Cohort | null;
-  fetchCohorts: () => void; 
-}
+const BasicDetailsForm = dynamic(
+  () =>
+    import("@/components/cohorts/steps/basic-details-form").then(
+      (m) => m.BasicDetailsForm
+    ),
+  { ssr: false }
+);
 
-export function CreateCohortDialog({ open, onOpenChange, editingCohort: initialEditingCohort,
+const ApplicationFormBuilder = dynamic(
+  () =>
+    import("@/components/cohorts/steps/application-form-builder").then(
+      (m) => m.ApplicationFormBuilder
+    ),
+  { ssr: false }
+);
+
+const LitmusTestForm = dynamic(
+  () =>
+    import("@/components/cohorts/steps/litmus-test-form").then(
+      (m) => m.LitmusTestForm
+    ),
+  { ssr: false }
+);
+
+const FeeStructureForm = dynamic(
+  () =>
+    import("@/components/cohorts/steps/fee-structure-form").then(
+      (m) => m.FeeStructureForm
+    ),
+  { ssr: false }
+);
+
+const FeePreviewForm = dynamic(
+  () =>
+    import("@/components/cohorts/steps/fee-preview-form").then(
+      (m) => m.FeePreviewForm
+    ),
+  { ssr: false }
+);
+
+const CollaboratorsForm = dynamic(
+  () =>
+    import("@/components/cohorts/steps/collaborators-form").then(
+      (m) => m.CollaboratorsForm
+    ),
+  { ssr: false }
+);
+
+export function CreateCohortDialog({
+  open,
+  onOpenChange,
+  editingCohort: initialEditingCohort,
   fetchCohorts,
-   }: CreateCohortDialogProps) {
+}: CreateCohortDialogProps) {
   const [currentStep, setCurrentStep] = useState("basic-details");
-  const [editingCohort, setEditingCohort] = useState<Cohort | null>(initialEditingCohort || null);
+  const [editingCohort, setEditingCohort] = useState<Cohort | null>(
+    initialEditingCohort || null
+  );
 
   const handleCohortCreated = (cohort: Cohort) => {
-    setEditingCohort(cohort); 
+    setEditingCohort(cohort);
     fetchCohorts();
-    console.log("111",editingCohort)
   };
 
   const steps = [
@@ -76,22 +107,46 @@ export function CreateCohortDialog({ open, onOpenChange, editingCohort: initialE
             ))}
           </TabsList>
           <TabsContent value="basic-details">
-            <BasicDetailsForm onNext={() => setCurrentStep("application-form")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
+            <BasicDetailsForm
+              onNext={() => setCurrentStep("application-form")}
+              onCohortCreated={handleCohortCreated}
+              initialData={editingCohort}
+            />
           </TabsContent>
           <TabsContent value="application-form">
-            <ApplicationFormBuilder onNext={() => setCurrentStep("litmus-test")} onCohortCreated={handleCohortCreated} initialData={editingCohort}/>
+            <ApplicationFormBuilder
+              onNext={() => setCurrentStep("litmus-test")}
+              onCohortCreated={handleCohortCreated}
+              initialData={editingCohort}
+            />
           </TabsContent>
           <TabsContent value="litmus-test">
-            <LitmusTestForm onNext={() => setCurrentStep("fee-structure")} onCohortCreated={handleCohortCreated} initialData={editingCohort}/>
+            <LitmusTestForm
+              onNext={() => setCurrentStep("fee-structure")}
+              onCohortCreated={handleCohortCreated}
+              initialData={editingCohort}
+            />
           </TabsContent>
           <TabsContent value="fee-structure">
-            <FeeStructureForm onNext={() => setCurrentStep("fee-preview")} onCohortCreated={handleCohortCreated} initialData={editingCohort}/>
+            <FeeStructureForm
+              onNext={() => setCurrentStep("fee-preview")}
+              onCohortCreated={handleCohortCreated}
+              initialData={editingCohort}
+            />
           </TabsContent>
           <TabsContent value="fee-preview">
-            <FeePreviewForm onNext={() => setCurrentStep("collaborators")} onCohortCreated={handleCohortCreated} initialData={editingCohort}/>
+            <FeePreviewForm
+              onNext={() => setCurrentStep("collaborators")}
+              onCohortCreated={handleCohortCreated}
+              initialData={editingCohort}
+            />
           </TabsContent>
           <TabsContent value="collaborators">
-            <CollaboratorsForm onComplete={() => onOpenChange(false)} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
+            <CollaboratorsForm
+              onComplete={() => onOpenChange(false)}
+              onCohortCreated={handleCohortCreated}
+              initialData={editingCohort}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>

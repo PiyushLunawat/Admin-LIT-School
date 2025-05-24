@@ -1,5 +1,28 @@
 "use client";
 
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import {
+  FileIcon,
+  FolderPlus,
+  GripVertical,
+  Link2Icon,
+  LoaderCircle,
+  Plus,
+  PlusIcon,
+  Trash2,
+  XIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  type UseFormReturn,
+} from "react-hook-form";
+import { z } from "zod";
+
 import { updateCohort } from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +41,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -26,31 +50,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import {
-  FileIcon,
-  FolderPlus,
-  GripVertical,
-  Link2Icon,
-  LoaderCircle,
-  Plus,
-  PlusIcon,
-  Trash2,
-  XIcon,
-} from "lucide-react";
-import type React from "react";
-import { useEffect, useState } from "react";
-import {
-  Controller,
-  useFieldArray,
-  useForm,
-  type UseFormReturn,
-} from "react-hook-form";
-import { z } from "zod";
-
-import { Progress } from "@/components/ui/progress";
-import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import type { FormData } from "@/schemas/components/cohorts/steps/litmus-test-form.schema";
+import { formSchema } from "@/schemas/components/cohorts/steps/litmus-test-form.schema";
+import { LitmusTestFormProps } from "@/types/components/cohorts/steps/litmus-test-form";
 
 const s3Client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -59,60 +61,6 @@ const s3Client = new S3Client({
     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY as string,
   },
 });
-
-// Modified schema to ensure numeric fields have default values
-const formSchema = z.object({
-  litmusTasks: z.array(
-    z.object({
-      id: z.string(),
-      title: z.string().nonempty("Task title is required"),
-      description: z.string().optional(),
-      submissionTypes: z.array(
-        z.object({
-          id: z.string(),
-          type: z.string().nonempty("Submission type is required"),
-          characterLimit: z.coerce.number().min(1).default(1000),
-          maxFiles: z.coerce.string().min(1).default("1"),
-          maxFileSize: z.coerce.string().min(1).default("500"),
-          allowedTypes: z.array(z.string()).default(["All"]),
-        })
-      ),
-      judgmentCriteria: z.array(
-        z.object({
-          id: z.string(),
-          name: z.string().nonempty("Criteria name is required"),
-          points: z.coerce.string().min(1, "Points must be at least 1"),
-          description: z.string().optional(),
-        })
-      ),
-      resources: z.object({
-        resourceFiles: z.array(z.string().optional()),
-        resourceLinks: z.array(
-          z.string().url("Please enter a valid Link URL").optional()
-        ),
-      }),
-    })
-  ),
-  scholarshipSlabs: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string().nonempty("Slab name is required"),
-      percentage: z.coerce.string().nonempty("Percentage is required"),
-      clearance: z.coerce.string().nonempty("Clearance is required"),
-      description: z.string().optional(),
-      cohortId: z.string().optional(),
-    })
-  ),
-  litmusTestDuration: z.string().nonempty("Duration is required"),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
-interface LitmusTestFormProps {
-  onNext: () => void;
-  onCohortCreated: (cohort: any) => void;
-  initialData?: any;
-}
 
 export function LitmusTestForm({
   onNext,
