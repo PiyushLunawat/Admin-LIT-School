@@ -382,17 +382,20 @@ export function PaymentInformationTab({
     const fallbackScholarship = cohortDetails.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === "No Scholarship"
     );
-    function groupInstallmentsBySemester(installments: any[] = []): any[][] {
+    function groupInstallmentsBySemester(installments: any[] = []) {
       const grouped = installments.reduce((acc, installment) => {
         const semester = installment.semester;
         if (!acc[semester]) {
-          acc[semester] = [];
+          acc[semester] = {
+            semester,
+            installments: [],
+          };
         }
-        acc[semester].push(installment);
+        acc[semester].installments.push(installment);
         return acc;
-      }, {} as Record<number, any[]>);
+      }, {} as Record<number, { semester: number; installments: any[] }>);
 
-      return Object.values(grouped);
+      return grouped;
     }
 
     const finalScholarship = groupInstallmentsBySemester(
@@ -412,8 +415,8 @@ export function PaymentInformationTab({
   ]);
 
   const visibleSemesters = showAllSemesters
-    ? feeStructure || sch?.installmentDetails
-    : (feeStructure || sch?.installmentDetails)?.slice(0, 1);
+  ? (paymentDetails ? feeStructure : sch?.installmentDetails)
+  : (paymentDetails ? feeStructure : sch?.installmentDetails)?.slice(0, 1);
 
   const tokenAmount = Number(cohortDetails?.cohortFeesDetail?.tokenFee) || 0;
   const installments =
@@ -934,13 +937,13 @@ export function PaymentInformationTab({
           ) : (
             <div className="space-y-2">
               {visibleSemesters?.map(
-                (installments: any, semesterIndex: any) => (
+                (semester: any, semesterIndex: any) => (
                   <div key={semesterIndex}>
                     <Badge variant="blue" className="capitalize mb-3">
                       Semester 0{semesterIndex + 1}
                     </Badge>
                     <div className="space-y-4">
-                      {installments?.map(
+                      {semester?.installments?.map(
                         (instalment: any, instalmentIndex: number) => (
                           <div
                             key={instalmentIndex}
