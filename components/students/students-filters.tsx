@@ -71,7 +71,7 @@ export function StudentsFilters({
 
         {/* Programs */}
         <Select value={selectedProgram} onValueChange={onProgramChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-auto sm:w-[180px]">
             <SelectValue placeholder="Program" />
           </SelectTrigger>
           <SelectContent>
@@ -86,7 +86,7 @@ export function StudentsFilters({
 
         {/* Cohorts */}
         <Select value={selectedCohort} onValueChange={onCohortChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-auto sm:w-[180px]">
             <SelectValue placeholder="Cohort" />
           </SelectTrigger>
           <SelectContent>
@@ -101,7 +101,7 @@ export function StudentsFilters({
 
         {/* Application Status */}
         <Select value={selectedAppStatus} onValueChange={onAppStatusChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-auto sm:w-[180px]">
             <SelectValue placeholder="Application Status" />
           </SelectTrigger>
           <SelectContent>
@@ -117,7 +117,7 @@ export function StudentsFilters({
 
         {/* Payment Status */}
         <Select value={selectedPaymentStatus} onValueChange={onPaymentStatusChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-auto sm:w-[180px]">
             <SelectValue placeholder="Payment Status" />
           </SelectTrigger>
           <SelectContent>

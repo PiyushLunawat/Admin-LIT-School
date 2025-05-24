@@ -395,7 +395,7 @@ export function PaymentInformationTab({
         return acc;
       }, {} as Record<number, { semester: number; installments: any[] }>);
 
-      return grouped;
+      return Object.values(grouped);
     }
 
     const finalScholarship = groupInstallmentsBySemester(
@@ -414,9 +414,11 @@ export function PaymentInformationTab({
     litmusTestDetails?.scholarshipDetail,
   ]);
 
+  console.log("feeStructure", feeStructure);
+
   const visibleSemesters = showAllSemesters
-  ? (paymentDetails ? feeStructure : sch?.installmentDetails)
-  : (paymentDetails ? feeStructure : sch?.installmentDetails)?.slice(0, 1);
+  ? (paymentDetails?.paymentPlan === "instalments" ? feeStructure : sch?.installmentDetails)
+  : (paymentDetails?.paymentPlan === "instalments" ? feeStructure : sch?.installmentDetails)?.slice(0, 1);
 
   const tokenAmount = Number(cohortDetails?.cohortFeesDetail?.tokenFee) || 0;
   const installments =

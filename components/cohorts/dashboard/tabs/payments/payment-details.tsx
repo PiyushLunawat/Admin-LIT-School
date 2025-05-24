@@ -1180,7 +1180,7 @@ export function PaymentDetails({
                 )}
               </Card>
             }
-            {paymentDetails?.paymentPlan === "instalment" &&
+            {paymentDetails?.paymentPlan === "instalments" &&
               <div className="space-y-2">
                 <Tabs defaultValue="1" className="space-y-4">
                   <TabsList variant="ghost" className="w-full pl-">

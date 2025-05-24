@@ -67,7 +67,7 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
 
       {/* Make Tabs a controlled component using `value` and `onValueChange` */}
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="w-full">
+        <TabsList className="w-full flex-nowrap flex overflow-x-auto scrollbar-hide space-x-2 pl-40 sm:pl-0">
           <TabsTrigger value="personal">Personal Details</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>

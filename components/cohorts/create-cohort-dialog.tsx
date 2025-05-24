@@ -64,7 +64,7 @@ export function CreateCohortDialog({ open, onOpenChange, editingCohort: initialE
           <DialogTitle>Create New Cohort</DialogTitle>
         </DialogHeader>
         <Tabs value={currentStep} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="w-full flex-nowrap flex overflow-x-auto scrollbar-hide space-x-2 pl-40 sm:pl-0">
             {steps.map((step) => (
               <TabsTrigger
                 key={step.id}
