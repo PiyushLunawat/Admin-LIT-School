@@ -453,7 +453,7 @@ export function ReviewComponent({
             ]?.tasks?.[index]?.texts?.map((textItem: string, id: number) => (
               <div
                 key={`text-${id}`}
-                className="flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl"
+                className="break-all flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl"
               >
                 {textItem}
               </div>

@@ -550,7 +550,7 @@ export function PaymentDetails({
               <div className="flex justify-between text-sm">
                 <span>Payment Progress</span>
                 <span className="pr-3">
-                  {notPaidAmount
+                  {(notPaidAmount || paidAmount === paidAmount + notPaidAmount)
                     ? `${(
                         (paidAmount / (paidAmount + notPaidAmount)) *
                         100
@@ -955,20 +955,18 @@ export function PaymentDetails({
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Base Amount: ₹
-                    {formatAmount(paymentDetails?.oneShotPayment?.baseFee)}
+                    {formatAmount(scholarshipDetails?.oneShotPaymentDetails?.baseFee)}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     One Shot Discount: ₹
                     {formatAmount(
-                      paymentDetails?.oneShotPayment?.OneShotPaymentAmount
+                      scholarshipDetails?.oneShotPaymentDetails?.OneShotPaymentAmount
                     )}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Scholarship Waiver: ₹
                     {formatAmount(
-                      paymentDetails?.oneShotPayment?.baseFee *
-                        scholarshipDetails?.scholarshipPercentage *
-                        0.01
+                      cohortDetails?.baseFee * 1.18 * litmusTestDetails?.scholarshipDetail?.scholarshipPercentage * 0.01
                     )}
                   </p>
                 </div>
@@ -1283,10 +1281,12 @@ export function PaymentDetails({
                                         instalment.scholarshipAmount
                                     )}
                                   </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    Scholarship Waiver: ₹
-                                    {formatAmount(instalment.scholarshipAmount)}
-                                  </p>
+                                  {!!instalment.scholarshipAmount &&
+                                    <p className="text-sm text-muted-foreground">
+                                      Scholarship Waiver: ₹
+                                      {formatAmount(instalment.scholarshipAmount)}
+                                    </p>
+                                  }
                                 </div>
                                 <div className="justify-between items-center gap-2">
                                   <div className="flex items-center text-sm text-muted-foreground">

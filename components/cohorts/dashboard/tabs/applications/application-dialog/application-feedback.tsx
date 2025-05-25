@@ -329,7 +329,7 @@ export function ApplicationFeedback({
               Why are you interested in joining The LIT School?
             </h4>
             <div className="mt-2">
-              <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
+              <div className="break-all flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
                 {submission?.courseDive?.[0]}
               </div>
             </div>
@@ -339,7 +339,7 @@ export function ApplicationFeedback({
               What are your career goals or aspirations??
             </h4>
             <div className="mt-2">
-              <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
+              <div className="break-all flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
                 {submission?.courseDive?.[1]}
               </div>
             </div>
@@ -433,7 +433,7 @@ export function ApplicationFeedback({
                     (textItem: string, id: number) => (
                       <div
                         key={`text-${id}`}
-                        className="w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl"
+                        className="break-all w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl"
                       >
                         {textItem}
                       </div>

@@ -339,6 +339,7 @@ export function DocumentsTab({
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
+      case "verification pending":
       case "pending":
         return "pending";
       case "verified":
@@ -411,9 +412,7 @@ export function DocumentsTab({
                         className="capitalize"
                         variant={getStatusColor(docDetails?.status)}
                       >
-                        {docDetails?.status === "pending"
-                          ? "verification pending"
-                          : docDetails?.status}
+                        {docDetails?.status}
                       </Badge>
                       <Button
                         variant="ghost"
@@ -442,6 +441,7 @@ export function DocumentsTab({
                               type="file"
                               accept="application/pdf"
                               className="hidden"
+                              disabled={latestCohort?.status === "dropped"}
                               id={`file-input-${doc.id}`}
                               onChange={(e) => handleFileChange(e, doc.id)}
                             />
@@ -478,6 +478,7 @@ export function DocumentsTab({
                           type="file"
                           accept="application/pdf"
                           className="hidden"
+                          disabled={latestCohort?.status === "dropped"}
                           id={`file-input-${doc.id}`}
                           onChange={(e) => handleFileChange(e, doc.id)}
                         />
@@ -487,7 +488,7 @@ export function DocumentsTab({
                 </div>
 
                 {/* Show Flag/Verify actions if the document is uploaded and marked as "updated" */}
-                {docDetails?.status === "pending" &&
+                {docDetails?.status === "verification pending" &&
                   (flagOpen ? (
                     <div className="space-y-4 ">
                       <div className="mt-2 space-y-2">
@@ -615,9 +616,7 @@ export function DocumentsTab({
                         className="capitalize"
                         variant={getStatusColor(docDetails?.status)}
                       >
-                        {docDetails?.status === "pending"
-                          ? "verification pending"
-                          : docDetails?.status}
+                        {docDetails?.status}
                       </Badge>
                       <Button
                         variant="ghost"
@@ -657,6 +656,7 @@ export function DocumentsTab({
                           type="file"
                           accept="application/pdf"
                           className="hidden"
+                          disabled={latestCohort?.status === "dropped"}
                           id={`file-input-${doc.id}`}
                           onChange={(e) => handleFileChange(e, doc.id)}
                         />
@@ -666,7 +666,7 @@ export function DocumentsTab({
                 </div>
 
                 {/* Show Flag/Verify actions if the document is uploaded and marked as "updated" */}
-                {docDetails?.status === "pending" &&
+                {docDetails?.status === "verification pending" &&
                   (flagOpen ? (
                     <div className="space-y-4 ">
                       <div className="mt-2 space-y-2">
@@ -859,7 +859,7 @@ export function DocumentsTab({
                   <span>Choose File</span>
                 </Button>
                 <input
-                  disabled={!newDocName}
+                  disabled={!newDocName || latestCohort?.status === "dropped"}
                   type="file"
                   accept="application/pdf"
                   className="hidden"

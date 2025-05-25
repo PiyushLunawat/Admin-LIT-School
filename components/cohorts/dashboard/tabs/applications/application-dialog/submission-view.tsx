@@ -30,7 +30,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
           </h4>
           {submission?.courseDive?.[0] && (
             <div className="mt-2">
-              <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
+              <div className="break-all flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
                 {submission?.courseDive?.[0]}
               </div>
             </div>
@@ -43,7 +43,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
           </h4>
           {submission?.courseDive?.[1] && (
             <div className="mt-2">
-              <div className="flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
+              <div className="break-all flex items-center gap-2 text-sm mt-2 px-4 py-2 border rounded-xl">
                 {submission?.courseDive?.[1]}
               </div>
             </div>
@@ -142,7 +142,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                   (textItem: string, id: number) => (
                     <div
                       key={`text-${id}`}
-                      className="w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl"
+                      className="break-all w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl"
                     >
                       {textItem}
                     </div>
