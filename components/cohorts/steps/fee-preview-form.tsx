@@ -252,9 +252,9 @@ export function FeePreviewForm({ onNext, onCohortCreated, initialData }: FeePrev
 
   return (
     <div className="max-h-[80vh] space-y-6 py-4">
-      <Tabs defaultValue={scholarshipSlabs[0]?.id || "default"} className="space-y-4">
+      <Tabs defaultValue={'no-scholarship'} className="space-y-4">
         <TabsList variant="ghost">
-          <TabsTrigger variant="xs" value={'no-scholarship'}>No Scholarship (0%) </TabsTrigger>
+          <TabsTrigger variant="xs" value={'no-scholarship'}>No Scholarship (0%)</TabsTrigger>
           {scholarshipSlabs.map((slab: any) => (
             <TabsTrigger key={slab.id} variant="xs" value={slab.id}>
               {slab.name} ({slab.percentage}%)

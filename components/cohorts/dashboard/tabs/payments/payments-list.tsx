@@ -74,6 +74,7 @@ export function PaymentsList({
   const getStatusColor = (status: PaymentRecord["status"]): BadgeVariant => {
     switch (status?.toLowerCase()) {
       case "paid":
+      case "complete":
         return "success";
       case "overdue":
         return "warning";
@@ -116,15 +117,27 @@ export function PaymentsList({
   };
 
   useEffect(() => {
-    if (applications.length > 0) {
-      const firstApplication = applications?.[0];
-      setSelectedRowId(firstApplication._id);
-      onStudentSelect(firstApplication);
-    } else {
-      setSelectedRowId(null);
-      onStudentSelect(null);
+  if (selectedRowId && onStudentSelect) {
+    const existingApplication = applications.find(
+      (app) => app._id === selectedRowId
+    );
+    if (existingApplication) {
+      onStudentSelect(existingApplication);
+      return; // ✅ Keep current selection
     }
-  }, [applications]);
+  }
+
+  // ✅ Fallback to first application if none selected or previous no longer exists
+  if (applications.length > 0) {
+    const firstApplication = applications?.[0];
+    setSelectedRowId(firstApplication._id);
+    onStudentSelect(firstApplication);
+  } else {
+    setSelectedRowId(null);
+    onStudentSelect(null);
+  }
+}, [applications]);
+
 
   return applications.length === 0 ? (
     <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground border rounded-md">
@@ -183,6 +196,9 @@ export function PaymentsList({
 
                 if (new Date(oneShotDetails?.installmentDate) < new Date()) {
                   paymentStatus = "overdue";
+                } else if(oneShotDetails?.verificationStatus === "paid") {
+                  paymentStatus = "complete";
+                  dueDate = "--";
                 } else {
                   paymentStatus = oneShotDetails?.verificationStatus;
                 }
@@ -201,7 +217,7 @@ export function PaymentsList({
                 }
               }
               if (allPaid) {
-                paymentStatus = "Complete";
+                paymentStatus = "complete";
                 dueDate = "--";
               } else if (
                 new Date(earliestUnpaid.installmentDate) < new Date()

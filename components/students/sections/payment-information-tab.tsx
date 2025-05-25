@@ -833,20 +833,18 @@ export function PaymentInformationTab({
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Base Amount: ₹
-                  {formatAmount(paymentDetails?.oneShotPayment?.baseFee)}
+                  {formatAmount(scholarshipDetails?.oneShotPaymentDetails?.baseFee)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   One Shot Discount: ₹
                   {formatAmount(
-                    paymentDetails?.oneShotPayment?.OneShotPaymentAmount
+                    scholarshipDetails?.oneShotPaymentDetails?.OneShotPaymentAmount
                   )}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Scholarship Waiver: ₹
                   {formatAmount(
-                    paymentDetails?.oneShotPayment?.baseFee *
-                      scholarshipDetails?.scholarshipPercentage *
-                      0.01
+                    cohortDetails?.baseFee * 1.18 * litmusTestDetails?.scholarshipDetail?.scholarshipPercentage * 0.01
                   )}
                 </p>
               </div>

@@ -87,6 +87,7 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       const applicationInterviews =
         latestCohort?.applicationDetails?.applicationTestInterviews;
       const litmusStatus = latestCohort?.litmusTestDetails?.status;
+      const paymentDetails = latestCohort?.paymentDetails;
       const scholarship = latestCohort?.litmusTestDetails?.scholarshipDetail;
       const baseFee = latestCohort?.cohortId?.baseFee || 0;
       const percentage = scholarship?.scholarshipPercentage;
@@ -131,23 +132,22 @@ export function MetricsGrid({ applications }: MetricsGridProps) {
       }
 
       // One-shot payment
-      if (latestCohort?.feeSetup?.installmentType === "one shot payment") {
-        const oneShot = latestCohort?.oneShotPayment;
-        if (oneShot?.verificationStatus === "paid") {
-          oneShotAmountPaid += oneShot.amountPayable;
+      if (paymentDetails?.paymentPlan === "one-shot") {
+          const oneShotPayment = paymentDetails.oneShotPayment;
+          if (oneShotPayment) {
+            if (oneShotPayment.verificationStatus === "paid") {
+              oneShotAmountPaid += oneShotPayment.amountPayable || 0;
+            }
+          }
         }
-      }
-
-      // Installment payment
-      if (latestCohort?.feeSetup?.installmentType === "instalments") {
-        latestCohort?.installmentDetails?.forEach((semester: any) => {
-          semester?.installments?.forEach((inst: any) => {
-            if (inst?.verificationStatus === "paid") {
-              installmentAmountPaid += inst.amountPayable;
+  
+        if (paymentDetails?.paymentPlan === "instalments") {
+          paymentDetails.installments?.forEach((installment: any) => {
+            if (installment.verificationStatus === "paid") {
+              installmentAmountPaid += installment.amountPayable || 0;
             }
           });
-        });
-      }
+        }
     });
 
     setTotalApplicationsCount(totalApplications);
