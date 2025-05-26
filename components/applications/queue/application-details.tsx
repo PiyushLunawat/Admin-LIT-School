@@ -584,7 +584,7 @@ export function ApplicationDetails({
       {/* Application Feedback Dialog */}
       <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
           <ApplicationFeedback
             application={application}
             initialStatus={status}
@@ -602,7 +602,7 @@ export function ApplicationDetails({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 pb-6 px-6 ">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 pb-6 px-6 ">
           <div className="flex justify-between items-center pb-4 border-b border-gray-700">
             <div>
               <h3 className="text-xl font-semibold">
@@ -635,7 +635,7 @@ export function ApplicationDetails({
         onOpenChange={setInterviewFeedbackOpen}
       >
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
           <InterviewFeedback
             name={application?.firstName}
             email={application?.email}
@@ -655,7 +655,7 @@ export function ApplicationDetails({
 
       <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-2xl">
           <SchedulePresentation
             student={application}
             interviewr={["interviewer"]}
@@ -665,14 +665,14 @@ export function ApplicationDetails({
 
       <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           <SendMessage type={selectedMessage} recipient={recipient} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
           <MarkedAsDialog
             student={application}
             onUpdateStatus={() => onApplicationUpdate()}

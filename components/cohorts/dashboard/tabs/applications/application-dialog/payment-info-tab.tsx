@@ -456,7 +456,7 @@ export function PaymentInformationTab({
         <CardHeader>
           <CardTitle>Payment Overview</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Amount</p>
@@ -535,7 +535,7 @@ export function PaymentInformationTab({
         <CardHeader>
           <CardTitle>Payment Schedule</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="border rounded-lg p-4 space-y-2">
             <div className="flex justify-between items-start">
               <div>
@@ -1198,7 +1198,7 @@ export function PaymentInformationTab({
 
       <Dialog open={vopen} onOpenChange={setVopen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 px-6 overflow-y-auto">
           <div className="flex items-center gap-4">
             <div className="space-y-1">
               <h2 className="text-base font-semibold">
@@ -1357,7 +1357,7 @@ export function PaymentInformationTab({
       </Dialog>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 px-6 overflow-y-auto">
           {imageUrl ? (
             <Image
               width={800}

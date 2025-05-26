@@ -58,7 +58,7 @@ export function ApplicationsTab({
         const response = await getStudents();
         const mappedStudents = response.data.filter(
           (student: any) =>
-            ["initiated", "applied", "reviewing", "dropped"].includes(
+            ["initiated", "applied", "reviewing", "enrolled", "dropped"].includes(
               student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
                 ?.status
             ) &&
@@ -235,7 +235,9 @@ export function ApplicationsTab({
             disabled={selectedStudents.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
-            Export Selected
+            <span className="truncate w-[50px] sm:w-auto">
+              Export Selected
+            </span>
           </Button>
           <Button
             variant="outline"

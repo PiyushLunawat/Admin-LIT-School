@@ -75,7 +75,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                       >
                         <div className="flex items-center gap-2">
                           <FileIcon className="w-4 h-4" />
-                          <span className="text-white text-sm truncate max-w-[700px]">
+                          <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
                             {file.split("/").pop()}
                           </span>
                         </div>
@@ -100,7 +100,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                       >
                         <div className="flex items-center gap-2 truncate">
                           <Link2 className="w-4 h-4" />
-                          <span className="text-white text-sm truncate max-w-[700px]">
+                          <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
                             {link}
                           </span>
                         </div>
@@ -193,7 +193,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                       <div className="w-full flex justify-between items-center p-3 border-t">
                         <div className="flex items-center gap-2 text-sm truncate">
                           <ImageIcon className="w-4 h-4" />
-                          <span className="w-[220px] text-white truncate">
+                          <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
                             {imageItem.split("/").pop()}
                           </span>
                         </div>
@@ -228,7 +228,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                       <div className="w-full flex justify-between items-center p-3 border-t">
                         <div className="flex items-center gap-2 text-sm truncate">
                           <VideoIcon className="w-4 h-4" />
-                          <span className="w-[220px] text-white truncate">
+                          <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
                             {videoItem.split("/").pop()}
                           </span>
                         </div>

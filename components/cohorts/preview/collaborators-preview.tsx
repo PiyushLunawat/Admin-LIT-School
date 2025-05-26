@@ -47,7 +47,7 @@ export function CollaboratorsPreview() {
       {/* Dialog for Collaborators Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl p-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl p-6">
           {/* <CollaboratorsForm onComplete={() => console.log("Form complete")} /> */}
         </DialogContent>
       </Dialog>

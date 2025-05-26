@@ -237,7 +237,7 @@ export function PersonalDetailsTab({
               : "Edit Details"}
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Full Name</Label>
@@ -333,7 +333,7 @@ export function PersonalDetailsTab({
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Contact Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Email Address</Label>
@@ -382,7 +382,7 @@ export function PersonalDetailsTab({
         <CardHeader>
           <CardTitle>Current Address</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Street Address</Label>
@@ -452,7 +452,7 @@ export function PersonalDetailsTab({
         <CardHeader>
           <CardTitle>Previous Education</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="pl-3">
@@ -625,7 +625,7 @@ export function PersonalDetailsTab({
         <CardHeader>
           <CardTitle>Emergency Contact</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {isEditing ? (
               <>
@@ -721,7 +721,7 @@ export function PersonalDetailsTab({
         <CardHeader>
           <CardTitle>Parental Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {/* Father's Information */}
             {isEditing ? (
@@ -981,17 +981,17 @@ export function PersonalDetailsTab({
         <CardHeader>
           <CardTitle>Financial Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <div className="grid gap-4">
             <div>
               {formData.studentDetailData.financialInformation
                 .isFinanciallyIndependent ? (
-                <Label className="pl-3 flex gap-2 items-center">
+                <Label className="sm:pl-3 flex gap-2 items-center">
                   <CircleCheckBig className="w-3 h-3 text-[#2EB88A]" />
                   Financially independent
                 </Label>
               ) : (
-                <Label className="pl-3 flex gap-2 items-center">
+                <Label className="sm:pl-3 flex gap-2 items-center">
                   <CircleMinus className="w-3 h-3 text-[#FF791F]" />
                   Financially dependent on Parents
                 </Label>
@@ -1000,12 +1000,12 @@ export function PersonalDetailsTab({
             <div>
               {formData.studentDetailData.financialInformation
                 .hasAppliedForFinancialAid ? (
-                <Label className="pl-3 flex gap-2 items-center">
+                <Label className="sm:pl-3 flex gap-2 items-center">
                   <CircleCheckBig className="w-3 h-3 text-[#2EB88A]" />
                   Has tried applying for financial aid earlier
                 </Label>
               ) : (
-                <Label className="pl-3 flex gap-2 items-center">
+                <Label className="sm:pl-3 flex gap-2 items-center">
                   <CircleMinus className="w-3 h-3 text-[#FF791F]" />
                   Has not tried applying for any financial aid earlier
                 </Label>

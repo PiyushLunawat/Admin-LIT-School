@@ -118,7 +118,7 @@ export default function CohortsPage() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           <CreateCohortContent
             currentStep={currentStep}
             onStepChange={(step) => setCurrentStep(step as StepId)}

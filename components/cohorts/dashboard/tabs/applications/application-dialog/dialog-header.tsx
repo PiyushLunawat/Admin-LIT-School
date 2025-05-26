@@ -101,9 +101,9 @@ export function StudentApplicationHeader({
             <h2 className="text-base font-semibold">
               {student?.firstName} {student?.lastName}
             </h2>
-            <div className="flex gap-2 h-5 items-center">
+            <div className="flex flex-col sm:flex-row gap-0 sm:gap-2 h-5 items-start sm:items-center">
               <p className="text-sm text-muted-foreground">{student?.email}</p>
-              <Separator orientation="vertical" />
+              <Separator orientation="vertical" className="hidden sm:block"/>
               <p className="text-sm text-muted-foreground">
                 {student?.mobileNumber}
               </p>
@@ -128,7 +128,7 @@ export function StudentApplicationHeader({
                 Dropped
               </Badge>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {/* <Button variant="outline" className="justify-start">
                     <Mail className="h-4 w-4 mr-2" />
                     Send Email
@@ -165,7 +165,7 @@ export function StudentApplicationHeader({
           </div>
 
           {/* Status Section */}
-          <div className="flex justify-between items-center py-3 border-t">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row gap-1 justify-between items-center py-3 border-t">
             <div>
               <p className="text-sm text-muted-foreground">
                 Application Status
@@ -266,7 +266,7 @@ export function StudentApplicationHeader({
 
       <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-2xl">
           <SchedulePresentation
             student={student}
             interviewr={["interviewer", "evaluator"]}
@@ -276,7 +276,7 @@ export function StudentApplicationHeader({
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
           <MarkedAsDialog
             student={student}
             onUpdateStatus={() => onUpdateStatus()}

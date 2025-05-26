@@ -238,7 +238,7 @@ export function ApplicationDetails({
                         key={index}
                         className="flex justify-between text-muted-foreground text-sm"
                       >
-                        <div className="flex justify-center gap-3 items-center">
+                        <div className="flex flex-col sm:flex-row justify-center gap-1 sm:gap-3 items-start sm:items-center">
                           <div className="flex gap-1 items-center">
                             <Clock4 className="w-4 h-4" />
                             {interview?.startTime} - {interview?.endTime}
@@ -410,7 +410,7 @@ export function ApplicationDetails({
                   // onClick={() => setInterviewOpen(true)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span className="truncate w-[170px]">
+                  <span className="flex-1 truncate w-[170px]">
                     Schedule Presentation
                   </span>
                 </Button>
@@ -423,7 +423,9 @@ export function ApplicationDetails({
                   )}
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
-                  Mark as Dropped
+                  <span className="flex-1 truncate w-[170px]">
+                    Mark as Dropped
+                  </span>
                 </Button>
               </div>
             </div>
@@ -598,7 +600,7 @@ export function ApplicationDetails({
       {/* Application Feedback Dialog */}
       <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-4 sm:px-6">
           <ApplicationFeedback
             application={application}
             initialStatus={status}
@@ -616,20 +618,16 @@ export function ApplicationDetails({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 pb-6 px-6 ">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 pb-6 px-4 sm:px-6 ">
           <div className="flex justify-between items-center pb-4 border-b border-gray-700">
             <div>
               <h3 className="text-xl font-semibold">
                 {application?.firstName + " " + application?.lastName}
               </h3>
-              <div className="flex gap-2 h-5 items-center">
-                <p className="text-sm text-muted-foreground">
-                  {application?.email}
-                </p>
-                <Separator orientation="vertical" />
-                <p className="text-sm text-muted-foreground">
-                  {application?.mobileNumber}
-                </p>
+              <div className="flex flex-col sm:flex-row gap-0 sm:gap-2 h-5 items-start sm:items-center">
+                <p className="text-sm text-muted-foreground">{application?.email}</p>
+                <Separator orientation="vertical" className="hidden sm:block"/>
+                <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
               </div>
             </div>
           </div>
@@ -649,7 +647,7 @@ export function ApplicationDetails({
         onOpenChange={setInterviewFeedbackOpen}
       >
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-4 sm:px-6">
           <InterviewFeedback
             name={application?.firstName}
             email={application?.email}
@@ -669,7 +667,7 @@ export function ApplicationDetails({
 
       <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-2xl px-4 sm:px-6 ">
           <SchedulePresentation
             student={application}
             interviewr={["interviewer"]}
@@ -679,14 +677,14 @@ export function ApplicationDetails({
 
       <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl px-4 sm:px-6 ">
           <SendMessage type={selectedMessage} recipient={recipient} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-4 sm:px-6">
           <MarkedAsDialog
             student={application}
             onUpdateStatus={() => onApplicationUpdate()}

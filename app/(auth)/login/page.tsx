@@ -165,14 +165,22 @@ export default function LoginPage() {
           alt="BANNER"
           width={1200}
           height={336}
-          className="w-full h-[200px] sm:h-[336px] object-cover"
+          className="w-full h-[200px] sm:h-[336px] object-cover hidden sm:block"
         />
+        <Image
+          src="/assets/images/lit-banner-mobile.svg"
+          alt="BANNER"
+          width={1200}
+          height={336}
+          className="w-full h-full object-cover sm:hidden"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/0"></div>
         <Image
           src="/assets/images/lit-logo.svg"
           alt="LIT"
           width={56}
           height={56}
-          className="absolute top-7 left-7 w-8 sm:w-14"
+          className="absolute top-7 left-7 w-12 sm:w-14"
         />
       </div>
       <div className="w-full px-6 mt-8 sm:mt-14 flex justify-center items-center">
@@ -181,7 +189,7 @@ export default function LoginPage() {
             <div className="text-2xl sm:text-3xl font-semibold ">
               Join the Education Revolution!
             </div>
-            <div className="text-base sm:text-lg font-light sm:font-normal ">
+            <div className="text-sm sm:text-base font-light sm:font-normal">
               Access your dashboard by verifying your Email
             </div>
           </div>
@@ -195,7 +203,7 @@ export default function LoginPage() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <Label>Email Address</Label>
+                    <Label className="pl-3">Email Address</Label>
                     <FormControl>
                       <Input
                         type="email"
@@ -213,7 +221,7 @@ export default function LoginPage() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="relative">
-                    <Label>Password</Label>
+                    <Label className="pl-3">Password</Label>
                     <FormControl>
                       <div className="relative">
                         <Input

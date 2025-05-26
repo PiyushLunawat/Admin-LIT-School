@@ -189,7 +189,7 @@ export default function CentresPage() {
               Create Centre
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-[90vw] sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>
                 {editMode ? "Edit Centre" : "Create New Centre"}
@@ -281,54 +281,56 @@ export default function CentresPage() {
                 <TableCell>{centre.location}</TableCell>
                 <TableCell>{centre.suffix}</TableCell>
                 <TableCell>{centre.status ? "Active" : "Inactive"}</TableCell>
-                <TableCell className="flex justify-start items-center">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditCentre(centre)}
-                  >
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={
-                          centre.status ? "text-destructive" : "text-[#2EB88A]"
-                        }
-                      >
-                        {centre.status ? "Disable" : "Enable"}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {" "}
-                          {centre.status ? "Disable" : "Enable"} Centre
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to{" "}
-                          {centre.status ? "Disable" : "Enable"} this center?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          className={`${
-                            centre.status
-                              ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            toggleCenterStatus(centre._id, centre.status)
+                <TableCell className="">
+                  <div className="flex items-center">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditCentre(centre)}
+                    >
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={
+                            centre.status ? "text-destructive" : "text-[#2EB88A]"
                           }
                         >
                           {centre.status ? "Disable" : "Enable"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {" "}
+                            {centre.status ? "Disable" : "Enable"} Centre
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to{" "}
+                            {centre.status ? "Disable" : "Enable"} this center?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className={`${
+                              centre.status
+                                ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              toggleCenterStatus(centre._id, centre.status)
+                            }
+                          >
+                            {centre.status ? "Disable" : "Enable"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

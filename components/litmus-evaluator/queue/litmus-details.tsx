@@ -370,35 +370,35 @@ export function LitmusDetails({ application, onClose, onApplicationUpdate }: Lit
 
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           <ReviewComponent application={application} onApplicationUpdate={onApplicationUpdate} onClose={() => setOpen(false)}/>
         </DialogContent>
       </Dialog>
       
       <Dialog open={vopen} onOpenChange={setVopen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           <ViewComponent application={application} onApplicationUpdate={onApplicationUpdate}/>
         </DialogContent>
       </Dialog>
 
       <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-2xl">
           <SchedulePresentation student={application} interviewr={['evaluator']}/>
         </DialogContent>
       </Dialog>
 
       <Dialog open={schOpen} onOpenChange={setSchOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-5xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-5xl">
           <AwardScholarship student={application} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
           <MarkedAsDialog student={application} onUpdateStatus={() => onApplicationUpdate()} onClose={() => setMarkedAsDialogOpen(false)}/>
         </DialogContent>
       </Dialog>

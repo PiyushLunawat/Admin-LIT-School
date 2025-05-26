@@ -51,7 +51,7 @@ export function PaymentsFilters({
           value={selectedPaymentStatus}
           onValueChange={onPaymentStatusChange}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-fit sm:w-[180px]">
             <SelectValue placeholder="Payment Status" />
           </SelectTrigger>
           <SelectContent>
@@ -65,7 +65,7 @@ export function PaymentsFilters({
 
         {/* Payment Plan Filter */}
         <Select value={selectedPaymentPlan} onValueChange={onPaymentPlanChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-fit sm:w-[180px]">
             <SelectValue placeholder="Payment Plan" />
           </SelectTrigger>
           <SelectContent>
@@ -77,7 +77,7 @@ export function PaymentsFilters({
 
         {/* Scholarship Filter */}
         <Select value={selectedScholarship} onValueChange={onScholarshipChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-fit sm:w-[180px]">
             <SelectValue placeholder="Scholarship" />
           </SelectTrigger>
           <SelectContent>

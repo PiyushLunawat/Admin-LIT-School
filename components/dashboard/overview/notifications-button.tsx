@@ -290,7 +290,7 @@ export function NotificationsButton() {
 
         <PopoverContent
           align="end"
-          className="flex flex-col w-[400px] p-1 max-h-[400px] min-h-[80px] justify-center"
+          className="flex flex-col w-[90vw] sm:w-[400px] p-1 max-h-[400px] min-h-[80px] justify-center"
         >
           {notifications.length === 0 ? (
             <Label className="text-base text-center text-muted-foreground font-normal">

@@ -303,7 +303,7 @@ export function PaymentsSummary({
           <CardTitle>Instalment Breakdown</CardTitle>
         </CardHeader>
         <CardContent
-          className={`grid grid-cols-${
+          className={`flex flex-col sm:grid grid-cols-${
             instalmentBreakdown.length <= 4 ? instalmentBreakdown.length : 3
           } gap-4 `}
         >
