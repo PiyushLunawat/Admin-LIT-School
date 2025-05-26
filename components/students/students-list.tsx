@@ -289,7 +289,7 @@ export function StudentsList({
                           </Button>
                         </DialogTrigger>
                         <DialogTitle></DialogTitle>
-                        <DialogContent className="max-w-4xl py-4 px-6">
+                        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
                           <MarkedAsDialog student={student} onUpdateStatus={() => onApplicationUpdate()}
                            onClose={() => {}} />
                         </DialogContent>
@@ -305,7 +305,7 @@ export function StudentsList({
       </div>
       <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           <SendMessage
             type={selectedMessage}
             recipient={recipient}

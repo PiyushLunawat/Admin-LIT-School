@@ -358,7 +358,7 @@ export function DocumentsTab({
         <CardHeader>
           <CardTitle>Required Documents</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           {reqDocuments.map((doc: any, index: any) => {
             const docDetails =
               docs.length > 0 ? docs.find((d: any) => d.name === doc.id) : null;
@@ -407,7 +407,7 @@ export function DocumentsTab({
                       </Button>
                     </div>
                   ) : docDetails ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-center gap-2">
                       <Badge
                         className="capitalize"
                         variant={getStatusColor(docDetails?.status)}
@@ -562,7 +562,7 @@ export function DocumentsTab({
         <CardHeader>
           <CardTitle>Parent&apos;s Documents</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           {parentDocuments.map((doc: any, index: any) => {
             const docDetails =
               docs.length > 0 ? docs.find((d: any) => d.name === doc.id) : null;
@@ -611,7 +611,7 @@ export function DocumentsTab({
                       </Button>
                     </div>
                   ) : docDetails ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-center gap-2">
                       <Badge
                         className="capitalize"
                         variant={getStatusColor(docDetails?.status)}
@@ -755,7 +755,7 @@ export function DocumentsTab({
             <CardHeader>
               <CardTitle>Additional Documents</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="px-4 sm:px-6 space-y-4">
               {docs
                 ?.filter(
                   (doc: any) =>
@@ -877,7 +877,7 @@ export function DocumentsTab({
       {/* PDF Preview Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 px-6 h-[90vh] overflow-y-auto">
           {viewDoc ? (
             <div className="max-w-7xl justify-center flex items-center ">
               <iframe

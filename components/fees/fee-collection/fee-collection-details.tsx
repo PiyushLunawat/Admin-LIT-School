@@ -281,7 +281,7 @@ export function FeeCollectionDetails({
                   onOpenChange={setMarkedAsDialogOpen}
                 >
                   <DialogTitle></DialogTitle>
-                  <DialogContent className="max-w-4xl py-4 px-6">
+                  <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
                     <MarkedAsDialog
                       student={application}
                       onUpdateStatus={() => onApplicationUpdate()}
@@ -576,7 +576,7 @@ export function FeeCollectionDetails({
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>
             <DialogTitle></DialogTitle>
-            <DialogContent className="max-w-5xl">
+            <DialogContent className="max-w-[90vw] sm:max-w-5xl">
               <AwardScholarship student={application} />
             </DialogContent>
           </Dialog>
@@ -602,7 +602,7 @@ export function FeeCollectionDetails({
       </ScrollArea>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 px-6 overflow-y-auto">
           {imageUrl ? (
             <Image
               width={600}

@@ -120,7 +120,7 @@ export function FeeStructurePreview() {
       {/* Dialog for Fee Structure Form */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl p-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl p-6">
           {/* <FeeStructureForm onNext={() => console.log("Navigating to collaborators")} /> */}
           <FeePreviewForm onNext={() => console.log("Navigating to collaborators")} onCohortCreated={handleCohortCreated}/>
         </DialogContent>

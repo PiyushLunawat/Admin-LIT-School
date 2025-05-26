@@ -122,13 +122,31 @@ export function PaymentDetails({
   const [flagOpen, setFlagOpen] = useState(false);
   const [reason, setReason] = useState("");
 
-  const handleDownload = (url: string) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Receipt.pdf"; // Default filename for the download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async (url: string, docName: string) => {
+    // setDownloading(true);
+    try {
+      // 1. Fetch the file as Blob
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      // 2. Create a temporary object URL for that Blob
+      const blobUrl = URL.createObjectURL(blob);
+
+      // 3. Create a hidden <a> and force download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${docName}.pdf`; // or "myImage.png"
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed", err);
+    } finally {
+      // setDownloading(false);
+    }
   };
 
   async function handleTokenVerify(
@@ -601,11 +619,15 @@ export function PaymentDetails({
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" className="justify-start" disabled>
                   <Calendar className="h-4 w-4 mr-2" />
-                  Schedule Presen...
+                  <span className="flex-1 truncate w-[170px]">
+                    Schedule Presentation
+                  </span>
                 </Button>
                 <Button variant="outline" className="justify-start" disabled>
                   <DownloadIcon className="h-4 w-4 mr-2" />
-                  Download Files
+                  <span className="flex-1 truncate w-[170px]">
+                    Download Files
+                  </span>
                 </Button>
                 {scholarshipDetails ? (
                   <Button
@@ -625,10 +647,10 @@ export function PaymentDetails({
                   </Button>
                 ) : (
                   <Button variant="outline" className="justify-start" disabled>
-                    <div className="flex gap-2 items-center">
-                      <Star className="h-4 w-4" />
+                    <Star className="h-4 w-4 mr-2" />
+                    <span className="flex-1 truncate w-[170px]">
                       Award Scholarship
-                    </div>
+                    </span>
                   </Button>
                 )}
                 <Button
@@ -637,7 +659,9 @@ export function PaymentDetails({
                   onClick={() => setMarkedAsDialogOpen(true)}
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
-                  Mark as Dropped
+                  <span className="flex-1 truncate w-[170px]">
+                    Mark as Dropped
+                  </span>
                 </Button>
 
                 <Dialog
@@ -645,7 +669,7 @@ export function PaymentDetails({
                   onOpenChange={setMarkedAsDialogOpen}
                 >
                   <DialogTitle></DialogTitle>
-                  <DialogContent className="max-w-4xl py-4 px-6">
+                  <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
                     <MarkedAsDialog
                       student={student}
                       onUpdateStatus={() => onApplicationUpdate()}
@@ -845,7 +869,8 @@ export function PaymentDetails({
                       handleDownload(
                         tokenFeeDetails?.receipts?.[
                           tokenFeeDetails?.receipts.length - 1
-                        ]?.url
+                        ]?.url,
+                        "Token_Receipt"
                       )
                     }
                   >
@@ -1109,8 +1134,9 @@ export function PaymentDetails({
                       onClick={() =>
                         handleDownload(
                           paymentDetails?.oneShotPayment?.receiptUrls?.[
-                            tokenFeeDetails?.receiptUrls.length - 1
-                          ]?.url
+                            paymentDetails?.oneShotPayment?.receiptUrls.length - 1
+                          ]?.url,
+                          "One_Shot_Receipt"
                         )
                       }
                     >
@@ -1316,11 +1342,11 @@ export function PaymentDetails({
                                     size="sm"
                                     className="w-full mt-2"
                                     onClick={() =>
-                                      window.open(
+                                      handleDownload(
                                         instalment.receiptUrls?.[
                                           instalment?.receiptUrls.length - 1
                                         ]?.url,
-                                        "_blank"
+                                        `Installment_${instalment?.instalmentNumber}`
                                       )
                                     }
                                   >
@@ -1465,7 +1491,7 @@ export function PaymentDetails({
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>
             <DialogTitle></DialogTitle>
-            <DialogContent className="max-w-5xl">
+            <DialogContent className="max-w-[90vw] sm:max-w-5xl">
               <AwardScholarship student={student} />
             </DialogContent>
           </Dialog>
@@ -1491,7 +1517,7 @@ export function PaymentDetails({
       </ScrollArea>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 px-6 overflow-y-auto">
           {imageUrl ? (
             <Image
               src={imageUrl}
@@ -1510,7 +1536,7 @@ export function PaymentDetails({
 
       <Dialog open={vopen} onOpenChange={setVopen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-2 px-6 overflow-y-auto">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-2 px-6 overflow-y-auto">
           <div className="flex items-center gap-4">
             <div className="space-y-1">
               <h2 className="text-base font-semibold">

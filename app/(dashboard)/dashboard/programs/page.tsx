@@ -199,7 +199,7 @@ export default function ProgramsPage() {
               Create Program
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-[90vw] sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>
                 {editMode ? "Edit Program" : "Create New Program"}
@@ -323,54 +323,56 @@ export default function ProgramsPage() {
                 <TableCell>{program.duration} months</TableCell>
                 <TableCell>{program.prefix}</TableCell>
                 <TableCell>{program.status ? "Active" : "Inactive"}</TableCell>
-                <TableCell className="flex justify-start items-center">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditProgram(program)}
-                  >
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={
-                          program.status ? "text-destructive" : "text-[#2EB88A]"
-                        }
-                      >
-                        {program.status ? "Disable" : "Enable"}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {" "}
-                          {program.status ? "Disable" : "Enable"} Program
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to{" "}
-                          {program.status ? "Disable" : "Enable"} this Program?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          className={`${
-                            program.status
-                              ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            toggleProgramStatus(program._id, program.status)
+                <TableCell className="">
+                  <div className="flex items-center">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditProgram(program)}
+                    >
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={
+                            program.status ? "text-destructive" : "text-[#2EB88A]"
                           }
                         >
                           {program.status ? "Disable" : "Enable"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {" "}
+                            {program.status ? "Disable" : "Enable"} Program
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to{" "}
+                            {program.status ? "Disable" : "Enable"} this Program?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className={`${
+                              program.status
+                                ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              toggleProgramStatus(program._id, program.status)
+                            }
+                          >
+                            {program.status ? "Disable" : "Enable"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

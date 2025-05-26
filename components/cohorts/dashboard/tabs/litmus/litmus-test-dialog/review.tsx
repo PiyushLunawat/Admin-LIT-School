@@ -337,7 +337,7 @@ export function ReviewComponent({
   return (
     <div className="space-y-3">
       {/* Header Section */}
-      <div className="flex items-center gap-4 border-b pb-3">
+      <div className="flex  items-center gap-4 border-b pb-3">
         <Avatar className="h-16 w-16">
           <AvatarImage src={application?.profileUrl} className="object-cover" />
           <AvatarFallback>
@@ -345,15 +345,15 @@ export function ReviewComponent({
             {application?.lastName?.[0] || "-"}
           </AvatarFallback>
         </Avatar>
-        <div className="space-y-1">
+        <div className="flexx flex-col gap-1">
           <h2 className="text-base font-semibold">
             {application?.firstName + " " + application?.lastName}
           </h2>
-          <div className="flex gap-2 h-5 items-center">
+          <div className="flex flex-col sm:flex-row gap-0 sm:gap-2 h-5 items-start sm:items-center">
             <p className="text-sm text-muted-foreground">
               {application?.email}
             </p>
-            <Separator orientation="vertical" />
+            <Separator orientation="vertical" className="hidden sm:block" />
             <p className="text-sm text-muted-foreground">
               {application?.mobileNumber}
             </p>

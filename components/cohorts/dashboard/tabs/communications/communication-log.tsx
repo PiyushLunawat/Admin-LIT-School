@@ -175,7 +175,7 @@ export function CommunicationLog({ cohortId }: CommunicationLogProps) {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           {selectedMessage && (
             <PreviousMessage
               type={selectedMessage.type}

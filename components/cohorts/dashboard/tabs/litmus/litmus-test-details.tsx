@@ -234,7 +234,7 @@ export function LitmusTestDetails({
                     key={index}
                     className="flex justify-between text-muted-foreground text-sm"
                   >
-                    <div className="flex justify-center gap-3 items-center">
+                    <div className="flex flex-col sm:flex-row justify-center gap-1 sm:gap-3 items-start sm:items-center">
                       <div className="flex gap-1 items-center">
                         <Clock4 className="w-4 h-4" />
                         {interview?.startTime} - {interview?.endTime}
@@ -294,7 +294,7 @@ export function LitmusTestDetails({
                   // onClick={() => setInterviewOpen(true)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span className="truncate w-[170px]">
+                  <span className="flex-1 truncate w-[170px]">
                     Schedule Presentation
                   </span>
                 </Button>
@@ -305,7 +305,9 @@ export function LitmusTestDetails({
                   disabled={[undefined, "pending"].includes(status)}
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Download Files
+                  <span className="flex-1 truncate w-[170px]">
+                    Download Files
+                  </span>
                 </Button>
                 {litmusTestDetails?.scholarshipDetail ? (
                   <Button
@@ -332,10 +334,10 @@ export function LitmusTestDetails({
                     className="justify-start min-px-2"
                     disabled
                   >
-                    <div className="flex gap-2 items-center">
-                      <Star className="h-4 w-4" />
+                    <Star className="h-4 w-4 mr-2" />
+                    <span className="flex-1 truncate w-[170px]">
                       Award Scholarship
-                    </div>
+                    </span>
                   </Button>
                 )}
                 <Button
@@ -344,7 +346,9 @@ export function LitmusTestDetails({
                   onClick={() => setMarkedAsDialogOpen(true)}
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
-                  Mark as Dropped
+                  <span className="flex-1 truncate w-[170px]">
+                    Mark as Dropped
+                  </span>
                 </Button>
               </div>
             </div>
@@ -576,7 +580,7 @@ export function LitmusTestDetails({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl px-4 sm:px-6 ">
           <ReviewComponent
             application={application}
             onApplicationUpdate={onApplicationUpdate}
@@ -586,7 +590,7 @@ export function LitmusTestDetails({
       </Dialog>
       <Dialog open={vopen} onOpenChange={setVopen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl px-4 sm:px-6 ">
           <ViewComponent
             application={application}
             onApplicationUpdate={onApplicationUpdate}
@@ -596,7 +600,7 @@ export function LitmusTestDetails({
 
       <Dialog open={interviewOpen} onOpenChange={setInterviewOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-2xl px-4 sm:px-6 ">
           <SchedulePresentation
             student={application}
             interviewr={["evaluator"]}
@@ -606,14 +610,14 @@ export function LitmusTestDetails({
 
       <Dialog open={schOpen} onOpenChange={setSchOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-5xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-5xl px-4 sm:px-6 ">
           <AwardScholarship student={application} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={markedAsDialogOpen} onOpenChange={setMarkedAsDialogOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl py-4 px-6">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-6">
           <MarkedAsDialog
             student={application}
             onUpdateStatus={() => onApplicationUpdate()}

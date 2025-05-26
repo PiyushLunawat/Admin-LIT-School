@@ -72,7 +72,7 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
         <CardHeader>
           <CardTitle>Add Note</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <Select onValueChange={setCategory}>
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
@@ -103,7 +103,7 @@ export function InternalNotesTab({ student, onApplicationUpdate }: InternalNotes
           <CardHeader>
             <CardTitle>Internal Notes</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 space-y-4">
             <div className="space-y-4">
               {internalNote?.notes?.map((note: any, index: any) => (
                 <div key={index} className="border rounded-lg p-4 space-y-2" >

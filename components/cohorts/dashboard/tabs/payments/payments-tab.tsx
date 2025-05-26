@@ -228,7 +228,9 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
             disabled={selectedStudents.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
-            Export Selected
+            <span className="truncate w-[50px] sm:w-auto">
+              Export Selected
+            </span>
           </Button>
           <Button
             variant="outline"

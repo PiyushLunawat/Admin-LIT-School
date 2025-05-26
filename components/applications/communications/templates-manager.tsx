@@ -62,7 +62,7 @@ export function TemplatesManager() {
               Create Template
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-[90vw] sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>
                 {editingTemplate ? "Edit Template" : "Create Template"}

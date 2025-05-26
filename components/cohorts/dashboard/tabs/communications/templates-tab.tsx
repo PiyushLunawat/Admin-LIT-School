@@ -121,7 +121,7 @@ export function TemplatesTab({ cohortId }: TemplatesTabProps) {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           <CreateTemplate />
         </DialogContent>
       </Dialog>
