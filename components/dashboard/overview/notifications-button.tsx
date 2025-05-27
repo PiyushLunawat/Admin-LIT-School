@@ -24,6 +24,8 @@ import { useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import io, { type Socket } from "socket.io-client";
+import { isToday, isYesterday } from "date-fns";
+
 
 const NETWORK_CHECK_INTERVAL = 15000; // 15 seconds
 
@@ -47,7 +49,9 @@ interface Notification {
 export function NotificationsButton() {
   // Replace the direct socket initialization with:
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationNo, setNotificationNO] = useState(0);
   const [adminId, setAdminId] = useState<string | undefined>();
   const [status, setStatus] = useState<ConnectionStatus>({
     connected: false,
@@ -156,6 +160,7 @@ export function NotificationsButton() {
     const handleNewNotification = (data: Notification) => {
       console.log("Received notification:", data);
       setNotifications((prev) => [data, ...prev]);
+      setNotificationNO((prev) => prev + 1)
       // toast.info(data.message);
       updateActivity();
     };
@@ -170,6 +175,7 @@ export function NotificationsButton() {
           })),
           ...prev,
         ]);
+        setNotificationNO((prev) => prev + unreadNotifications.length)
       }
     };
 
@@ -248,12 +254,12 @@ export function NotificationsButton() {
   };
 
   async function handleRemoveNotification(
-    notificationId: string,
+    notificationIds: string[],
     adminId: string
   ) {
     try {
       const payload = {
-        notificationIds: [notificationId],
+        notificationIds: notificationIds,
         userId: adminId,
       };
       const res = await markNotificationsAsRead(payload);
@@ -261,23 +267,49 @@ export function NotificationsButton() {
 
       // Optionally, you can update UI state here after successful API call
       setNotifications((prev) =>
-        prev.filter((n) => n.notificationId !== adminId)
+        prev.filter((n) => !notificationIds.includes(n.notificationId))
       );
-      console.log("Notification marked as read:", notificationId);
+      console.log("Notification marked as read:", notificationIds);
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
   }
 
+  function groupNotificationsByDate(notifications: Notification[]) {
+    const grouped: Record<string, Notification[]> = {
+      Today: [],
+      Yesterday: [],
+      Older: [],
+    };
+
+    notifications.forEach((notification) => {
+      const date = new Date(notification.timestamp);
+      if (isToday(date)) {
+        grouped["Today"].push(notification);
+      } else if (isYesterday(date)) {
+        grouped["Yesterday"].push(notification);
+      } else {
+        grouped["Older"].push(notification);
+      }
+    });
+
+    return grouped;
+  }
+
   return (
     <>
-      <Popover>
+      <Popover open={isOpen} onOpenChange={(open) => {
+        setIsOpen(open);
+        if (open) {
+          setNotificationNO(0); // Clear badge count on open
+        }
+      }}>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
-            {notifications.length > 0 && (
+            {notificationNo > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
-                {notifications.length}
+                {notificationNo}
               </span>
             )}
             <div
@@ -299,97 +331,105 @@ export function NotificationsButton() {
           ) : (
             <div className="flex flex-col justify-center">
               <div className="flex flex-col gap-1.5 max-h-[360px] min-h-[80px] overflow-y-auto">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.notificationId}
-                    className="flex flex-col gap-1 rounded-lg items-start p-2 cursor-pointer"
-                    style={{
-                      backgroundColor: `${getStatusColor(
-                        notification.status || ""
-                      )}20`,
-                    }}
-                    onClick={() =>
-                      router.push(
-                        getUrl(notification.cohortId, notification.type)
-                      )
-                    }
-                  >
-                    <div className="flex items-center justify-between text-[10px] w-full">
-                      <div className="text-muted-foreground">
-                        {new Date(notification.timestamp).toLocaleTimeString(
-                          [],
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          }
-                        )}
+                {Object.entries(groupNotificationsByDate(notifications)).map(([label, group]) => (
+                  group.length > 0 && (
+                    <div key={label}>
+                      <div className="text-xs font-medium pl-1.5 mb-2 mt-1">
+                        {label}
                       </div>
-                      <div
-                        className="rounded px-1 font-semibold"
-                        style={{
-                          backgroundColor: `${getStatusColor(
-                            notification.status || ""
-                          )}40`,
-                        }}
-                      >
-                        {notification.cohortTitle}
-                      </div>
-                    </div>
 
-                    <div className="w-full flex justify-between items-center">
-                      <div className="flex flex-1 items-center gap-2 mb-1">
+                      {group.map((notification) => (
                         <div
-                          className="p-4 rounded-full"
+                          key={notification.notificationId}
+                          className="flex flex-col gap-1 rounded-lg items-start p-2 cursor-pointer"
                           style={{
-                            backgroundColor: `${getStatusColor(
-                              notification.status || ""
-                            )}40`,
+                            backgroundColor: `${getStatusColor(notification.status || "")}20`,
                           }}
+                          onClick={() =>
+                            router.push(getUrl(notification.cohortId, notification.type))
+                          }
                         >
-                          {geCohortIcon(notification.type || "")}
-                        </div>
-                        <div>
-                          <div
-                            className="text-base font-medium"
-                            style={{
-                              color: notification.status
-                                ? getStatusColor(notification.status || "")
-                                : "#ffffff",
-                            }}
-                          >
-                            {notification.title}
+                          <div className="flex items-center justify-between text-[10px] w-full">
+                            <div className="text-muted-foreground">
+                              {new Date(notification.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })}
+                            </div>
+                            <div
+                              className="rounded px-1 font-semibold"
+                              style={{
+                                backgroundColor: `${getStatusColor(
+                                  notification.status || ""
+                                )}40`,
+                              }}
+                            >
+                              {notification.cohortTitle}
+                            </div>
                           </div>
-                          <p className="text-xs">{notification.message}</p>
+
+                          <div className="w-full flex justify-between items-center">
+                            <div className="flex flex-1 items-center gap-2 mb-1">
+                              <div
+                                className="p-4 rounded-full"
+                                style={{
+                                  backgroundColor: `${getStatusColor(
+                                    notification.status || ""
+                                  )}40`,
+                                }}
+                              >
+                                {geCohortIcon(notification.type || "")}
+                              </div>
+                              <div>
+                                <div
+                                  className="text-base font-medium"
+                                  style={{
+                                    color: notification.status
+                                      ? getStatusColor(notification.status || "")
+                                      : "#ffffff",
+                                  }}
+                                >
+                                  {notification.title}
+                                </div>
+                                <p className="text-xs">{notification.message}</p>
+                              </div>
+                            </div>
+                            {adminId && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="z-10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveNotification(
+                                    [notification.notificationId],
+                                    adminId
+                                  );
+                                }}
+                              >
+                                <XIcon className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      {adminId && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="z-10"
-                          onClick={(e) => {
-                            e.stopPropagation(); // ✅ Prevent parent div onClick
-                            handleRemoveNotification(
-                              notification.notificationId,
-                              adminId
-                            );
-                          }}
-                        >
-                          <XIcon className="w-4 h-4" />
-                        </Button>
-                      )}
+                      ))}
                     </div>
-                  </div>
+                  )
                 ))}
               </div>
-              <Button
-                variant={"link"}
-                className="text-xs text-muted-foreground underline mx-auto"
-                onClick={() => setNotifications([])}
-              >
-                Clear All
-              </Button>
+              {adminId &&
+                <Button
+                  variant={"link"}
+                  className="text-xs text-muted-foreground underline mx-auto"
+                  onClick={() => {
+                    const allIds = notifications.map((n) => n.notificationId);
+                    handleRemoveNotification(allIds, adminId);
+                  }}
+                >
+                  Clear All
+                </Button>
+              }
             </div>
           )}
         </PopoverContent>
