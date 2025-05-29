@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import { Camera, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getCentres } from "@/app/api/centres";
@@ -18,7 +18,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { UploadState } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
 import { PersonalDetailsTabProps } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
+import axios from "axios";
+import Image from "next/image";
 
 export function PersonalDetailsTab({
   student,
@@ -28,6 +31,10 @@ export function PersonalDetailsTab({
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCentre, setSelectedCentre] = useState("");
+  const [profileUrl, setProfileUrl] = useState("");
+  const [uploadStates, setUploadStates] = useState<{
+    [docId: string]: UploadState;
+  }>({});
 
   const latestCohort =
     student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
@@ -42,6 +49,7 @@ export function PersonalDetailsTab({
     studentData: {
       linkedInUrl: student?.linkedInUrl ?? "",
       instagramUrl: student?.instagramUrl ?? "",
+      profileUrl: student?.profileUrl ?? "",
     },
 
     studentDetailData: {
@@ -186,6 +194,8 @@ export function PersonalDetailsTab({
   const handleSave = async () => {
     try {
       setLoading(true);
+      console.log("Student updated successfully:", formData);
+      
       const response = await updateStudentData(formData);
       onUpdateStatus();
       console.log("Student updated successfully:", response);
@@ -205,6 +215,68 @@ export function PersonalDetailsTab({
       setLoading(false);
       setIsEditing(false);
     }
+  };
+
+  const generateUniqueFileName = (originalName: string) => {
+    const timestamp = Date.now();
+    const sanitizedName = originalName.replace(/\s+/g, "-");
+    return `${timestamp}-${sanitizedName}`;
+  };
+
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setLoading(true);
+      const fileKey = generateUniqueFileName(file.name);
+
+      try {
+        const formData = new FormData();
+        formData.append("profileImage", file);
+        const fileUrl = await uploadDirect(file, fileKey);
+        console.log("fileUrl",fileUrl);
+        setProfileUrl(fileUrl)
+        setFormData((prev: any) => ({
+          ...prev,
+          studentData: {
+            ...prev.studentData,
+            profileUrl: fileUrl,
+          },
+        }));
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        // alert("An error occurred while uploading the image.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const uploadDirect = async (file: File, fileKey: string) => {
+    const { data } = await axios.post(
+      `https://dev.apply.litschool.in/student/generate-presigned-url`,
+      {
+        bucketName: "dev-application-portal",
+        key: fileKey,
+      }
+    );
+    const { url } = data;
+    await axios.put(url, file, {
+      headers: { "Content-Type": file.type },
+      onUploadProgress: (evt: any) => {
+        if (!evt.total) return;
+        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+        setUploadStates((prev) => ({
+          ...prev,
+          // [docId]: {
+          //   ...prev[docId],
+          //   uploadProgress: Math.min(percentComplete, 100),
+          // },
+        }));
+      },
+    });
+    return `${url.split("?")[0]}`;
   };
 
   if (!latestCohort || !applicationDetails || !studentDetail) {
@@ -237,92 +309,137 @@ export function PersonalDetailsTab({
               : "Edit Details"}
           </Button>
         </CardHeader>
-        <CardContent className="px-4 sm:px-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="pl-3">Full Name</Label>
-              <Input
-                defaultValue={
-                  student?.firstName + " " + student?.lastName || "--"
-                }
-                disabled
-              />
+        <CardContent className="flex flex-wrap flex-col sm:flex-row justify-center px-4 sm:px-6 gap-4">
+          <div className="w-full sm:w-[200px] h-[285px] sm:h-full bg-[#1F1F1F] flex flex-col items-center justify-center rounded-xl text-sm space-y-4">
+            {profileUrl || student?.profileUrl ? (
+              <div className="w-full h-full relative">
+                <Image
+                  width={32}
+                  height={32}
+                  src={student?.profileUrl || profileUrl}
+                  alt="id card"
+                  className="w-full h-[250px] object-cover rounded-lg"
+                />
+              </div>
+            ) : (
+              <label
+                htmlFor="passport-input"
+                className="w-full h-[250px] cursor-pointer flex flex-col items-center justify-center bg-[#1F1F1F] px-6 rounded-xl border-[#2C2C2C]"
+              >
+                <div className="text-center my-auto text-muted-foreground">
+                  <Camera className="mx-auto mb-2 w-8 h-8" />
+                  <div className="text-wrap">
+                    {loading
+                      ? "Uploading your Profile Image..."
+                      : "Upload a Passport size Image of Yourself. Ensure that your face covers 60% of this picture."}
+                  </div>
+                </div>
+                <input
+                  id="passport-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                  disabled={!isEditing}
+                />
+              </label>
+            )}
+          </div>
+          <div className="flex flex-col flex-1 gap-4">
+            <div className="flex flex-1 gap-4">
+              <div className="flex flex-col flex-1 gap-2">
+                <Label className="pl-3">Full Name</Label>
+                <Input
+                  defaultValue={
+                    student?.firstName + " " + student?.lastName || "--"
+                  }
+                  disabled
+                />
+              </div>
+              <div className="flex flex-col flex-1 gap-2">
+                <Label className="pl-3">Date of Birth</Label>
+                <Input
+                  type="date"
+                  defaultValue={
+                    student?.dateOfBirth
+                      ? format(new Date(student.dateOfBirth), "yyyy-MM-dd")
+                      : ""
+                  }
+                  disabled
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label className="pl-3">Date of Birth</Label>
-              <Input
-                type="date"
-                defaultValue={
-                  student?.dateOfBirth
-                    ? format(new Date(student.dateOfBirth), "yyyy-MM-dd")
-                    : ""
-                }
-                disabled
-              />
+            <div className="flex flex-1 gap-4">
+              <div className="flex flex-col flex-1 gap-2">
+                <Label className="pl-3">Gender</Label>
+                <Select disabled defaultValue={student?.gender?.toLowerCase()}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col flex-1 gap-2">
+                <Label className="pl-3">Current Status</Label>
+                <Select disabled value={latestCohort?.qualification}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Student">Student</SelectItem>
+                    <SelectItem value="Highschool Graduate">
+                      Highschool Graduate
+                    </SelectItem>
+                    <SelectItem value="College Graduate">
+                      College Graduate
+                    </SelectItem>
+                    <SelectItem value="Working Professional">
+                      Working Professional
+                    </SelectItem>
+                    <SelectItem value="Freelancer">Freelancer</SelectItem>
+                    <SelectItem value="Business Owner">
+                      Business Owner
+                    </SelectItem>
+                    <SelectItem value="Consultant">Consultant</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label className="pl-3">Gender</Label>
-              <Select disabled defaultValue={student?.gender?.toLowerCase()}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="pl-3">Current Status</Label>
-              <Select disabled value={latestCohort?.qualification}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Student">Student</SelectItem>
-                  <SelectItem value="Highschool Graduate">
-                    Highschool Graduate
-                  </SelectItem>
-                  <SelectItem value="College Graduate">
-                    College Graduate
-                  </SelectItem>
-                  <SelectItem value="Working Professional">
-                    Working Professional
-                  </SelectItem>
-                  <SelectItem value="Freelancer">Freelancer</SelectItem>
-                  <SelectItem value="Business Owner">Business Owner</SelectItem>
-                  <SelectItem value="Consultant">Consultant</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="pl-3">Program of Interest</Label>
-              <Input
-                defaultValue={
-                  student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
-                    ?.cohortId?.programDetail?.name
-                }
-                disabled
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="pl-3">Cohort</Label>
-              <Input
-                value={
-                  formatDateToMonthYear(
+            <div className="flex flex-1 gap-4">
+              <div className="flex flex-col flex-1 gap-2">
+                <Label className="pl-3">Program of Interest</Label>
+                <Input
+                  defaultValue={
                     student?.appliedCohorts?.[
                       student?.appliedCohorts.length - 1
-                    ]?.cohortId?.startDate
-                  ) +
-                  " " +
-                  student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
-                    ?.cohortId?.timeSlot +
-                  ", " +
-                  selectedCentre
-                }
-                disabled
-              />
+                    ]?.cohortId?.programDetail?.name
+                  }
+                  disabled
+                />
+              </div>
+              <div className="flex flex-col flex-1 gap-2">
+                <Label className="pl-3">Cohort</Label>
+                <Input
+                  value={
+                    formatDateToMonthYear(
+                      student?.appliedCohorts?.[
+                        student?.appliedCohorts.length - 1
+                      ]?.cohortId?.startDate
+                    ) +
+                    " " +
+                    student?.appliedCohorts?.[
+                      student?.appliedCohorts.length - 1
+                    ]?.cohortId?.timeSlot +
+                    ", " +
+                    selectedCentre
+                  }
+                  disabled
+                />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -334,7 +451,7 @@ export function PersonalDetailsTab({
           <CardTitle>Contact Information</CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Email Address</Label>
               <Input type="email" defaultValue={student?.email} disabled />
@@ -383,7 +500,7 @@ export function PersonalDetailsTab({
           <CardTitle>Current Address</CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <div className="space-y-2">
               <Label className="pl-3">Street Address</Label>
               <Input
@@ -439,7 +556,7 @@ export function PersonalDetailsTab({
                     target.value
                   );
                 }}
-                maxLength={6}
+                maxLength={10}
                 disabled={!isEditing}
               />
             </div>
@@ -453,7 +570,7 @@ export function PersonalDetailsTab({
           <CardTitle>Previous Education</CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <div className="space-y-2">
               <Label className="pl-3">
                 Highest Level of Education Attained
@@ -534,7 +651,7 @@ export function PersonalDetailsTab({
             </div>
           </div>
           {formData.studentDetailData.workExperience.isExperienced && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
               <div className="space-y-2">
                 <Label className="pl-3">Experience Type</Label>
                 <Select
@@ -626,7 +743,7 @@ export function PersonalDetailsTab({
           <CardTitle>Emergency Contact</CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             {isEditing ? (
               <>
                 <div className="space-y-2">
@@ -722,7 +839,7 @@ export function PersonalDetailsTab({
           <CardTitle>Parental Information</CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Father's Information */}
             {isEditing ? (
               <>
