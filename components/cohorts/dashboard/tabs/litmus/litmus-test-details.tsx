@@ -177,23 +177,23 @@ export function LitmusTestDetails({
   };
 
   async function handleDownloadAll() {
-  const tasks = litmusTestDetails?.litmusTasks?.[0]?.tasks || [];
-  if (!Array.isArray(tasks)) return;
+    const tasks = litmusTestDetails?.litmusTasks?.[0]?.tasks || [];
+    if (!Array.isArray(tasks)) return;
 
-  const urls: string[] = [];
+    const urls: string[] = [];
 
-  tasks.forEach((taskObj) => {
-    if (!taskObj) return;
-    urls.push(...(taskObj.files || []));
-    urls.push(...(taskObj.images || []));
-    urls.push(...(taskObj.videos || []));
-  });
+    tasks.forEach((taskObj) => {
+      if (!taskObj) return;
+      urls.push(...(taskObj.files || []));
+      urls.push(...(taskObj.images || []));
+      urls.push(...(taskObj.videos || []));
+    });
 
-  for (const url of urls) {
-    const fileName = url.split("/").pop() || "download";
-    await handleDownload(url, fileName);
+    for (const url of urls) {
+      const fileName = url.split("/").pop() || "download";
+      await handleDownload(url, fileName);
+    }
   }
-}
 
   return (
     <div className="h-full flex flex-col">
@@ -344,6 +344,7 @@ export function LitmusTestDetails({
                   variant="outline"
                   className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
+                  disabled={latestCohort.status !== "enrolled"}
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   <span className="flex-1 truncate w-[170px]">

@@ -418,9 +418,11 @@ export function ApplicationDetails({
                   variant="outline"
                   className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
-                  disabled={["rejected", "not qualified"].includes(
-                    applicationDetails?.applicationStatus
-                  )}
+                  disabled={
+                    ["rejected", "not qualified"].includes(
+                      applicationDetails?.applicationStatus
+                    ) || latestCohort.status !== "enrolled"
+                  }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   <span className="flex-1 truncate w-[170px]">
@@ -625,9 +627,13 @@ export function ApplicationDetails({
                 {application?.firstName + " " + application?.lastName}
               </h3>
               <div className="flex flex-col sm:flex-row gap-0 sm:gap-2 h-5 items-start sm:items-center">
-                <p className="text-sm text-muted-foreground">{application?.email}</p>
-                <Separator orientation="vertical" className="hidden sm:block"/>
-                <p className="text-sm text-muted-foreground">{application?.mobileNumber}</p>
+                <p className="text-sm text-muted-foreground">
+                  {application?.email}
+                </p>
+                <Separator orientation="vertical" className="hidden sm:block" />
+                <p className="text-sm text-muted-foreground">
+                  {application?.mobileNumber}
+                </p>
               </div>
             </div>
           </div>

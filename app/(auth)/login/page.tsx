@@ -33,7 +33,6 @@ import { LoginFormValues } from "@/types/auth/login";
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
@@ -78,7 +77,10 @@ export default function LoginPage() {
       setShowOtp(true);
     } catch (error: any) {
       console.error("Login error:", error.message);
-      setErrorMessage(error.message || "An unexpected error occurred.");
+      form.setError("password", {
+        type: "manual",
+        message: error.message || "Invalid email or password",
+      });
       toast({
         title: "Login failed",
         description: error.message || "An unexpected error occurred.",
@@ -248,12 +250,6 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-
-              {errorMessage && (
-                <div className="text-[#FF503D] text-sm pl-3">
-                  {errorMessage}
-                </div>
-              )}
 
               <div className="flex justify-center items-center mt-4">
                 <Button type="submit" className="w-full" disabled={loading}>
