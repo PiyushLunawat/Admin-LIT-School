@@ -46,7 +46,6 @@ export function DocumentsTab({
   const cohortDetails = latestCohort?.cohortId;
 
   const { toast } = useToast();
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadStates, setUploadStates] = useState<{
     [docId: string]: UploadState;
@@ -129,14 +128,30 @@ export function DocumentsTab({
         personalDocId: personalDocId,
         docId: docId,
         status: status,
-        feedback: [feedback],
+        feedback: feedback ? [feedback] : [],
       };
-      console.log("Updated document status:", payLoad);
+
+      // Validate payload
+      if (!payLoad.personalDocId || !payLoad.docId || !payLoad.status) {
+        throw new Error("Missing required fields for document verification");
+      }
+
+      console.log("Document verification payload:", payLoad);
+
       const response = await updateDocumentStatus(payLoad);
-      console.log("Updated document status:", response);
+      console.log("Document verification response:", response);
+
+      // Check if response is valid
+      if (
+        !response ||
+        (typeof response === "object" && Object.keys(response).length === 0)
+      ) {
+        throw new Error("Received empty response from document verification");
+      }
+
       toast({
         title: `Document ${status}`,
-        description: response.message || `Document ${status} successfully`,
+        description: response?.message || `Document ${status} successfully`,
         variant: "success",
       });
       onApplicationUpdate();
@@ -184,8 +199,6 @@ export function DocumentsTab({
     e: React.ChangeEvent<HTMLInputElement>,
     docId: string
   ) => {
-    setError(null);
-
     setUploadStates((prev) => ({
       ...prev,
       [docId]: { uploading: true, uploadProgress: 0, fileName: "" },
@@ -216,16 +229,35 @@ export function DocumentsTab({
 
       const payload = {
         studentId: student?._id,
-        cohortId: cohortDetails?._id,
+        cohortId: cohortDetails._id,
         fieldName: docId,
         fileUrl: fileUrl,
       };
 
-      console.log("payload", payload);
+      // Validate payload before sending
+      if (
+        !payload.studentId ||
+        !payload.cohortId ||
+        !payload.fieldName ||
+        !payload.fileUrl
+      ) {
+        throw new Error("Missing required fields in payload");
+      }
 
       // Call the API function with FormData
       const response = await uploadStudentDocuments(payload);
-      console.log("Upload response:", response);
+      console.log("Full response object:", response);
+      console.log("Response data:", response?.data);
+      console.log("Response status:", response?.status);
+
+      // Check if response is valid
+      if (
+        !response ||
+        (typeof response === "object" && Object.keys(response).length === 0)
+      ) {
+        throw new Error("Received empty response from server");
+      }
+
       onApplicationUpdate();
       // setDocs(response.data);
     } catch (error: any) {

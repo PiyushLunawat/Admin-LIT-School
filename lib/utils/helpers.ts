@@ -1,11 +1,12 @@
 import ExcelJs from "exceljs";
 
-export const formatAmount = (value: number | undefined) =>
-  value !== undefined
+export const formatAmount = (value: number | undefined) => {
+  return value !== undefined
     ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(
         Math.round(value)
       )
     : "--";
+};
 
 export function KLsystem(amount: number): string {
   if (amount === 0) {

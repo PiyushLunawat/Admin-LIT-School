@@ -193,10 +193,12 @@ export async function updateScholarship(payLoad: any) {
 
 // New API for uploading student documents
 export async function uploadStudentDocuments(formData: any) {
+  console.log(formData);
   const response = await fetch(
     `${process.env.API_URL}/admin/upload-student-doc`,
     {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     }
   );
