@@ -229,7 +229,7 @@ export function DocumentsTab({
 
       const payload = {
         studentId: student?._id,
-        cohortId: cohortDetails._id,
+        cohortId: cohortDetails?._id,
         fieldName: docId,
         fileUrl: fileUrl,
       };
@@ -546,7 +546,7 @@ export function DocumentsTab({
                           onClick={() =>
                             handleDocumentVerification(
                               latestCohort?.personalDocs?._id,
-                              docDetails._id,
+                              docDetails?._id,
                               "flagged",
                               reason
                             )
@@ -574,7 +574,7 @@ export function DocumentsTab({
                         onClick={() =>
                           handleDocumentVerification(
                             latestCohort?.personalDocs?._id,
-                            docDetails._id,
+                            docDetails?._id,
                             "verified"
                           )
                         }
@@ -724,7 +724,7 @@ export function DocumentsTab({
                           onClick={() =>
                             handleDocumentVerification(
                               latestCohort?.personalDocs?._id,
-                              docDetails._id,
+                              docDetails?._id,
                               "flagged",
                               reason
                             )
@@ -752,7 +752,7 @@ export function DocumentsTab({
                         onClick={() =>
                           handleDocumentVerification(
                             latestCohort?.personalDocs?._id,
-                            docDetails._id,
+                            docDetails?._id,
                             "verified"
                           )
                         }
