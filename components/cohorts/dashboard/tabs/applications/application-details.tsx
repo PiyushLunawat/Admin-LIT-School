@@ -214,7 +214,7 @@ export function ApplicationDetails({
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-2">
         <div className="space-y-4">
           {/* Status Section */}
           <div className="space-y-2">
@@ -236,7 +236,7 @@ export function ApplicationDetails({
                     .map((interview: any, index: any) => (
                       <div
                         key={index}
-                        className="flex justify-between text-muted-foreground text-sm"
+                        className="flex justify-between text-muted-foreground text-sm whitespace-nowrap"
                       >
                         <div className="flex flex-col sm:flex-row justify-center gap-1 sm:gap-3 items-start sm:items-center">
                           <div className="flex gap-1 items-center">
