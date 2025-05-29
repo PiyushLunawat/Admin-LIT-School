@@ -402,11 +402,16 @@ export function PaymentInformationTab({
     cohortDetails.feeStructureDetails,
     litmusTestDetails?.scholarshipDetail,
   ]);
-  
+
   const visibleSemesters = showAllSemesters
-  ? (paymentDetails?.paymentPlan === "instalments" ? feeStructure : sch?.installmentDetails)
-  : (paymentDetails?.paymentPlan === "instalments" ? feeStructure : sch?.installmentDetails)?.slice(0, 1);
-  
+    ? paymentDetails?.paymentPlan === "instalments"
+      ? feeStructure
+      : sch?.installmentDetails
+    : (paymentDetails?.paymentPlan === "instalments"
+        ? feeStructure
+        : sch?.installmentDetails
+      )?.slice(0, 1);
+
   const tokenAmount = Number(cohortDetails?.cohortFeesDetail?.tokenFee) || 0;
   const installments =
     (feeStructure?.installmentDetails || sch?.installmentDetails)?.flatMap(
@@ -819,18 +824,25 @@ export function PaymentInformationTab({
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Base Amount: ₹
-                  {formatAmount(scholarshipDetails?.oneShotPaymentDetails?.baseFee)}
+                  {formatAmount(
+                    scholarshipDetails?.oneShotPaymentDetails?.baseFee
+                  )}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   One Shot Discount: ₹
                   {formatAmount(
-                    scholarshipDetails?.oneShotPaymentDetails?.OneShotPaymentAmount
+                    scholarshipDetails?.oneShotPaymentDetails
+                      ?.OneShotPaymentAmount
                   )}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Scholarship Waiver: ₹
                   {formatAmount(
-                    cohortDetails?.baseFee * 1.18 * litmusTestDetails?.scholarshipDetail?.scholarshipPercentage * 0.01
+                    cohortDetails?.baseFee *
+                      1.18 *
+                      litmusTestDetails?.scholarshipDetail
+                        ?.scholarshipPercentage *
+                      0.01
                   )}
                 </p>
               </div>
@@ -922,236 +934,230 @@ export function PaymentInformationTab({
             </Card>
           ) : (
             <div className="space-y-2">
-              {visibleSemesters?.map(
-                (semester: any, semesterIndex: any) => (
-                  <div key={semesterIndex}>
-                    <Badge variant="blue" className="capitalize mb-3">
-                      Semester 0{semesterIndex + 1}
-                    </Badge>
-                    <div className="space-y-4">
-                      {semester?.installments?.map(
-                        (instalment: any, instalmentIndex: number) => (
-                          <div
-                            key={instalmentIndex}
-                            className="border rounded-lg p-4 space-y-2"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">
-                                  Instalment {instalmentIndex + 1}
-                                </h4>
-                                <p className="text-sm text-muted-foreground">
-                                  Amount: ₹
-                                  {formatAmount(instalment?.amountPayable)}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {paymentDetails &&
-                                  lastStatus !== "pending" &&
-                                  (new Date(instalment?.installmentDate) <
-                                    new Date() &&
-                                  instalment?.verificationStatus ===
-                                    "pending" &&
-                                  !instalment.receiptUrls[0]?.uploadedDate ? (
-                                    <Badge variant={getStatusColor("overdue")}>
-                                      overdue
-                                    </Badge>
-                                  ) : (
-                                    <Badge
-                                      className="capitalize"
-                                      variant={getStatusColor(
-                                        instalment?.verificationStatus
-                                      )}
-                                    >
-                                      {instalment?.verificationStatus}
-                                    </Badge>
-                                  ))}
-                                {instalment?.receiptUrls[
-                                  instalment?.receiptUrls.length - 1
-                                ]?.url && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                      handleView(
-                                        instalment?.receiptUrls[
-                                          instalment?.receiptUrls.length - 1
-                                        ]?.url
-                                      )
-                                    }
-                                  >
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    View
-                                  </Button>
-                                )}
-                              </div>
+              {visibleSemesters?.map((semester: any, semesterIndex: any) => (
+                <div key={semesterIndex}>
+                  <Badge variant="blue" className="capitalize mb-3">
+                    Semester 0{semesterIndex + 1}
+                  </Badge>
+                  <div className="space-y-4">
+                    {semester?.installments?.map(
+                      (instalment: any, instalmentIndex: number) => (
+                        <div
+                          key={instalmentIndex}
+                          className="border rounded-lg p-4 space-y-2"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-medium">
+                                Instalment {instalmentIndex + 1}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                Amount: ₹
+                                {formatAmount(instalment?.amountPayable)}
+                              </p>
                             </div>
+                            <div className="flex items-center gap-2">
+                              {paymentDetails &&
+                                lastStatus !== "pending" &&
+                                (new Date(instalment?.installmentDate) <
+                                  new Date() &&
+                                instalment?.verificationStatus === "pending" &&
+                                !instalment.receiptUrls[0]?.uploadedDate ? (
+                                  <Badge variant={getStatusColor("overdue")}>
+                                    overdue
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    className="capitalize"
+                                    variant={getStatusColor(
+                                      instalment?.verificationStatus
+                                    )}
+                                  >
+                                    {instalment?.verificationStatus}
+                                  </Badge>
+                                ))}
+                              {instalment?.receiptUrls[
+                                instalment?.receiptUrls.length - 1
+                              ]?.url && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleView(
+                                      instalment?.receiptUrls[
+                                        instalment?.receiptUrls.length - 1
+                                      ]?.url
+                                    )
+                                  }
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </Button>
+                              )}
+                            </div>
+                          </div>
 
-                            <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              Due:{" "}
+                              {instalment?.installmentDate
+                                ? new Date(
+                                    instalment?.installmentDate
+                                  ).toLocaleDateString()
+                                : "--"}
+                            </div>
+                            {instalment?.receiptUrls[
+                              instalment?.receiptUrls.length - 1
+                            ]?.uploadedDate && (
                               <div className="flex items-center text-sm text-muted-foreground">
                                 <Calendar className="h-4 w-4 mr-2" />
-                                Due:{" "}
+                                Paid:{" "}
                                 {instalment?.installmentDate
                                   ? new Date(
-                                      instalment?.installmentDate
+                                      instalment?.receiptUrls[
+                                        instalment?.receiptUrls.length - 1
+                                      ]?.uploadedDate
                                     ).toLocaleDateString()
                                   : "--"}
                               </div>
-                              {instalment?.receiptUrls[
-                                instalment?.receiptUrls.length - 1
-                              ]?.uploadedDate && (
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <Calendar className="h-4 w-4 mr-2" />
-                                  Paid:{" "}
-                                  {instalment?.installmentDate
-                                    ? new Date(
-                                        instalment?.receiptUrls[
-                                          instalment?.receiptUrls.length - 1
-                                        ]?.uploadedDate
-                                      ).toLocaleDateString()
-                                    : "--"}
-                                </div>
-                              )}
-                            </div>
-                            {/* <Button variant="outline" size="sm">
+                            )}
+                          </div>
+                          {/* <Button variant="outline" size="sm">
                             <UploadIcon className="h-4 w-4 mr-2" />
                             Upload Receipt
                             </Button> */}
-                            {instalment.verificationStatus === "paid" ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full mt-2"
-                                onClick={() =>
-                                  window.open(
-                                    instalment.receiptUrls?.[
-                                      instalment?.receiptUrls.length - 1
-                                    ]?.url,
-                                    "_blank"
-                                  )
-                                }
-                              >
-                                <Download className="h-4 w-4 mr-2" />
-                                Download Receipt
-                              </Button>
-                            ) : instalment.verificationStatus ===
-                              "verifying" ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full mt-2"
-                                onClick={() =>
-                                  handleVerifyDialog(false, instalment)
-                                }
-                              >
-                                <EyeIcon className="h-4 w-4 mr-2" />
-                                Acknowledgement Receipt
-                              </Button>
-                            ) : uploadStates[
-                                `${instalmentIndex + 1}${instalment?.semester}`
-                              ]?.uploading ? (
-                              <div className="flex flex-1 justify-between items-center gap-4 truncate">
-                                {/* <div className="flex flex-1 truncate">{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.fileName}</div> */}
-                                <div className="flex items-center gap-2">
-                                  {uploadStates[
-                                    `${instalmentIndex + 1}${
-                                      instalment?.semester
-                                    }`
-                                  ]?.uploadProgress === 100 ? (
-                                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Progress
-                                        className="h-2 w-20"
-                                        states={[
-                                          {
-                                            value:
-                                              uploadStates[
-                                                `${instalmentIndex + 1}${
-                                                  instalment?.semester
-                                                }`
-                                              ]?.uploadProgress,
-                                            widt: uploadStates[
+                          {instalment.verificationStatus === "paid" ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full mt-2"
+                              onClick={() =>
+                                window.open(
+                                  instalment.receiptUrls?.[
+                                    instalment?.receiptUrls.length - 1
+                                  ]?.url,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download Receipt
+                            </Button>
+                          ) : instalment.verificationStatus === "verifying" ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full mt-2"
+                              onClick={() =>
+                                handleVerifyDialog(false, instalment)
+                              }
+                            >
+                              <EyeIcon className="h-4 w-4 mr-2" />
+                              Acknowledgement Receipt
+                            </Button>
+                          ) : uploadStates[
+                              `${instalmentIndex + 1}${instalment?.semester}`
+                            ]?.uploading ? (
+                            <div className="flex flex-1 justify-between items-center gap-4 truncate">
+                              {/* <div className="flex flex-1 truncate">{uploadStates[`${installmentIndex + 1}${semesterDetail.semester}`]?.fileName}</div> */}
+                              <div className="flex items-center gap-2">
+                                {uploadStates[
+                                  `${instalmentIndex + 1}${
+                                    instalment?.semester
+                                  }`
+                                ]?.uploadProgress === 100 ? (
+                                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <>
+                                    <Progress
+                                      className="h-2 w-20"
+                                      states={[
+                                        {
+                                          value:
+                                            uploadStates[
                                               `${instalmentIndex + 1}${
                                                 instalment?.semester
                                               }`
                                             ]?.uploadProgress,
-                                            color: "#ffffff",
-                                          },
-                                        ]}
-                                      />
-                                      <span>
-                                        {
-                                          uploadStates[
+                                          widt: uploadStates[
                                             `${instalmentIndex + 1}${
                                               instalment?.semester
                                             }`
-                                          ]?.uploadProgress
-                                        }
-                                        %
-                                      </span>
-                                    </>
-                                  )}
-                                  <Button variant="ghost" size="sm">
-                                    <XIcon className="w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              paymentDetails &&
-                              lastStatus !== "pending" && (
-                                <label className="cursor-pointer w-full">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full mt-2"
-                                    onClick={() =>
-                                      document
-                                        .getElementById(
-                                          `file-input-${instalmentIndex + 1}${
+                                          ]?.uploadProgress,
+                                          color: "#ffffff",
+                                        },
+                                      ]}
+                                    />
+                                    <span>
+                                      {
+                                        uploadStates[
+                                          `${instalmentIndex + 1}${
                                             instalment?.semester
                                           }`
-                                        )
-                                        ?.click()
-                                    }
-                                    disabled={
-                                      latestCohort?.status === "dropped"
-                                    }
-                                  >
-                                    <UploadIcon className="h-4 w-4 mr-2" />
-                                    Upload Receipt
-                                  </Button>
-
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    id={`file-input-${instalmentIndex + 1}${
-                                      instalment?.semester
-                                    }`}
-                                    onChange={(e) => {
-                                      handleFileChange(
-                                        e,
-                                        paymentDetails?._id,
-                                        false,
-                                        instalmentIndex + 1,
-                                        instalment?.semester
-                                      );
-                                    }}
-                                  />
-                                </label>
-                              )
-                            )}
-                            <div className="hidden">
-                              {(lastStatus = instalment?.verificationStatus)}
+                                        ]?.uploadProgress
+                                      }
+                                      %
+                                    </span>
+                                  </>
+                                )}
+                                <Button variant="ghost" size="sm">
+                                  <XIcon className="w-4" />
+                                </Button>
+                              </div>
                             </div>
+                          ) : (
+                            paymentDetails &&
+                            lastStatus !== "pending" && (
+                              <label className="cursor-pointer w-full">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full mt-2"
+                                  onClick={() =>
+                                    document
+                                      .getElementById(
+                                        `file-input-${instalmentIndex + 1}${
+                                          instalment?.semester
+                                        }`
+                                      )
+                                      ?.click()
+                                  }
+                                  disabled={latestCohort?.status === "dropped"}
+                                >
+                                  <UploadIcon className="h-4 w-4 mr-2" />
+                                  Upload Receipt
+                                </Button>
+
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  id={`file-input-${instalmentIndex + 1}${
+                                    instalment?.semester
+                                  }`}
+                                  onChange={(e) => {
+                                    handleFileChange(
+                                      e,
+                                      paymentDetails?._id,
+                                      false,
+                                      instalmentIndex + 1,
+                                      instalment?.semester
+                                    );
+                                  }}
+                                />
+                              </label>
+                            )
+                          )}
+                          <div className="hidden">
+                            {(lastStatus = instalment?.verificationStatus)}
                           </div>
-                        )
-                      )}
-                    </div>
+                        </div>
+                      )
+                    )}
                   </div>
-                )
-              )}
+                </div>
+              ))}
               <Button
                 variant="ghost"
                 className="w-full underline"

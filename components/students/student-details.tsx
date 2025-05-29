@@ -36,7 +36,7 @@ export function StudentDetails({ studentId }: StudentDetailsProps) {
       }
       fetchStudent();
     }
-  }, [studentId, refreshKey]);
+  }, [studentId, refreshKey, student]);
 
   const handleApplicationUpdate = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
