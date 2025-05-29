@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
 import { MarkAsdropped } from "@/app/api/student";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { UserMinus } from "lucide-react";
+import { useState } from "react";
 
 interface MarkedAsDialogProps {
   student: any;
@@ -14,7 +14,11 @@ interface MarkedAsDialogProps {
   onClose: () => void;
 }
 
-export function MarkedAsDialog({ student, onUpdateStatus, onClose }: MarkedAsDialogProps) {
+export function MarkedAsDialog({
+  student,
+  onUpdateStatus,
+  onClose,
+}: MarkedAsDialogProps) {
   const [notes, setNotes] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -22,7 +26,8 @@ export function MarkedAsDialog({ student, onUpdateStatus, onClose }: MarkedAsDia
     return <p>Student data not available.</p>;
   }
 
-  const latestCohort = student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
+  const latestCohort =
+    student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
 
   const handleMarkAsDropped = async () => {
     if (!notes.trim()) {
@@ -46,7 +51,6 @@ export function MarkedAsDialog({ student, onUpdateStatus, onClose }: MarkedAsDia
       console.log("payload", payload);
 
       const response = await MarkAsdropped(payload);
-      
 
       if (response.ok) {
         console.log("Student successfully marked as dropped.");
@@ -84,7 +88,9 @@ export function MarkedAsDialog({ student, onUpdateStatus, onClose }: MarkedAsDia
             <div className="flex flex-col sm:flex-row gap-0 sm:gap-2 h-5 items-start sm:items-center">
               <p className="text-sm text-muted-foreground">{student?.email}</p>
               <Separator orientation="vertical" className="hidden sm:block" />
-              <p className="text-sm text-muted-foreground">{student?.mobileNumber}</p>
+              <p className="text-sm text-muted-foreground">
+                {student?.mobileNumber}
+              </p>
             </div>
           </div>
         </div>
@@ -109,7 +115,11 @@ export function MarkedAsDialog({ student, onUpdateStatus, onClose }: MarkedAsDia
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="flex-1" onClick={() => onClose()}>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => onClose()}
+          >
             Cancel
           </Button>
           <Button

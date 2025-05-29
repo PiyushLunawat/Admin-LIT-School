@@ -342,93 +342,100 @@ export function NotificationsButton() {
                         </div>
 
                         {[...group]
-                          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                          .sort(
+                            (a, b) =>
+                              new Date(b.timestamp).getTime() -
+                              new Date(a.timestamp).getTime()
+                          )
                           .map((notification) => (
-                          <div
-                            key={notification.notificationId}
-                            className="flex flex-col gap-1 rounded-lg items-start p-2 cursor-pointer"
-                            style={{
-                              backgroundColor: `${getStatusColor(
-                                notification.status || ""
-                              )}20`,
-                            }}
-                            onClick={() =>
-                              router.push(
-                                getUrl(notification.cohortId, notification.type)
-                              )
-                            }
-                          >
-                            <div className="flex items-center justify-between text-[10px] w-full">
-                              <div className="text-muted-foreground">
-                                {new Date(
-                                  notification.timestamp
-                                ).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                })}
-                              </div>
-                              <div
-                                className="rounded px-1 font-semibold"
-                                style={{
-                                  backgroundColor: `${getStatusColor(
-                                    notification.status || ""
-                                  )}40`,
-                                }}
-                              >
-                                {notification.cohortTitle}
-                              </div>
-                            </div>
-
-                            <div className="w-full flex justify-between items-center">
-                              <div className="flex flex-1 items-center gap-2 mb-1">
+                            <div
+                              key={notification.notificationId}
+                              className="flex flex-col gap-1 rounded-lg items-start p-2 cursor-pointer"
+                              style={{
+                                backgroundColor: `${getStatusColor(
+                                  notification.status || ""
+                                )}20`,
+                              }}
+                              onClick={() =>
+                                router.push(
+                                  getUrl(
+                                    notification.cohortId,
+                                    notification.type
+                                  )
+                                )
+                              }
+                            >
+                              <div className="flex items-center justify-between text-[10px] w-full">
+                                <div className="text-muted-foreground">
+                                  {new Date(
+                                    notification.timestamp
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </div>
                                 <div
-                                  className="p-4 rounded-full"
+                                  className="rounded px-1 font-semibold"
                                   style={{
                                     backgroundColor: `${getStatusColor(
                                       notification.status || ""
                                     )}40`,
                                   }}
                                 >
-                                  {geCohortIcon(notification.type || "")}
-                                </div>
-                                <div>
-                                  <div
-                                    className="text-base font-medium"
-                                    style={{
-                                      color: notification.status
-                                        ? getStatusColor(
-                                            notification.status || ""
-                                          )
-                                        : "#ffffff",
-                                    }}
-                                  >
-                                    {notification.title}
-                                  </div>
-                                  <p className="text-xs">
-                                    {notification.message}
-                                  </p>
+                                  {notification.cohortTitle}
                                 </div>
                               </div>
-                              {adminId && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="z-10"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveNotification(
-                                      [notification.notificationId],
-                                      adminId
-                                    );
-                                  }}
-                                >
-                                  <XIcon className="w-4 h-4" />
-                                </Button>
-                              )}
+
+                              <div className="w-full flex justify-between items-center">
+                                <div className="flex flex-1 items-center gap-2 mb-1">
+                                  <div
+                                    className="p-4 rounded-full"
+                                    style={{
+                                      backgroundColor: `${getStatusColor(
+                                        notification.status || ""
+                                      )}40`,
+                                    }}
+                                  >
+                                    {geCohortIcon(notification.type || "")}
+                                  </div>
+                                  <div>
+                                    <div
+                                      className="text-base font-medium"
+                                      style={{
+                                        color: notification.status
+                                          ? getStatusColor(
+                                              notification.status || ""
+                                            )
+                                          : "#ffffff",
+                                      }}
+                                    >
+                                      {notification.title}
+                                    </div>
+                                    <p className="text-xs">
+                                      {notification.message}
+                                    </p>
+                                  </div>
+                                </div>
+                                {adminId && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="z-10"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveNotification(
+                                        [notification.notificationId],
+                                        adminId
+                                      );
+                                    }}
+                                  >
+                                    <XIcon className="w-4 h-4" />
+                                  </Button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     )
                 )}

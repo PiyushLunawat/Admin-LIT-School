@@ -1,7 +1,16 @@
 "use client";
 
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { format } from "date-fns";
-import { Camera, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import {
+  Camera,
+  CircleCheckBig,
+  CircleMinus,
+  Edit,
+  PencilIcon,
+  Save,
+  XIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getCentres } from "@/app/api/centres";
@@ -40,6 +49,14 @@ export function PersonalDetailsTab({
     student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const studentDetail = applicationDetails?.studentDetails;
+
+  const s3Client = new S3Client({
+    region: process.env.NEXT_PUBLIC_AWS_REGION,
+    credentials: {
+      accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID as string,
+      secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY as string,
+    },
+  });
 
   // Initialize formData with the new structure.
   const [formData, setFormData] = useState({
@@ -195,7 +212,7 @@ export function PersonalDetailsTab({
     try {
       setLoading(true);
       console.log("Student updated successfully:", formData);
-      
+
       const response = await updateStudentData(formData);
       onUpdateStatus();
       console.log("Student updated successfully:", response);
@@ -223,6 +240,26 @@ export function PersonalDetailsTab({
     return `${timestamp}-${sanitizedName}`;
   };
 
+  const handleDeleteFile = async (fileKey: string, index?: number) => {
+    try {
+      if (!fileKey) {
+        console.error("Invalid file URL:", fileKey);
+        return;
+      }
+
+      // AWS S3 DeleteObject Command
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: "dev-application-portal", // Replace with your bucket name
+        Key: fileKey, // Key extracted from file URL
+      });
+
+      await s3Client.send(deleteCommand);
+      console.log("File deleted successfully from S3:", fileKey);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+
   const handleImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -235,8 +272,8 @@ export function PersonalDetailsTab({
         const formData = new FormData();
         formData.append("profileImage", file);
         const fileUrl = await uploadDirect(file, fileKey);
-        console.log("fileUrl",fileUrl);
-        setProfileUrl(fileUrl)
+        console.log("fileUrl", fileUrl);
+        setProfileUrl(fileUrl);
         setFormData((prev: any) => ({
           ...prev,
           studentData: {
@@ -313,6 +350,12 @@ export function PersonalDetailsTab({
           <div className="w-full sm:w-[200px] h-[285px] sm:h-full bg-[#1F1F1F] flex flex-col items-center justify-center rounded-xl text-sm space-y-4">
             {profileUrl || student?.profileUrl ? (
               <div className="w-full h-full relative">
+                <div className="flex right-0 bg-transparent w-8 h-8 border-b rounded-full">
+                  <PencilIcon className="w-4 h-4 items-center justify-center" />
+                </div>
+                <div className="flex bg-transparent w-8 h-8 border-b rounded-full">
+                  <XIcon className="w-4 h-4 fill-white items-center float-right" />
+                </div>
                 <Image
                   width={32}
                   height={32}

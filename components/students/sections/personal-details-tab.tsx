@@ -14,8 +14,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { UploadState } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import axios from "axios";
 import { format } from "date-fns";
 import { Camera, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface PersonalDetailsTabProps {
@@ -31,11 +35,23 @@ export function PersonalDetailsTab({
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCentre, setSelectedCentre] = useState("");
+  const [profileUrl, setProfileUrl] = useState("");
+  const [uploadStates, setUploadStates] = useState<{
+    [docId: string]: UploadState;
+  }>({});
 
   const latestCohort =
     student?.appliedCohorts?.[student?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
   const studentDetail = applicationDetails?.studentDetails;
+
+  const s3Client = new S3Client({
+    region: process.env.NEXT_PUBLIC_AWS_REGION,
+    credentials: {
+      accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID as string,
+      secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY as string,
+    },
+  });
 
   const [formData, setFormData] = useState({
     studentDetailId: "",
@@ -276,6 +292,88 @@ export function PersonalDetailsTab({
     }
   };
 
+  const generateUniqueFileName = (originalName: string) => {
+    const timestamp = Date.now();
+    const sanitizedName = originalName.replace(/\s+/g, "-");
+    return `${timestamp}-${sanitizedName}`;
+  };
+
+  const handleDeleteFile = async (fileKey: string, index?: number) => {
+    try {
+      if (!fileKey) {
+        console.error("Invalid file URL:", fileKey);
+        return;
+      }
+
+      // AWS S3 DeleteObject Command
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: "dev-application-portal", // Replace with your bucket name
+        Key: fileKey, // Key extracted from file URL
+      });
+
+      await s3Client.send(deleteCommand);
+      console.log("File deleted successfully from S3:", fileKey);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setLoading(true);
+      const fileKey = generateUniqueFileName(file.name);
+
+      try {
+        const formData = new FormData();
+        formData.append("profileImage", file);
+        const fileUrl = await uploadDirect(file, fileKey);
+        console.log("fileUrl", fileUrl);
+        setProfileUrl(fileUrl);
+        setFormData((prev: any) => ({
+          ...prev,
+          studentData: {
+            ...prev.studentData,
+            profileUrl: fileUrl,
+          },
+        }));
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        // alert("An error occurred while uploading the image.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const uploadDirect = async (file: File, fileKey: string) => {
+    const { data } = await axios.post(
+      `https://dev.apply.litschool.in/student/generate-presigned-url`,
+      {
+        bucketName: "dev-application-portal",
+        key: fileKey,
+      }
+    );
+    const { url } = data;
+    await axios.put(url, file, {
+      headers: { "Content-Type": file.type },
+      onUploadProgress: (evt: any) => {
+        if (!evt.total) return;
+        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+        setUploadStates((prev) => ({
+          ...prev,
+          // [docId]: {
+          //   ...prev[docId],
+          //   uploadProgress: Math.min(percentComplete, 100),
+          // },
+        }));
+      },
+    });
+    return `${url.split("?")[0]}`;
+  };
+
   if (!latestCohort || !applicationDetails || !studentDetail) {
     return <div>No student details available</div>;
   }
@@ -310,7 +408,9 @@ export function PersonalDetailsTab({
           <div className="w-full sm:w-[200px] h-[285px] sm:h-full bg-[#1F1F1F] flex flex-col items-center justify-center rounded-xl text-sm space-y-4">
             {student?.profileUrl ? (
               <div className="w-full h-full relative">
-                <img
+                <Image
+                  width={32}
+                  height={32}
                   src={student?.profileUrl}
                   alt="id card"
                   className="w-full h-full object-cover rounded-lg"
@@ -334,7 +434,7 @@ export function PersonalDetailsTab({
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  // onChange={handleImageChange}
+                  onChange={handleImageChange}
                 />
               </label>
             )}
@@ -361,7 +461,7 @@ export function PersonalDetailsTab({
                   }
                   disabled
                 />
-              </div>   
+              </div>
             </div>
             <div className="flex flex-1 gap-4">
               <div className="flex flex-col flex-1 gap-2">
@@ -395,7 +495,9 @@ export function PersonalDetailsTab({
                       Working Professional
                     </SelectItem>
                     <SelectItem value="Freelancer">Freelancer</SelectItem>
-                    <SelectItem value="Business Owner">Business Owner</SelectItem>
+                    <SelectItem value="Business Owner">
+                      Business Owner
+                    </SelectItem>
                     <SelectItem value="Consultant">Consultant</SelectItem>
                   </SelectContent>
                 </Select>
@@ -406,8 +508,9 @@ export function PersonalDetailsTab({
                 <Label className="pl-3">Program of Interest</Label>
                 <Input
                   defaultValue={
-                    student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
-                      ?.cohortId?.programDetail?.name
+                    student?.appliedCohorts?.[
+                      student?.appliedCohorts.length - 1
+                    ]?.cohortId?.programDetail?.name
                   }
                   disabled
                 />
@@ -422,8 +525,9 @@ export function PersonalDetailsTab({
                       ]?.cohortId?.startDate
                     ) +
                     " " +
-                    student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
-                      ?.cohortId?.timeSlot +
+                    student?.appliedCohorts?.[
+                      student?.appliedCohorts.length - 1
+                    ]?.cohortId?.timeSlot +
                     ", " +
                     selectedCentre
                   }

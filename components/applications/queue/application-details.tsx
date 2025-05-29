@@ -106,6 +106,8 @@ export function ApplicationDetails({
   const latestCohort =
     application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
   const applicationDetails = latestCohort?.applicationDetails;
+  console.log(applicationDetails);
+  console.log(latestCohort);
 
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
@@ -414,6 +416,7 @@ export function ApplicationDetails({
                   variant="outline"
                   className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
+                  disabled={latestCohort.status !== "enrolled"}
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   Mark as Dropped

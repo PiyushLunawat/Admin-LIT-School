@@ -568,7 +568,7 @@ export function PaymentDetails({
               <div className="flex justify-between text-sm">
                 <span>Payment Progress</span>
                 <span className="pr-3">
-                  {(notPaidAmount || paidAmount === paidAmount + notPaidAmount)
+                  {notPaidAmount || paidAmount === paidAmount + notPaidAmount
                     ? `${(
                         (paidAmount / (paidAmount + notPaidAmount)) *
                         100
@@ -657,6 +657,7 @@ export function PaymentDetails({
                   variant="outline"
                   className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
+                  disabled={latestCohort.status !== "enrolled"}
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   <span className="flex-1 truncate w-[170px]">
@@ -726,15 +727,16 @@ export function PaymentDetails({
                     Amount Payable: ₹{formatAmount(tokenAmount)}
                   </p>
 
-                  {(tokenFeeDetails && tokenFeeDetails?.verificationStatus !== "paid") && (
-                    <p className="flex text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Uploaded on{" "}
-                      {new Date(
-                        tokenFeeDetails?.updatedAt
-                      ).toLocaleDateString()}
-                    </p>
-                  )}
+                  {tokenFeeDetails &&
+                    tokenFeeDetails?.verificationStatus !== "paid" && (
+                      <p className="flex text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Uploaded on{" "}
+                        {new Date(
+                          tokenFeeDetails?.updatedAt
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
                   {applicationDetails?.applicationStatus === "selected" && (
@@ -928,7 +930,7 @@ export function PaymentDetails({
                 )}
             </div>
 
-            {paymentDetails?.paymentPlan === "one-shot" &&
+            {paymentDetails?.paymentPlan === "one-shot" && (
               <Card className="p-4 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
@@ -980,18 +982,25 @@ export function PaymentDetails({
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Base Amount: ₹
-                    {formatAmount(scholarshipDetails?.oneShotPaymentDetails?.baseFee)}
+                    {formatAmount(
+                      scholarshipDetails?.oneShotPaymentDetails?.baseFee
+                    )}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     One Shot Discount: ₹
                     {formatAmount(
-                      scholarshipDetails?.oneShotPaymentDetails?.OneShotPaymentAmount
+                      scholarshipDetails?.oneShotPaymentDetails
+                        ?.OneShotPaymentAmount
                     )}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Scholarship Waiver: ₹
                     {formatAmount(
-                      cohortDetails?.baseFee * 1.18 * litmusTestDetails?.scholarshipDetail?.scholarshipPercentage * 0.01
+                      cohortDetails?.baseFee *
+                        1.18 *
+                        litmusTestDetails?.scholarshipDetail
+                          ?.scholarshipPercentage *
+                        0.01
                     )}
                   </p>
                 </div>
@@ -1134,7 +1143,8 @@ export function PaymentDetails({
                       onClick={() =>
                         handleDownload(
                           paymentDetails?.oneShotPayment?.receiptUrls?.[
-                            paymentDetails?.oneShotPayment?.receiptUrls.length - 1
+                            paymentDetails?.oneShotPayment?.receiptUrls.length -
+                              1
                           ]?.url,
                           "One_Shot_Receipt"
                         )
@@ -1203,8 +1213,8 @@ export function PaymentDetails({
                   </label>
                 )}
               </Card>
-            }
-            {paymentDetails?.paymentPlan === "instalments" &&
+            )}
+            {paymentDetails?.paymentPlan === "instalments" && (
               <div className="space-y-2">
                 <Tabs defaultValue="1" className="space-y-4">
                   <TabsList variant="ghost" className="w-full pl-">
@@ -1307,12 +1317,14 @@ export function PaymentDetails({
                                         instalment.scholarshipAmount
                                     )}
                                   </p>
-                                  {!!instalment.scholarshipAmount &&
+                                  {!!instalment.scholarshipAmount && (
                                     <p className="text-sm text-muted-foreground">
                                       Scholarship Waiver: ₹
-                                      {formatAmount(instalment.scholarshipAmount)}
+                                      {formatAmount(
+                                        instalment.scholarshipAmount
+                                      )}
                                     </p>
-                                  }
+                                  )}
                                 </div>
                                 <div className="justify-between items-center gap-2">
                                   <div className="flex items-center text-sm text-muted-foreground">
@@ -1486,7 +1498,7 @@ export function PaymentDetails({
                 </Button>
               )} */}
               </div>
-            }
+            )}
           </div>
 
           <Dialog open={schOpen} onOpenChange={setSchOpen}>
