@@ -281,7 +281,6 @@ export function PersonalDetailsTab({
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setLoading(true);
       const fileKey = generateUniqueFileName(file.name);
 
       try {
