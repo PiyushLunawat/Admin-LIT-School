@@ -520,6 +520,7 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
         console.error("Invalid file URL:", fileKey);
         return;
       }
+        console.log("file URL:", fileKey);
 
       // AWS S3 DeleteObject Command
       const deleteCommand = new DeleteObjectCommand({
