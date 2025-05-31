@@ -82,7 +82,7 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
       console.log("change", payLoad);
 
       const result = await updateScholarship(payLoad);
-      console.log("Scholarship updated successfully:", result);
+      console.log("response:", result);
     } catch (error) {
       console.error("Failed to update scholarship:", error);
     } finally {

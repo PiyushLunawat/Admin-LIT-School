@@ -1,5 +1,4 @@
 "use client";
-
 import { markNotificationsAsRead } from "@/app/api/auth";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -25,6 +24,7 @@ import { useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import io, { type Socket } from "socket.io-client";
+// import notification_tone from "../../../public/assets/notification/notifiacation_tone.wav"
 
 const NETWORK_CHECK_INTERVAL = 15000; // 15 seconds
 
@@ -57,6 +57,8 @@ export function NotificationsButton() {
     online: typeof navigator !== "undefined" ? navigator.onLine : true,
     lastActivity: new Date().toISOString(),
   });
+
+  // const audioRef = useRef<HTMLAudioElement | null>(null); 
   const router = useRouter();
 
   const networkCheckRef = useRef<NodeJS.Timeout>();
@@ -158,6 +160,9 @@ export function NotificationsButton() {
 
     const handleNewNotification = (data: Notification) => {
       console.log("Received notification:", data);
+
+      handlePlay();
+
       setNotifications((prev) => [data, ...prev]);
       setNotificationNO((prev) => prev + 1);
       // toast.info(data.message);
@@ -293,6 +298,14 @@ export function NotificationsButton() {
     });
 
     return grouped;
+  }
+
+  const handlePlay = () => {
+    const audio = new Audio("/assets/notification/notification_tone.wav")
+
+    audio.play().catch((err) => {
+      console.error("Audio playback failed:", err)
+    })
   }
 
   return (
