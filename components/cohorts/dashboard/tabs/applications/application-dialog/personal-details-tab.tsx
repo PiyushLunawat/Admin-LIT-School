@@ -8,10 +8,8 @@ import {
   CircleMinus,
   Edit,
   Pencil,
-  PencilIcon,
   Save,
   X,
-  XIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -253,7 +251,7 @@ export function PersonalDetailsTab({
         console.error("Invalid file URL:", fileKey);
         return;
       }
-        console.log("file URL:", fileKey);
+      console.log("file URL:", fileKey);
 
       // AWS S3 DeleteObject Command
       const deleteCommand = new DeleteObjectCommand({
@@ -340,7 +338,6 @@ export function PersonalDetailsTab({
             uploadProgress: Math.min(percentComplete, 100),
           },
         }));
-
       },
     });
     return `${url.split("?")[0]}`;
@@ -392,8 +389,7 @@ export function PersonalDetailsTab({
                   </div>
                 </div>
               </label>
-            ) :
-            profileUrl || student?.profileUrl ? (
+            ) : profileUrl || student?.profileUrl ? (
               <div className="w-full h-full relative">
                 <Image
                   width={32}
@@ -402,7 +398,7 @@ export function PersonalDetailsTab({
                   alt="id card"
                   className="w-full h-[220px] object-cover rounded-lg"
                 />
-                {isEditing && 
+                {isEditing && (
                   <div className="absolute top-2 right-2 flex space-x-2">
                     <input
                       ref={fileInputRef}
@@ -422,15 +418,21 @@ export function PersonalDetailsTab({
                     >
                       <Pencil className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon"
+                    <Button
+                      variant="outline"
+                      size="icon"
                       className="w-8 h-8 !bg-white/[0.2] border border-white rounded-full shadow mix-blend-hard-light hover:bg-white/[0.4]"
-                      onClick={() => handleDeleteFile((profileUrl || student?.profileUrl).split("/").pop())}
+                      onClick={() =>
+                        handleDeleteFile(
+                          (profileUrl || student?.profileUrl).split("/").pop()
+                        )
+                      }
                       disabled={!isEditing}
                     >
                       <X className="w-5 h-5" />
                     </Button>
                   </div>
-                }
+                )}
               </div>
             ) : (
               <label

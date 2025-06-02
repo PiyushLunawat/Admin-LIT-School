@@ -36,8 +36,10 @@ export function DashboardHeader({
   selectedCohort,
   onCohortChange,
 }: CohortHeaderProps) {
-  console.log(cohorts, programs);
-  
+  const handleProgramChange = (value: string) => {
+    onProgramChange(value);
+    onCohortChange("all-cohorts");
+  };
 
   return (
     <div className="space-y-4 mb-6">
@@ -62,7 +64,7 @@ export function DashboardHeader({
           <DateRangePicker setDateRange={setDateRange} />
         </div>
         <div className="flex gap-2">
-          <Select value={selectedProgram} onValueChange={onProgramChange}>
+          <Select value={selectedProgram} onValueChange={handleProgramChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Program" />
             </SelectTrigger>
@@ -81,11 +83,17 @@ export function DashboardHeader({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-cohorts">All Cohorts</SelectItem>
-              {cohorts.map((c) => (
-                <SelectItem key={c._id} value={c.cohortId}>
-                  {c.cohortId}
-                </SelectItem>
-              ))}
+              {cohorts
+                .filter((c) =>
+                  selectedProgram === "all-programs"
+                    ? true
+                    : c.programDetail === selectedProgram
+                )
+                .map((c) => (
+                  <SelectItem key={c._id} value={c.cohortId}>
+                    {c.cohortId}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>

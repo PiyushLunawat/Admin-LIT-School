@@ -33,7 +33,9 @@ import {
   updateCohort,
 } from "@/app/api/cohorts";
 import { useToast } from "@/hooks/use-toast";
+import { deleteCollaborator as deleteCollaboratorFromStore } from "@/lib/features/cohort/cohortSlice";
 import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
+import { useDispatch } from "react-redux";
 
 // Roles array
 const roles = [
@@ -118,6 +120,8 @@ export function CollaboratorsForm({
     control: form.control,
     name: "collaborators",
   });
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (fields.length === 0) {
@@ -281,37 +285,41 @@ export function CollaboratorsForm({
   };
 
   const handleDeleteCollab = async (
-    cId?: string,
-    collabId?: string,
-    role?: string,
+    cohortId?: string,
+    collaboratorId?: string,
+    roleId?: string,
     index?: number
   ) => {
     try {
       setdeleteLoading(true);
 
-      if (cId && collabId && role && typeof index === "number") {
-        const deletePayload = {
-          cohortId: cId,
-          collaboratorId: collabId,
-          roleId: role,
-        };
+      if (cohortId && collaboratorId && roleId && typeof index === "number") {
+        const deletePayload = { cohortId, collaboratorId, roleId };
 
         const deleteRes = await deleteCollaborator(deletePayload);
-        if (index !== undefined) {
-          remove(index);
-        }
+
+        remove(index); // remove from UI/form
+        console.log(deleteRes);
+
+        dispatch(deleteCollaboratorFromStore(collaboratorId));
 
         toast({
           title: "Collaborator deleted successfully!",
           variant: "success",
         });
       } else if (typeof index === "number") {
-        remove(index);
+        remove(index); // just remove from form
+        toast({
+          title: "Unsaved collaborator removed.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      console.error("Failed to delete collaborators:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error("Failed to delete collaborators:", errorMessage);
       toast({
-        title: `Failed to delete collaborator: ${error}!`,
+        title: `Failed to delete collaborator: ${errorMessage}`,
         variant: "warning",
       });
     } finally {
@@ -394,6 +402,7 @@ export function CollaboratorsForm({
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
+                            onClick={() => handleDeleteCollab()}
                             variant="ghost"
                             size="icon"
                             className="text-destructive"

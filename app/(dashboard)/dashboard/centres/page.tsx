@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { LoaderIcon, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -261,7 +261,9 @@ export default function CentresPage() {
 
       {loading ? (
         <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
-          Loading...
+          <div className="flex justify-center items-center h-full">
+            <LoaderIcon className="w-8 h-8 animate-spin" />
+          </div>
         </div>
       ) : centres.length > 0 ? (
         <Table>
@@ -296,7 +298,9 @@ export default function CentresPage() {
                           variant="ghost"
                           size="sm"
                           className={
-                            centre.status ? "text-destructive" : "text-[#2EB88A]"
+                            centre.status
+                              ? "text-destructive"
+                              : "text-[#2EB88A]"
                           }
                         >
                           {centre.status ? "Disable" : "Enable"}

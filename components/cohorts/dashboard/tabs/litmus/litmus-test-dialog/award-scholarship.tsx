@@ -79,10 +79,13 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
         cohortId: latestCohort?._id,
         scholarshipId: selectedSch._id,
       };
-      console.log("change", payLoad);
 
       const result = await updateScholarship(payLoad);
-      console.log("response:", result);
+      if (result.success) {
+        console.log("Scholarship updated successfully");
+      } else {
+        console.error("API returned error:", result.error);
+      }
     } catch (error) {
       console.error("Failed to update scholarship:", error);
     } finally {

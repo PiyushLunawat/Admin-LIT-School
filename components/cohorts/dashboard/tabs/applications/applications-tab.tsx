@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, RefreshCw } from "lucide-react";
+import { Download, LoaderIcon, RefreshCw } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
@@ -58,7 +58,13 @@ export function ApplicationsTab({
         const response = await getStudents();
         const mappedStudents = response.data.filter(
           (student: any) =>
-            ["initiated", "applied", "reviewing", "enrolled", "dropped"].includes(
+            [
+              "initiated",
+              "applied",
+              "reviewing",
+              "enrolled",
+              "dropped",
+            ].includes(
               student?.appliedCohorts?.[student?.appliedCohorts.length - 1]
                 ?.status
             ) &&
@@ -77,7 +83,21 @@ export function ApplicationsTab({
     fetchStudents();
   }, [cohortId, refreshKey]);
 
+  useEffect(() => {
+    const loadWithDelay = async () => {
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (loading) {
+        <div className="flex justify-center items-center h-full">
+          <LoaderIcon className="w-8 h-8 animate-spin" />
+        </div>;
+      }
+    };
+    loadWithDelay();
+  }, []);
+
   const filteredAndSortedApplications = useMemo(() => {
+    if (!applications) return [];
     const filteredApplications = applications?.filter((app: any) => {
       if (!selectedDateRange) return true;
       const appDate = new Date(app.updatedAt);
@@ -204,6 +224,7 @@ export function ApplicationsTab({
   }, [applications, searchQuery, selectedStatus, sortBy, selectedDateRange]);
 
   const handleApplicationUpdate = () => {
+    setLoading(true);
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
   };
 
@@ -217,11 +238,13 @@ export function ApplicationsTab({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Applications</h2>
-        <div className="flex gap-2">
-          {/* <Button
+    <>
+      {!loading ? (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Applications</h2>
+            <div className="flex gap-2">
+              {/* <Button
             variant="outline"
             onClick={handleBulkEmail}
             disabled={selectedApplicationIds.length === 0}
@@ -229,76 +252,84 @@ export function ApplicationsTab({
             <Mail className="h-4 w-4 mr-2" />
             Bulk Email
           </Button> */}
-          <Button
-            variant="outline"
-            onClick={() => handleBulkExport(selectedStudents)}
-            disabled={selectedStudents.length === 0}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            <span className="truncate w-[50px] sm:w-auto">
-              Export Selected
-            </span>
-          </Button>
-          <Button
-            variant="outline"
-            size={"icon"}
-            onClick={handleApplicationUpdate}
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          </Button>
-        </div>
-      </div>
-
-      <ApplicationFilters
-        searchTerm={searchQuery}
-        onSearchTermChange={setSearchQuery}
-        selectedStatus={selectedStatus}
-        onSelectedStatusChange={setSelectedStatus}
-        sortBy={sortBy}
-        onSortByChange={setSortBy}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          {applications.length === 0 && loading ? (
-            <div className="h-fit flex items-center justify-center p-6 border rounded text-muted-foreground">
-              <p className="text-center animate-pulse">
-                All your students will appear here...
-              </p>
-            </div>
-          ) : (
-            <ApplicationsList
-              applications={filteredAndSortedApplications}
-              onApplicationSelect={(application) =>
-                setSelectedApplication(application)
-              }
-              selectedIds={selectedStudents}
-              onSelectedIdsChange={setSelectedStudents}
-              onApplicationUpdate={handleApplicationUpdate}
-            />
-          )}
-        </div>
-        <div className="lg:col-span-1">
-          <div className="sticky top-6">
-            <Card className="max-h-[calc(100vh-7rem)] overflow-y-auto">
-              {selectedApplication ? (
-                <ApplicationDetails
-                  application={selectedApplication}
-                  onClose={() => setSelectedApplication(null)}
-                  onApplicationUpdate={handleApplicationUpdate}
+              <Button
+                variant="outline"
+                onClick={() => handleBulkExport(selectedStudents)}
+                disabled={selectedStudents.length === 0}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                <span className="truncate w-[50px] sm:w-auto">
+                  Export Selected
+                </span>
+              </Button>
+              <Button
+                variant="outline"
+                size={"icon"}
+                onClick={handleApplicationUpdate}
+                disabled={loading}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
                 />
-              ) : (
-                <div className="h-full flex items-center justify-center p-6 text-muted-foreground">
-                  <p className="text-center">
-                    Select an application to view details
+              </Button>
+            </div>
+          </div>
+
+          <ApplicationFilters
+            searchTerm={searchQuery}
+            onSearchTermChange={setSearchQuery}
+            selectedStatus={selectedStatus}
+            onSelectedStatusChange={setSelectedStatus}
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              {applications.length === 0 && loading ? (
+                <div className="h-fit flex items-center justify-center p-6 border rounded text-muted-foreground">
+                  <p className="text-center animate-pulse">
+                    All your students will appear here...
                   </p>
                 </div>
+              ) : (
+                <ApplicationsList
+                  applications={filteredAndSortedApplications}
+                  onApplicationSelect={(application) =>
+                    setSelectedApplication(application)
+                  }
+                  selectedIds={selectedStudents}
+                  onSelectedIdsChange={setSelectedStudents}
+                  onApplicationUpdate={handleApplicationUpdate}
+                />
               )}
-            </Card>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="sticky top-6">
+                <Card className="max-h-[calc(100vh-7rem)] overflow-y-auto">
+                  {selectedApplication ? (
+                    <ApplicationDetails
+                      application={selectedApplication}
+                      onClose={() => setSelectedApplication(null)}
+                      onApplicationUpdate={handleApplicationUpdate}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center p-6 text-muted-foreground">
+                      <p className="text-center">
+                        Select an application to view details
+                      </p>
+                    </div>
+                  )}
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <div className="flex justify-center items-center h-full">
+          <LoaderIcon className="w-8 h-8 animate-spin" />
+        </div>
+      )}
+    </>
   );
 }
