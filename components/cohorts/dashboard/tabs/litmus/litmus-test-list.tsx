@@ -245,7 +245,7 @@ export function LitmusTestList({
                         litmusTestDetails?.status || "pending"
                       )}
                     >
-                      {litmusTestDetails?.status || "pending"}
+                      {litmusTestDetails?.status === "pending" ? "Awaiting Submission" : litmusTestDetails?.status}
                     </Badge>
                   )}
                 </TableCell>

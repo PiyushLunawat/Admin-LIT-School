@@ -71,13 +71,12 @@ export function DashboardHeader({
             <SelectContent>
               <SelectItem value="all-programs">All Programs</SelectItem>
               {programs.map((prog) => (
-                <SelectItem key={prog._id} value={prog._id}>
+                <SelectItem key={prog._id} value={prog.name}>
                   {prog.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-
           <Select value={selectedCohort} onValueChange={onCohortChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Cohort" />

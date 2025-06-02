@@ -55,10 +55,8 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
       (slab: any) => slab._id === litmusTestDetails?.scholarshipDetail
     );
 
-    if (schSlab) {
-      setSch(schSlab);
-      setSelectedSch(schSlab);
-    }
+    setSch(schSlab);
+    setSelectedSch(litmusTestDetails?.scholarshipDetail);
   }, [
     latestCohort?.cohortId?.feeStructureDetails,
     litmusTestDetails?.scholarshipDetail,
@@ -68,19 +66,12 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
     const matchedScholarship = cohortDetails.feeStructureDetails.find(
       (scholarship: any) => scholarship.scholarshipName === slabName
     );
-
     if (matchedScholarship) {
       setSelectedSch(matchedScholarship);
-      console.log("Selected scholarship:", matchedScholarship); // Debug log
     }
   };
 
   const handleScholarship = async () => {
-    if (!selectedSch?._id) {
-      console.error("No scholarship selected");
-      return;
-    }
-
     setLoading(true);
     try {
       const payLoad = {
@@ -88,12 +79,8 @@ export function AwardScholarship({ student }: AwardScholarshipProps) {
         cohortId: latestCohort?._id,
         scholarshipId: selectedSch._id,
       };
-      console.log("Payload:", payLoad);
 
       const result = await updateScholarship(payLoad);
-      console.log("Response:", result);
-
-      // Check if the API call was successful
       if (result.success) {
         console.log("Scholarship updated successfully");
       } else {

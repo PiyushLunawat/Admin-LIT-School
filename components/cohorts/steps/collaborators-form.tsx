@@ -89,7 +89,7 @@ export function CollaboratorsForm({
   const formattedCollaborators = formatCollaborators(
     initialData?.collaborators || []
   );
-  console.log("one", formatCollaborators(initialData?.collaborators));
+  // console.log("one", formatCollaborators(initialData?.collaborators));
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

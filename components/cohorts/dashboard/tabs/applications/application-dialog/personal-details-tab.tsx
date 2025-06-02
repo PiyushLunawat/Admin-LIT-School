@@ -7,11 +7,11 @@ import {
   CircleCheckBig,
   CircleMinus,
   Edit,
-  PencilIcon,
+  Pencil,
   Save,
-  XIcon,
+  X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { getCentres } from "@/app/api/centres";
 import { updateStudentData } from "@/app/api/student";
@@ -27,23 +27,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { UploadState } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
 import { PersonalDetailsTabProps } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
 import axios from "axios";
 import Image from "next/image";
+
+interface UploadState {
+  uploading: boolean;
+  uploadProgress: number;
+  fileName: string;
+}
 
 export function PersonalDetailsTab({
   student,
   onUpdateStatus,
 }: PersonalDetailsTabProps) {
-  console.log("first @ cohorts/dashboard/tabs");
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCentre, setSelectedCentre] = useState("");
   const [profileUrl, setProfileUrl] = useState("");
   const [uploadStates, setUploadStates] = useState<{
-    [docId: string]: UploadState;
+    profilePic?: UploadState;
   }>({});
 
   const latestCohort =
@@ -241,17 +245,53 @@ export function PersonalDetailsTab({
     return `${timestamp}-${sanitizedName}`;
   };
 
+  const handleDeleteFile = async (fileKey: string, index?: number) => {
+    try {
+      if (!fileKey) {
+        console.error("Invalid file URL:", fileKey);
+        return;
+      }
+      console.log("file URL:", fileKey);
+
+      // AWS S3 DeleteObject Command
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: "dev-application-portal", // Replace with your bucket name
+        Key: fileKey, // Key extracted from file URL
+      });
+
+      await s3Client.send(deleteCommand);
+      console.log("File deleted successfully from S3:", fileKey);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleEditClick = () => {
+    if (fileInputRef.current && isEditing) {
+      fileInputRef.current.click();
+    }
+  };
+
   const handleImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setLoading(true);
       const fileKey = generateUniqueFileName(file.name);
 
       try {
         const formData = new FormData();
         formData.append("profileImage", file);
+        setUploadStates((prev) => ({
+          ...prev,
+          profilePic: {
+            uploading: true,
+            uploadProgress: 0,
+            fileName: file.name,
+          },
+        }));
         const fileUrl = await uploadDirect(file, fileKey);
         console.log("fileUrl", fileUrl);
         setProfileUrl(fileUrl);
@@ -266,7 +306,13 @@ export function PersonalDetailsTab({
         console.error("Error uploading image:", error);
         // alert("An error occurred while uploading the image.");
       } finally {
-        setLoading(false);
+        setUploadStates((prev) => ({
+          ...prev,
+          profilePic: {
+            ...prev.profilePic!,
+            uploading: false,
+          },
+        }));
       }
     }
   };
@@ -287,78 +333,14 @@ export function PersonalDetailsTab({
         const percentComplete = Math.round((evt.loaded / evt.total) * 100);
         setUploadStates((prev) => ({
           ...prev,
-          // [docId]: {
-          //   ...prev[docId],
-          //   uploadProgress: Math.min(percentComplete, 100),
-          // },
+          profilePic: {
+            ...prev.profilePic!,
+            uploadProgress: Math.min(percentComplete, 100),
+          },
         }));
       },
     });
     return `${url.split("?")[0]}`;
-  };
-
-  const handleDeleteImage = async () => {
-    try {
-      setLoading(true);
-
-      // Get the current image URL to extract the file key
-      const currentImageUrl = profileUrl || student?.profileUrl;
-      if (currentImageUrl) {
-        // Extract file key from URL (assuming URL format is https://bucket.s3.region.amazonaws.com/fileKey)
-        const urlParts = currentImageUrl.split("/");
-        const fileKey = urlParts[urlParts.length - 1].split("?")[0]; // Remove query parameters if any
-
-        // Delete from S3
-        await handleDeleteFile(fileKey);
-      }
-
-      // Clear the profile URL from state and form data
-      setProfileUrl("");
-      setFormData((prev: any) => ({
-        ...prev,
-        studentData: {
-          ...prev.studentData,
-          profileUrl: "",
-        },
-      }));
-
-      toast({
-        title: "Image Deleted",
-        description: "Profile image has been removed successfully.",
-        variant: "success",
-      });
-    } catch (error) {
-      console.error("Error deleting image:", error);
-      toast({
-        title: "Delete Failed",
-        description: "Failed to delete the profile image.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Also update your handleDeleteFile function to be more robust
-  const handleDeleteFile = async (fileKey: string) => {
-    try {
-      if (!fileKey) {
-        console.error("Invalid file key:", fileKey);
-        return;
-      }
-
-      // AWS S3 DeleteObject Command
-      const deleteCommand = new DeleteObjectCommand({
-        Bucket: "dev-application-portal", // Replace with your bucket name
-        Key: fileKey, // Key extracted from file URL
-      });
-
-      await s3Client.send(deleteCommand);
-      console.log("File deleted successfully from S3:", fileKey);
-    } catch (error) {
-      console.error("Error deleting file from S3:", error);
-      throw error; // Re-throw to handle in calling function
-    }
   };
 
   if (!latestCohort || !applicationDetails || !studentDetail) {
@@ -392,61 +374,70 @@ export function PersonalDetailsTab({
           </Button>
         </CardHeader>
         <CardContent className="flex flex-wrap flex-col sm:flex-row justify-center px-4 sm:px-6 gap-4">
-          <div className="w-full sm:w-[200px] h-[285px] sm:h-full bg-[#1F1F1F] flex flex-col items-center justify-center rounded-xl text-sm space-y-4">
-            {profileUrl || student?.profileUrl ? (
+          <div className="w-full sm:w-[200px] h-[220px] sm:h-full bg-[#1F1F1F] flex flex-col items-center justify-center rounded-xl text-sm space-y-4">
+            {uploadStates.profilePic?.uploading ? (
+              <label
+                htmlFor="passport-input"
+                className="w-full h-[220px] flex flex-col items-center justify-center bg-[#09090b] px-6 rounded-xl border border-[#2C2C2C]"
+              >
+                <div className="text-center my-auto text-muted-foreground">
+                  <Camera className="mx-auto mb-2 w-8 h-8" />
+                  <div className="text-wrap">
+                    {loading
+                      ? `Uploading... ${uploadStates.profilePic.uploadProgress}%`
+                      : "Upload a Passport size Image of Yourself. Ensure that your face covers 60% of this picture."}
+                  </div>
+                </div>
+              </label>
+            ) : profileUrl || student?.profileUrl ? (
               <div className="w-full h-full relative">
-                {isEditing && (
-                  <>
-                    {/* Edit Button */}
-                    <div className="absolute top-3 right-12 z-10">
-                      <label htmlFor="passport-input-edit">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className="w-8 h-8 bg-white/[0.2] border border-white rounded-full shadow hover:bg-white/[0.4]"
-                          asChild
-                          onClick={() => handleImageChange}
-                        >
-                          <PencilIcon className="w-2 h-2 cursor-pointer" />
-                        </Button>
-                      </label>
-                      <input
-                        id="passport-input-edit"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageChange}
-                      />
-                    </div>
-
-                    {/* Delete Button */}
-                    <div className="absolute top-3 right-2 z-10">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="w-8 h-8 bg-white/[0.2] border border-white rounded-full shadow hover:bg-white/[0.4]"
-                        onClick={handleDeleteImage}
-                      >
-                        <XIcon className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </>
-                )}
-
                 <Image
                   width={32}
                   height={32}
                   src={profileUrl || student?.profileUrl}
-                  alt="profile image"
-                  className="w-full h-[250px] object-cover rounded-lg"
+                  alt="id card"
+                  className="w-full h-[220px] object-cover rounded-lg"
                 />
+                {isEditing && (
+                  <div className="absolute top-2 right-2 flex space-x-2">
+                    <input
+                      ref={fileInputRef}
+                      id="passport-input"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageChange}
+                      disabled={!isEditing}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 bg-white/[0.2] border border-white rounded-full shadow mix-blend-hard-light hover:bg-white/[0.4]"
+                      onClick={handleEditClick}
+                      disabled={!isEditing}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 !bg-white/[0.2] border border-white rounded-full shadow mix-blend-hard-light hover:bg-white/[0.4]"
+                      onClick={() =>
+                        handleDeleteFile(
+                          (profileUrl || student?.profileUrl).split("/").pop()
+                        )
+                      }
+                      disabled={!isEditing}
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
               <label
                 htmlFor="passport-input"
-                className="w-full h-[250px] cursor-pointer flex flex-col items-center justify-center bg-[#1F1F1F] px-6 rounded-xl border-[#2C2C2C]"
+                className="w-full h-[220px] cursor-pointer flex flex-col items-center justify-center bg-[#1F1F1F] px-6 rounded-xl border-[#2C2C2C]"
               >
                 <div className="text-center my-auto text-muted-foreground">
                   <Camera className="mx-auto mb-2 w-8 h-8" />
