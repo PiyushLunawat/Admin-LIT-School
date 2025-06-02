@@ -2,7 +2,7 @@
 
 import { LoaderIcon, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import {
   createCentre,
@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { getCentresData } from "@/lib/features/center/centerSlice";
+import { useAppDispatch } from "@/lib/store/hooks";
 import { Centre } from "@/types/dashboard/centres/centres";
 
 export default function CentresPage() {
@@ -57,7 +58,7 @@ export default function CentresPage() {
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedCentre, setSelectedCentre] = useState<string | null>(null);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const centerData = useSelector((state: any) => state.center.centers);
 
