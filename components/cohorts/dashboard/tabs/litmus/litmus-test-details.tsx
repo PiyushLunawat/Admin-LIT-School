@@ -222,7 +222,7 @@ export function LitmusTestDetails({
                 className="capitalize"
                 variant={getStatusColor(status || "pending")}
               >
-                {status || "pending"}
+                {status === "pending" ? "Awaiting Submission" : status}
               </Badge>
             </div>
             <div className="space-y-1">

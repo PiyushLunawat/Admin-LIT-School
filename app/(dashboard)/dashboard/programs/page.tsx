@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { LoaderIcon, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -299,7 +299,9 @@ export default function ProgramsPage() {
 
       {loading ? (
         <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
-          Loading...
+          <div className="flex justify-center items-center h-full">
+            <LoaderIcon className="w-8 h-8 animate-spin" />
+          </div>
         </div>
       ) : programs.length > 0 ? (
         <Table>
@@ -338,7 +340,9 @@ export default function ProgramsPage() {
                           variant="ghost"
                           size="sm"
                           className={
-                            program.status ? "text-destructive" : "text-[#2EB88A]"
+                            program.status
+                              ? "text-destructive"
+                              : "text-[#2EB88A]"
                           }
                         >
                           {program.status ? "Disable" : "Enable"}
@@ -352,7 +356,8 @@ export default function ProgramsPage() {
                           </AlertDialogTitle>
                           <AlertDialogDescription>
                             Are you sure you want to{" "}
-                            {program.status ? "Disable" : "Enable"} this Program?
+                            {program.status ? "Disable" : "Enable"} this
+                            Program?
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

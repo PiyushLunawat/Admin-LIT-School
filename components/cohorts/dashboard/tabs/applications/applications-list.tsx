@@ -1,6 +1,12 @@
 "use client";
 
-import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle,
+  Clock4Icon,
+  Eye,
+  LoaderIcon,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
@@ -70,6 +76,7 @@ export function ApplicationsList({
   onApplicationUpdate,
 }: ApplicationsListProps) {
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
@@ -145,8 +152,16 @@ export function ApplicationsList({
   };
 
   const handleEyeClick = (student: any) => {
-    setSelectedStudent(student); // Set the selected student ID
-    setOpen(true); // Open the dialog
+    setIsLoading(true);
+    setSelectedStudent(student);
+
+    // Open dialog immediately (optional based on design)
+    setOpen(true);
+
+    // Simulate async delay (e.g., fetching detailed data)
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
   };
 
   const handleStatusUpdate = () => {
@@ -328,41 +343,47 @@ export function ApplicationsList({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle></DialogTitle>
         <DialogContent className="flex flex-col gap-4 max-w-[90vw] sm:max-w-4xl py-2 px-4 sm:px-6 h-[90vh] overflow-y-auto">
-          {selectedStudent && (
-            <StudentApplicationHeader
-              student={selectedStudent}
-              onUpdateStatus={() => onApplicationUpdate()}
-            />
+          {isLoading ? (
+            <div className="flex justify-center items-center h-60">
+              <LoaderIcon className="w-8 h-8 animate-spin text-muted" />
+            </div>
+          ) : (
+            selectedStudent && (
+              <>
+                <StudentApplicationHeader
+                  student={selectedStudent}
+                  onUpdateStatus={() => onApplicationUpdate()}
+                />
+                <Tabs defaultValue="personal">
+                  <TabsList>
+                    <TabsTrigger value="personal">Personal</TabsTrigger>
+                    <TabsTrigger value="documents">Documents</TabsTrigger>
+                    <TabsTrigger value="payment">Payment</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="personal">
+                    <PersonalDetailsTab
+                      student={selectedStudent}
+                      onUpdateStatus={onApplicationUpdate}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="payment">
+                    <PaymentInformationTab
+                      student={selectedStudent}
+                      onUpdateStatus={() => onApplicationUpdate()}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="documents">
+                    <DocumentsTab
+                      student={selectedStudent}
+                      onUpdateStatus={handleStatusUpdate}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </>
+            )
           )}
-
-          <Tabs defaultValue="personal" className="space-y-6">
-            <TabsList className="w-full">
-              <TabsTrigger value="personal">Personal Details</TabsTrigger>
-              <TabsTrigger value="payment">Payment</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="personal">
-              <PersonalDetailsTab
-                student={selectedStudent}
-                onUpdateStatus={onApplicationUpdate}
-              />
-            </TabsContent>
-
-            <TabsContent value="payment">
-              <PaymentInformationTab
-                student={selectedStudent}
-                onUpdateStatus={() => onApplicationUpdate()}
-              />
-            </TabsContent>
-
-            <TabsContent value="documents">
-              <DocumentsTab
-                student={selectedStudent}
-                onUpdateStatus={handleStatusUpdate}
-              />
-            </TabsContent>
-          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

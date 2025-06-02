@@ -15,6 +15,8 @@ export default async function StudentDetailsPage({
 }) {
   const studentId = (await params).studentId;
 
+  await new Promise((res) => setTimeout(res, 2000));
+
   return (
     <div className="h-full">
       <StudentDetails studentId={studentId} />

@@ -209,6 +209,18 @@ const cohortSlice = createSlice({
       state.collaborators = { ...state.collaborators, ...action.payload };
     },
 
+    // Delete collaborator
+    deleteCollaborator: (state, action: PayloadAction<string>) => {
+      const idToDelete = action.payload;
+      if (!idToDelete) return;
+
+      state.collaborators.collaborators =
+        state.collaborators.collaborators.filter(
+          (collaborator: any) =>
+            collaborator._id && collaborator._id !== idToDelete
+        );
+    },
+
     // Set current step
     setCurrentStep: (state, action: PayloadAction<number>) => {
       state.currentStep = action.payload;
@@ -231,6 +243,7 @@ export const {
   updateCollaborators,
   setCurrentStep,
   resetCohortState,
+  deleteCollaborator,
 } = cohortSlice.actions;
 
 export default cohortSlice.reducer;

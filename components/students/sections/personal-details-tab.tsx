@@ -18,7 +18,15 @@ import { UploadState } from "@/types/components/cohorts/dashboard/tabs/applicati
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import axios from "axios";
 import { format } from "date-fns";
-import { Camera, CircleCheckBig, CircleMinus, Edit, Save } from "lucide-react";
+import {
+  Camera,
+  CircleCheckBig,
+  CircleMinus,
+  Edit,
+  PencilIcon,
+  Save,
+  XIcon,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -31,6 +39,8 @@ export function PersonalDetailsTab({
   student,
   onApplicationUpdate,
 }: PersonalDetailsTabProps) {
+  console.log("first @ students/sections");
+
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -298,6 +308,48 @@ export function PersonalDetailsTab({
     return `${timestamp}-${sanitizedName}`;
   };
 
+  const handleDeleteImage = async () => {
+    try {
+      setLoading(true);
+
+      // Get the current image URL to extract the file key
+      const currentImageUrl = profileUrl || student?.profileUrl;
+      if (currentImageUrl) {
+        // Extract file key from URL (assuming URL format is https://bucket.s3.region.amazonaws.com/fileKey)
+        const urlParts = currentImageUrl.split("/");
+        const fileKey = urlParts[urlParts.length - 1].split("?")[0]; // Remove query parameters if any
+
+        // Delete from S3
+        await handleDeleteFile(fileKey);
+      }
+
+      // Clear the profile URL from state and form data
+      setProfileUrl("");
+      setFormData((prev: any) => ({
+        ...prev,
+        studentData: {
+          ...prev.studentData,
+          profileUrl: "",
+        },
+      }));
+
+      toast({
+        title: "Image Deleted",
+        description: "Profile image has been removed successfully.",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete the profile image.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteFile = async (fileKey: string, index?: number) => {
     try {
       if (!fileKey) {
@@ -406,14 +458,51 @@ export function PersonalDetailsTab({
         </CardHeader>
         <CardContent className="flex flex-wrap flex-col sm:flex-row justify-center px-4 sm:px-6 gap-4">
           <div className="w-full sm:w-[200px] h-[285px] sm:h-full bg-[#1F1F1F] flex flex-col items-center justify-center rounded-xl text-sm space-y-4">
-            {student?.profileUrl ? (
+            {profileUrl || student?.profileUrl ? (
               <div className="w-full h-full relative">
+                <div className="flex right-0 bg-transparent w-8 h-8 border-b rounded-full">
+                  {isEditing && (
+                    <div className="absolute top-3 right-12 flex space-x-2">
+                      <label htmlFor="passport-input">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="w-8 h-8 bg-white/[0.2] border border-white rounded-full shadow hover:bg-white/[0.4]"
+                          onClick={() => handleImageChange}
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                          <input
+                            id="passport-input"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageChange}
+                          />
+                        </Button>
+                      </label>
+                    </div>
+                  )}
+                </div>
+                <div className="flex bg-transparent w-8 h-8 border-b rounded-full">
+                  {isEditing && (
+                    <div className="absolute top-3 right-2 flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="w-8 h-8 bg-white/[0.2] border border-white rounded-full shadow hover:bg-white/[0.4]"
+                        onClick={() => handleDeleteImage}
+                      >
+                        <XIcon className="w-4 h-4 fill-white items-center float-right" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <Image
                   width={32}
                   height={32}
-                  src={student?.profileUrl}
+                  src={student?.profileUrl || profileUrl}
                   alt="id card"
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-[250px] object-cover rounded-lg"
                 />
               </div>
             ) : (

@@ -7,4 +7,6 @@ export type BadgeVariant =
 
 export interface AwardScholarshipProps {
   student: any;
+  onClose?: () => void;
+  onApplicationUpdate?: () => void;
 }
