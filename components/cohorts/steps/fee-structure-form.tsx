@@ -29,8 +29,8 @@ interface FeeStructureFormProps {
 
 // Define the Zod schema
 const formSchema = z.object({
-  applicationFee: z.coerce.string().min(1, "Application fee is required"),
-  tokenFee: z.coerce.string().min(1, "Admission fee is required"),
+  applicationFee: z.coerce.number().min(1, "Application fee is required"),
+  tokenFee: z.coerce.number().min(1, "Admission fee is required"),
   semesters: z.coerce.string().min(1, "Number of semesters is required"),
   installmentsPerSemester: z.coerce
     .string()
@@ -136,7 +136,7 @@ export function FeeStructureForm({
                 <Label>Application Fee (₹)</Label>
                 <FormControl>
                   <Input
-                    type="text"
+                    type="number"
                     placeholder="₹500"
                     value={formatIndianCurrency(field.value)} // Format the value on render
                     onChange={(e) => {
@@ -158,7 +158,7 @@ export function FeeStructureForm({
                 <Label>Admission Fee (₹)</Label>
                 <FormControl>
                   <Input
-                    type="text"
+                    type="number"
                     placeholder="₹50,000"
                     value={formatIndianCurrency(field.value)} // Format the value on render
                     onChange={(e) => {
