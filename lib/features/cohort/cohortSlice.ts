@@ -25,8 +25,8 @@ export interface LitmusTestState {
 }
 
 export interface FeeStructureState {
-  applicationFee: string;
-  tokenFee: string;
+  applicationFee: number;
+  tokenFee: number;
   semesters: string;
   installmentsPerSemester: string;
   oneShotDiscount: string;
@@ -74,8 +74,8 @@ const initialState: CohortState = {
     litmusTestDuration: "",
   },
   feeStructure: {
-    applicationFee: "",
-    tokenFee: "",
+    applicationFee: 0,
+    tokenFee: 0,
     semesters: "",
     installmentsPerSemester: "",
     oneShotDiscount: "",
