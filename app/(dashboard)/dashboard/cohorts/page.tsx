@@ -8,7 +8,9 @@ import { getCohorts } from "@/app/api/cohorts";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StepId } from "@/constants/cohort-stepper";
+import type { StepId } from "@/constants/cohort-stepper";
+import { resetCohortState } from "@/lib/features/cohort/cohortSlice";
+import { useAppDispatch } from "@/lib/store/hooks";
 
 const CohortGrid = dynamic(
   () => import("@/components/cohorts/cohort-grid").then((m) => m.CohortGrid),
@@ -24,6 +26,7 @@ const CreateCohortContent = dynamic(
 );
 
 export default function CohortsPage() {
+  const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<StepId>("basic-details");
   const [editingCohort, setEditingCohort] = useState(null);
@@ -47,35 +50,52 @@ export default function CohortsPage() {
   };
 
   useEffect(() => {
-    fetchCohorts(); // Initial load of programs
+    fetchCohorts(); // Initial load of cohorts
   }, []);
 
   const handleComplete = () => {
     setOpen(false);
     setCurrentStep("basic-details");
     setEditingCohort(null);
+    // Reset Redux state when dialog closes
+    dispatch(resetCohortState());
   };
 
   const handleEditCohort = (cohort: any) => {
+    console.log("Editing cohort:", cohort);
     setEditingCohort(cohort);
     setCurrentStep("basic-details");
+    setOpen(true);
   };
 
   const handleOpenDialog = () => {
     setOpen(true);
   };
 
+  const handleCreateNew = () => {
+    setEditingCohort(null);
+    setOpen(true);
+    setCurrentStep("basic-details");
+    // Reset Redux state for new cohort
+    dispatch(resetCohortState());
+  };
+
+  // Handle dialog close
+  const handleDialogClose = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      // Reset state when dialog closes
+      setEditingCohort(null);
+      setCurrentStep("basic-details");
+      dispatch(resetCohortState());
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Cohorts</h1>
-        <Button
-          onClick={() => {
-            setEditingCohort(null);
-            setOpen(true);
-            setCurrentStep("basic-details");
-          }}
-        >
+        <Button onClick={handleCreateNew}>
           <Plus className="mr-2 h-4 w-4" />
           Create Cohort
         </Button>
@@ -96,7 +116,7 @@ export default function CohortsPage() {
             />
           ) : (
             <div className="w-full h-[calc(100vh-15rem)] flex items-center justify-center text-center text-muted-foreground border rounded-md">
-              <div>All your Cohorts will appear here </div>
+              <div>All your Cohorts will appear here</div>
             </div>
           )}
         </TabsContent>
@@ -116,7 +136,7 @@ export default function CohortsPage() {
         </TabsContent>
       </Tabs>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleDialogClose}>
         <DialogTitle></DialogTitle>
         <DialogContent className="max-w-[90vw] sm:max-w-4xl">
           <CreateCohortContent

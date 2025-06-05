@@ -1,17 +1,27 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BasicDetailsForm } from "@/components/cohorts/steps/basic-details-form";
 import { ApplicationFormBuilder } from "@/components/cohorts/steps/application-form-builder";
-import { LitmusTestForm } from "@/components/cohorts/steps/litmus-test-form";
-import { FeeStructureForm } from "@/components/cohorts/steps/fee-structure-form";
-import { FeePreviewForm } from "@/components/cohorts/steps/fee-preview-form";
+import { BasicDetailsForm } from "@/components/cohorts/steps/basic-details-form";
 import { CollaboratorsForm } from "@/components/cohorts/steps/collaborators-form";
-import { useState } from "react";
+import { FeePreviewForm } from "@/components/cohorts/steps/fee-preview-form";
+import { FeeStructureForm } from "@/components/cohorts/steps/fee-structure-form";
+import { LitmusTestForm } from "@/components/cohorts/steps/litmus-test-form";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  resetCohortState,
+  setCohortData,
+} from "@/lib/features/cohort/cohortSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { useEffect, useState } from "react";
 
-
-type StepId = "basic-details" | "application-form" | "litmus-test" | "fee-structure" | "fee-preview" | "collaborators";
+type StepId =
+  | "basic-details"
+  | "application-form"
+  | "litmus-test"
+  | "fee-structure"
+  | "fee-preview"
+  | "collaborators";
 
 interface Step {
   id: StepId;
@@ -20,6 +30,8 @@ interface Step {
 
 interface Cohort {
   _id: string;
+  name: string;
+  description: string;
   programDetail: string;
   centerDetail: string;
   cohortId: string;
@@ -31,6 +43,11 @@ interface Cohort {
   status: "Draft" | "Open" | "Full" | "Closed" | "Archived";
   baseFee: string;
   isComplete: boolean;
+  collaborators?: any[];
+  applicationFormDetail?: any[];
+  litmusTestDetail?: any[];
+  feeStructureDetails?: any[];
+  cohortFeesDetail?: any;
 }
 
 interface CreateCohortContentProps {
@@ -38,7 +55,7 @@ interface CreateCohortContentProps {
   onStepChange: (step: StepId) => void;
   onComplete: () => void;
   editingCohort?: Cohort | null;
-  fetchCohorts: () => void; 
+  fetchCohorts: () => void;
 }
 
 export function CreateCohortContent({
@@ -47,14 +64,13 @@ export function CreateCohortContent({
   onComplete,
   editingCohort: initialEditingCohort,
   fetchCohorts,
-  
 }: CreateCohortContentProps) {
-  const [editingCohort, setEditingCohort] = useState<Cohort | null>(initialEditingCohort || null);
+  const dispatch = useAppDispatch();
+  const cohortState = useAppSelector((state) => state.cohort);
 
-  const handleCohortCreated = (cohort: Cohort) => {
-    setEditingCohort(cohort); 
-    fetchCohorts();
-  };
+  const [editingCohort, setEditingCohort] = useState<Cohort | null>(
+    initialEditingCohort || null
+  );
 
   const steps: Step[] = [
     { id: "basic-details", label: "Basic Details" },
@@ -65,11 +81,59 @@ export function CreateCohortContent({
     { id: "collaborators", label: "Collaborators" },
   ];
 
+  // Initialize Redux state when editing cohort changes
+  useEffect(() => {
+    if (initialEditingCohort) {
+      console.log("Initializing Redux with cohort data:", initialEditingCohort);
+      dispatch(setCohortData(initialEditingCohort));
+      setEditingCohort(initialEditingCohort);
+    } else {
+      // Reset Redux state for new cohort
+      dispatch(resetCohortState());
+      setEditingCohort(null);
+    }
+  }, [initialEditingCohort, dispatch]);
+
+  // Enhanced cohort update handler
+  const handleCohortCreated = (cohort: Cohort) => {
+    console.log("Cohort updated:", cohort);
+
+    if (!cohort._id || !cohort.cohortId) {
+      console.warn("Invalid cohort data received");
+      return;
+    }
+
+    // Update local state
+    const updatedCohort = {
+      ...editingCohort,
+      ...cohort,
+      _id: cohort._id,
+      cohortId: cohort.cohortId,
+    } as Cohort;
+
+    setEditingCohort(updatedCohort);
+
+    // Update Redux state
+    dispatch(setCohortData(updatedCohort));
+
+    // Refresh cohorts list
+    fetchCohorts();
+  };
+
+  // Handle dialog close - reset state
+  const handleComplete = () => {
+    dispatch(resetCohortState());
+    setEditingCohort(null);
+    onComplete();
+  };
+
   return (
     <>
       <DialogHeader>
         <DialogTitle>
-          {editingCohort ? `Edit Cohort: ${editingCohort.cohortId}` : "Create New Cohort"}
+          {editingCohort
+            ? `Edit Cohort: ${editingCohort.cohortId}`
+            : "Create New Cohort"}
         </DialogTitle>
       </DialogHeader>
       <Tabs value={currentStep} className="w-full">
@@ -85,26 +149,46 @@ export function CreateCohortContent({
           ))}
         </TabsList>
         <TabsContent value="basic-details">
-          <BasicDetailsForm 
+          <BasicDetailsForm
             onNext={() => onStepChange("application-form")}
-            onCohortCreated={handleCohortCreated} // Pass the callback to handle cohort creation
+            onCohortCreated={handleCohortCreated}
             initialData={editingCohort}
           />
         </TabsContent>
         <TabsContent value="application-form">
-          <ApplicationFormBuilder onNext={() => onStepChange("litmus-test")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
+          <ApplicationFormBuilder
+            onNext={() => onStepChange("litmus-test")}
+            onCohortCreated={handleCohortCreated}
+            initialData={editingCohort}
+          />
         </TabsContent>
         <TabsContent value="litmus-test">
-          <LitmusTestForm onNext={() => onStepChange("fee-structure")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
+          <LitmusTestForm
+            onNext={() => onStepChange("fee-structure")}
+            onCohortCreated={handleCohortCreated}
+            initialData={editingCohort}
+          />
         </TabsContent>
         <TabsContent value="fee-structure">
-          <FeeStructureForm onNext={() => onStepChange("fee-preview")} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
+          <FeeStructureForm
+            onNext={() => onStepChange("fee-preview")}
+            onCohortCreated={handleCohortCreated}
+            initialData={editingCohort}
+          />
         </TabsContent>
         <TabsContent value="fee-preview">
-          <FeePreviewForm onNext={() => onStepChange("collaborators")} onCohortCreated={handleCohortCreated}  initialData={editingCohort} />
+          <FeePreviewForm
+            onNext={() => onStepChange("collaborators")}
+            onCohortCreated={handleCohortCreated}
+            initialData={editingCohort}
+          />
         </TabsContent>
         <TabsContent value="collaborators">
-          <CollaboratorsForm onComplete={onComplete} onCohortCreated={handleCohortCreated} initialData={editingCohort} />
+          <CollaboratorsForm
+            onComplete={handleComplete}
+            onCohortCreated={handleCohortCreated}
+            initialData={editingCohort}
+          />
         </TabsContent>
       </Tabs>
     </>

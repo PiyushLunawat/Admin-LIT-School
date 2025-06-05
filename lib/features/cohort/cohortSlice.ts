@@ -96,28 +96,32 @@ const cohortSlice = createSlice({
     // Set the entire cohort data (useful for initialization)
     setCohortData: (state, action: PayloadAction<any>) => {
       const cohortData = action.payload;
+      console.log("Redux: Setting cohort data", cohortData);
+
       if (cohortData._id) state._id = cohortData._id;
 
       // Basic Details
-      if (cohortData.programDetail)
+      if (cohortData.programDetail !== undefined)
         state.basicDetails.programDetail = cohortData.programDetail;
-      if (cohortData.centerDetail)
+      if (cohortData.centerDetail !== undefined)
         state.basicDetails.centerDetail = cohortData.centerDetail;
-      if (cohortData.cohortId)
+      if (cohortData.cohortId !== undefined)
         state.basicDetails.cohortId = cohortData.cohortId;
-      if (cohortData.startDate)
+      if (cohortData.startDate !== undefined)
         state.basicDetails.startDate = cohortData.startDate;
-      if (cohortData.endDate) state.basicDetails.endDate = cohortData.endDate;
-      if (cohortData.timeSlot)
+      if (cohortData.endDate !== undefined)
+        state.basicDetails.endDate = cohortData.endDate;
+      if (cohortData.timeSlot !== undefined)
         state.basicDetails.timeSlot = cohortData.timeSlot;
-      if (cohortData.totalSeats)
+      if (cohortData.totalSeats !== undefined)
         state.basicDetails.totalSeats = cohortData.totalSeats;
-      if (cohortData.baseFee) state.basicDetails.baseFee = cohortData.baseFee;
+      if (cohortData.baseFee !== undefined)
+        state.basicDetails.baseFee = cohortData.baseFee;
       if (cohortData.isGSTIncluded !== undefined)
         state.basicDetails.isGSTIncluded = cohortData.isGSTIncluded;
 
       // Application Form
-      if (cohortData.applicationFormDetail)
+      if (cohortData.applicationFormDetail !== undefined)
         state.applicationForm.applicationFormDetail =
           cohortData.applicationFormDetail;
 
@@ -127,38 +131,47 @@ const cohortSlice = createSlice({
         cohortData.litmusTestDetail.length > 0
       ) {
         const litmusData = cohortData.litmusTestDetail[0];
-        if (litmusData.litmusTasks)
+        if (litmusData.litmusTasks !== undefined)
           state.litmusTest.litmusTasks = litmusData.litmusTasks;
-        if (litmusData.scholarshipSlabs)
+        if (litmusData.scholarshipSlabs !== undefined)
           state.litmusTest.scholarshipSlabs = litmusData.scholarshipSlabs;
-        if (litmusData.litmusTestDuration)
+        if (litmusData.litmusTestDuration !== undefined)
           state.litmusTest.litmusTestDuration = litmusData.litmusTestDuration;
       }
 
       // Fee Structure
       if (cohortData.cohortFeesDetail) {
-        if (cohortData.cohortFeesDetail.applicationFee)
+        if (cohortData.cohortFeesDetail.applicationFee !== undefined)
           state.feeStructure.applicationFee =
             cohortData.cohortFeesDetail.applicationFee;
-        if (cohortData.cohortFeesDetail.tokenFee)
+        if (cohortData.cohortFeesDetail.tokenFee !== undefined)
           state.feeStructure.tokenFee = cohortData.cohortFeesDetail.tokenFee;
-        if (cohortData.cohortFeesDetail.semesters)
+        if (cohortData.cohortFeesDetail.semesters !== undefined)
           state.feeStructure.semesters = cohortData.cohortFeesDetail.semesters;
-        if (cohortData.cohortFeesDetail.installmentsPerSemester)
+        if (cohortData.cohortFeesDetail.installmentsPerSemester !== undefined)
           state.feeStructure.installmentsPerSemester =
             cohortData.cohortFeesDetail.installmentsPerSemester;
-        if (cohortData.cohortFeesDetail.oneShotDiscount)
+        if (cohortData.cohortFeesDetail.oneShotDiscount !== undefined)
           state.feeStructure.oneShotDiscount =
             cohortData.cohortFeesDetail.oneShotDiscount;
       }
 
       // Fee Preview
-      if (cohortData.feeStructureDetails)
+      if (cohortData.feeStructureDetails !== undefined)
         state.feePreview.feeStructureDetails = cohortData.feeStructureDetails;
 
-      // Collaborators
-      if (cohortData.collaborators)
-        state.collaborators.collaborators = cohortData.collaborators;
+      // Collaborators - Always update, even if empty array
+      if (cohortData.collaborators !== undefined) {
+        state.collaborators.collaborators = Array.isArray(
+          cohortData.collaborators
+        )
+          ? cohortData.collaborators
+          : [];
+        console.log(
+          "Redux: Updated collaborators",
+          state.collaborators.collaborators
+        );
+      }
     },
 
     // Update basic details
@@ -201,12 +214,110 @@ const cohortSlice = createSlice({
       state.feePreview = { ...state.feePreview, ...action.payload };
     },
 
-    // Update collaborators
-    updateCollaborators: (
+    // Update collaborators - improved handling
+    updateCollaborators: (state, action: PayloadAction<any>) => {
+      console.log("Redux: Updating collaborators", action.payload);
+
+      // If the payload has a collaborators property, use that
+      if (action.payload.collaborators !== undefined) {
+        state.collaborators.collaborators = Array.isArray(
+          action.payload.collaborators
+        )
+          ? action.payload.collaborators
+          : [];
+      }
+      // If the payload is just the collaborators array
+      else if (Array.isArray(action.payload)) {
+        state.collaborators.collaborators = action.payload;
+      }
+      // If it's a partial update to the collaborators state
+      else {
+        state.collaborators = { ...state.collaborators, ...action.payload };
+      }
+
+      console.log(
+        "Redux: Collaborators after update",
+        state.collaborators.collaborators
+      );
+    },
+
+    // Delete collaborators - improved logic
+    deleteCollaborators: (
       state,
-      action: PayloadAction<Partial<CollaboratorsState>>
+      action: PayloadAction<{
+        cohortId: string;
+        collaboratorId: string;
+        roleId: string;
+      }>
     ) => {
-      state.collaborators = { ...state.collaborators, ...action.payload };
+      const { collaboratorId, roleId } = action.payload;
+      console.log("Redux: Deleting collaborator", action.payload);
+
+      state.collaborators.collaborators = state.collaborators.collaborators
+        .map((collaborator: any) => {
+          if (collaborator._id === collaboratorId) {
+            // Remove the specific role from this collaborator
+            const updatedRoles =
+              collaborator.roles?.filter((role: any) => role._id !== roleId) ||
+              [];
+
+            // If no roles left, return null to filter out this collaborator
+            if (updatedRoles.length === 0) {
+              return null;
+            }
+
+            // Return collaborator with updated roles
+            return {
+              ...collaborator,
+              roles: updatedRoles,
+            };
+          }
+          return collaborator;
+        })
+        .filter(Boolean); // Remove null entries
+
+      console.log(
+        "Redux: Collaborators after delete",
+        state.collaborators.collaborators
+      );
+    },
+
+    // Edit collaborator - improved logic
+    editCollaborator: (
+      state,
+      action: PayloadAction<{
+        collaboratorId?: string;
+        roleId?: string;
+        role?: string;
+      }>
+    ) => {
+      const { collaboratorId, roleId, role } = action.payload;
+      console.log("Redux: Editing collaborator", action.payload);
+
+      state.collaborators.collaborators = state.collaborators.collaborators.map(
+        (collaborator: any) => {
+          if (collaborator._id === collaboratorId) {
+            return {
+              ...collaborator,
+              roles: collaborator.roles?.map((roleObj: any) =>
+                roleObj._id === roleId ? { ...roleObj, role: role } : roleObj
+              ),
+            };
+          }
+          return collaborator;
+        }
+      );
+
+      console.log(
+        "Redux: Collaborators after edit",
+        state.collaborators.collaborators
+      );
+    },
+
+    // Add individual collaborator
+    addCollaborator: (state, action: PayloadAction<any>) => {
+      console.log("Redux: Adding collaborator", action.payload);
+      state.collaborators.collaborators.push(action.payload);
     },
 
     // Delete collaborator
@@ -227,8 +338,9 @@ const cohortSlice = createSlice({
     },
 
     // Reset cohort state
-    resetCohortState: (_state) => {
-      return initialState;
+    resetCohortState: () => {
+      console.log("Redux: Resetting cohort state");
+      return { ...initialState };
     },
   },
 });
@@ -241,6 +353,9 @@ export const {
   updateFeeStructure,
   updateFeePreview,
   updateCollaborators,
+  deleteCollaborators,
+  editCollaborator,
+  addCollaborator,
   setCurrentStep,
   resetCohortState,
   deleteCollaborator,
