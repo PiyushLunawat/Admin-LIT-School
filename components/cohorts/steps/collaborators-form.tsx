@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -84,6 +84,8 @@ export function CollaboratorsForm({
       }))
     );
   };
+
+  const debounceTimers = useRef<{ [key: number]: NodeJS.Timeout }>({});
 
   // Usage
   const formattedCollaborators = formatCollaborators(
@@ -178,24 +180,31 @@ export function CollaboratorsForm({
     }
   };
 
-  const handleCheckEmail = async (
+  const handleCheckEmail = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
     const emailVal = e.target.value.trim();
-    const role = form.getValues(`collaborators.${index}.role`);
     form.setValue(`collaborators.${index}.email`, emailVal);
     form.clearErrors(`collaborators.${index}.email`);
 
-    if (emailVal && ["interviewer", "Litmus_test_reviewer"].includes(role)) {
-      const result = await checkEmailExists(emailVal);
-      if (!result.success) {
-        form.setError(`collaborators.${index}.email`, {
-          type: "manual",
-          message: "This email doesn't have an account on CalendLIT",
-        });
+    // Clear any previous debounce timeout for this index
+    clearTimeout(debounceTimers.current[index]);
+
+    // Start new debounce
+    debounceTimers.current[index] = setTimeout(async () => {
+      const role = form.getValues(`collaborators.${index}.role`);
+
+      if (emailVal && ["interviewer", "Litmus_test_reviewer"].includes(role)) {
+        const result = await checkEmailExists(emailVal);
+        if (!result.success) {
+          form.setError(`collaborators.${index}.email`, {
+            type: "manual",
+            message: "This email doesn't have an account on CalendLIT",
+          });
+        }
       }
-    }
+    }, 500); // 500ms debounce
   };
 
   const handleEdit = (index: number) => {

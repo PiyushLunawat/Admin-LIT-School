@@ -5,7 +5,7 @@ import { getPrograms } from "@/app/api/programs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { LoaderIcon } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface CohortDetailsProps {
@@ -83,7 +83,7 @@ export function CohortDetails({
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="flex justify-center items-center h-full">
-          <LoaderIcon className="w-8 h-8 animate-spin" />
+          <LoaderCircle className="w-8 h-8 animate-spin" />
         </div>
       </div>
     );

@@ -519,7 +519,10 @@ export function BasicDetailsForm({
                     placeholder="9,95,000"
                     value={formatIndianCurrency(field.value)} // Format the value on render
                     onChange={(e) => {
-                      const rawValue = removeFormatting(e.target.value); // Remove formatting for raw input
+                      const rawValue = removeFormatting(e.target.value).replace(
+                        /\D/g,
+                        ""
+                      ); // Remove formatting for raw input
                       field.onChange(rawValue); // Update the field with unformatted value
                     }}
                   />

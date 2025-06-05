@@ -488,20 +488,20 @@ export function PaymentInformationTab({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Scholarship</p>
-              <div className="flex gap-1.5 items-center text-sm font-semibold">
+              <div className="sm:flex gap-1.5 items-center text-sm font-semibold">
                 {scholarshipDetails ? (
                   <>
                     ₹{formatAmount(scholarshipAmount)}{" "}
                     <Badge
-                      className={`capitalize ${getColor(
+                      className={`w-fit capitalize ${getColor(
                         scholarshipDetails?.scholarshipName
                       )}`}
                       variant="secondary"
                     >
-                      {scholarshipDetails?.scholarshipName +
-                        " (" +
-                        scholarshipDetails?.scholarshipPercentage +
-                        "%)"}
+                      <span className="w-16 sm:w-fit sm:mr-1 truncate ">
+                        {scholarshipDetails?.scholarshipName}
+                      </span>
+                      {"(" + scholarshipDetails?.scholarshipPercentage + "%)"}
                     </Badge>
                   </>
                 ) : (

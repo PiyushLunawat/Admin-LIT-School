@@ -57,6 +57,7 @@ export function DocumentsTab({
 
   const [newDocName, setNewDocName] = useState<string>("");
   const [newDocFile, setNewDocFile] = useState<File | null>(null);
+  const [docNameError, setDocNameError] = useState("");
 
   const [open, setOpen] = useState(false);
   const [viewDoc, setViewDoc] = useState("");
@@ -850,13 +851,21 @@ export function DocumentsTab({
         <CardHeader>
           <CardTitle>Upload New Document</CardTitle>
         </CardHeader>
-        <CardContent className="flex gap-4">
-          <Input
-            className="w-full"
-            placeholder="Document Name"
-            value={newDocName}
-            onChange={(e) => setNewDocName(e.target.value)}
-          />
+        <CardContent className="flex gap-4 items-start">
+          <div className="w-full flex flex-col gap-1">
+            <Input
+              className="w-full"
+              placeholder="Document Name"
+              value={newDocName}
+              onChange={(e) => {
+                setDocNameError("");
+                setNewDocName(e.target.value);
+              }}
+            />
+            {docNameError && (
+              <div className="text-[#FF503D] text-sm pl-3">{docNameError}</div>
+            )}
+          </div>
           <div className="flex gap-2 items-center">
             {uploadStates[newDocName]?.uploading ? (
               <div className="flex items-center gap-2">
@@ -891,13 +900,21 @@ export function DocumentsTab({
                   <span>Choose File</span>
                 </Button>
                 <input
-                  disabled={!newDocName || latestCohort?.status === "dropped"}
+                  disabled={latestCohort?.status === "dropped"}
                   type="file"
                   accept="application/pdf"
                   className="hidden"
                   key={newDocFile ? newDocFile.name : ""}
                   onChange={(e) => {
-                    handleFileChange(e, newDocName);
+                    if (!newDocName.trim()) {
+                      setDocNameError(
+                        "Please enter a document name before uploading."
+                      );
+                      return;
+                    } else {
+                      setDocNameError("");
+                      handleFileChange(e, newDocName);
+                    }
                   }}
                 />
               </label>

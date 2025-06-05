@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, LoaderIcon, RefreshCw } from "lucide-react";
+import { Download, LoaderCircle, RefreshCw } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
@@ -89,7 +89,7 @@ export function ApplicationsTab({
       await new Promise((resolve) => setTimeout(resolve, 2000));
       if (loading) {
         <div className="flex justify-center items-center h-full">
-          <LoaderIcon className="w-8 h-8 animate-spin" />
+          <LoaderCircle className="w-8 h-8 animate-spin" />
         </div>;
       }
     };
@@ -327,7 +327,7 @@ export function ApplicationsTab({
         </div>
       ) : (
         <div className="flex justify-center items-center h-full">
-          <LoaderIcon className="w-8 h-8 animate-spin" />
+          <LoaderCircle className="w-8 h-8 animate-spin" />
         </div>
       )}
     </>

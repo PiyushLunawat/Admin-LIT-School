@@ -1400,7 +1400,7 @@ function ScholarshipSlabItem({
                           placeholder="Start"
                           value={start}
                           min={0}
-                          max={end || 99}
+                          max={end ? Number(end) - 1 : 99}
                           onChange={(e) => {
                             const value = e.target.value;
                             const endValue =
@@ -1419,7 +1419,7 @@ function ScholarshipSlabItem({
                           type="number"
                           placeholder="End"
                           value={end}
-                          min={start || 0}
+                          min={start ? Number(start) + 1 : 1}
                           max={100}
                           onChange={(e) => {
                             const value = e.target.value;

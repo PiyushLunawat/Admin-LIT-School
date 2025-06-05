@@ -197,12 +197,15 @@ export function ApplicationFeedback({
     }
 
     if (status === "accepted" || status === "rejected") {
-      // Check if for each task, there's feedback that isn't purely bullet(s).
-      const allFeedback = Object.values(feedbacks).flat(); // Flatten all tasks
-      // If we find at least some text beyond "• ", we consider it valid
-      return allFeedback.some((fb) => {
-        const stripped = fb.replace(/•/g, "").trim();
-        return stripped.length > 0;
+      // Check feedback for each task
+      return taskList.every((task: any) => {
+        const taskFeedbacks = feedbacks[task._id];
+        if (!taskFeedbacks || taskFeedbacks.length === 0) return false;
+
+        return taskFeedbacks.every((fb) => {
+          const stripped = fb.replace(/•/g, "").trim();
+          return stripped.length > 0;
+        });
       });
     }
     return true; // fallback

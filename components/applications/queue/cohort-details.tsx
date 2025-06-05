@@ -12,7 +12,7 @@ import {
   CohortDetailsProps,
   Program,
 } from "@/types/components/applications/queue/cohort-details";
-import { LoaderIcon } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 
 export function CohortDetails({
   cohort,
@@ -64,7 +64,7 @@ export function CohortDetails({
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="flex justify-center items-center h-full">
-          <LoaderIcon className="w-8 h-8 animate-spin" />
+          <LoaderCircle className="w-8 h-8 animate-spin" />
         </div>
       </div>
     );

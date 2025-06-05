@@ -15,7 +15,7 @@ import {
   CohortHeaderProps,
   Program,
 } from "@/types/components/cohorts/dashboard/cohort-header";
-import { LoaderIcon } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 
 export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
   const [cohort, setCohort] = useState<any>(null);
@@ -102,7 +102,7 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="flex justify-center items-center h-full">
-          <LoaderIcon className="w-8 h-8 animate-spin" />
+          <LoaderCircle className="w-8 h-8 animate-spin" />
         </div>
       </div>
     );

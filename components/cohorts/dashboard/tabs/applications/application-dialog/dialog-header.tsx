@@ -103,7 +103,7 @@ export function StudentApplicationHeader({
             </h2>
             <div className="flex flex-col sm:flex-row gap-0 sm:gap-2 h-5 items-start sm:items-center">
               <p className="text-sm text-muted-foreground">{student?.email}</p>
-              <Separator orientation="vertical" className="hidden sm:block"/>
+              <Separator orientation="vertical" className="hidden sm:block" />
               <p className="text-sm text-muted-foreground">
                 {student?.mobileNumber}
               </p>
@@ -152,7 +152,7 @@ export function StudentApplicationHeader({
                   onClick={() => setMarkedAsDialogOpen(true)}
                   disabled={
                     latestCohort?.status === "dropped" ||
-                    ["rejected", "not qualified"].includes(
+                    ["incomplete", "rejected", "not qualified"].includes(
                       applicationDetails?.applicationStatus
                     )
                   }

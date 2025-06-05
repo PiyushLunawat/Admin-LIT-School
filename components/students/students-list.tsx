@@ -267,7 +267,7 @@ export function StudentsList({
                     </TableCell>
                     <TableCell>
                       <Badge
-                        className="capitalize"
+                        className="capitalize truncate"
                         variant={getStatusColor(
                           applicationDetails?.applicationStatus
                         )}
@@ -278,7 +278,7 @@ export function StudentsList({
                     </TableCell>
                     <TableCell>
                       <Badge
-                        className="capitalize"
+                        className="capitalize truncate"
                         variant={getStatusColor(latestCohort?.status || "")}
                       >
                         {latestCohort?.status?.toLowerCase() || "not enrolled"}
@@ -289,7 +289,7 @@ export function StudentsList({
                         {paymentStage}
                       </span>
                       <Badge
-                        className="capitalize"
+                        className="capitalize truncate"
                         variant={getStatusColor(paymentStatus || "payment due")}
                       >
                         {paymentStatus?.toLowerCase() || "payment due"}
@@ -298,7 +298,7 @@ export function StudentsList({
                     <TableCell>
                       {scholarshipDetails ? (
                         <Badge
-                          className={`capitalize ${getColor(
+                          className={`capitalize truncate ${getColor(
                             scholarshipDetails?.scholarshipName
                           )}`}
                           variant="secondary"
@@ -335,10 +335,13 @@ export function StudentsList({
                               className="justify-start text-destructive"
                               disabled={
                                 latestCohort?.status === "dropped" ||
-                                ["rejected", "not qualified"].includes(
+                                [
+                                  "incomplete",
+                                  "rejected",
+                                  "not qualified",
+                                ].includes(
                                   applicationDetails?.applicationStatus
-                                ) ||
-                                latestCohort?.status !== "enrolled"
+                                )
                               }
                             >
                               <UserMinus className="h-4 w-4 mr-2" />

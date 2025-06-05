@@ -58,7 +58,7 @@ export function NotificationsButton() {
     lastActivity: new Date().toISOString(),
   });
 
-  // const audioRef = useRef<HTMLAudioElement | null>(null); 
+  // const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
 
   const networkCheckRef = useRef<NodeJS.Timeout>();
@@ -301,12 +301,12 @@ export function NotificationsButton() {
   }
 
   const handlePlay = () => {
-    const audio = new Audio("/assets/notification/notification_tone.wav")
+    const audio = new Audio("/assets/notification/notification_tone.wav");
 
     audio.play().catch((err) => {
-      console.error("Audio playback failed:", err)
-    })
-  }
+      console.error("Audio playback failed:", err);
+    });
+  };
 
   return (
     <>
@@ -345,7 +345,7 @@ export function NotificationsButton() {
             </Label>
           ) : (
             <div className="flex flex-col justify-center">
-              <div className="flex flex-col !gap-1.5 max-h-[360px] min-h-[80px] overflow-y-auto">
+              <div className="flex flex-col pt-2 !gap-1.5 max-h-[360px] min-h-[80px] overflow-y-auto">
                 {Object.entries(groupNotificationsByDate(notifications)).map(
                   ([label, group]) =>
                     group.length > 0 && (

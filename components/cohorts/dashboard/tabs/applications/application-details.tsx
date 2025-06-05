@@ -170,7 +170,7 @@ export function ApplicationDetails({
   };
 
   const handleApplicationStatusChange = (newStatus: string) => {
-    setStatus(newStatus);
+    // setStatus(newStatus);
     if (
       newStatus === "accepted" ||
       newStatus === "on hold" ||
@@ -182,7 +182,7 @@ export function ApplicationDetails({
   };
 
   const handleInterviewStatusChange = (newStatus: string) => {
-    setStatus(newStatus);
+    // setStatus(newStatus);
     if (
       newStatus === "waitlist" ||
       newStatus === "selected" ||
@@ -419,9 +419,10 @@ export function ApplicationDetails({
                   className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
                   disabled={
-                    ["rejected", "not qualified"].includes(
+                    latestCohort?.status === "dropped" ||
+                    ["incomplete", "rejected", "not qualified"].includes(
                       applicationDetails?.applicationStatus
-                    ) || latestCohort.status !== "enrolled"
+                    )
                   }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />

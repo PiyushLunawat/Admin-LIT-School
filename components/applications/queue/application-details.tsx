@@ -416,7 +416,12 @@ export function ApplicationDetails({
                   variant="outline"
                   className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
-                  disabled={latestCohort.status !== "enrolled"}
+                  disabled={
+                    latestCohort?.status === "dropped" ||
+                    ["incomplete", "rejected", "not qualified"].includes(
+                      applicationDetails?.applicationStatus
+                    )
+                  }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   Mark as Dropped

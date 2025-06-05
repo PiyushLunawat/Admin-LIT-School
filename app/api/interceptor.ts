@@ -1,7 +1,6 @@
 import fetchIntercept from "fetch-intercept";
 import Cookies from "js-cookie";
 import { adminRefreshToken } from "./auth";
-import { log } from "console";
 
 const API_BASE_URL = process.env.API_URL;
 
@@ -32,6 +31,11 @@ export const RegisterInterceptor = () => {
       let accesstoken = Cookies.get("adminAccessToken");
       let reftoken = Cookies.get("adminRefreshToken");
 
+      // console.log(
+      //   "refresh ",
+      //   !isPublic && !accesstoken && reftoken && !refreshingToken
+      // );
+
       if (!isPublic && !accesstoken && reftoken && !refreshingToken) {
         refreshingToken = true;
 
@@ -49,7 +53,7 @@ export const RegisterInterceptor = () => {
       }
 
       if (!isPublic && !accesstoken && !reftoken) {
-        console.log("logout", url);
+        // console.log("logout", url);
         await clearAuthAndRedirect();
       }
 
@@ -78,5 +82,5 @@ const clearAuthAndRedirect = () => {
   Cookies.remove("adminId");
   Cookies.remove("adminEmail");
   localStorage.clear();
-  window.location.href = "/login";
+  // window.location.href = "/login";
 };

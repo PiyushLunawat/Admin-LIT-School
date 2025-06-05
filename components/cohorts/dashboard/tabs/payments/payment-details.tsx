@@ -111,7 +111,7 @@ export function PaymentDetails({
   useEffect(() => {
     setTokenFeeDetails(latestCohort?.tokenFeeDetails);
     setPaymentDetails(latestCohort?.paymentDetails);
-    console.log("Dvd", student);
+    // console.log("student", student);
   }, [latestCohort?.paymentDetails, latestCohort?.tokenFeeDetails, student]);
 
   const tokenAmount =
@@ -475,13 +475,6 @@ export function PaymentDetails({
   };
 
   const getColor = (slabName: string): string => {
-    console.log(
-      "gggg",
-      slabName,
-      student?.appliedCohorts?.[student?.appliedCohorts.length - 1]?.cohortId
-        ?.litmusTestDetail?.[0]?.scholarshipSlabs
-    );
-
     const index = student?.appliedCohorts?.[
       student?.appliedCohorts.length - 1
     ]?.cohortId?.litmusTestDetail?.[0]?.scholarshipSlabs.findIndex(
@@ -657,7 +650,12 @@ export function PaymentDetails({
                   variant="outline"
                   className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
-                  disabled={latestCohort.status !== "enrolled"}
+                  disabled={
+                    latestCohort?.status === "dropped" ||
+                    ["incomplete", "rejected", "not qualified"].includes(
+                      applicationDetails?.applicationStatus
+                    )
+                  }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   <span className="flex-1 truncate w-[170px]">
@@ -1504,7 +1502,11 @@ export function PaymentDetails({
           <Dialog open={schOpen} onOpenChange={setSchOpen}>
             <DialogTitle></DialogTitle>
             <DialogContent className="max-w-[90vw] sm:max-w-5xl">
-              <AwardScholarship student={student} />
+              <AwardScholarship
+                student={student}
+                onApplicationUpdate={onApplicationUpdate}
+                onClose={() => setSchOpen(false)}
+              />
             </DialogContent>
           </Dialog>
 

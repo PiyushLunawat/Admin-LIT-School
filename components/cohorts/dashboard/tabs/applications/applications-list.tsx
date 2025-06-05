@@ -5,7 +5,7 @@ import {
   CheckCircle,
   Clock4Icon,
   Eye,
-  LoaderIcon,
+  LoaderCircle,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -281,7 +281,9 @@ export function ApplicationsList({
                         applicationDetails?.applicationStatus || "--"
                       )}
                     >
-                      {applicationDetails?.applicationStatus}
+                      {latestCohort?.status === "enrolled"
+                        ? latestCohort?.status
+                        : applicationDetails?.applicationStatus}
                     </Badge>
                   )}
                   {applicationDetails?.applicationStatus === "under review" &&
@@ -345,7 +347,7 @@ export function ApplicationsList({
         <DialogContent className="flex flex-col gap-4 max-w-[90vw] sm:max-w-4xl py-2 px-4 sm:px-6 h-[90vh] overflow-y-auto">
           {isLoading ? (
             <div className="flex justify-center items-center h-60">
-              <LoaderIcon className="w-8 h-8 animate-spin text-muted" />
+              <LoaderCircle className="w-8 h-8 animate-spin text-muted" />
             </div>
           ) : (
             selectedStudent && (

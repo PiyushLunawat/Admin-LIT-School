@@ -60,6 +60,8 @@ export function FeeCollectionDetails({
     application.cousrseEnrolled?.[application.cousrseEnrolled.length - 1];
   const latestCohort =
     application.appliedCohort?.[application.appliedCohort.length - 1];
+  const applicationDetails = latestCohort?.applicationDetails;
+
   let lastStatus = "";
 
   const visibleSemesters = showAllSemesters
@@ -271,7 +273,12 @@ export function FeeCollectionDetails({
                   variant="outline"
                   className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
-                  disabled={latestCohort.status !== "enrolled"}
+                  disabled={
+                    latestCohort?.status === "dropped" ||
+                    ["incomplete", "rejected", "not qualified"].includes(
+                      applicationDetails?.applicationStatus
+                    )
+                  }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   Mark as Dropped

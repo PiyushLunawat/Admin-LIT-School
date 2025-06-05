@@ -1,6 +1,7 @@
 "use client";
 
 import { DateRangePicker } from "@/components/dashboard/overview/date-range-picker";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -8,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dispatch, SetStateAction } from "react";
+import { X } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { DateRange } from "react-day-picker";
 
 interface CohortHeaderProps {
@@ -36,8 +38,18 @@ export function DashboardHeader({
   selectedCohort,
   onCohortChange,
 }: CohortHeaderProps) {
+  const [selectedProgramId, setSelectedProgramId] = useState("");
+
   const handleProgramChange = (value: string) => {
     onProgramChange(value);
+    const selected = programs.find((prog) => prog.name === value);
+    setSelectedProgramId(selected?._id || "");
+    onCohortChange("all-cohorts");
+  };
+
+  const resetDateRange = () => {
+    setSelectedProgramId("");
+    onProgramChange("all-programs");
     onCohortChange("all-cohorts");
   };
 
@@ -85,9 +97,9 @@ export function DashboardHeader({
               <SelectItem value="all-cohorts">All Cohorts</SelectItem>
               {cohorts
                 .filter((c) =>
-                  selectedProgram === "all-programs"
+                  selectedProgramId === ""
                     ? true
-                    : c.programDetail === selectedProgram
+                    : c.programDetail === selectedProgramId
                 )
                 .map((c) => (
                   <SelectItem key={c._id} value={c.cohortId}>
@@ -97,6 +109,18 @@ export function DashboardHeader({
             </SelectContent>
           </Select>
         </div>
+        {!(
+          selectedProgram === "all-programs" && selectedCohort === "all-cohorts"
+        ) && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="-ml-3"
+            onClick={resetDateRange}
+          >
+            <X className="ml-4 sm:ml-0 h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -80,6 +80,8 @@ export function LitmusTestDetails({
 
   const latestCohort =
     application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
+  const applicationDetails = latestCohort?.applicationDetails;
+
   const litmusTestDetails = latestCohort?.litmusTestDetails;
 
   const colorClasses = [
@@ -344,7 +346,12 @@ export function LitmusTestDetails({
                   variant="outline"
                   className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
-                  disabled={latestCohort.status !== "enrolled"}
+                  disabled={
+                    latestCohort?.status === "dropped" ||
+                    ["incomplete", "rejected", "not qualified"].includes(
+                      applicationDetails?.applicationStatus
+                    )
+                  }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
                   <span className="flex-1 truncate w-[170px]">
@@ -612,7 +619,11 @@ export function LitmusTestDetails({
       <Dialog open={schOpen} onOpenChange={setSchOpen}>
         <DialogTitle></DialogTitle>
         <DialogContent className="max-w-[90vw] sm:max-w-5xl px-4 sm:px-6 ">
-          <AwardScholarship student={application} />
+          <AwardScholarship
+            student={application}
+            onApplicationUpdate={onApplicationUpdate}
+            onClose={() => setSchOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 

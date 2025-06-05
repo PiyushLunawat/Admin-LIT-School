@@ -1,6 +1,6 @@
 "use client";
 
-import { LoaderIcon, Plus } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -300,7 +300,7 @@ export default function ProgramsPage() {
       {loading ? (
         <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
           <div className="flex justify-center items-center h-full">
-            <LoaderIcon className="w-8 h-8 animate-spin" />
+            <LoaderCircle className="w-8 h-8 animate-spin" />
           </div>
         </div>
       ) : programs.length > 0 ? (

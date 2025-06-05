@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, LoaderIcon } from "lucide-react";
+import { Download, LoaderCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
@@ -262,7 +262,7 @@ export default function StudentsPage() {
       {loading ? (
         <div className="h-fit flex items-center justify-center p-6 border rounded text-muted-foreground">
           <div className="flex justify-center items-center h-full">
-            <LoaderIcon className="w-8 h-8 animate-spin" />
+            <LoaderCircle className="w-8 h-8 animate-spin" />
           </div>
         </div>
       ) : (
