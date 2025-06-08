@@ -152,16 +152,16 @@ export function ApplicationsList({
   };
 
   const handleEyeClick = (student: any) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     setSelectedStudent(student);
 
     // Open dialog immediately (optional based on design)
     setOpen(true);
 
     // Simulate async delay (e.g., fetching detailed data)
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    // }, 2000);
   };
 
   const handleStatusUpdate = () => {
@@ -356,8 +356,8 @@ export function ApplicationsList({
                   student={selectedStudent}
                   onUpdateStatus={() => onApplicationUpdate()}
                 />
-                <Tabs defaultValue="personal">
-                  <TabsList>
+                <Tabs defaultValue="personal" className="space-y-6">
+                  <TabsList className="w-full">
                     <TabsTrigger value="personal">Personal</TabsTrigger>
                     <TabsTrigger value="documents">Documents</TabsTrigger>
                     <TabsTrigger value="payment">Payment</TabsTrigger>

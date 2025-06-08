@@ -85,14 +85,6 @@ export function CollaboratorsForm({
     );
   };
 
-  const debounceTimers = useRef<{ [key: number]: NodeJS.Timeout }>({});
-
-  // Usage
-  const formattedCollaborators = formatCollaborators(
-    initialData?.collaborators || []
-  );
-  // console.log("one", formatCollaborators(initialData?.collaborators));
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -117,6 +109,7 @@ export function CollaboratorsForm({
   const [editingCollaborator, setEditingCollaborator] = useState<number | null>(
     null
   );
+  const debounceTimers = useRef<{ [key: number]: NodeJS.Timeout }>({});
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -127,6 +120,7 @@ export function CollaboratorsForm({
 
   useEffect(() => {
     if (fields.length === 0) {
+      console.log("append");
       append({
         email: "",
         role: "",
@@ -229,9 +223,15 @@ export function CollaboratorsForm({
         console.log("A", createdCohort);
 
         form.reset({
-          collaborators: formatCollaborators(createdCohort.data.collaborators),
+          collaborators: formatCollaborators(createdCohort.data),
         });
-        onCohortCreated(createdCohort.data);
+
+        const updatedCohort = {
+          ...initialData,
+          collaborators: createdCohort.data,
+        };
+
+        onCohortCreated(updatedCohort);
         onComplete();
       } else {
         console.error("Cohort ID is missing. Unable to update.");
@@ -252,28 +252,37 @@ export function CollaboratorsForm({
           role: collab.role,
         }));
 
-        const updatedCohort = await updateCohort(initialData._id, {
+        const updatedResp = await updateCohort(initialData._id, {
           collaborators: collaboratorsToUpdate,
         });
-        console.log("updateCohort", updatedCohort);
+        console.log("updateCohort", updatedResp);
         form.reset({
-          collaborators: formatCollaborators(updatedCohort.data.collaborators),
+          collaborators: formatCollaborators(updatedResp.data),
         });
-        onCohortCreated(updatedCohort.data);
+        const updatedCohort = {
+          ...initialData,
+          collaborators: updatedResp.data,
+        };
 
+        onCohortCreated(updatedCohort);
         const invited = await inviteCollaborators(initialData._id);
 
         console.log("invited", updatedCohort);
 
+        form.reset({
+          collaborators: formatCollaborators(invited.data),
+        });
+
+        const invitedCohort = {
+          ...initialData,
+          collaborators: invited.data,
+        };
+
+        onCohortCreated(invitedCohort);
+
         toast({
           title: "Collaborators invited successfully!",
           variant: "success",
-        });
-
-        onCohortCreated(invited.data);
-
-        form.reset({
-          collaborators: invited.data.collaborators,
         });
       } else {
         toast({
@@ -309,6 +318,17 @@ export function CollaboratorsForm({
 
         remove(index); // remove from UI/form
         console.log(deleteRes);
+
+        form.reset({
+          collaborators: formatCollaborators(deleteRes.data),
+        });
+
+        const updatedCohort = {
+          ...initialData,
+          collaborators: deleteRes.data,
+        };
+
+        onCohortCreated(updatedCohort);
 
         dispatch(deleteCollaboratorFromStore(collaboratorId));
 
@@ -353,7 +373,17 @@ export function CollaboratorsForm({
         const editResp = await editCollaborator(editPayload);
         console.log("edited", editResp);
 
-        // onCohortCreated(editResp.data);
+        form.reset({
+          collaborators: formatCollaborators(editResp.data),
+        });
+
+        const updatedCohort = {
+          ...initialData,
+          collaborators: editResp.data,
+        };
+
+        onCohortCreated(updatedCohort);
+
         toast({
           title: "Collaborator edited successfully!",
           variant: "success",
@@ -392,9 +422,23 @@ export function CollaboratorsForm({
                 {editingCollaborator !== index && collaborator.isInvited ? (
                   <div className="w-full flex grid-cols-3 justify-between items-center">
                     <div className="w-3/5 flex-1">{collaborator.email}</div>
-                    <div className="w-1/5 flex gap-1 mx-auto items-center">
-                      Invited
-                      <CheckCircle className="w-4 h-4 text-[#2EB88A]" />
+                    <div className="w-1/5 mx-auto">
+                      {collaborator.isAccepted ? (
+                        <div className="flex gap-1 items-center text-[#2EB88A]">
+                          Invitation accepted
+                          <CheckCircle className="w-4 h-4 text-[#2EB88A]" />
+                        </div>
+                      ) : collaborator.isInvited ? (
+                        <div className="flex gap-1 items-center">
+                          Invited
+                          <CheckCircle className="w-4 h-4 text-[#2EB88A]" />
+                        </div>
+                      ) : (
+                        <div className="flex gap-1 items-center text-muted-foreground">
+                          Not yet invited
+                          <Plus className="w-4 h-4" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-1 flex-1 justify-end items-center">
                       <div className="px-3 py-2 capitalize bg-[#262626] rounded">
