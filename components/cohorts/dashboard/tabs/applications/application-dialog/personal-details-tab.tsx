@@ -7,6 +7,7 @@ import {
   CircleCheckBig,
   CircleMinus,
   Edit,
+  LoaderCircle,
   Pencil,
   Save,
   X,
@@ -381,11 +382,9 @@ export function PersonalDetailsTab({
                 className="w-full h-[220px] flex flex-col items-center justify-center bg-[#09090b] px-6 rounded-xl border border-[#2C2C2C]"
               >
                 <div className="text-center my-auto text-muted-foreground">
-                  <Camera className="mx-auto mb-2 w-8 h-8" />
+                  <LoaderCircle className="mx-auto mb-2 w-8 h-8 animate-spin" />
                   <div className="text-wrap">
-                    {loading
-                      ? `Uploading... ${uploadStates.profilePic.uploadProgress}%`
-                      : "Upload a Passport size Image of Yourself. Ensure that your face covers 60% of this picture."}
+                    {`Uploading... ${uploadStates.profilePic.uploadProgress}%`}
                   </div>
                 </div>
               </label>
@@ -459,7 +458,7 @@ export function PersonalDetailsTab({
             )}
           </div>
           <div className="flex flex-col flex-1 gap-4">
-            <div className="flex flex-1 gap-4">
+            <div className="flex flex-col sm:flex-row flex-1 gap-4">
               <div className="flex flex-col flex-1 gap-2">
                 <Label className="pl-3">Full Name</Label>
                 <Input
@@ -482,7 +481,7 @@ export function PersonalDetailsTab({
                 />
               </div>
             </div>
-            <div className="flex flex-1 gap-4">
+            <div className="flex flex-col sm:flex-row flex-1 gap-4">
               <div className="flex flex-col flex-1 gap-2">
                 <Label className="pl-3">Gender</Label>
                 <Select disabled defaultValue={student?.gender?.toLowerCase()}>
@@ -522,7 +521,7 @@ export function PersonalDetailsTab({
                 </Select>
               </div>
             </div>
-            <div className="flex flex-1 gap-4">
+            <div className="flex flex-col sm:flex-row flex-1 gap-4">
               <div className="flex flex-col flex-1 gap-2">
                 <Label className="pl-3">Program of Interest</Label>
                 <Input

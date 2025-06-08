@@ -440,9 +440,9 @@ export function DocumentsTab({
                       </Button>
                     </div>
                   ) : docDetails ? (
-                    <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                       <Badge
-                        className="capitalize"
+                        className="capitalize truncate"
                         variant={getStatusColor(docDetails?.status)}
                       >
                         {docDetails?.status}
@@ -558,10 +558,10 @@ export function DocumentsTab({
                       </div>
                     </div>
                   ) : (
-                    <div className="flex gap-4 mt-4">
+                    <div className="flex flex-col sm:flex-row gap-4 mt-4">
                       <Button
                         variant="outline"
-                        className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]"
+                        className="order-2 sm:order-1 flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]"
                         disabled={loading || latestCohort?.status === "dropped"}
                         onClick={() => setFlagOpen(true)}
                       >
@@ -570,7 +570,7 @@ export function DocumentsTab({
                       </Button>
                       <Button
                         variant="outline"
-                        className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
+                        className="order-1 sm:order-2 flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
                         disabled={loading || latestCohort?.status === "dropped"}
                         onClick={() =>
                           handleDocumentVerification(
@@ -644,9 +644,9 @@ export function DocumentsTab({
                       </Button>
                     </div>
                   ) : docDetails ? (
-                    <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                       <Badge
-                        className="capitalize"
+                        className="capitalize truncate"
                         variant={getStatusColor(docDetails?.status)}
                       >
                         {docDetails?.status}
@@ -736,10 +736,10 @@ export function DocumentsTab({
                       </div>
                     </div>
                   ) : (
-                    <div className="flex gap-4 mt-4">
+                    <div className="flex flex-col sm:flex-row gap-4 mt-4">
                       <Button
                         variant="outline"
-                        className="flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]"
+                        className="order-2 sm:order-1 flex gap-2 border-[#FF503D] text-[#FF503D] bg-[#FF503D]/[0.2]"
                         disabled={loading || latestCohort?.status === "dropped"}
                         onClick={() => setFlagOpen(true)}
                       >
@@ -748,7 +748,7 @@ export function DocumentsTab({
                       </Button>
                       <Button
                         variant="outline"
-                        className="flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
+                        className="order-1 sm:order-2 flex gap-2 border-[#2EB88A] text-[#2EB88A] bg-[#2EB88A]/[0.2]"
                         disabled={loading || latestCohort?.status === "dropped"}
                         onClick={() =>
                           handleDocumentVerification(
@@ -815,7 +815,7 @@ export function DocumentsTab({
                           {new Date(doc?.date).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
