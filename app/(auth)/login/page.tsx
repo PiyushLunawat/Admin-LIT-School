@@ -40,6 +40,13 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [otpToken, setOtpToken] = useState("");
 
+  let accesstoken = Cookies.get("adminAccessToken");
+  let reftoken = Cookies.get("adminRefreshToken");
+
+  useEffect(() => {
+    if (accesstoken || reftoken) router.push("/dashboard");
+  }, []);
+
   useEffect(() => {
     setTimer(59);
   }, []);
@@ -298,7 +305,7 @@ export default function LoginPage() {
               <div className="flex flex-col gap-">
                 <div className="text-center">
                   <Button
-                    type="button"
+                    type="submit"
                     onClick={handleOtpSubmit}
                     disabled={loading}
                   >

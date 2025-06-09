@@ -38,8 +38,9 @@ import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 
 const ROLES = [
+  // { value: "application_reviewer", label: "Application Reviewer" },
   { value: "interviewer", label: "Application Interviewer" },
-  { value: "fee_collector", label: "Fee Collector" },
+  // { value: "fee_collector", label: "Fee Collector" },
   { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
 ];
 
@@ -134,6 +135,7 @@ export function CollaboratorsForm({
   });
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCalEmail, setIsCalEmail] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -201,7 +203,9 @@ export function CollaboratorsForm({
             type: "manual",
             message: "This email doesn't have an account on Cal.LIT",
           });
+          setIsCalEmail(true);
         } else {
+          setIsCalEmail(false);
           form.clearErrors(`collaborators.${fieldIndex}.email`);
         }
       }
@@ -227,10 +231,14 @@ export function CollaboratorsForm({
       ) {
         const emailCheckResult = await checkEmailExists(emailValue);
         if (!emailCheckResult.success) {
+          setIsCalEmail(true);
           form.setError(`collaborators.${fieldIndex}.email`, {
             type: "manual",
-            message: "This email doesn't have an account on CalendLIT",
+            message: "This email doesn't have an account on Cal.LIT",
           });
+        } else {
+          setIsCalEmail(false);
+          form.clearErrors(`collaborators.${fieldIndex}.email`);
         }
       }
     }, 500);
@@ -240,11 +248,32 @@ export function CollaboratorsForm({
     setEditingCollaboratorIndex(fieldIndex);
   };
 
+  const hasInvalidUninvited = fields.some((field, i) => {
+    if (field.isInvited) return false; // Skip invited collaborators
+
+    // Get specific email error
+    const emailError =
+      form.formState.errors?.collaborators?.[i]?.email?.message;
+
+    // Disable if:
+    return (
+      !field.email ||
+      !field.role ||
+      !!form.formState.errors?.collaborators?.[i] ||
+      emailError?.includes("doesn't have an account") // Specifically check for account error
+    );
+  });
+
   const handleFormSubmit = async (
     data: z.infer<typeof collaboratorFormSchema>
   ) => {
+    const isValid = await form.trigger();
+    if (!isValid || isCalEmail) return;
+
     setIsSubmitting(true);
     try {
+      const isValid = await form.trigger();
+      if (!isValid) return;
       if (initialData?._id) {
         const collaboratorsPayload = data.collaborators.map((collaborator) => ({
           email: collaborator.email,
@@ -278,6 +307,9 @@ export function CollaboratorsForm({
     data: z.infer<typeof collaboratorFormSchema>
   ) => {
     try {
+      const isValid = await form.trigger();
+      if (!isValid || isCalEmail) return;
+
       setIsInviting(true);
       if (initialData?._id) {
         const collaboratorsPayload = data.collaborators.map((collaborator) => ({
@@ -298,8 +330,10 @@ export function CollaboratorsForm({
           collaborators: updateResponse.data,
         };
 
-        onCohortCreated(updatedCohortData);
+        // onCohortCreated(updatedCohortData);
         const inviteResponse = await inviteCollaborators(initialData._id);
+
+        console.log("All collaborators:", inviteResponse);
 
         form.reset({
           collaborators: formatCollaboratorsData(inviteResponse.data),
@@ -557,8 +591,8 @@ export function CollaboratorsForm({
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    <div className="grid gap-3 flex-1">
-                      <Label>Email Address</Label>
+                    <div className="grid flex-1">
+                      <Label className="mb-2">Email Address</Label>
                       <Controller
                         control={form.control}
                         name={`collaborators.${index}.email`}
@@ -627,8 +661,8 @@ export function CollaboratorsForm({
                       </FormMessage>
                     </div>
 
-                    <div className="grid gap-3">
-                      <Label>Role</Label>
+                    <div className="grid">
+                      <Label className="mb-2">Role</Label>
                       <Controller
                         control={form.control}
                         name={`collaborators.${index}.role`}
@@ -694,7 +728,7 @@ export function CollaboratorsForm({
                   !!form.formState.errors?.collaborators?.[i]
               )}
               variant="outline"
-              type="button"
+              type="submit"
               className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
               onClick={() => handleInviteCollaborators(form.getValues())}
             >
