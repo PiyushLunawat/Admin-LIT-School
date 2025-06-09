@@ -31,10 +31,7 @@ export const RegisterInterceptor = () => {
       let accesstoken = Cookies.get("adminAccessToken");
       let reftoken = Cookies.get("adminRefreshToken");
 
-      // console.log(
-      //   "refresh ",
-      //   !isPublic && !accesstoken && reftoken && !refreshingToken
-      // );
+      // console.log("REquest ", !isPublic && !accesstoken && !reftoken);
 
       if (!isPublic && !accesstoken && reftoken && !refreshingToken) {
         refreshingToken = true;
@@ -55,6 +52,7 @@ export const RegisterInterceptor = () => {
       if (!isPublic && !accesstoken && !reftoken) {
         // console.log("logout", url);
         await clearAuthAndRedirect();
+        throw new Error("No auth tokens. Please Refresh or login again");
       }
 
       config.headers = {

@@ -101,8 +101,6 @@ export function BasicDetailsForm({
     (state) => state.cohort.basicDetails
   );
 
-  console.log("All collaborators:", initialData);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
