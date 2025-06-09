@@ -317,7 +317,12 @@ export default function ProgramsPage() {
           </TableHeader>
           <TableBody>
             {programs.map((program) => (
-              <TableRow key={program._id}>
+              <TableRow
+                key={program._id}
+                className={`${
+                  program.status ? "text-white" : "text-muted-foreground"
+                }`}
+              >
                 <TableCell>{program.name}</TableCell>
                 <TableCell className="max-w-[500px]">
                   {program.description}
