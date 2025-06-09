@@ -101,6 +101,8 @@ export function BasicDetailsForm({
     (state) => state.cohort.basicDetails
   );
 
+  console.log("All collaborators:", initialData);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -160,13 +162,9 @@ export function BasicDetailsForm({
     async function fetchData() {
       try {
         const programsData = await getPrograms();
-        setPrograms(
-          programsData.data.filter((program: any) => program.status === true)
-        );
+        setPrograms(programsData.data);
         const centresData = await getCentres();
-        setCentres(
-          centresData.data.filter((centre: any) => centre.status === true)
-        );
+        setCentres(centresData.data);
         const cohortsData = await getCohorts();
         setCohorts(cohortsData.data);
       } catch (error) {
@@ -291,63 +289,103 @@ export function BasicDetailsForm({
           <FormField
             control={form.control}
             name="programDetail"
-            render={({ field }) => (
-              <FormItem>
-                <Label>Program</Label>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value); // Updates the form state
-                    setSelectedProgram(value);
-                  }}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select program" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {programs.map((program) => (
-                      <SelectItem key={program._id} value={program._id}>
-                        {program.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const selectedProgram = programs.find(
+                (p) => p._id === initialData?.programDetail
+              );
+              const activePrograms = programs.filter(
+                (p) => p.status === true && p._id !== initialData?.programDetail
+              );
+
+              return (
+                <FormItem>
+                  <Label>Program</Label>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setSelectedProgram(value);
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select program" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {/* Show current selected program at top if it exists */}
+                      {selectedProgram && (
+                        <SelectItem
+                          key={selectedProgram._id}
+                          value={selectedProgram._id}
+                        >
+                          {selectedProgram.name}
+                        </SelectItem>
+                      )}
+
+                      {/* Show all active programs except the selected one */}
+                      {activePrograms.map((program) => (
+                        <SelectItem key={program._id} value={program._id}>
+                          {program.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="centerDetail"
-            render={({ field }) => (
-              <FormItem>
-                <Label>Centre</Label>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value); // Updates the form state
-                    setSelectedCentre(value); // Updates the local state
-                  }}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select center" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {centres.map((center) => (
-                      <SelectItem key={center._id} value={center._id}>
-                        {center.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const selectedCentre = centres.find(
+                (c) => c._id === initialData?.centerDetail
+              );
+              const activeCentres = centres.filter(
+                (c) => c.status === true && c._id !== initialData?.centerDetail
+              );
+
+              return (
+                <FormItem>
+                  <Label>Centre</Label>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setSelectedCentre(value);
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select center" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {/* Show current selected center if it exists */}
+                      {selectedCentre && (
+                        <SelectItem
+                          key={selectedCentre._id}
+                          value={selectedCentre._id}
+                        >
+                          {selectedCentre.name}
+                        </SelectItem>
+                      )}
+
+                      {/* Show all active centres except the selected one */}
+                      {activeCentres.map((center) => (
+                        <SelectItem key={center._id} value={center._id}>
+                          {center.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 

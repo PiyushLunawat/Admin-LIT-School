@@ -71,8 +71,6 @@ export function FeePreviewForm({
   );
   const uniqueId = useId();
 
-  console.log("initial data", initialData);
-
   // Pull scholarshipSlabs from litmusTestDetail
   const scholarshipSlabs =
     initialData?.litmusTestDetail?.[0]?.scholarshipSlabs?.map(

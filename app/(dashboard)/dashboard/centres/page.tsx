@@ -278,7 +278,12 @@ export default function CentresPage() {
           </TableHeader>
           <TableBody>
             {centerData.map((centre: Centre) => (
-              <TableRow key={centre._id}>
+              <TableRow
+                key={centre._id}
+                className={`${
+                  centre.status ? "text-white" : "text-muted-foreground"
+                }`}
+              >
                 <TableCell>{centre.name}</TableCell>
                 <TableCell>{centre.location}</TableCell>
                 <TableCell>{centre.suffix}</TableCell>
