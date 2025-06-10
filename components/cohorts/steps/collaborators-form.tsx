@@ -320,28 +320,29 @@ export function CollaboratorsForm({
         const updateResponse = await updateCohort(initialData._id, {
           collaborators: collaboratorsPayload,
         });
+        console.log("updated:", updateResponse);
 
-        form.reset({
-          collaborators: formatCollaboratorsData(updateResponse.data),
-        });
+        // form.reset({
+        //   collaborators: formatCollaboratorsData(updateResponse.data),
+        // });
 
-        const updatedCohortData = {
-          ...initialData,
-          collaborators: updateResponse.data,
-        };
+        // const updatedCohortData = {
+        //   ...initialData,
+        //   collaborators: updateResponse.data,
+        // };
 
         // onCohortCreated(updatedCohortData);
         const inviteResponse = await inviteCollaborators(initialData._id);
 
-        console.log("All collaborators:", inviteResponse);
+        console.log("invited:", inviteResponse);
 
         form.reset({
-          collaborators: formatCollaboratorsData(inviteResponse.data),
+          collaborators: formatCollaboratorsData(inviteResponse.data.details),
         });
 
         const invitedCohortData = {
           ...initialData,
-          collaborators: inviteResponse.data,
+          collaborators: inviteResponse.data.details,
         };
 
         onCohortCreated(invitedCohortData);
@@ -728,7 +729,7 @@ export function CollaboratorsForm({
                   !!form.formState.errors?.collaborators?.[i]
               )}
               variant="outline"
-              type="submit"
+              type="button"
               className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"
               onClick={() => handleInviteCollaborators(form.getValues())}
             >
