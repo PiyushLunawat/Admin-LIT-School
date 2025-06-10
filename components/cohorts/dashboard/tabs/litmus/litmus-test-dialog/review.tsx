@@ -2,7 +2,6 @@
 
 import {
   ArrowUpRight,
-  Download,
   FileIcon,
   HandMetal,
   ImageIcon,
@@ -39,6 +38,9 @@ export function ReviewComponent({
     application?.appliedCohorts?.[application?.appliedCohorts.length - 1];
   const cohortDetails = latestCohort?.cohortId;
   const litmusTestDetails = latestCohort?.litmusTestDetails;
+  const tasks = cohortDetails?.litmusTestDetail[0]?.litmusTasks || [];
+  const submission =
+    litmusTestDetails?.litmusTasks?.[litmusTestDetails?.litmusTasks.length - 1];
 
   const [rating, setRating] = useState<number>(
     litmusTestDetails?.performanceRating || 0
@@ -154,8 +156,6 @@ export function ReviewComponent({
       [title]: value,
     }));
   };
-
-  const tasks = cohortDetails?.litmusTestDetail[0]?.litmusTasks || [];
 
   // For each task => array of scores for each criteria
   const [taskScores, setTaskScores] = useState<number[][]>(
@@ -316,15 +316,13 @@ export function ReviewComponent({
       performanceRating: performanceRating,
     };
 
-    console.log("reviewresults", reviewPayload);
     setLoading(true);
     try {
-      console.log("Submitting to updateLitmusTaskStatus...");
       const response = await updateLitmusTaskStatus(
         litmusTestDetails?._id,
         reviewPayload
       );
-      console.log("Update Successful:", response);
+      // console.log("Update Successful:", response);
       onApplicationUpdate();
       onClose();
     } catch (error) {
@@ -362,213 +360,234 @@ export function ReviewComponent({
       </div>
 
       {/* Tasks */}
-      {tasks.map((Task: any, index: number) => (
-        <div key={index} className="space-y-6">
-          <div>
-            <Badge
-              variant="blue"
-              className="px-3 mt-4 text-md font-semibold -mb-2"
-            >
-              Task 0{index + 1}
-            </Badge>
+      {tasks.map((task: any, index: number) => (
+        <div key={index} className="space-y-4">
+          <h3 className="text-[#00A3FF] text-lg font-semibold">
+            Task 0{index + 1}
+          </h3>
+          <div className="space-y-1">
+            <h4 className="text-lg font-semibold">{task?.title}</h4>
+            <p className="text-sm ">{task?.description}</p>
           </div>
 
-          <div className="space-y-3">
-            <div className="">
-              <p className="text-lg font-semibold pl-3">{Task.title}</p>
-              <div className="space-y-2 list-disc pl-6 text-sm">
-                {Task?.description}
-              </div>
-            </div>
-
-            {/* Resources */}
-            <div className="space-y-1">
-              <h4 className="font-semibold pl-3">Resources</h4>
-              <div className="space-y-2">
-                <div className="w-full space-y-2">
-                  {Task?.resources?.resourceFiles.map(
-                    (file: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl "
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileIcon className="w-4 h-4" />
-                          <span className="text-white text-sm truncate max-w-[700px]">
-                            {file.split("/").pop()}
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          onClick={() => window.open(file, "_blank")}
-                          className="text-white rounded-xl"
-                        >
-                          <ArrowUpRight className="w-4 h-4" />
-                        </Button>
+          <div className="space-y-1">
+            <h4 className="font-semibold pl-3">Resources</h4>
+            <div className="space-y-2">
+              <div className="w-full space-y-2">
+                {task?.resources?.resourceFiles.map(
+                  (file: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl "
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileIcon className="w-4 h-4" />
+                        <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
+                          {file.split("/").pop()}
+                        </span>
                       </div>
-                    )
-                  )}
-
-                  {Task?.resources?.resourceLinks.map(
-                    (link: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl "
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        onClick={() => window.open(file, "_blank")}
+                        className="text-white rounded-xl"
                       >
-                        <div className="flex items-center gap-2 truncate">
-                          <Link2 className="w-4 h-4" />
-                          <span className="text-white text-sm truncate max-w-[700px]">
-                            {link}
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          onClick={() => window.open(link, "_blank")}
-                          className="text-white rounded-xl"
-                        >
-                          <ArrowUpRight className="w-4 h-4" />
-                        </Button>
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )
+                )}
+
+                {task?.resources?.resourceLinks.map(
+                  (link: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between gap-2 mt-2 px-3 border rounded-xl "
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Link2 className="w-4 h-4" />
+                        <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
+                          {link}
+                        </span>
                       </div>
-                    )
-                  )}
-                </div>
+                      <Button
+                        onClick={() => window.open(link, "_blank")}
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        className="text-white rounded-xl"
+                      >
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>
 
-          {/* Submission */}
-          <div className="space-y-2">
-            <Badge
-              variant={"pending"}
-              className="px-3 py-1 text-md font-medium"
-            >
-              Submission 0{index + 1}
-            </Badge>
-            {litmusTestDetails?.litmusTasks?.[
-              litmusTestDetails?.litmusTasks.length - 1
-            ]?.tasks?.[index]?.texts?.map((textItem: string, id: number) => (
-              <div
-                key={`text-${id}`}
-                className="break-all flex items-center gap-2 mt-2 px-4 py-2 border rounded-xl"
-              >
-                {textItem}
-              </div>
-            ))}
-            {litmusTestDetails?.litmusTasks?.[
-              litmusTestDetails?.litmusTasks.length - 1
-            ]?.tasks?.[index]?.links?.map((linkItem: string, id: number) => (
-              <div
-                key={`link-${id}`}
-                className="flex items-center gap-2 mt-2 p-3 border rounded-xl"
-              >
-                <Link2Icon className="w-4 h-4" />
-                <a
-                  href={linkItem}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white"
+          <div className="mt-4">
+            {submission?.tasks && (
+              <div className="flex justify-between items-center">
+                <Badge
+                  variant="pending"
+                  className="px-3 py-2 text-sm bg-[#FFF552]/[0.2] border-[#FFF552]"
                 >
-                  {linkItem}
-                </a>
-              </div>
-            ))}
-            {litmusTestDetails?.litmusTasks?.[
-              litmusTestDetails?.litmusTasks.length - 1
-            ]?.tasks?.[index]?.images?.map((imageItem: string, id: number) => (
-              <div
-                key={`image-${id}`}
-                className="w-full flex flex-col items-center text-sm border rounded-xl"
-              >
-                <Image
-                  src={imageItem}
-                  alt={imageItem.split("/").pop() || ""}
-                  width={800}
-                  height={420}
-                  className="w-full h-[420px] object-contain rounded-t-xl"
-                />
-                <div className="w-full flex justify-between items-center p-3 border-t">
-                  <div className="flex items-center gap-2 text-sm truncate">
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="w-[220px] text-white truncate">
-                      {imageItem.split("/").pop()}
-                    </span>
-                  </div>
-                  <Button variant={"ghost"} size={"zero"} className="">
-                    <a
-                      href={imageItem}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className=""
-                    >
-                      <Download className="w-4 h-4 " />
-                    </a>
-                  </Button>
+                  Submission 0{index + 1}
+                </Badge>
+                <div className="text-muted-foreground capitalize text-sm mt-2">
+                  Type:{" "}
+                  {task?.submissionTypes
+                    .map((configItem: any) => configItem?.type)
+                    .join(", ")}
                 </div>
               </div>
-            ))}
-            {litmusTestDetails?.litmusTasks?.[
-              litmusTestDetails?.litmusTasks.length - 1
-            ]?.tasks?.[index]?.videos?.map((videoItem: string, id: number) => (
-              <div
-                key={`video-${id}`}
-                className="w-full flex flex-col w-fit items-center text-sm border rounded-xl"
-              >
-                <video
-                  controls
-                  preload="none"
-                  className="h-[420px] rounded-t-xl"
-                >
-                  <source src={videoItem} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-                <div className="w-full flex justify-between items-center p-3 border-t">
-                  <div className="flex items-center gap-2 text-sm truncate">
-                    <VideoIcon className="w-4 h-4" />
-                    <span className="w-[220px] text-white truncate">
-                      {videoItem.split("/").pop()}
-                    </span>
+            )}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {submission?.tasks[index]?.text?.map(
+                (textItem: string, id: number) => (
+                  <div
+                    key={`text-${id}`}
+                    className="break-all w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl"
+                  >
+                    {textItem}
                   </div>
-                  <Button variant={"ghost"} size={"zero"} className="">
-                    <a
-                      href={videoItem}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className=""
+                )
+              )}
+              {submission?.tasks[index]?.links?.map(
+                (linkItem: string, id: number) => (
+                  <div
+                    key={`link-${id}`}
+                    className="w-full flex items-center justify-between gap-2 text-sm px-3 border rounded-xl"
+                  >
+                    <div className="flex items-center gap-2 text-sm truncate">
+                      <Link2Icon className="w-4 h-4" />
+                      <a
+                        href={linkItem}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white"
+                      >
+                        {linkItem}
+                      </a>
+                    </div>
+                    <Button
+                      onClick={() => window.open(linkItem, "_blank")}
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      className="text-white rounded-xl"
                     >
-                      <Download className="w-4 h-4 " />
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {litmusTestDetails?.litmusTasks?.[
-              litmusTestDetails?.litmusTasks.length - 1
-            ]?.tasks?.[index]?.files?.map((fileItem: string, id: number) => (
-              <div
-                key={`file-${id}`}
-                className="flex items-center gap-2 mt-2 p-3 border rounded-xl"
-              >
-                <FileIcon className="w-4 h-4" />
-                <a
-                  href={fileItem}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white"
-                >
-                  {fileItem.split("/").pop()}
-                </a>
-              </div>
-            ))}
+                      <ArrowUpRight className="w-4 h-4 " />
+                    </Button>
+                  </div>
+                )
+              )}
+              {submission?.tasks[index]?.images?.map(
+                (imageItem: string, id: number) => (
+                  <div
+                    key={`image-${id}`}
+                    className="w-full flex flex-col items-center text-sm border rounded-xl"
+                  >
+                    <Image
+                      width={800}
+                      height={420}
+                      src={imageItem}
+                      alt={imageItem.split("/").pop() || ""}
+                      className="w-full h-[420px] object-contain rounded-t-xl"
+                    />
+                    <div className="w-full flex justify-between items-center px-3 border-t">
+                      <div className="flex items-center gap-2 text-sm truncate">
+                        <ImageIcon className="w-4 h-4" />
+                        <span className="w-[220px] text-white truncate">
+                          {imageItem.split("/").pop()}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() => window.open(imageItem, "_blank")}
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        className="text-white rounded-xl"
+                      >
+                        <ArrowUpRight className="w-4 h-4 " />
+                      </Button>
+                    </div>
+                  </div>
+                )
+              )}
+              {submission?.tasks[index]?.videos?.map(
+                (videoItem: string, id: number) => (
+                  <div
+                    key={`video-${id}`}
+                    className="w-full flex flex-col items-center text-sm border rounded-xl"
+                  >
+                    <video
+                      controls
+                      preload="none"
+                      className="h-[420px] rounded-t-xl"
+                    >
+                      <source src={videoItem} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                    <div className="w-full flex justify-between items-center px-3 border-t">
+                      <div className="flex items-center gap-2 text-sm truncate">
+                        <VideoIcon className="w-4 h-4" />
+                        <span className="w-[220px] text-white truncate">
+                          {videoItem.split("/").pop()}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() => window.open(videoItem, "_blank")}
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        className="text-white rounded-xl"
+                      >
+                        <ArrowUpRight className="w-4 h-4 " />
+                      </Button>
+                    </div>
+                  </div>
+                )
+              )}
+              {submission?.tasks[index]?.files?.map(
+                (fileItem: string, id: number) => (
+                  <div
+                    key={`file-${id}`}
+                    className="w-full flex items-center justify-between gap-2 text-sm px-3 border rounded-xl"
+                  >
+                    <div className="flex items-center gap-2 text-sm truncate">
+                      <FileIcon className="w-4 h-4" />
+                      <a
+                        href={fileItem}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white"
+                      >
+                        {fileItem.split("/").pop()}
+                      </a>
+                    </div>
+                    <Button
+                      onClick={() => window.open(fileItem, "_blank")}
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      className="text-white rounded-xl"
+                    >
+                      <ArrowUpRight className="w-4 h-4 " />
+                    </Button>
+                  </div>
+                )
+              )}
+            </div>
           </div>
+          {index < tasks?.length - 1 && <Separator className="my-8" />}
 
           {/* Criteria Evaluation */}
           <div className="space-y-4">
             <h3 className="text-md font-medium">Criteria Evaluation</h3>
-            {Task?.judgmentCriteria.map((criteria: any, cIndex: number) => (
+            {task?.judgmentCriteria.map((criteria: any, cIndex: number) => (
               <div className="space-y-2 pl-3" key={cIndex}>
                 <div className="flex justify-between">
                   <Label>{criteria.name}</Label>

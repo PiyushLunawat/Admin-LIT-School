@@ -37,8 +37,7 @@ export function InternalNotesTab({
   const [content, setContent] = useState<string>("");
 
   useEffect(() => {
-    console.log("internalNotes", latestCohort?.internalNotes);
-
+    // console.log("internalNotes", latestCohort?.internalNotes);
     setInternalNote(latestCohort?.internalNotes);
   }, [latestCohort]);
 

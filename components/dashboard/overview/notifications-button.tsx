@@ -75,14 +75,14 @@ export function NotificationsButton() {
       const isOnline = navigator.onLine;
 
       if (isOnline && !status.online) {
-        console.log("Network restored.");
+        // console.log("Network restored.");
         setStatus((prev) => ({ ...prev, online: true }));
         if (socket) socket.emit("network_status", { online: true });
         if (socket && !socket.connected && adminId) {
           socket.connect();
         }
       } else if (!isOnline && status.online) {
-        console.log("Network disconnected.");
+        // console.log("Network disconnected.");
         setStatus((prev) => ({ ...prev, online: false }));
         if (socket) socket.emit("network_status", { online: false });
         if (socket) socket.disconnect();
@@ -120,7 +120,7 @@ export function NotificationsButton() {
 
   useEffect(() => {
     if (status.online && adminId && socket && !socket.connected) {
-      console.log("Connecting socket...");
+      // console.log("Connecting socket...");
       socket.connect();
     }
 
@@ -132,13 +132,13 @@ export function NotificationsButton() {
     };
 
     const handleConnect = () => {
-      console.log("Socket connected!");
+      // console.log("Socket connected!");
       setStatus((prev) => ({ ...prev, connected: true }));
 
       if (adminId && socket) {
         socket.emit("login", adminId, (response: any) => {
           if (response.success) {
-            console.log("Login successful:", adminId);
+            // console.log("Login successful:", adminId);
           } else {
             console.error("Login failed:", response.error);
           }
@@ -147,22 +147,20 @@ export function NotificationsButton() {
     };
 
     const handleDisconnect = () => {
-      console.log("Socket disconnected!");
+      // console.log("Socket disconnected!");
       setStatus((prev) => ({ ...prev, connected: false }));
     };
 
     const handlePing = () => {
       if (status.online && socket) {
         socket.emit("pong");
-        console.log("Responded with pong");
+        // console.log("Responded with pong");
       }
     };
 
     const handleNewNotification = (data: Notification) => {
-      console.log("Received notification:", data);
-
       handlePlay();
-
+      // console.log("New notification received:", data);
       setNotifications((prev) => [data, ...prev]);
       setNotificationNO((prev) => prev + 1);
       // toast.info(data.message);
@@ -171,15 +169,14 @@ export function NotificationsButton() {
 
     const handleUnreadNotifications = (unreadNotifications: Notification[]) => {
       if (unreadNotifications.length > 0) {
-        console.log("Unread notifications received:", unreadNotifications);
-        setNotifications((prev) => [
-          ...unreadNotifications.map((n) => ({
+        // console.log("Unread notifications received:", unreadNotifications);
+        setNotifications(
+          unreadNotifications.map((n) => ({
             ...n,
             timestamp: n.timestamp || new Date().toISOString(),
-          })),
-          ...prev,
-        ]);
-        setNotificationNO((prev) => prev + unreadNotifications.length);
+          }))
+        );
+        setNotificationNO(unreadNotifications.length);
       }
     };
 
@@ -267,13 +264,13 @@ export function NotificationsButton() {
         userId: adminId,
       };
       const res = await markNotificationsAsRead(payload);
-      console.log("vf", res);
+      // console.log("mark Notifications As Read", res);
 
       // Optionally, you can update UI state here after successful API call
       setNotifications((prev) =>
         prev.filter((n) => !notificationIds.includes(n.notificationId))
       );
-      console.log("Notification marked as read:", notificationIds);
+      // console.log("Notification marked as read:", notificationIds);
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }

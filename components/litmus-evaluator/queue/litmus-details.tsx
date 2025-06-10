@@ -532,7 +532,7 @@ export function LitmusDetails({
         <DialogContent className="max-w-[90vw] sm:max-w-2xl">
           <SchedulePresentation
             student={application}
-            interviewr={["evaluator"]}
+            interviewr={["litmus_interviewer"]}
           />
         </DialogContent>
       </Dialog>

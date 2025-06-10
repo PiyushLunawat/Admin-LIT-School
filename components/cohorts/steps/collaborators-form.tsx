@@ -39,9 +39,9 @@ import { useDispatch } from "react-redux";
 
 const ROLES = [
   // { value: "application_reviewer", label: "Application Reviewer" },
-  { value: "interviewer", label: "Application Interviewer" },
+  { value: "application_interviewer", label: "Application Interviewer" },
   // { value: "fee_collector", label: "Fee Collector" },
-  { value: "Litmus_test_reviewer", label: "LITMUS Test Evaluator" },
+  { value: "litmus_interviewer", label: "LITMUS Test Evaluator" },
 ];
 
 const collaboratorFormSchema = z.object({
@@ -169,11 +169,11 @@ export function CollaboratorsForm({
     switch (roleValue) {
       case "application_reviewer":
         return "Application Reviewer";
-      case "interviewer":
+      case "application_interviewer":
         return "Application Interviewer";
       case "fee_collector":
         return "Fee Collector";
-      case "Litmus_test_reviewer":
+      case "litmus_interviewer":
         return "LITMUS Test Evaluator";
       default:
         return "--";
@@ -187,7 +187,9 @@ export function CollaboratorsForm({
     form.setValue(`collaborators.${fieldIndex}.role`, selectedRole);
     form.clearErrors(`collaborators.${fieldIndex}.email`);
 
-    if (["interviewer", "Litmus_test_reviewer"].includes(selectedRole)) {
+    if (
+      ["application_interviewer", "litmus_interviewer"].includes(selectedRole)
+    ) {
       const emailValue = form
         .getValues(`collaborators.${fieldIndex}.email`)
         .trim();
@@ -227,7 +229,7 @@ export function CollaboratorsForm({
 
       if (
         emailValue &&
-        ["interviewer", "Litmus_test_reviewer"].includes(currentRole)
+        ["application_interviewer", "litmus_interviewer"].includes(currentRole)
       ) {
         const emailCheckResult = await checkEmailExists(emailValue);
         if (!emailCheckResult.success) {

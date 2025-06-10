@@ -63,6 +63,7 @@ export function ApplicationDetails({
   const [interviewOpen, setInterviewOpen] = useState(false);
   const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
   const [markedAsDialogOpen, setMarkedAsDialogOpen] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState("");
   const [status, setStatus] = useState(
     application?.appliedCohorts?.[application?.appliedCohorts.length - 1]
       ?.applicationDetails?.applicationStatus || "--"
@@ -170,24 +171,24 @@ export function ApplicationDetails({
   };
 
   const handleApplicationStatusChange = (newStatus: string) => {
-    // setStatus(newStatus);
     if (
       newStatus === "accepted" ||
       newStatus === "on hold" ||
       newStatus === "rejected" ||
       newStatus === "under review"
     ) {
+      setFeedbackStatus(newStatus);
       setFeedbackOpen(true);
     }
   };
 
   const handleInterviewStatusChange = (newStatus: string) => {
-    // setStatus(newStatus);
     if (
       newStatus === "waitlist" ||
       newStatus === "selected" ||
       newStatus === "not qualified"
     ) {
+      setFeedbackStatus(newStatus);
       setInterviewFeedbackOpen(true);
     }
   };
@@ -405,18 +406,18 @@ export function ApplicationDetails({
                 </Button> */}
                 <Button
                   variant="outline"
-                  className="justify-start min-px-2"
+                  className="flex justify-center items-center min-px-2"
                   disabled
                   // onClick={() => setInterviewOpen(true)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Schedule Presentation
                   </span>
                 </Button>
                 <Button
                   variant="outline"
-                  className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
+                  className="flex justify-center items-center border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
                   disabled={
                     latestCohort?.status === "dropped" ||
@@ -426,7 +427,7 @@ export function ApplicationDetails({
                   }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Mark as Dropped
                   </span>
                 </Button>
@@ -606,7 +607,7 @@ export function ApplicationDetails({
         <DialogContent className="max-w-[90vw] sm:max-w-4xl py-4 px-4 sm:px-6">
           <ApplicationFeedback
             application={application}
-            initialStatus={status}
+            initialStatus={feedbackStatus}
             ques={latestCohort?.cohortId?.applicationFormDetail?.[0]?.task}
             submission={
               applicationDetails?.applicationTasks?.[
@@ -660,7 +661,7 @@ export function ApplicationDetails({
             email={application?.email}
             phone={application?.mobileNumber}
             applicationId={applicationDetails?._id}
-            initialStatus={status}
+            initialStatus={feedbackStatus}
             interview={
               applicationDetails?.applicationTestInterviews?.[
                 applicationDetails?.applicationTestInterviews.length - 1
@@ -677,7 +678,7 @@ export function ApplicationDetails({
         <DialogContent className="max-w-[90vw] sm:max-w-2xl px-4 sm:px-6 ">
           <SchedulePresentation
             student={application}
-            interviewr={["interviewer"]}
+            interviewr={["application_interviewer"]}
           />
         </DialogContent>
       </Dialog>

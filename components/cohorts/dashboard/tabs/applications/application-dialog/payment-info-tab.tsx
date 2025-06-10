@@ -100,7 +100,7 @@ export function PaymentInformationTab({
       // 3. Create a hidden <a> and force download
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = "Receipt.pdf"; // or "myImage.png"
+      link.download = "Receipt.jpg"; // or "myImage.png"
       document.body.appendChild(link);
       link.click();
 
@@ -165,8 +165,6 @@ export function PaymentInformationTab({
       };
     }
 
-    console.log("payload", payload);
-
     try {
       if (!payload) {
         console.error("Fee ID is not available");
@@ -174,7 +172,7 @@ export function PaymentInformationTab({
       }
       setLoading(true);
       const response = await verifyFeeStatus(payload);
-      console.log("response", response);
+      // console.log("response", response);
       setPaymentDetails(response.updatedPayment);
       setFlagOpen(false);
       setVopen(false);
@@ -222,10 +220,10 @@ export function PaymentInformationTab({
       let fileUrl = "";
       if (file.size <= CHUNK_SIZE) {
         fileUrl = await uploadDirect(file, fileKey, key);
-        console.log("uploadDirect File URL:", fileUrl);
+        // console.log("uploadDirect File URL:", fileUrl);
       } else {
         fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, key);
-        console.log("uploadMultipart File URL:", fileUrl);
+        // console.log("uploadMultipart File URL:", fileUrl);
       }
       let payload;
       if (oneShot) {
@@ -239,11 +237,9 @@ export function PaymentInformationTab({
           receiptUrl: fileUrl,
         };
       }
-      console.log("payload", payload);
 
-      // Call the API function with FormData
       const response = await uploadFeeReceipt(payload);
-      console.log("Upload response:", response);
+      // console.log("Upload response:", response);
       onUpdateStatus();
       setPaymentDetails(response.updatedPayment);
     } catch (error: any) {

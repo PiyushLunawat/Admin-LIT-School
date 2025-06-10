@@ -109,7 +109,6 @@ export function PaymentsSummary({
         if (paymentDetails?.paymentPlan === "one-shot") {
           oneShot += 1;
           const oneShotDetails = paymentDetails?.oneShotPayment;
-          console.log("paymentDetails", paymentDetails);
 
           if (oneShotDetails) {
             oneShotAmount += oneShotDetails?.amountPayable;

@@ -91,11 +91,9 @@ export function InterviewFeedback({
         applicationId,
         applicationStatus: newStatus,
       };
-      console.log("Interview update response", payload);
-
       // Send it as JSON
       const response = await updateInterviewStatus(JSON.stringify(payload));
-      console.log("Interview update response", response);
+      // console.log("Interview update response", response);
 
       onUpdateStatus(newStatus, feedbacks);
       onClose();

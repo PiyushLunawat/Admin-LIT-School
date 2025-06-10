@@ -2,7 +2,6 @@
 
 import {
   ArrowUpRight,
-  Download,
   FileIcon,
   ImageIcon,
   Link2,
@@ -178,7 +177,6 @@ export function ApplicationFeedback({
         const taskFeedback = prevFeedbacks[taskId] || [];
         const newTaskFeedback = [...taskFeedback];
         newTaskFeedback[idx] = formatInput(value);
-        console.log("2", formatInput(newTaskFeedback[0]));
         return {
           ...prevFeedbacks,
           [taskId]: [formatInput(newTaskFeedback[0])],
@@ -225,14 +223,6 @@ export function ApplicationFeedback({
           feedbackData: validReasons,
         };
 
-        console.log("Sending feedback:", {
-          applicationId,
-          applicationTaskId,
-          subTaskId,
-          status,
-          feedback,
-        });
-
         const res = await updateStudentTaskFeedback(
           applicationId,
           applicationTaskId,
@@ -240,14 +230,9 @@ export function ApplicationFeedback({
           status,
           feedback
         );
-
-        console.log(
-          `Feedback for application ${applicationId} submitted successfully`,
-          res
-        );
+        // console.log(`Feedback submitted successfully`, res);
       } else if (status === "rejected" || status === "accepted") {
         // Prepare an array of task feedback
-        console.log("cons", feedbacks);
         const feedbackData = Object.keys(feedbacks).map((taskId) => {
           // Flatten all lines from all entries
           const lines = feedbacks[taskId]
@@ -261,16 +246,6 @@ export function ApplicationFeedback({
           };
         });
 
-        console.log("Transformed Feedback:", feedbackData);
-
-        console.log("Accepted feedback:", {
-          applicationId,
-          applicationTaskId,
-          subTaskId,
-          status,
-          feedbackData,
-        });
-
         // Send feedback data to backend
         const res = await updateStudentTaskFeedbackAccep(
           applicationId,
@@ -279,10 +254,7 @@ export function ApplicationFeedback({
           status,
           { feedbackData }
         );
-        console.log(
-          `Feedback for application ${applicationId} submitted successfully`,
-          res
-        );
+        // console.log(`Feedback submitted successfully`, res);
       }
 
       onUpdateStatus(status, feedbacks);
@@ -424,7 +396,7 @@ export function ApplicationFeedback({
                   <Badge variant="pending" className="px-3 py-2 text-sm">
                     Submission
                   </Badge>
-                  <div className="text-muted-foreground text-sm mt-2">
+                  <div className="text-muted-foreground capitalize text-sm mt-2">
                     Type:{" "}
                     {task?.config
                       .map((configItem: any) => configItem?.type)
@@ -446,7 +418,7 @@ export function ApplicationFeedback({
                     (linkItem: string, id: number) => (
                       <div
                         key={`link-${id}`}
-                        className="w-full flex items-center justify-between gap-2 text-sm px-4 py-3 border rounded-xl"
+                        className="w-full flex items-center justify-between gap-2 text-sm px-3 border rounded-xl"
                       >
                         <div className="flex items-center gap-2 text-sm truncate">
                           <Link2Icon className="w-4 h-4" />
@@ -460,11 +432,11 @@ export function ApplicationFeedback({
                           </a>
                         </div>
                         <Button
+                          onClick={() => window.open(linkItem, "_blank")}
                           variant="ghost"
-                          size="zero"
+                          size="icon"
                           type="button"
                           className="text-white rounded-xl"
-                          onClick={() => window.open(linkItem, "_blank")}
                         >
                           <ArrowUpRight className="w-4 h-4 " />
                         </Button>
@@ -484,22 +456,21 @@ export function ApplicationFeedback({
                           alt={imageItem.split("/").pop() || ""}
                           className="w-full h-[420px] object-contain rounded-t-xl"
                         />
-                        <div className="w-full flex justify-between items-center p-3 border-t">
+                        <div className="w-full flex justify-between items-center px-3 border-t">
                           <div className="flex items-center gap-2 text-sm truncate">
                             <ImageIcon className="w-4 h-4" />
                             <span className="w-[220px] text-white truncate">
                               {imageItem.split("/").pop()}
                             </span>
                           </div>
-                          <Button variant={"ghost"} size={"zero"} className="">
-                            <a
-                              href={imageItem}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className=""
-                            >
-                              <Download className="w-4 h-4 " />
-                            </a>
+                          <Button
+                            onClick={() => window.open(imageItem, "_blank")}
+                            variant="ghost"
+                            size="icon"
+                            type="button"
+                            className="text-white rounded-xl"
+                          >
+                            <ArrowUpRight className="w-4 h-4 " />
                           </Button>
                         </div>
                       </div>
@@ -519,22 +490,21 @@ export function ApplicationFeedback({
                           <source src={videoItem} type="video/mp4" />
                           Your browser does not support the video tag.
                         </video>
-                        <div className="w-full flex justify-between items-center p-3 border-t">
+                        <div className="w-full flex justify-between items-center px-3 border-t">
                           <div className="flex items-center gap-2 text-sm truncate">
                             <VideoIcon className="w-4 h-4" />
                             <span className="w-[220px] text-white truncate">
                               {videoItem.split("/").pop()}
                             </span>
                           </div>
-                          <Button variant={"ghost"} size={"zero"} className="">
-                            <a
-                              href={videoItem}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className=""
-                            >
-                              <Download className="w-4 h-4 " />
-                            </a>
+                          <Button
+                            onClick={() => window.open(videoItem, "_blank")}
+                            variant="ghost"
+                            size="icon"
+                            type="button"
+                            className="text-white rounded-xl"
+                          >
+                            <ArrowUpRight className="w-4 h-4 " />
                           </Button>
                         </div>
                       </div>
@@ -544,7 +514,7 @@ export function ApplicationFeedback({
                     (fileItem: string, id: number) => (
                       <div
                         key={`file-${id}`}
-                        className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl"
+                        className="w-full flex items-center justify-between gap-2 text-sm px-3 border rounded-xl"
                       >
                         <div className="flex items-center gap-2 text-sm truncate">
                           <FileIcon className="w-4 h-4" />
@@ -557,15 +527,14 @@ export function ApplicationFeedback({
                             {fileItem.split("/").pop()}
                           </a>
                         </div>
-                        <Button variant={"ghost"} size={"zero"} className="">
-                          <a
-                            href={fileItem}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className=""
-                          >
-                            <Download className="w-4 h-4 " />
-                          </a>
+                        <Button
+                          onClick={() => window.open(fileItem, "_blank")}
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          className="text-white rounded-xl"
+                        >
+                          <ArrowUpRight className="w-4 h-4 " />
                         </Button>
                       </div>
                     )

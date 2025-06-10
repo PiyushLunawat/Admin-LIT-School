@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Calendar,
-  CheckCircle,
-  Clock4Icon,
-  Eye,
-  LoaderCircle,
-} from "lucide-react";
+import { Calendar, CheckCircle, Clock4Icon, Eye } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
@@ -154,14 +148,7 @@ export function ApplicationsList({
   const handleEyeClick = (student: any) => {
     // setIsLoading(true);
     setSelectedStudent(student);
-
-    // Open dialog immediately (optional based on design)
     setOpen(true);
-
-    // Simulate async delay (e.g., fetching detailed data)
-    // setTimeout(() => {
-    //   setIsLoading(false);
-    // }, 2000);
   };
 
   const handleStatusUpdate = () => {
@@ -346,8 +333,8 @@ export function ApplicationsList({
         <DialogTitle></DialogTitle>
         <DialogContent className="flex flex-col gap-4 max-w-[90vw] sm:max-w-4xl py-2 px-4 sm:px-6 h-[90vh] overflow-y-auto">
           {isLoading ? (
-            <div className="flex justify-center items-center h-60">
-              <LoaderCircle className="w-8 h-8 animate-spin text-muted" />
+            <div className="flex justify-center items-center animate-pulse h-full">
+              Loading
             </div>
           ) : (
             selectedStudent && (

@@ -1,9 +1,5 @@
 "use client";
 
-import { CalendarIcon, X } from "lucide-react";
-import { addDays, format } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { cn } from "@/lib/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -18,7 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils/utils";
+import { addDays, format } from "date-fns";
+import { CalendarIcon, X } from "lucide-react";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { DateRange } from "react-day-picker";
 
 interface DateRangePickerProps {
   setDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
@@ -58,7 +58,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
   return (
     <div className="flex flex-wrap items-center gap-1 sm:gap-4">
       <Select
-        value={selectedValue} 
+        value={selectedValue}
         onValueChange={(value) => {
           setSelectedValue(value);
           if (value === "all") {
@@ -67,7 +67,10 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
             const preset = presets.find((p) => p.value === value);
             if (preset) {
               const to = new Date();
-              const from = preset.days !== undefined ? addDays(to, preset.days) : undefined;
+              const from =
+                preset.days !== undefined
+                  ? addDays(to, preset.days)
+                  : undefined;
               handleDateChange({ from, to });
             }
           }
@@ -90,7 +93,7 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
           <Button
             variant="outline"
             className={cn(
-              "justify-start text-left font-normal w-auto flex-1 sm:w-[300px]",
+              "justify-start text-left font-normal w-auto sm:w-[300px]",
               !date && "text-muted-foreground"
             )}
           >
@@ -122,7 +125,12 @@ export function DateRangePicker({ setDateRange }: DateRangePickerProps) {
           />
         </PopoverContent>
       </Popover>
-      <Button variant="ghost" size="icon" className="-ml-3" onClick={resetDateRange}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="-ml-3"
+        onClick={resetDateRange}
+      >
         <X className="ml-4 sm:ml-0 h-4 w-4" />
       </Button>
     </div>

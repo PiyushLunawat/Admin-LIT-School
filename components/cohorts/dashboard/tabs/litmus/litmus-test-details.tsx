@@ -147,7 +147,7 @@ export function LitmusTestDetails({
           lastInterview.endTime
       );
 
-      console.log("timee", meetingEnd < currentTime, meetingEnd, currentTime);
+      // console.log("timee", meetingEnd < currentTime, meetingEnd, currentTime);
       if (meetingEnd < currentTime) {
         setStatus("interview concluded");
       }
@@ -291,30 +291,30 @@ export function LitmusTestDetails({
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="outline"
-                  className="justify-start min-px-2"
+                  className="flex justify-center items-center min-px-2"
                   disabled
                   // onClick={() => setInterviewOpen(true)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Schedule Presentation
                   </span>
                 </Button>
                 <Button
                   variant="outline"
-                  className="justify-start min-px-2"
+                  className="flex justify-center items-center min-px-2"
                   onClick={handleDownloadAll}
                   disabled={[undefined, "pending"].includes(status)}
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Download Files
                   </span>
                 </Button>
                 {litmusTestDetails?.scholarshipDetail ? (
                   <Button
                     variant="outline"
-                    className={`justify-start min-px-2 ${getColor(
+                    className={`flex justify-start items-center min-px-2 ${getColor(
                       litmusTestDetails?.scholarshipDetail?.scholarshipName
                     )}`}
                     onClick={() => setSchOpen(true)}
@@ -333,18 +333,18 @@ export function LitmusTestDetails({
                 ) : (
                   <Button
                     variant="outline"
-                    className="justify-start min-px-2"
+                    className="flex justify-center items-center min-px-2"
                     disabled
                   >
                     <Star className="h-4 w-4 mr-2" />
-                    <span className="flex-1 truncate w-[170px]">
+                    <span className="text-start flex-1 truncate w-[170px]">
                       Award Scholarship
                     </span>
                   </Button>
                 )}
                 <Button
                   variant="outline"
-                  className="justify-start min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
+                  className="flex justify-center items-center min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
                   disabled={
                     latestCohort?.status === "dropped" ||
@@ -354,7 +354,7 @@ export function LitmusTestDetails({
                   }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Mark as Dropped
                   </span>
                 </Button>
@@ -611,7 +611,7 @@ export function LitmusTestDetails({
         <DialogContent className="max-w-[90vw] sm:max-w-2xl px-4 sm:px-6 ">
           <SchedulePresentation
             student={application}
-            interviewr={["evaluator"]}
+            interviewr={["litmus_interviewer"]}
           />
         </DialogContent>
       </Dialog>

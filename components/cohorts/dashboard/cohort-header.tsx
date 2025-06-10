@@ -10,12 +10,12 @@ import { DateRangePicker } from "@/components/dashboard/overview/date-range-pick
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Centre,
   CohortHeaderProps,
   Program,
 } from "@/types/components/cohorts/dashboard/cohort-header";
-import { LoaderCircle } from "lucide-react";
 
 export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
   const [cohort, setCohort] = useState<any>(null);
@@ -100,10 +100,8 @@ export function CohortHeader({ cohortId, setDateRange }: CohortHeaderProps) {
 
   if (!cohort) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="flex justify-center items-center h-full">
-          <LoaderCircle className="w-8 h-8 animate-spin" />
-        </div>
+      <div className="flex ">
+        <Skeleton className="h-[200px] w-full rounded-xl" />
       </div>
     );
   }
