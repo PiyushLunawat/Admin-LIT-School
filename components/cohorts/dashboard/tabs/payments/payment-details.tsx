@@ -111,7 +111,6 @@ export function PaymentDetails({
   useEffect(() => {
     setTokenFeeDetails(latestCohort?.tokenFeeDetails);
     setPaymentDetails(latestCohort?.paymentDetails);
-    // console.log("student", student);
   }, [latestCohort?.paymentDetails, latestCohort?.tokenFeeDetails, student]);
 
   const tokenAmount =
@@ -135,7 +134,7 @@ export function PaymentDetails({
       // 3. Create a hidden <a> and force download
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `${docName}.pdf`; // or "myImage.png"
+      link.download = `${docName}.jpg`; // or "myImage.png"
       document.body.appendChild(link);
       link.click();
 
@@ -199,8 +198,6 @@ export function PaymentDetails({
       };
     }
 
-    console.log("payload", payload);
-
     try {
       if (!payload) {
         console.error("Fee ID is not available");
@@ -208,7 +205,7 @@ export function PaymentDetails({
       }
       setLoading(true);
       const response = await verifyFeeStatus(payload);
-      console.log("response", response);
+      // console.log("response", response);
       setPaymentDetails(response.updatedPayment);
       setFlagOpen(false);
       setVopen(false);
@@ -256,10 +253,10 @@ export function PaymentDetails({
       let fileUrl = "";
       if (file.size <= CHUNK_SIZE) {
         fileUrl = await uploadDirect(file, fileKey, key);
-        console.log("uploadDirect File URL:", fileUrl);
+        // console.log("uploadDirect File URL:", fileUrl);
       } else {
         fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, key);
-        console.log("uploadMultipart File URL:", fileUrl);
+        // console.log("uploadMultipart File URL:", fileUrl);
       }
       let payload;
       if (oneShot) {
@@ -273,11 +270,10 @@ export function PaymentDetails({
           receiptUrl: fileUrl,
         };
       }
-      console.log("payload", payload);
 
       // Call the API function with FormData
       const response = await uploadFeeReceipt(payload);
-      console.log("Upload response:", response);
+      // console.log("Upload response:", response);
       onApplicationUpdate();
       setPaymentDetails(response.updatedPayment);
     } catch (error: any) {
@@ -610,22 +606,30 @@ export function PaymentDetails({
             <div className="space-y-2">
               <h4 className="font-medium">Quick Actions</h4>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" disabled>
+                <Button
+                  variant="outline"
+                  className="flex justify-center items-center min-px-2"
+                  disabled
+                >
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Schedule Presentation
                   </span>
                 </Button>
-                <Button variant="outline" className="justify-start" disabled>
+                <Button
+                  variant="outline"
+                  className="flex justify-center items-center min-px-2"
+                  disabled
+                >
                   <DownloadIcon className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Download Files
                   </span>
                 </Button>
                 {scholarshipDetails ? (
                   <Button
                     variant="outline"
-                    className={`justify-start ${getColor(
+                    className={`flex justify-start items-center min-px-2 ${getColor(
                       scholarshipDetails?.scholarshipName
                     )}`}
                     onClick={() => setSchOpen(true)}
@@ -639,16 +643,20 @@ export function PaymentDetails({
                     </div>
                   </Button>
                 ) : (
-                  <Button variant="outline" className="justify-start" disabled>
+                  <Button
+                    variant="outline"
+                    className="flex justify-center items-center min-px-2"
+                    disabled
+                  >
                     <Star className="h-4 w-4 mr-2" />
-                    <span className="flex-1 truncate w-[170px]">
+                    <span className="text-start flex-1 truncate w-[170px]">
                       Award Scholarship
                     </span>
                   </Button>
                 )}
                 <Button
                   variant="outline"
-                  className="border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 justify-start text-destructive"
+                  className="flex justify-center items-center min-px-2 border-none bg-[#FF503D1A] hover:bg-[#FF503D]/20 text-destructive"
                   onClick={() => setMarkedAsDialogOpen(true)}
                   disabled={
                     latestCohort?.status === "dropped" ||
@@ -658,7 +666,7 @@ export function PaymentDetails({
                   }
                 >
                   <UserMinus className="h-4 w-4 mr-2" />
-                  <span className="flex-1 truncate w-[170px]">
+                  <span className="text-start flex-1 truncate w-[170px]">
                     Mark as Dropped
                   </span>
                 </Button>

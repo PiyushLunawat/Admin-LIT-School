@@ -269,7 +269,7 @@ export function StudentApplicationHeader({
         <DialogContent className="max-w-[90vw] sm:max-w-2xl">
           <SchedulePresentation
             student={student}
-            interviewr={["interviewer", "evaluator"]}
+            interviewr={["application_interviewer", "litmus_interviewer"]}
           />
         </DialogContent>
       </Dialog>

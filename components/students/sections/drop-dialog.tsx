@@ -48,12 +48,10 @@ export function MarkedAsDialog({
         notes: notesArray,
       };
 
-      console.log("payload", payload);
-
       const response = await MarkAsdropped(payload);
 
       if (response.ok) {
-        console.log("Student successfully marked as dropped.");
+        // console.log("Student successfully marked as dropped.");
         onUpdateStatus();
         onClose();
       } else {

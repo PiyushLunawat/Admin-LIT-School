@@ -1,6 +1,6 @@
 "use client";
 
-import { LoaderCircle, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -260,9 +260,9 @@ export default function CentresPage() {
       </div>
 
       {loading ? (
-        <div className="text-center text-muted-foreground border-b border-t py-4 mx-16">
-          <div className="flex justify-center items-center h-full">
-            <LoaderCircle className="w-8 h-8 animate-spin" />
+        <div className="text-center text-muted-foreground border-b border-t py-4">
+          <div className="flex justify-center items-center animate-pulse h-full">
+            Loading
           </div>
         </div>
       ) : centres.length > 0 ? (

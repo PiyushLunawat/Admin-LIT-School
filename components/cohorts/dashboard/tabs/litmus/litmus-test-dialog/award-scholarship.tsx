@@ -86,7 +86,6 @@ export function AwardScholarship({
 
       const result = await updateScholarship(payLoad);
       if (result.success) {
-        console.log("Scholarship updated successfully");
         onClose?.(); // Call the optional close callback
         onApplicationUpdate?.();
       } else {

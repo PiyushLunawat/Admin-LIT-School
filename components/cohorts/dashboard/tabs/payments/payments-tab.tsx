@@ -60,7 +60,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
   const [selectedScholarship, setSelectedScholarship] = useState("all");
 
   const handleApplicationUpdate = () => {
-    console.log("prevKey", refreshKey);
+    // console.log("prevKey", refreshKey);
     setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key
   };
 
@@ -228,9 +228,7 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
             disabled={selectedStudents.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
-            <span className="truncate w-[50px] sm:w-auto">
-              Export Selected
-            </span>
+            <span className="truncate w-[50px] sm:w-auto">Export Selected</span>
           </Button>
           <Button
             variant="outline"

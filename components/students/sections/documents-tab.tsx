@@ -137,10 +137,8 @@ export function DocumentsTab({
         throw new Error("Missing required fields for document verification");
       }
 
-      console.log("Document verification payload:", payLoad);
-
       const response = await updateDocumentStatus(payLoad);
-      console.log("Document verification response:", response);
+      // console.log("Document verification response:", response);
 
       // Check if response is valid
       if (
@@ -222,10 +220,10 @@ export function DocumentsTab({
       let fileUrl = "";
       if (file.size <= CHUNK_SIZE) {
         fileUrl = await uploadDirect(file, fileKey, docId);
-        console.log("uploadDirect File URL:", fileUrl);
+        // console.log("uploadDirect File URL:", fileUrl);
       } else {
         fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, docId);
-        console.log("uploadMultipart File URL:", fileUrl);
+        // console.log("uploadMultipart File URL:", fileUrl);
       }
 
       const payload = {
@@ -247,9 +245,7 @@ export function DocumentsTab({
 
       // Call the API function with FormData
       const response = await uploadStudentDocuments(payload);
-      console.log("Full response object:", response);
-      console.log("Response data:", response?.data);
-      console.log("Response status:", response?.status);
+      // console.log("Full response object:", response);
 
       // Check if response is valid
       if (

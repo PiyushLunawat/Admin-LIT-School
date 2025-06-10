@@ -217,11 +217,11 @@ export function PersonalDetailsTab({
   const handleSave = async () => {
     try {
       setLoading(true);
-      console.log("Student updated successfully:", formData);
+      // console.log("Student payload:", formData);
 
       const response = await updateStudentData(formData);
       onUpdateStatus();
-      console.log("Student updated successfully:", response);
+      // console.log("Student updated successfully:", response);
       toast({
         title: "Details Updated",
         description: "Your changes have been saved.",
@@ -252,7 +252,7 @@ export function PersonalDetailsTab({
         console.error("Invalid file URL:", fileKey);
         return;
       }
-      console.log("file URL:", fileKey);
+      // console.log("file URL:", fileKey);
 
       // AWS S3 DeleteObject Command
       const deleteCommand = new DeleteObjectCommand({
@@ -294,7 +294,6 @@ export function PersonalDetailsTab({
           },
         }));
         const fileUrl = await uploadDirect(file, fileKey);
-        console.log("fileUrl", fileUrl);
         setProfileUrl(fileUrl);
         setFormData((prev: any) => ({
           ...prev,
@@ -345,7 +344,13 @@ export function PersonalDetailsTab({
   };
 
   if (!latestCohort || !applicationDetails || !studentDetail) {
-    return <div>No student details available</div>;
+    return (
+      <div className="text-center text-muted-foreground border-b border-t py-4">
+        <div className="flex justify-center items-center animate-pulse h-full">
+          No student details available
+        </div>
+      </div>
+    );
   }
 
   return (

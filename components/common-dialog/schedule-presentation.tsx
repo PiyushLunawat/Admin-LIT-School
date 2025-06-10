@@ -31,7 +31,7 @@ export function SchedulePresentation({
       interviewr.some((role: string) => collaborator.role === role)
     ) || [];
 
-  console.log("Reviewer List:", reviewerList);
+  // console.log("Reviewer List:", reviewerList);
 
   const handleSelect = (interviewer: any) => {
     setSelectedInterviewer(interviewer);

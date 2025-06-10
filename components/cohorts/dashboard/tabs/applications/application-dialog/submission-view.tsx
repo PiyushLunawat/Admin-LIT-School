@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   ArrowUpRight,
-  Download,
   FileIcon,
   ImageIcon,
   Link2,
@@ -129,7 +128,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                   >
                     Submission
                   </Badge>
-                  <div className="text-muted-foreground text-sm mt-2">
+                  <div className="text-muted-foreground capitalize text-sm mt-2">
                     Type:{" "}
                     {task?.config
                       .map((configItem: any) => configItem?.type)
@@ -152,7 +151,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                   (linkItem: string, id: number) => (
                     <div
                       key={`link-${id}`}
-                      className="w-full flex items-center justify-between gap-2 text-sm px-4 py-3 border rounded-xl"
+                      className="w-full flex items-center justify-between gap-2 text-sm px-3 border rounded-xl"
                     >
                       <div className="flex items-center gap-2 text-sm truncate">
                         <Link2Icon className="w-4 h-4" />
@@ -166,11 +165,11 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                         </a>
                       </div>
                       <Button
+                        onClick={() => window.open(linkItem, "_blank")}
                         variant="ghost"
-                        size="zero"
+                        size="icon"
                         type="button"
                         className="text-white rounded-xl"
-                        onClick={() => window.open(linkItem, "_blank")}
                       >
                         <ArrowUpRight className="w-4 h-4 " />
                       </Button>
@@ -190,22 +189,21 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                         height={420}
                         className="w-full h-[420px] object-contain rounded-t-xl"
                       />
-                      <div className="w-full flex justify-between items-center p-3 border-t">
+                      <div className="w-full flex justify-between items-center px-3 border-t">
                         <div className="flex items-center gap-2 text-sm truncate">
                           <ImageIcon className="w-4 h-4" />
                           <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
                             {imageItem.split("/").pop()}
                           </span>
                         </div>
-                        <Button variant={"ghost"} size={"zero"} className="">
-                          <a
-                            href={imageItem}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className=""
-                          >
-                            <Download className="w-4 h-4 " />
-                          </a>
+                        <Button
+                          onClick={() => window.open(imageItem, "_blank")}
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          className="text-white rounded-xl"
+                        >
+                          <ArrowUpRight className="w-4 h-4 " />
                         </Button>
                       </div>
                     </div>
@@ -225,22 +223,21 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                         <source src={videoItem} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
-                      <div className="w-full flex justify-between items-center p-3 border-t">
+                      <div className="w-full flex justify-between items-center px-3 border-t">
                         <div className="flex items-center gap-2 text-sm truncate">
                           <VideoIcon className="w-4 h-4" />
                           <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
                             {videoItem.split("/").pop()}
                           </span>
                         </div>
-                        <Button variant={"ghost"} size={"zero"} className="">
-                          <a
-                            href={videoItem}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className=""
-                          >
-                            <Download className="w-4 h-4 " />
-                          </a>
+                        <Button
+                          onClick={() => window.open(videoItem, "_blank")}
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          className="text-white rounded-xl"
+                        >
+                          <ArrowUpRight className="w-4 h-4 " />
                         </Button>
                       </div>
                     </div>
@@ -250,7 +247,7 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                   (fileItem: string, id: number) => (
                     <div
                       key={`file-${id}`}
-                      className="w-full flex items-center justify-between gap-2 text-sm p-3 border rounded-xl"
+                      className="w-full flex items-center justify-between gap-2 text-sm px-3 border rounded-xl"
                     >
                       <div className="flex items-center gap-2 text-sm truncate">
                         <FileIcon className="w-4 h-4" />
@@ -263,15 +260,14 @@ export function SubmissionView({ tasks, submission }: SubmissionViewProps) {
                           {fileItem.split("/").pop()}
                         </a>
                       </div>
-                      <Button variant={"ghost"} size={"zero"} className="">
-                        <a
-                          href={fileItem}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className=""
-                        >
-                          <Download className="w-4 h-4 " />
-                        </a>
+                      <Button
+                        onClick={() => window.open(fileItem, "_blank")}
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        className="text-white rounded-xl"
+                      >
+                        <ArrowUpRight className="w-4 h-4 " />
                       </Button>
                     </div>
                   )

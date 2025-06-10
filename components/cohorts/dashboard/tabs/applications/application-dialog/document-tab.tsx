@@ -115,9 +115,8 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
         status: status,
         feedback: [feedback],
       };
-      console.log("Updated document status:", payLoad);
       const response = await updateDocumentStatus(payLoad);
-      console.log("Updated document status:", response);
+      // console.log("Updated document status:", response);
       // setDocs(response.data.documents)
       toast({
         title: `Document ${status}`,
@@ -193,10 +192,10 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
       let fileUrl = "";
       if (file.size <= CHUNK_SIZE) {
         fileUrl = await uploadDirect(file, fileKey, docId);
-        console.log("uploadDirect File URL:", fileUrl);
+        // console.log("uploadDirect File URL:", fileUrl);
       } else {
         fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, docId);
-        console.log("uploadMultipart File URL:", fileUrl);
+        // console.log("uploadMultipart File URL:", fileUrl);
       }
 
       const payload = {
@@ -206,11 +205,9 @@ export function DocumentsTab({ student, onUpdateStatus }: DocumentsTabProps) {
         fileUrl: fileUrl,
       };
 
-      console.log("payload", payload);
-
       // Call the API function with FormData
       const response = await uploadStudentDocuments(payload);
-      console.log("Upload response:", response);
+      // console.log("Upload response:", response);
       onUpdateStatus();
       setDocs(response.data.documents);
     } catch (error: any) {

@@ -666,7 +666,7 @@ export function ApplicationDetails({
         <DialogContent className="max-w-[90vw] sm:max-w-2xl">
           <SchedulePresentation
             student={application}
-            interviewr={["interviewer"]}
+            interviewr={["application_interviewer"]}
           />
         </DialogContent>
       </Dialog>
