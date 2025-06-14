@@ -116,8 +116,12 @@ export function PersonalDetailsTab({
         },
       },
       financialInformation: {
-        isFinanciallyIndependent: false,
         hasAppliedForFinancialAid: false,
+        annualFamilyIncome: "",
+        cibilScore: 0,
+        loanApplicant: "",
+        loanType: "",
+        requestedLoanAmount: 0,
       },
     },
   });
@@ -192,12 +196,17 @@ export function PersonalDetailsTab({
             },
           },
           financialInformation: {
-            isFinanciallyIndependent:
-              studentDetail?.financialInformation?.isFinanciallyIndependent ||
-              false,
             hasAppliedForFinancialAid:
               studentDetail?.financialInformation?.hasAppliedForFinancialAid ||
               false,
+            annualFamilyIncome:
+              studentDetail?.financialInformation?.annualFamilyIncome || "",
+            cibilScore: studentDetail?.financialInformation?.cibilScore || 0,
+            loanApplicant:
+              studentDetail?.financialInformation?.loanApplicant || "",
+            loanType: studentDetail?.financialInformation?.loanType || "",
+            requestedLoanAmount:
+              studentDetail?.financialInformation?.requestedLoanAmount || 0,
           },
         },
       });
@@ -1282,36 +1291,157 @@ export function PersonalDetailsTab({
           <CardTitle>Financial Information</CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 space-y-4">
-          <div className="grid gap-4">
-            <div>
-              {formData.studentDetailData.financialInformation
-                .isFinanciallyIndependent ? (
-                <Label className="sm:pl-3 flex gap-2 items-center">
-                  <CircleCheckBig className="w-3 h-3 text-[#2EB88A]" />
-                  Financially independent
-                </Label>
-              ) : (
-                <Label className="sm:pl-3 flex gap-2 items-center">
-                  <CircleMinus className="w-3 h-3 text-[#FF791F]" />
-                  Financially dependent on Parents
-                </Label>
-              )}
-            </div>
-            <div>
-              {formData.studentDetailData.financialInformation
-                .hasAppliedForFinancialAid ? (
-                <Label className="sm:pl-3 flex gap-2 items-center">
-                  <CircleCheckBig className="w-3 h-3 text-[#2EB88A]" />
-                  Has tried applying for financial aid earlier
-                </Label>
-              ) : (
-                <Label className="sm:pl-3 flex gap-2 items-center">
-                  <CircleMinus className="w-3 h-3 text-[#FF791F]" />
-                  Has not tried applying for any financial aid earlier
-                </Label>
-              )}
-            </div>
+          <div className="mb-6">
+            {formData.studentDetailData.financialInformation
+              .hasAppliedForFinancialAid ? (
+              <Label className="sm:pl-3 flex gap-2 items-center">
+                <CircleCheckBig className="w-3 h-3 text-[#2EB88A]" />
+                Has tried applying for financial aid earlier
+              </Label>
+            ) : (
+              <Label className="sm:pl-3 flex gap-2 items-center">
+                <CircleMinus className="w-3 h-3 text-[#FF791F]" />
+                Has not tried applying for any financial aid earlier
+              </Label>
+            )}
           </div>
+
+          {formData.studentDetailData.financialInformation
+            .hasAppliedForFinancialAid && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="pl-3">Loan Applicant</Label>
+                <Select
+                  disabled={!isEditing}
+                  value={
+                    formData.studentDetailData.financialInformation
+                      .loanApplicant
+                  }
+                  onValueChange={(val) =>
+                    handleStudentDetailsChange(
+                      "financialInformation",
+                      "loanApplicant",
+                      val
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="father">Father</SelectItem>
+                    <SelectItem value="mother">Mother</SelectItem>
+                    <SelectItem value="sibling">Sibling</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="pl-3">Loan Type</Label>
+                <Select
+                  disabled={!isEditing}
+                  value={
+                    formData.studentDetailData.financialInformation.loanType
+                  }
+                  onValueChange={(val) =>
+                    handleStudentDetailsChange(
+                      "financialInformation",
+                      "loanType",
+                      val
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="home">Home Loan</SelectItem>
+                    <SelectItem value="gold">Gold Loan</SelectItem>
+                    <SelectItem value="vehicle">Vehicle Loan</SelectItem>
+                    <SelectItem value="personal">Personal Loan</SelectItem>
+                    <SelectItem value="short-term business">
+                      Short-term Business Loan
+                    </SelectItem>
+                    <SelectItem value="education">Education Loan</SelectItem>
+                    <SelectItem value="other">other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="pl-3">Requested Loan Amount</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.financialInformation
+                      .requestedLoanAmount
+                  }
+                  maxLength={12}
+                  onChange={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.value = target.value.replace(/[^0-9]/g, "");
+                    handleStudentDetailsChange(
+                      "financialInformation",
+                      "requestedLoanAmount",
+                      target.value
+                    );
+                  }}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="pl-3">CIBIL Score</Label>
+                <Input
+                  value={
+                    formData.studentDetailData.financialInformation.cibilScore
+                  }
+                  maxLength={3}
+                  minLength={3}
+                  onChange={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.value = target.value.replace(/[^0-9]/g, "");
+                    handleStudentDetailsChange(
+                      "financialInformation",
+                      "cibilScore",
+                      target.value
+                    );
+                  }}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="pl-3">Annual Family Income</Label>
+                <Select
+                  disabled={!isEditing}
+                  value={
+                    formData.studentDetailData.financialInformation
+                      .annualFamilyIncome
+                  }
+                  onValueChange={(val) =>
+                    handleStudentDetailsChange(
+                      "financialInformation",
+                      "annualFamilyIncome",
+                      val
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="below5L">Below 5L</SelectItem>
+                    <SelectItem value="5-10L">5-10L</SelectItem>
+                    <SelectItem value="10-25L">10-25L</SelectItem>
+                    <SelectItem value="25-50L">25-50L</SelectItem>
+                    <SelectItem value="50-75L">50-75L</SelectItem>
+                    <SelectItem value="75-100L">75L–1Cr</SelectItem>
+                    <SelectItem value="above1Cr">Above 1 Cr.</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
