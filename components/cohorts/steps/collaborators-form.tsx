@@ -47,7 +47,12 @@ const ROLES = [
 const collaboratorFormSchema = z.object({
   collaborators: z.array(
     z.object({
-      email: z.string().email("Invalid email address"),
+      email: z
+        .string()
+        .email("Invalid email address")
+        .refine((email) => email.endsWith("@litschool.in"), {
+          message: "Email must be from @litschool.in domain",
+        }),
       role: z.string().nonempty("Role is required"),
       isInvited: z.boolean().optional(),
       isAccepted: z.boolean().optional(),

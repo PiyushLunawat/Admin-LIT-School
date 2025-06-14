@@ -1,11 +1,13 @@
 "use client";
 
+import Cookies from "js-cookie";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 
 import { getCohorts } from "@/app/api/cohorts";
 import { getPrograms } from "@/app/api/programs";
+import { useRouter } from "next/navigation";
 
 const DashboardHeader = dynamic(
   () =>
@@ -40,12 +42,21 @@ const RecentCohorts = dynamic(
 );
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState("all-programs");
   const [selectedCohort, setSelectedCohort] = useState("all-cohorts");
   const [programs, setPrograms] = useState<any[]>([]);
   const [cohorts, setCohorts] = useState<any[]>([]);
+
+  let accesstoken = Cookies.get("adminAccessToken");
+  let reftoken = Cookies.get("adminRefreshToken");
+
+  useEffect(() => {
+    if (!(accesstoken || reftoken)) router.push("/dashboard");
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
