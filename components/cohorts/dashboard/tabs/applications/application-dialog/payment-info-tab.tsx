@@ -602,9 +602,11 @@ export function PaymentInformationTab({
                     size="sm"
                     onClick={() =>
                       handleView(
-                        tokenFeeDetails?.receipts?.[
-                          tokenFeeDetails?.receipts.length - 1
-                        ]?.url
+                        `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                          tokenFeeDetails?.receipts?.[
+                            tokenFeeDetails?.receipts.length - 1
+                          ]?.url
+                        }`
                       )
                     }
                   >
@@ -625,16 +627,18 @@ export function PaymentInformationTab({
               <div className="space-y-4">
                 <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
                   <Image
-                    src={
+                    src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
                       tokenFeeDetails?.receipts?.[
                         tokenFeeDetails?.receipts.length - 1
                       ]?.url
-                    }
-                    alt={tokenFeeDetails?.receipts?.[
+                    }`}
+                    alt={`${
+                      process.env.NEXT_PUBLIC_AWS_RESOURCE_URL
+                    }/${`tokenFeeDetails?.receipts?.[
                       tokenFeeDetails?.receipts.length - 1
-                    ]?.url
+                    ]?.url}`
                       .split("/")
-                      .pop()}
+                      .pop()}`}
                     width={800}
                     height={200}
                     className="w-full h-[200px] object-contain rounded-t-xl"
@@ -711,9 +715,11 @@ export function PaymentInformationTab({
                   className="w-full mt-2"
                   onClick={() =>
                     handleDownload(
-                      tokenFeeDetails?.receipts?.[
-                        tokenFeeDetails?.receipts.length - 1
-                      ]?.url
+                      `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                        tokenFeeDetails?.receipts?.[
+                          tokenFeeDetails?.receipts.length - 1
+                        ]?.url
+                      }`
                     )
                   }
                 >
@@ -756,9 +762,11 @@ export function PaymentInformationTab({
                           size="sm"
                           onClick={() =>
                             handleView(
-                              tokenFeeDetails?.receipts?.[
-                                tokenFeeDetails?.feedback.length - 1 - index
-                              ]?.url
+                              `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                                tokenFeeDetails?.receipts?.[
+                                  tokenFeeDetails?.feedback.length - 1 - index
+                                ]?.url
+                              }`
                             )
                           }
                         >
@@ -800,10 +808,13 @@ export function PaymentInformationTab({
                       size="sm"
                       onClick={() =>
                         handleView(
-                          paymentDetails?.oneShotPayment?.receiptUrls[
-                            paymentDetails?.oneShotPayment?.receiptUrls.length -
-                              1
-                          ]?.url
+                          `
+                        ${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                            paymentDetails?.oneShotPayment?.receiptUrls[
+                              paymentDetails?.oneShotPayment?.receiptUrls
+                                .length - 1
+                            ]?.url
+                          }}`
                         )
                       }
                     >
@@ -980,9 +991,14 @@ export function PaymentInformationTab({
                                   size="sm"
                                   onClick={() =>
                                     handleView(
-                                      instalment?.receiptUrls[
-                                        instalment?.receiptUrls.length - 1
-                                      ]?.url
+                                      `
+                                    ${
+                                      process.env.NEXT_PUBLIC_AWS_RESOURCE_URL
+                                    }/${
+                                        instalment?.receiptUrls[
+                                          instalment?.receiptUrls.length - 1
+                                        ]?.url
+                                      }}`
                                     )
                                   }
                                 >
@@ -1030,9 +1046,13 @@ export function PaymentInformationTab({
                               className="w-full mt-2"
                               onClick={() =>
                                 window.open(
-                                  instalment.receiptUrls?.[
-                                    instalment?.receiptUrls.length - 1
-                                  ]?.url,
+                                  `${
+                                    process.env.NEXT_PUBLIC_AWS_RESOURCE_URL
+                                  }/${
+                                    instalment.receiptUrls?.[
+                                      instalment?.receiptUrls.length - 1
+                                    ]?.url
+                                  }}`,
                                   "_blank"
                                 )
                               }
@@ -1276,11 +1296,11 @@ export function PaymentInformationTab({
             {instalment ? (
               <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
                 <Image
-                  src={
+                  src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
                     instalment?.receiptUrls?.[
                       instalment?.receiptUrls.length - 1
                     ]?.url
-                  }
+                  }}`}
                   alt={"Fee_Receipt"}
                   width={800}
                   height={160}

@@ -762,9 +762,11 @@ export function PaymentDetails({
                       className="px-0 py-1 text-white text-xs"
                       onClick={() =>
                         handleView(
-                          tokenFeeDetails?.receipts?.[
-                            tokenFeeDetails?.receipts.length - 1
-                          ]?.url
+                          `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                            tokenFeeDetails?.receipts?.[
+                              tokenFeeDetails?.receipts.length - 1
+                            ]?.url
+                          }}`
                         )
                       }
                     >
@@ -788,16 +790,19 @@ export function PaymentDetails({
                     <Image
                       width={300}
                       height={160}
-                      src={
+                      src={`
+                       ${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
                         tokenFeeDetails?.receipts?.[
                           tokenFeeDetails?.receipts.length - 1
                         ]?.url
-                      }
-                      alt={tokenFeeDetails?.receipts?.[
-                        tokenFeeDetails?.receipts.length - 1
-                      ]?.url
+                      }}`}
+                      alt={`${
+                        process.env.NEXT_PUBLIC_AWS_RESOURCE_URL
+                      }/${`tokenFeeDetails?.receipts?.[
+                      tokenFeeDetails?.receipts.length - 1
+                    ]?.url}`
                         .split("/")
-                        .pop()}
+                        .pop()}`}
                       className="w-full h-[160px] object-contain rounded-t-xl"
                     />
                   </div>
@@ -875,9 +880,11 @@ export function PaymentDetails({
                     className="w-full mt-2"
                     onClick={() =>
                       handleDownload(
-                        tokenFeeDetails?.receipts?.[
-                          tokenFeeDetails?.receipts.length - 1
-                        ]?.url,
+                        `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                          tokenFeeDetails?.receipts?.[
+                            tokenFeeDetails?.receipts.length - 1
+                          ]?.url
+                        }}`,
                         "Token_Receipt"
                       )
                     }
@@ -958,18 +965,22 @@ export function PaymentDetails({
                         {paymentDetails?.oneShotPayment?.verificationStatus}
                       </Badge>
                     )}
-                    {paymentDetails?.oneShotPayment?.receiptUrls[
-                      paymentDetails?.oneShotPayment?.receiptUrls.length - 1
-                    ]?.url && (
+                    {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                      paymentDetails?.oneShotPayment?.receiptUrls[
+                        paymentDetails?.oneShotPayment?.receiptUrls.length - 1
+                      ]?.url
+                    }}` && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() =>
                           handleView(
-                            paymentDetails?.oneShotPayment?.receiptUrls[
-                              paymentDetails?.oneShotPayment?.receiptUrls
-                                .length - 1
-                            ]?.url
+                            `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                              paymentDetails?.oneShotPayment?.receiptUrls[
+                                paymentDetails?.oneShotPayment?.receiptUrls
+                                  .length - 1
+                              ]?.url
+                            }}`
                           )
                         }
                       >
@@ -1040,17 +1051,24 @@ export function PaymentDetails({
                       <Image
                         width={300}
                         height={160}
-                        src={
+                        src={`
+                          ${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
                           paymentDetails?.oneShotPayment?.receiptUrls?.[
                             paymentDetails?.oneShotPayment?.receiptUrls.length -
                               1
                           ]?.url
+                        }}
+                          `}
+                        alt={
+                          `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                            paymentDetails?.oneShotPayment?.receiptUrls?.[
+                              paymentDetails?.oneShotPayment?.receiptUrls
+                                .length - 1
+                            ]?.url || ""
+                          }`
+                            .split("/")
+                            .pop() || "receipt"
                         }
-                        alt={paymentDetails?.oneShotPayment?.receiptUrls?.[
-                          paymentDetails?.oneShotPayment?.receiptUrls.length - 1
-                        ]?.url
-                          .split("/")
-                          .pop()}
                         className="w-full h-[160px] object-contain rounded-t-xl"
                       />
                     </div>
@@ -1148,10 +1166,12 @@ export function PaymentDetails({
                       className="w-full mt-2"
                       onClick={() =>
                         handleDownload(
-                          paymentDetails?.oneShotPayment?.receiptUrls?.[
-                            paymentDetails?.oneShotPayment?.receiptUrls.length -
-                              1
-                          ]?.url,
+                          `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                            paymentDetails?.oneShotPayment?.receiptUrls?.[
+                              paymentDetails?.oneShotPayment?.receiptUrls
+                                .length - 1
+                            ]?.url
+                          }}`,
                           "One_Shot_Receipt"
                         )
                       }
@@ -1299,9 +1319,16 @@ export function PaymentDetails({
                                         size="sm"
                                         onClick={() =>
                                           handleView(
-                                            instalment.receiptUrls?.[
-                                              instalment.receiptUrls.length - 1
-                                            ]?.url
+                                            `
+                                          ${
+                                            process.env
+                                              .NEXT_PUBLIC_AWS_RESOURCE_URL
+                                          }/${
+                                              instalment.receiptUrls?.[
+                                                instalment.receiptUrls.length -
+                                                  1
+                                              ]?.url
+                                            }}`
                                           )
                                         }
                                       >
@@ -1361,9 +1388,15 @@ export function PaymentDetails({
                                     className="w-full mt-2"
                                     onClick={() =>
                                       handleDownload(
-                                        instalment.receiptUrls?.[
-                                          instalment?.receiptUrls.length - 1
-                                        ]?.url,
+                                        `
+                                        ${
+                                          process.env
+                                            .NEXT_PUBLIC_AWS_RESOURCE_URL
+                                        }/${
+                                          instalment.receiptUrls?.[
+                                            instalment?.receiptUrls.length - 1
+                                          ]?.url
+                                        }}`,
                                         `Installment_${instalment?.instalmentNumber}`
                                       )
                                     }
@@ -1634,11 +1667,12 @@ export function PaymentDetails({
             {instalment ? (
               <div className="w-full flex bg-[#64748B33] flex-col items-center rounded-xl">
                 <Image
-                  src={
+                  src={`
+                  ${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
                     instalment?.receiptUrls?.[
                       instalment?.receiptUrls.length - 1
                     ]?.url
-                  }
+                  }}`}
                   alt={"Fee_Receipt"}
                   width={300}
                   height={160}
