@@ -328,17 +328,23 @@ export function FeeCollectionDetails({
                         {lastCourse?.oneShotPayment?.verificationStatus}
                       </Badge>
                     )}
-                    {lastCourse?.oneShotPayment?.receiptUrls[
-                      lastCourse?.oneShotPayment?.receiptUrls.length - 1
-                    ]?.url && (
+                    {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                      lastCourse?.oneShotPayment?.receiptUrls[
+                        lastCourse?.oneShotPayment?.receiptUrls.length - 1
+                      ]?.url
+                    }}` && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() =>
                           handleView(
-                            lastCourse?.oneShotPayment?.receiptUrls[
-                              lastCourse?.oneShotPayment?.receiptUrls.length - 1
-                            ]?.url
+                            `
+                          ${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                              lastCourse?.oneShotPayment?.receiptUrls[
+                                lastCourse?.oneShotPayment?.receiptUrls.length -
+                                  1
+                              ]?.url
+                            }}`
                           )
                         }
                       >
@@ -403,9 +409,11 @@ export function FeeCollectionDetails({
                     </div>
                   )}
                 </div>
-                {lastCourse?.oneShotPayment?.receiptUrls[
-                  lastCourse?.oneShotPayment?.receiptUrls.length - 1
-                ]?.url ? (
+                {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                  lastCourse?.oneShotPayment?.receiptUrls[
+                    lastCourse?.oneShotPayment?.receiptUrls.length - 1
+                  ]?.url
+                }}` ? (
                   <Button variant="outline" size="sm" className="w-full mt-2">
                     <Download className="h-4 w-4 mr-2" />
                     Download Receipt
@@ -460,17 +468,24 @@ export function FeeCollectionDetails({
                                 <div className="hidden">
                                   {(lastStatus = instalment.verificationStatus)}
                                 </div>
-                                {instalment.receiptUrls[
-                                  instalment.receiptUrls.length - 1
-                                ]?.url && (
+                                {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                                  instalment.receiptUrls[
+                                    instalment.receiptUrls.length - 1
+                                  ]?.url
+                                }}` && (
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() =>
                                       handleView(
-                                        instalment.receiptUrls[
-                                          instalment.receiptUrls.length - 1
-                                        ]?.url
+                                        `${
+                                          process.env
+                                            .NEXT_PUBLIC_AWS_RESOURCE_URL
+                                        }/${
+                                          instalment.receiptUrls[
+                                            instalment.receiptUrls.length - 1
+                                          ]?.url
+                                        }}`
                                       )
                                     }
                                   >
@@ -524,9 +539,11 @@ export function FeeCollectionDetails({
                                 </div>
                               )}
                             </div>
-                            {instalment.receiptUrls[
-                              instalment.receiptUrls.length - 1
-                            ]?.url ? (
+                            {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                              instalment.receiptUrls[
+                                instalment.receiptUrls.length - 1
+                              ]?.url
+                            }}` ? (
                               instalment.verificationStatus ===
                               "verification pending" ? (
                                 <Button
@@ -544,7 +561,7 @@ export function FeeCollectionDetails({
                                   className="w-full mt-2"
                                   onClick={() =>
                                     window.open(
-                                      instalment.receiptUrls[0]?.url,
+                                      `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${instalment.receiptUrls[0]?.url}}`,
                                       "_blank"
                                     )
                                   }
