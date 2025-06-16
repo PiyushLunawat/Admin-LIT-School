@@ -107,8 +107,9 @@ export function NotificationsButton() {
   // Socket connection and handlers
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const socketIo = io(`${process.env.API_URL}/api`, {
+      const socketIo = io(`${process.env.API_URL}`, {
         autoConnect: false,
+        path: "/socket.io",
         reconnection: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 3000,
