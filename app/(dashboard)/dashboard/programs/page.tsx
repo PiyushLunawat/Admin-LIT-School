@@ -217,7 +217,7 @@ export default function ProgramsPage() {
                   }
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name}</p>
+                  <p className="text-destructive text-sm">{errors.name}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -234,7 +234,9 @@ export default function ProgramsPage() {
                   }
                 />
                 {errors.description && (
-                  <p className="text-red-500 text-sm">{errors.description}</p>
+                  <p className="text-destructive text-sm">
+                    {errors.description}
+                  </p>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -253,7 +255,9 @@ export default function ProgramsPage() {
                     }
                   />
                   {errors.duration && (
-                    <p className="text-red-500 text-sm">{errors.duration}</p>
+                    <p className="text-destructive text-sm">
+                      {errors.duration}
+                    </p>
                   )}
                 </div>
 
@@ -275,7 +279,7 @@ export default function ProgramsPage() {
                     }}
                   />
                   {errors.prefix && (
-                    <p className="text-red-500 text-sm">{errors.prefix}</p>
+                    <p className="text-destructive text-sm">{errors.prefix}</p>
                   )}
                 </div>
               </div>

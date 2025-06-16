@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import {
   ArrowLeft,
   Calendar,
@@ -19,6 +18,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { uploadDirect } from "@/app/api/aws";
 import {
   uploadFeeReceipt,
   verifyFeeStatus,
@@ -41,7 +41,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { formatAmount } from "@/lib/utils/helpers";
+import { formatAmount, generateUniqueFileName } from "@/lib/utils/helpers";
 import {
   BadgeVariant,
   PaymentDetailsProps,
@@ -231,33 +231,45 @@ export function PaymentDetails({
     if (oneShot) key = "oneshot";
     else key = `${inst}${sem}`;
 
-    setUploadStates((prev) => ({
-      ...prev,
-      [key]: { uploading: true, uploadProgress: 0, fileName: "" },
-    }));
-
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadStates((prev) => ({
+        ...prev,
+        [key]: {
+          ...prev[key],
+          error: "Image size exceeds 5 MB",
+        },
+      }));
+      return;
+    }
     const fileKey = generateUniqueFileName(file.name);
 
     // Update fileName for this document
     setUploadStates((prev) => ({
       ...prev,
-      [key]: { ...prev[key], fileName: fileKey },
+      [key]: {
+        uploading: true,
+        uploadProgress: 0,
+        fileName: fileKey,
+        error: "",
+      },
     }));
 
-    const CHUNK_SIZE = 100 * 1024 * 1024;
-    e.target.value = "";
-
     try {
-      let fileUrl = "";
-      if (file.size <= CHUNK_SIZE) {
-        fileUrl = await uploadDirect(file, fileKey, key);
-        // console.log("uploadDirect File URL:", fileUrl);
-      } else {
-        fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, key);
-        // console.log("uploadMultipart File URL:", fileUrl);
-      }
+      const fileUrl = await uploadDirect({
+        file,
+        fileKey,
+        onProgress: (percentComplete) => {
+          setUploadStates((prev) => ({
+            ...prev,
+            [key]: {
+              ...prev[key],
+              uploadProgress: Math.min(percentComplete, 100),
+            },
+          }));
+        },
+      });
       let payload;
       if (oneShot) {
         payload = {
@@ -291,97 +303,6 @@ export function PaymentDetails({
       }));
       e.target.value = "";
     }
-  };
-
-  const uploadDirect = async (file: File, fileKey: string, key: string) => {
-    const { data } = await axios.post(
-      `https://dev.apply.litschool.in/student/generate-presigned-url`,
-      {
-        bucketName: "dev-application-portal",
-        key: fileKey,
-      }
-    );
-    const { url } = data;
-    await axios.put(url, file, {
-      headers: { "Content-Type": file.type },
-      onUploadProgress: (evt: any) => {
-        if (!evt.total) return;
-        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
-        setUploadStates((prev) => ({
-          ...prev,
-          [key]: {
-            ...prev[key],
-            uploadProgress: Math.min(percentComplete, 100),
-          },
-        }));
-      },
-    });
-    return `${url.split("?")[0]}`;
-  };
-
-  const uploadMultipart = async (
-    file: File,
-    fileKey: string,
-    chunkSize: number,
-    key: string
-  ) => {
-    const uniqueKey = fileKey;
-
-    const initiateRes = await axios.post(
-      `https://dev.apply.litschool.in/student/initiate-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-      }
-    );
-    const { uploadId } = initiateRes.data;
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    let totalBytesUploaded = 0;
-    const parts: { ETag: string; PartNumber: number }[] = [];
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
-      const partRes = await axios.post(
-        `https://dev.apply.litschool.in/student/generate-presigned-url-part`,
-        {
-          bucketName: "dev-application-portal",
-          key: uniqueKey,
-          uploadId,
-          partNumber: i + 1,
-        }
-      );
-      const { url } = partRes.data;
-      const uploadRes = await axios.put(url, chunk, {
-        headers: { "Content-Type": file.type },
-        onUploadProgress: (evt: any) => {
-          if (!evt.total) return;
-          totalBytesUploaded += evt.loaded;
-          const percent = Math.round((totalBytesUploaded / file.size) * 100);
-          setUploadStates((prev) => ({
-            ...prev,
-            [key]: { ...prev[key], uploadProgress: Math.min(percent, 100) },
-          }));
-        },
-      });
-      parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
-    }
-    await axios.post(
-      `https://dev.apply.litschool.in/student/complete-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-        uploadId,
-        parts,
-      }
-    );
-    return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
-  };
-
-  const generateUniqueFileName = (originalName: string) => {
-    const timestamp = Date.now();
-    const sanitizedName = originalName.replace(/\s+/g, "-");
-    return `${timestamp}-${sanitizedName}`;
   };
 
   ////////////////////////
@@ -584,7 +505,7 @@ export function PaymentDetails({
             <div className="bg-[#FF503D1A] px-4 py-3 rounded-lg space-y-2">
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
-                  <UserMinus className="h-4 w-4 text-red-500" />
+                  <UserMinus className="h-4 w-4 text-destructive" />
                   Dropped off
                 </div>
                 <div className="">By Admin</div>
@@ -796,13 +717,7 @@ export function PaymentDetails({
                           tokenFeeDetails?.receipts.length - 1
                         ]?.url
                       }}`}
-                      alt={`${
-                        process.env.NEXT_PUBLIC_AWS_RESOURCE_URL
-                      }/${`tokenFeeDetails?.receipts?.[
-                      tokenFeeDetails?.receipts.length - 1
-                    ]?.url}`
-                        .split("/")
-                        .pop()}`}
+                      alt="Admission_Fee_Receipt"
                       className="w-full h-[160px] object-contain rounded-t-xl"
                     />
                   </div>
@@ -965,11 +880,9 @@ export function PaymentDetails({
                         {paymentDetails?.oneShotPayment?.verificationStatus}
                       </Badge>
                     )}
-                    {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
-                      paymentDetails?.oneShotPayment?.receiptUrls[
-                        paymentDetails?.oneShotPayment?.receiptUrls.length - 1
-                      ]?.url
-                    }}` && (
+                    {paymentDetails?.oneShotPayment?.receiptUrls[
+                      paymentDetails?.oneShotPayment?.receiptUrls.length - 1
+                    ]?.url && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1059,16 +972,7 @@ export function PaymentDetails({
                           ]?.url
                         }}
                           `}
-                        alt={
-                          `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
-                            paymentDetails?.oneShotPayment?.receiptUrls?.[
-                              paymentDetails?.oneShotPayment?.receiptUrls
-                                .length - 1
-                            ]?.url || ""
-                          }`
-                            .split("/")
-                            .pop() || "receipt"
-                        }
+                        alt="Fee_Receipt"
                         className="w-full h-[160px] object-contain rounded-t-xl"
                       />
                     </div>

@@ -207,7 +207,7 @@ export default function CentresPage() {
                   }
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name}</p>
+                  <p className="text-destructive text-sm">{errors.name}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -221,7 +221,7 @@ export default function CentresPage() {
                   }
                 />
                 {errors.location && (
-                  <p className="text-red-500 text-sm">{errors.location}</p>
+                  <p className="text-destructive text-sm">{errors.location}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -242,7 +242,7 @@ export default function CentresPage() {
                   }}
                 />
                 {errors.suffix && (
-                  <p className="text-red-500 text-sm">{errors.suffix}</p>
+                  <p className="text-destructive text-sm">{errors.suffix}</p>
                 )}
               </div>
               <Button className="w-full" onClick={handleCreateOrUpdateCentre}>

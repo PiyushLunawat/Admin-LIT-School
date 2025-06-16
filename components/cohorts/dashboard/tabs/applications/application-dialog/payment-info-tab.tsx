@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import {
   ArrowLeft,
   Calendar,
@@ -16,6 +15,7 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { uploadDirect } from "@/app/api/aws";
 import {
   uploadFeeReceipt,
   verifyFeeStatus,
@@ -29,7 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { formatAmount } from "@/lib/utils/helpers";
+import { formatAmount, generateUniqueFileName } from "@/lib/utils/helpers";
 import {
   BadgeVariant,
   PaymentInformationTabProps,
@@ -205,26 +205,43 @@ export function PaymentInformationTab({
 
     const file = e.target.files?.[0];
     if (!file) return;
-    const fileKey = generateUniqueFileName(file.name);
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadStates((prev) => ({
+        ...prev,
+        [key]: {
+          ...prev[key],
+          error: "Image size exceeds 5 MB",
+        },
+      }));
+      return;
+    }
+    const fileKey = generateUniqueFileName(file.name, "fee_receipt");
 
     // Update fileName for this document
     setUploadStates((prev) => ({
       ...prev,
-      [key]: { ...prev[key], fileName: fileKey },
+      [key]: {
+        uploading: true,
+        uploadProgress: 0,
+        fileName: fileKey,
+        error: "",
+      },
     }));
 
-    const CHUNK_SIZE = 100 * 1024 * 1024;
-    e.target.value = "";
-
     try {
-      let fileUrl = "";
-      if (file.size <= CHUNK_SIZE) {
-        fileUrl = await uploadDirect(file, fileKey, key);
-        // console.log("uploadDirect File URL:", fileUrl);
-      } else {
-        fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, key);
-        // console.log("uploadMultipart File URL:", fileUrl);
-      }
+      const fileUrl = await uploadDirect({
+        file,
+        fileKey,
+        onProgress: (percentComplete) => {
+          setUploadStates((prev) => ({
+            ...prev,
+            [key]: {
+              ...prev[key],
+              uploadProgress: Math.min(percentComplete, 100),
+            },
+          }));
+        },
+      });
       let payload;
       if (oneShot) {
         payload = {
@@ -257,97 +274,6 @@ export function PaymentInformationTab({
       }));
       e.target.value = "";
     }
-  };
-
-  const uploadDirect = async (file: File, fileKey: string, key: string) => {
-    const { data } = await axios.post(
-      `https://dev.apply.litschool.in/student/generate-presigned-url`,
-      {
-        bucketName: "dev-application-portal",
-        key: fileKey,
-      }
-    );
-    const { url } = data;
-    await axios.put(url, file, {
-      headers: { "Content-Type": file.type },
-      onUploadProgress: (evt: any) => {
-        if (!evt.total) return;
-        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
-        setUploadStates((prev) => ({
-          ...prev,
-          [key]: {
-            ...prev[key],
-            uploadProgress: Math.min(percentComplete, 100),
-          },
-        }));
-      },
-    });
-    return `${url.split("?")[0]}`;
-  };
-
-  const uploadMultipart = async (
-    file: File,
-    fileKey: string,
-    chunkSize: number,
-    key: string
-  ) => {
-    const uniqueKey = fileKey;
-
-    const initiateRes = await axios.post(
-      `https://dev.apply.litschool.in/student/initiate-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-      }
-    );
-    const { uploadId } = initiateRes.data;
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    let totalBytesUploaded = 0;
-    const parts: { ETag: string; PartNumber: number }[] = [];
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
-      const partRes = await axios.post(
-        `https://dev.apply.litschool.in/student/generate-presigned-url-part`,
-        {
-          bucketName: "dev-application-portal",
-          key: uniqueKey,
-          uploadId,
-          partNumber: i + 1,
-        }
-      );
-      const { url } = partRes.data;
-      const uploadRes = await axios.put(url, chunk, {
-        headers: { "Content-Type": file.type },
-        onUploadProgress: (evt: any) => {
-          if (!evt.total) return;
-          totalBytesUploaded += evt.loaded;
-          const percent = Math.round((totalBytesUploaded / file.size) * 100);
-          setUploadStates((prev) => ({
-            ...prev,
-            [key]: { ...prev[key], uploadProgress: Math.min(percent, 100) },
-          }));
-        },
-      });
-      parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
-    }
-    await axios.post(
-      `https://dev.apply.litschool.in/student/complete-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-        uploadId,
-        parts,
-      }
-    );
-    return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
-  };
-
-  const generateUniqueFileName = (originalName: string) => {
-    const timestamp = Date.now();
-    const sanitizedName = originalName.replace(/\s+/g, "-");
-    return `${timestamp}-${sanitizedName}`;
   };
 
   let lastStatus = "";
@@ -632,13 +558,7 @@ export function PaymentInformationTab({
                         tokenFeeDetails?.receipts.length - 1
                       ]?.url
                     }`}
-                    alt={`${
-                      process.env.NEXT_PUBLIC_AWS_RESOURCE_URL
-                    }/${`tokenFeeDetails?.receipts?.[
-                      tokenFeeDetails?.receipts.length - 1
-                    ]?.url}`
-                      .split("/")
-                      .pop()}`}
+                    alt="Admission_Fee_Receipt"
                     width={800}
                     height={200}
                     className="w-full h-[200px] object-contain rounded-t-xl"
@@ -1301,7 +1221,7 @@ export function PaymentInformationTab({
                       instalment?.receiptUrls.length - 1
                     ]?.url
                   }}`}
-                  alt={"Fee_Receipt"}
+                  alt="Fee_Receipt"
                   width={800}
                   height={160}
                   className="w-full h-[160px] object-contain rounded-t-xl"

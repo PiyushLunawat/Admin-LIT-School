@@ -232,7 +232,7 @@ export function FeeCollectionDetails({
             <div className="bg-[#FF503D1A] px-4 py-3 rounded-lg space-y-2">
               <div className="flex justify-between gap-2">
                 <div className="flex gap-2 items-center justify-start text-destructive">
-                  <UserMinus className="h-4 w-4 text-red-500" />
+                  <UserMinus className="h-4 w-4 text-destructive" />
                   Dropped off
                 </div>
                 <div className="">By Admin</div>

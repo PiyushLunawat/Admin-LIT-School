@@ -222,16 +222,16 @@ export function NotificationsButton() {
   }
 
   function geCohortIcon(type: string): JSX.Element {
-    switch (type) {
-      case "Registration and Application Task":
+    switch (type.toLowerCase()) {
+      case "registration and application task":
         return <FileText className="w-6 h-6" />;
-      case "Application Interview":
+      case "application interview":
         return <Users className="w-6 h-6" />;
-      case "Admission Fee Payment":
+      case "admission fee payment":
         return <Banknote className="w-6 h-6" />;
-      case "LITMUS Test":
+      case "litmus test":
         return <Bot className="w-6 h-6" />;
-      case "Fee Payment Setup":
+      case "fee payment setup":
         return <Wallet className="w-6 h-6" />;
       default:
         return <Megaphone className="w-6 h-6" />;
@@ -240,14 +240,14 @@ export function NotificationsButton() {
 
   const getUrl = (cohortId: string, type: string): string => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    switch (type) {
-      case "Registration and Application Task":
-      case "Application Interview":
+    switch (type.toLowerCase()) {
+      case "registration and application task":
+      case "application interview":
         return `${origin}/dashboard/cohorts/${cohortId}?tab=applications`;
-      case "Admission Fee Payment":
-      case "Fee Payment Setup":
+      case "admission fee payment":
+      case "fee payment setup":
         return `${origin}/dashboard/cohorts/${cohortId}?tab=payments`;
-      case "LITMUS Test":
+      case "litmus test":
         return `${origin}/dashboard/cohorts/${cohortId}?tab=litmus`;
       default:
         return `${origin}/dashboard/cohorts/${cohortId}`;

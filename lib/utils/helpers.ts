@@ -27,6 +27,15 @@ export const formatInput = (value: string): string => {
   return formattedLines.join("\n");
 };
 
+export const generateUniqueFileName = (
+  originalName: string,
+  folder?: string
+) => {
+  const timestamp = Date.now();
+  const sanitizedName = originalName.replace(/\s+/g, "-");
+  return `${folder}/${timestamp}-${sanitizedName}`;
+};
+
 export const handleFileDownload = async (
   url: string,
   fileName: string,

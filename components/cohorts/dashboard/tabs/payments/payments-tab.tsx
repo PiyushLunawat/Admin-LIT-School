@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw, Wallet } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
@@ -241,18 +241,6 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         </div>
       </div>
 
-      {/* Payments Summary */}
-      <Accordion type="single" collapsible>
-        <AccordionItem value="item-1">
-          <AccordionTrigger className="-mt-4">
-            Payment Breakdown
-          </AccordionTrigger>
-          <AccordionContent>
-            <PaymentsSummary applications={applications} cohortId={cohortId} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
       {/* Payments Filters */}
       <PaymentsFilters
         searchQuery={searchQuery}
@@ -265,6 +253,26 @@ export function PaymentsTab({ cohortId, selectedDateRange }: PaymentsTabProps) {
         selectedPaymentPlan={selectedPaymentPlan}
         onPaymentPlanChange={setSelectedPaymentPlan}
       />
+
+      {/* Payments Summary */}
+      <Card className="bg-[#00AB7B14] px-6">
+        <Accordion type="single" collapsible>
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="">
+              <div className="flex gap-2 items-center">
+                <Wallet className="w-6 h-6 text-[#00AB7B]" />
+                Payment Breakdown
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <PaymentsSummary
+                applications={applications}
+                cohortId={cohortId}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </Card>
 
       {/* Payments List and Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

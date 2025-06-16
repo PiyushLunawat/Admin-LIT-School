@@ -3,6 +3,9 @@ interface UploadState {
   uploading: boolean;
   uploadProgress: number;
   fileName: string;
+  error: string;
+  flagOpen: boolean;
+  reason: string;
 }
 
 export interface DocumentsTabProps {

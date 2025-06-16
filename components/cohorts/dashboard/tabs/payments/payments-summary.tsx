@@ -123,18 +123,34 @@ export function PaymentsSummary({
 
         // Installments Processing
         if (paymentDetails?.paymentPlan === "instalments") {
+          // console.log(
+          //   "paymentDetails",
+          //   paymentDetails?.installments,
+          //   breakdown
+          // );
           paymentDetails?.installments?.forEach(
             (installment: any, instIndex: any) => {
+              console.log(
+                "conditon",
+                instIndex,
+                breakdown[installment?.semester - 1]?.installments[
+                  installment?.installmentNumber - 1
+                ],
+                paymentDetails?.installments?.[instIndex]
+              );
+
               if (
                 breakdown[installment?.semester - 1] &&
-                breakdown[installment?.semester - 1]?.installments[instIndex]
+                breakdown[installment?.semester - 1]?.installments[
+                  installment?.installmentNumber - 1
+                ]
               ) {
                 breakdown[installment?.semester - 1].installments[
-                  instIndex
+                  installment?.installmentNumber - 1
                 ].total += installment?.amountPayable;
                 if (installment?.verificationStatus === "paid") {
                   breakdown[installment?.semester - 1].installments[
-                    instIndex
+                    installment?.installmentNumber - 1
                   ].received += installment?.amountPayable;
                 }
                 if (installment?.verificationStatus === "pending") {

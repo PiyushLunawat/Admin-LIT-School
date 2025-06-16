@@ -3,6 +3,7 @@
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { format } from "date-fns";
 import {
+  AlertCircle,
   Camera,
   CircleCheckBig,
   CircleMinus,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { uploadDirect } from "@/app/api/aws";
 import { getCentres } from "@/app/api/centres";
 import { updateStudentData } from "@/app/api/student";
 import { Button } from "@/components/ui/button";
@@ -28,14 +30,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { generateUniqueFileName } from "@/lib/utils/helpers";
 import { PersonalDetailsTabProps } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/personal-details-tab";
-import axios from "axios";
 import Image from "next/image";
 
 interface UploadState {
   uploading: boolean;
   uploadProgress: number;
   fileName: string;
+  error: string;
 }
 
 export function PersonalDetailsTab({
@@ -244,12 +247,6 @@ export function PersonalDetailsTab({
     }
   };
 
-  const generateUniqueFileName = (originalName: string) => {
-    const timestamp = Date.now();
-    const sanitizedName = originalName.replace(/\s+/g, "-");
-    return `${timestamp}-${sanitizedName}`;
-  };
-
   const handleDeleteFile = async (fileKey: string, index?: number) => {
     try {
       if (!fileKey) {
@@ -284,20 +281,42 @@ export function PersonalDetailsTab({
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      const fileKey = generateUniqueFileName(file.name);
+      if (file.size > 5 * 1024 * 1024) {
+        setUploadStates((prev) => ({
+          ...prev,
+          profilePic: {
+            ...prev.profilePic!,
+            error: "Image size exceeds 5 MB",
+          },
+        }));
+        return;
+      }
+      const fileKey = generateUniqueFileName(file.name, "student_profile_pic");
 
       try {
-        const formData = new FormData();
-        formData.append("profileImage", file);
         setUploadStates((prev) => ({
           ...prev,
           profilePic: {
             uploading: true,
             uploadProgress: 0,
             fileName: file.name,
+            error: "",
           },
         }));
-        const fileUrl = await uploadDirect(file, fileKey);
+        const fileUrl = await uploadDirect({
+          file,
+          fileKey,
+          onProgress: (percentComplete) => {
+            setUploadStates((prev) => ({
+              ...prev,
+              profilePic: {
+                ...prev.profilePic!,
+                uploadProgress: Math.min(percentComplete, 100),
+              },
+            }));
+          },
+        });
+
         setProfileUrl(fileUrl);
         setFormData((prev: any) => ({
           ...prev,
@@ -319,32 +338,6 @@ export function PersonalDetailsTab({
         }));
       }
     }
-  };
-
-  const uploadDirect = async (file: File, fileKey: string) => {
-    const { data } = await axios.post(
-      `https://dev.apply.litschool.in/student/generate-presigned-url`,
-      {
-        bucketName: "dev-application-portal",
-        key: fileKey,
-      }
-    );
-    const { url } = data;
-    await axios.put(url, file, {
-      headers: { "Content-Type": file.type },
-      onUploadProgress: (evt: any) => {
-        if (!evt.total) return;
-        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
-        setUploadStates((prev) => ({
-          ...prev,
-          profilePic: {
-            ...prev.profilePic!,
-            uploadProgress: Math.min(percentComplete, 100),
-          },
-        }));
-      },
-    });
-    return `${url.split("?")[0]}`;
   };
 
   if (!latestCohort || !applicationDetails || !studentDetail) {
@@ -402,8 +395,10 @@ export function PersonalDetailsTab({
                 <Image
                   width={32}
                   height={32}
-                  src={profileUrl || student?.profileUrl}
-                  alt="id card"
+                  src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${
+                    profileUrl || student?.profileUrl
+                  }`}
+                  alt="PROFILE piC"
                   className="w-full h-[220px] object-cover rounded-lg"
                 />
                 {isEditing && (
@@ -431,9 +426,7 @@ export function PersonalDetailsTab({
                       size="icon"
                       className="w-8 h-8 !bg-white/[0.2] border border-white rounded-full shadow mix-blend-hard-light hover:bg-white/[0.4]"
                       onClick={() =>
-                        handleDeleteFile(
-                          (profileUrl || student?.profileUrl).split("/").pop()
-                        )
+                        handleDeleteFile(profileUrl || student?.profileUrl)
                       }
                       disabled={!isEditing}
                     >
@@ -447,11 +440,21 @@ export function PersonalDetailsTab({
                 htmlFor="passport-input"
                 className="w-full h-[220px] cursor-pointer flex flex-col items-center justify-center bg-[#1F1F1F] px-6 rounded-xl border-[#2C2C2C]"
               >
-                <div className="text-center my-auto text-muted-foreground">
-                  <Camera className="mx-auto mb-2 w-8 h-8" />
+                <div
+                  className={`text-center my-auto ${
+                    uploadStates.profilePic?.error
+                      ? "text-destructive"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {uploadStates.profilePic?.error ? (
+                    <AlertCircle className="text-destructive mx-auto mb-2 w-8 h-8" />
+                  ) : (
+                    <Camera className="mx-auto mb-2 w-8 h-8" />
+                  )}
                   <div className="text-wrap">
-                    {loading
-                      ? "Uploading your Profile Image..."
+                    {uploadStates.profilePic?.error
+                      ? `${uploadStates.profilePic?.error}`
                       : "Upload a Passport size Image of Yourself. Ensure that your face covers 60% of this picture."}
                   </div>
                 </div>

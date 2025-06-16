@@ -550,7 +550,7 @@ export function FeePreviewForm({
                   {formatAmount(initialData?.cohortFeesDetail?.oneShotDiscount)}
                   %):
                 </span>
-                <span className="text-red-500">
+                <span className="text-destructive">
                   - ₹
                   {formatAmount(
                     newBaseFee *
@@ -762,7 +762,7 @@ export function FeePreviewForm({
                               <span>
                                 Scholarship Amount ({slab.percentage}%):
                               </span>
-                              <span className="text-red-500">
+                              <span className="text-destructive">
                                 - ₹{formatAmount(totalScholarshipAmount)}
                               </span>
                             </div>
@@ -812,7 +812,7 @@ export function FeePreviewForm({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Total Scholarship Amount ({slab.percentage}%):</span>
-                  <span className="text-red-500">
+                  <span className="text-destructive">
                     - ₹
                     {formatAmount(
                       newBaseFee * GSTAmount * (slab.percentage / 100)
@@ -861,7 +861,7 @@ export function FeePreviewForm({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Total Scholarship Amount ({slab.percentage}%):</span>
-                  <span className="text-red-500">
+                  <span className="text-destructive">
                     - ₹
                     {formatAmount(
                       newBaseFee * GSTAmount * (slab.percentage / 100)
@@ -876,7 +876,7 @@ export function FeePreviewForm({
                     )}
                     %):
                   </span>
-                  <span className="text-red-500">
+                  <span className="text-destructive">
                     - ₹
                     {formatAmount(
                       newBaseFee *

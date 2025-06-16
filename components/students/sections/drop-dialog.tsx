@@ -67,7 +67,7 @@ export function MarkedAsDialog({
   return (
     <div className="grid gap-3">
       <div className="flex gap-2 text-2xl items-center justify-start text-destructive">
-        <UserMinus className="h-6 w-6 text-red-500" />
+        <UserMinus className="h-6 w-6 text-destructive" />
         Mark as Drop
       </div>
       <div className="flex justify-between items-center border-b pb-3">
