@@ -157,7 +157,7 @@ export function ReviewComponent({
     }));
   };
 
-  // For each task => array of scores for each criteria
+  // For each task => array of scores for each criterion
   const [taskScores, setTaskScores] = useState<number[][]>(
     tasks.map((task: any, index: number) =>
       task.judgmentCriteria.map((criteria: any, cIndex: number) => {
@@ -313,7 +313,7 @@ export function ReviewComponent({
       results: results,
       feedbackData: feedbackData,
       scholarshipDetail: assignedScholarshipId,
-      performanceRating: performanceRating,
+      performanceRating,
     };
 
     setLoading(true);
@@ -337,7 +337,7 @@ export function ReviewComponent({
       {/* Header Section */}
       <div className="flex  items-center gap-4 border-b pb-3">
         <Avatar className="h-16 w-16">
-          <AvatarImage src={application?.profileUrl} className="object-cover" />
+          <AvatarImage src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${application?.profileUrl}`} className="object-cover" />
           <AvatarFallback>
             {application?.firstName?.[0] || "-"}
             {application?.lastName?.[0] || "-"}
@@ -383,14 +383,14 @@ export function ReviewComponent({
                       <div className="flex items-center gap-2">
                         <FileIcon className="w-4 h-4" />
                         <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
-                          {file.split("/").pop()}
+                          {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${file}`.split("/").pop()}
                         </span>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         type="button"
-                        onClick={() => window.open(file, "_blank")}
+                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${file}`, "_blank")}
                         className="text-white rounded-xl"
                       >
                         <ArrowUpRight className="w-4 h-4" />
@@ -408,11 +408,11 @@ export function ReviewComponent({
                       <div className="flex items-center gap-2 truncate">
                         <Link2 className="w-4 h-4" />
                         <span className="text-white text-sm truncate overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-[700px]">
-                          {link}
+                          {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${link}`}
                         </span>
                       </div>
                       <Button
-                        onClick={() => window.open(link, "_blank")}
+                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${link}`, "_blank")}
                         variant="ghost"
                         size="icon"
                         type="button"
@@ -451,7 +451,7 @@ export function ReviewComponent({
                     key={`text-${id}`}
                     className="break-all w-full flex items-center gap-2 text-sm px-4 py-2 border rounded-xl"
                   >
-                    {textItem}
+                    {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${textItem}`}
                   </div>
                 )
               )}
@@ -464,16 +464,16 @@ export function ReviewComponent({
                     <div className="flex items-center gap-2 text-sm truncate">
                       <Link2Icon className="w-4 h-4" />
                       <a
-                        href={linkItem}
+                        href={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${linkItem}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-white"
                       >
-                        {linkItem}
+                        {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${linkItem}`}
                       </a>
                     </div>
                     <Button
-                      onClick={() => window.open(linkItem, "_blank")}
+                      onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${linkItem}`, "_blank")}
                       variant="ghost"
                       size="icon"
                       type="button"
@@ -493,19 +493,19 @@ export function ReviewComponent({
                     <Image
                       width={800}
                       height={420}
-                      src={imageItem}
-                      alt={imageItem.split("/").pop() || ""}
+                      src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`}
+                      alt={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`.split("/").pop() || ""}
                       className="w-full h-[420px] object-contain rounded-t-xl"
                     />
                     <div className="w-full flex justify-between items-center px-3 border-t">
                       <div className="flex items-center gap-2 text-sm truncate">
                         <ImageIcon className="w-4 h-4" />
                         <span className="w-[220px] text-white truncate">
-                          {imageItem.split("/").pop()}
+                          {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`.split("/").pop()}
                         </span>
                       </div>
                       <Button
-                        onClick={() => window.open(imageItem, "_blank")}
+                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`, "_blank")}
                         variant="ghost"
                         size="icon"
                         type="button"
@@ -528,18 +528,18 @@ export function ReviewComponent({
                       preload="none"
                       className="h-[420px] rounded-t-xl"
                     >
-                      <source src={videoItem} type="video/mp4" />
+                      <source src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${videoItem}`} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
                     <div className="w-full flex justify-between items-center px-3 border-t">
                       <div className="flex items-center gap-2 text-sm truncate">
                         <VideoIcon className="w-4 h-4" />
                         <span className="w-[220px] text-white truncate">
-                          {videoItem.split("/").pop()}
+                          {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${videoItem}`.split("/").pop()}
                         </span>
                       </div>
                       <Button
-                        onClick={() => window.open(videoItem, "_blank")}
+                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${videoItem}`, "_blank")}
                         variant="ghost"
                         size="icon"
                         type="button"
@@ -560,16 +560,16 @@ export function ReviewComponent({
                     <div className="flex items-center gap-2 text-sm truncate">
                       <FileIcon className="w-4 h-4" />
                       <a
-                        href={fileItem}
+                        href={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${fileItem}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-white"
                       >
-                        {fileItem.split("/").pop()}
+                        {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${fileItem}`.split("/").pop()}
                       </a>
                     </div>
                     <Button
-                      onClick={() => window.open(fileItem, "_blank")}
+                      onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${fileItem}`, "_blank")}
                       variant="ghost"
                       size="icon"
                       type="button"

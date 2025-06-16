@@ -347,14 +347,14 @@ export function ApplicationFeedback({
                           <div className="flex items-center gap-2">
                             <FileIcon className="w-4 h-4" />
                             <span className="text-white text-sm truncate max-w-[700px]">
-                              {file.split("/").pop()}
+                              {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${file}`.split("/").pop()}
                             </span>
                           </div>
                           <Button
                             variant="ghost"
                             size="icon"
                             type="button"
-                            onClick={() => window.open(file, "_blank")}
+                            onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${file}`, "_blank")}
                             className="text-white rounded-xl"
                           >
                             <ArrowUpRight className="w-4 h-4" />
@@ -372,14 +372,14 @@ export function ApplicationFeedback({
                           <div className="flex items-center gap-2 truncate">
                             <Link2 className="w-4 h-4" />
                             <span className="text-white text-sm truncate max-w-[700px]">
-                              {link}
+                              {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${link}`}
                             </span>
                           </div>
                           <Button
                             variant="ghost"
                             size="icon"
                             type="button"
-                            onClick={() => window.open(link, "_blank")}
+                            onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${link}`, "_blank")}
                             className="text-white rounded-xl"
                           >
                             <ArrowUpRight className="w-4 h-4" />
@@ -423,16 +423,16 @@ export function ApplicationFeedback({
                         <div className="flex items-center gap-2 text-sm truncate">
                           <Link2Icon className="w-4 h-4" />
                           <a
-                            href={linkItem}
+                            href={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${linkItem}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-white"
                           >
-                            {linkItem}
+                            {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${linkItem}`}
                           </a>
                         </div>
                         <Button
-                          onClick={() => window.open(linkItem, "_blank")}
+                          onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${linkItem}`, "_blank")}
                           variant="ghost"
                           size="icon"
                           type="button"
@@ -452,19 +452,19 @@ export function ApplicationFeedback({
                         <Image
                           width={800}
                           height={420}
-                          src={imageItem}
-                          alt={imageItem.split("/").pop() || ""}
+                          src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`}
+                          alt={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`.split("/").pop() || ""}
                           className="w-full h-[420px] object-contain rounded-t-xl"
                         />
                         <div className="w-full flex justify-between items-center px-3 border-t">
                           <div className="flex items-center gap-2 text-sm truncate">
                             <ImageIcon className="w-4 h-4" />
                             <span className="w-[220px] text-white truncate">
-                              {imageItem.split("/").pop()}
+                              {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`.split("/").pop()}
                             </span>
                           </div>
                           <Button
-                            onClick={() => window.open(imageItem, "_blank")}
+                            onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${imageItem}`, "_blank")}
                             variant="ghost"
                             size="icon"
                             type="button"
@@ -487,18 +487,18 @@ export function ApplicationFeedback({
                           preload="none"
                           className="h-[420px] rounded-t-xl"
                         >
-                          <source src={videoItem} type="video/mp4" />
+                          <source src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${videoItem}`} type="video/mp4" />
                           Your browser does not support the video tag.
                         </video>
                         <div className="w-full flex justify-between items-center px-3 border-t">
                           <div className="flex items-center gap-2 text-sm truncate">
                             <VideoIcon className="w-4 h-4" />
                             <span className="w-[220px] text-white truncate">
-                              {videoItem.split("/").pop()}
+                              {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${videoItem}`.split("/").pop()}
                             </span>
                           </div>
                           <Button
-                            onClick={() => window.open(videoItem, "_blank")}
+                            onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${videoItem}`, "_blank")}
                             variant="ghost"
                             size="icon"
                             type="button"
@@ -519,16 +519,16 @@ export function ApplicationFeedback({
                         <div className="flex items-center gap-2 text-sm truncate">
                           <FileIcon className="w-4 h-4" />
                           <a
-                            href={fileItem}
+                            href={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${fileItem}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-white"
                           >
-                            {fileItem.split("/").pop()}
+                            {`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${fileItem}`.split("/").pop()}
                           </a>
                         </div>
                         <Button
-                          onClick={() => window.open(fileItem, "_blank")}
+                          onClick={() => window.open(`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${fileItem}`, "_blank")}
                           variant="ghost"
                           size="icon"
                           type="button"
