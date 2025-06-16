@@ -91,7 +91,10 @@ export function StudentApplicationHeader({
         {/* Profile Section */}
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={student?.profileUrl} className="object-cover" />
+            <AvatarImage
+              src={`${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${student?.profileUrl}`}
+              className="object-cover"
+            />
             <AvatarFallback>
               {student?.firstName?.[0] || "-"}
               {student?.lastName?.[0] || "-"}

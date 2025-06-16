@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -38,9 +37,7 @@ import { CheckCircle, Plus, Send, SquarePen, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 
 const ROLES = [
-  // { value: "application_reviewer", label: "Application Reviewer" },
   { value: "application_interviewer", label: "Application Interviewer" },
-  // { value: "fee_collector", label: "Fee Collector" },
   { value: "litmus_interviewer", label: "LITMUS Test Evaluator" },
 ];
 
@@ -74,14 +71,9 @@ const enhancedFormSchema = collaboratorFormSchema.superRefine(
       }`;
 
       if (seenCombinations.has(combinationKey)) {
-        // context.addIssue({
-        //   code: z.ZodIssueCode.custom,
-        //   message: "Duplicate email-role combination",
-        //   path: [`collaborators.${index}.email`],
-        // });
         const parts = combinationKey.split("-");
-        const role = parts.pop(); // remove the last element (role)
-        const email = parts.join("-"); // join the rest back as email
+        const role = parts.pop();
+        const email = parts.join("-");
 
         context.addIssue({
           code: z.ZodIssueCode.custom,
@@ -138,15 +130,18 @@ export function CollaboratorsForm({
       ],
     },
   });
+
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCalEmail, setIsCalEmail] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [editingCollaboratorIndex, setEditingCollaboratorIndex] = useState<
     number | null
   >(null);
+  const [emailErrors, setEmailErrors] = useState<{ [index: number]: string }>(
+    {}
+  );
   const debounceTimers = useRef<{ [key: number]: NodeJS.Timeout }>({});
 
   const { fields, append, remove } = useFieldArray({
@@ -185,6 +180,43 @@ export function CollaboratorsForm({
     }
   };
 
+  // Unified function to validate Cal.LIT account
+  const validateCalAccount = async (email: string, fieldIndex: number) => {
+    if (!email) return;
+
+    // Clear previous error
+
+    // Skip validation if not required for role
+    const currentRole = form.getValues(`collaborators.${fieldIndex}.role`);
+    const requiresCalAccount = [
+      "application_interviewer",
+      "litmus_interviewer",
+    ].includes(currentRole);
+
+    if (!requiresCalAccount) return;
+
+    debounceTimers.current[fieldIndex] = setTimeout(async () => {
+      const currentRole = form.getValues(`collaborators.${fieldIndex}.role`);
+
+      try {
+        const emailCheckResult = await checkEmailExists(email);
+        if (!emailCheckResult.success) {
+          setEmailErrors((prev) => ({
+            ...prev,
+            [fieldIndex]: "This email doesn't have an account on Cal.LIT",
+          }));
+        } else {
+          setEmailErrors((prev) => ({ ...prev, [fieldIndex]: "" }));
+        }
+      } catch (error) {
+        setEmailErrors((prev) => ({
+          ...prev,
+          [fieldIndex]: "Error checking email account",
+        }));
+      }
+    }, 500);
+  };
+
   const handleRoleSelection = async (
     selectedRole: string,
     fieldIndex: number
@@ -192,31 +224,10 @@ export function CollaboratorsForm({
     form.setValue(`collaborators.${fieldIndex}.role`, selectedRole);
     form.clearErrors(`collaborators.${fieldIndex}.email`);
 
-    if (
-      ["application_interviewer", "litmus_interviewer"].includes(selectedRole)
-    ) {
-      const emailValue = form
-        .getValues(`collaborators.${fieldIndex}.email`)
-        .trim();
-
-      if (emailValue) {
-        const emailCheckResult = await checkEmailExists(emailValue);
-        if (
-          !emailCheckResult.success &&
-          emailValue.includes("@") &&
-          emailValue.includes(".")
-        ) {
-          form.setError(`collaborators.${fieldIndex}.email`, {
-            type: "manual",
-            message: "This email doesn't have an account on Cal.LIT",
-          });
-          setIsCalEmail(true);
-        } else {
-          setIsCalEmail(false);
-          form.clearErrors(`collaborators.${fieldIndex}.email`);
-        }
-      }
-    }
+    const emailValue = form
+      .getValues(`collaborators.${fieldIndex}.email`)
+      .trim();
+    await validateCalAccount(emailValue, fieldIndex);
   };
 
   const validateEmailWithDebounce = (
@@ -229,25 +240,8 @@ export function CollaboratorsForm({
 
     clearTimeout(debounceTimers.current[fieldIndex]);
 
-    debounceTimers.current[fieldIndex] = setTimeout(async () => {
-      const currentRole = form.getValues(`collaborators.${fieldIndex}.role`);
-
-      if (
-        emailValue &&
-        ["application_interviewer", "litmus_interviewer"].includes(currentRole)
-      ) {
-        const emailCheckResult = await checkEmailExists(emailValue);
-        if (!emailCheckResult.success) {
-          setIsCalEmail(true);
-          form.setError(`collaborators.${fieldIndex}.email`, {
-            type: "manual",
-            message: "This email doesn't have an account on Cal.LIT",
-          });
-        } else {
-          setIsCalEmail(false);
-          form.clearErrors(`collaborators.${fieldIndex}.email`);
-        }
-      }
+    debounceTimers.current[fieldIndex] = setTimeout(() => {
+      validateCalAccount(emailValue, fieldIndex);
     }, 500);
   };
 
@@ -256,31 +250,35 @@ export function CollaboratorsForm({
   };
 
   const hasInvalidUninvited = fields.some((field, i) => {
-    if (field.isInvited) return false; // Skip invited collaborators
+    if (field.isInvited) return false;
 
-    // Get specific email error
-    const emailError =
-      form.formState.errors?.collaborators?.[i]?.email?.message;
-
-    // Disable if:
     return (
       !field.email ||
       !field.role ||
       !!form.formState.errors?.collaborators?.[i] ||
-      emailError?.includes("doesn't have an account") // Specifically check for account error
+      !!emailErrors[i]
     );
   });
 
   const handleFormSubmit = async (
     data: z.infer<typeof collaboratorFormSchema>
   ) => {
+    const hasEmailErrors = Object.values(emailErrors).some(
+      (error) => error !== ""
+    );
     const isValid = await form.trigger();
-    if (!isValid || isCalEmail) return;
+
+    if (!isValid || hasEmailErrors) {
+      toast({
+        title: "Failed to add collabarotes",
+        description: "Please chaeck all emails before saving",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const isValid = await form.trigger();
-      if (!isValid) return;
       if (initialData?._id) {
         const collaboratorsPayload = data.collaborators.map((collaborator) => ({
           email: collaborator.email,
@@ -313,10 +311,21 @@ export function CollaboratorsForm({
   const handleInviteCollaborators = async (
     data: z.infer<typeof collaboratorFormSchema>
   ) => {
-    try {
-      const isValid = await form.trigger();
-      if (!isValid || isCalEmail) return;
+    const hasEmailErrors = Object.values(emailErrors).some(
+      (error) => error !== ""
+    );
+    const isValid = await form.trigger();
 
+    if (!isValid || hasEmailErrors) {
+      toast({
+        title: "Failed to invite collabarotes",
+        description: "Please check all email before inviting",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
       setIsInviting(true);
       if (initialData?._id) {
         const collaboratorsPayload = data.collaborators.map((collaborator) => ({
@@ -327,21 +336,8 @@ export function CollaboratorsForm({
         const updateResponse = await updateCohort(initialData._id, {
           collaborators: collaboratorsPayload,
         });
-        console.log("updated:", updateResponse);
 
-        // form.reset({
-        //   collaborators: formatCollaboratorsData(updateResponse.data),
-        // });
-
-        // const updatedCohortData = {
-        //   ...initialData,
-        //   collaborators: updateResponse.data,
-        // };
-
-        // onCohortCreated(updatedCohortData);
         const inviteResponse = await inviteCollaborators(initialData._id);
-
-        console.log("invited:", inviteResponse);
 
         form.reset({
           collaborators: formatCollaboratorsData(inviteResponse.data.details),
@@ -432,6 +428,15 @@ export function CollaboratorsForm({
     collaboratorId?: string,
     newRole?: string
   ) => {
+    if (emailErrors[index]) {
+      toast({
+        title: "Failed to add collabarotes",
+        description: "This email doesn't have a Cal.LIT account",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const collaborators = form.getValues().collaborators;
     const currentCollaborator = collaborators[index];
 
@@ -609,7 +614,7 @@ export function CollaboratorsForm({
                             <Input
                               disabled={collaborator.isInvited}
                               type="email"
-                              placeholder="email@example.com"
+                              placeholder="email@litschool.in"
                               value={field.value || ""}
                               onChange={(e) =>
                                 validateEmailWithDebounce(e, index)
@@ -662,10 +667,8 @@ export function CollaboratorsForm({
                         )}
                       />
                       <FormMessage className="pl-3">
-                        {
-                          form.formState.errors?.collaborators?.[index]?.email
-                            ?.message
-                        }
+                        {form.formState.errors?.collaborators?.[index]?.email
+                          ?.message || emailErrors[index]}
                       </FormMessage>
                     </div>
 
@@ -729,12 +732,6 @@ export function CollaboratorsForm({
         <div className="flex gap-2">
           {hasUninvitedCollaborators && (
             <Button
-              disabled={fields.every(
-                (field, i) =>
-                  !field.email ||
-                  !field.role ||
-                  !!form.formState.errors?.collaborators?.[i]
-              )}
               variant="outline"
               type="button"
               className="w-full bg-[#6808FE] hover:bg-[#6808FE]/80"

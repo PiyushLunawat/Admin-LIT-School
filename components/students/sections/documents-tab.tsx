@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { uploadDirect } from "@/app/api/aws";
 import {
   updateDocumentStatus,
   uploadStudentDocuments,
@@ -22,15 +23,10 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import { generateUniqueFileName } from "@/lib/utils/helpers";
+import { UploadState } from "@/types/components/cohorts/dashboard/tabs/applications/application-dialog/document-tab";
 
 type BadgeVariant = "warning" | "success" | "pending" | "default";
-
-interface UploadState {
-  uploading: boolean;
-  uploadProgress: number;
-  fileName: string;
-}
 
 interface DocumentsTabProps {
   student: any;
@@ -70,30 +66,35 @@ export function DocumentsTab({
       name: "ID Proof (Aadhar card)",
       type: "PDF",
       size: "5 MB",
+      folder: "student_identity_proof",
     },
     {
       id: "secondarySchoolMarksheet",
       name: "10th Marks Sheet",
       type: "PDF",
       size: "5 MB",
+      folder: "10th-grade-marksheet",
     },
     {
       id: "higherSecondaryMarkSheet",
       name: "12th Marks Sheet",
       type: "PDF",
       size: "5 MB",
+      folder: "12th-grade-marksheet",
     },
     {
       id: "higherSecondaryTC",
       name: "12th Transfer Certificate",
       type: "PDF",
       size: "5 MB",
+      folder: "12th-grade-transfer-certificate",
     },
     {
       id: "graduationMarkSheet",
       name: "Graduation Marks Sheet",
       type: "PDF",
       size: "5 MB",
+      folder: "graduation_marksheet",
     },
   ];
 
@@ -103,12 +104,14 @@ export function DocumentsTab({
       name: "Father’s ID Proof (Aadhar/PAN Card/Passport)",
       type: "PDF",
       size: "5 MB",
+      folder: "parent-id-proof",
     },
     {
       id: "motherIdProof",
       name: "Father’s ID Proof (Aadhar/PAN Card/Passport)",
       type: "PDF",
       size: "5 MB",
+      folder: "parent-id-proof",
     },
   ];
 
@@ -196,35 +199,49 @@ export function DocumentsTab({
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    docId: string
+    docId: string,
+    folder: string
   ) => {
-    setUploadStates((prev) => ({
-      ...prev,
-      [docId]: { uploading: true, uploadProgress: 0, fileName: "" },
-    }));
-
     const file = e.target.files?.[0];
     if (!file) return;
-    const fileKey = generateUniqueFileName(file.name);
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadStates((prev) => ({
+        ...prev,
+        [docId]: {
+          ...prev[docId],
+          error: "File size exceeds 5 MB",
+        },
+      }));
+      return;
+    }
+    const fileKey = generateUniqueFileName(file.name, folder);
 
-    // Update fileName for this document
     setUploadStates((prev) => ({
       ...prev,
-      [docId]: { ...prev[docId], fileName: fileKey },
+      [docId]: {
+        uploading: true,
+        uploadProgress: 0,
+        fileName: fileKey,
+        error: "",
+        flagOpen: false,
+        reason: "",
+      },
     }));
 
-    const CHUNK_SIZE = 100 * 1024 * 1024;
-    e.target.value = "";
-
     try {
-      let fileUrl = "";
-      if (file.size <= CHUNK_SIZE) {
-        fileUrl = await uploadDirect(file, fileKey, docId);
-        // console.log("uploadDirect File URL:", fileUrl);
-      } else {
-        fileUrl = await uploadMultipart(file, fileKey, CHUNK_SIZE, docId);
-        // console.log("uploadMultipart File URL:", fileUrl);
-      }
+      const fileUrl = await uploadDirect({
+        file,
+        fileKey,
+        onProgress: (percentComplete) => {
+          setUploadStates((prev) => ({
+            ...prev,
+            [docId]: {
+              ...prev[docId],
+              uploadProgress: Math.min(percentComplete, 100),
+            },
+          }));
+        },
+      });
 
       const payload = {
         studentId: student?._id,
@@ -275,97 +292,6 @@ export function DocumentsTab({
     }
   };
 
-  const uploadDirect = async (file: File, fileKey: string, docId: string) => {
-    const { data } = await axios.post(
-      `https://dev.apply.litschool.in/student/generate-presigned-url`,
-      {
-        bucketName: "dev-application-portal",
-        key: fileKey,
-      }
-    );
-    const { url } = data;
-    await axios.put(url, file, {
-      headers: { "Content-Type": file.type },
-      onUploadProgress: (evt: any) => {
-        if (!evt.total) return;
-        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
-        setUploadStates((prev) => ({
-          ...prev,
-          [docId]: {
-            ...prev[docId],
-            uploadProgress: Math.min(percentComplete, 100),
-          },
-        }));
-      },
-    });
-    return `${url.split("?")[0]}`;
-  };
-
-  const uploadMultipart = async (
-    file: File,
-    fileKey: string,
-    chunkSize: number,
-    docId: string
-  ) => {
-    const uniqueKey = fileKey;
-
-    const initiateRes = await axios.post(
-      `https://dev.apply.litschool.in/student/initiate-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-      }
-    );
-    const { uploadId } = initiateRes.data;
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    let totalBytesUploaded = 0;
-    const parts: { ETag: string; PartNumber: number }[] = [];
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
-      const partRes = await axios.post(
-        `https://dev.apply.litschool.in/student/generate-presigned-url-part`,
-        {
-          bucketName: "dev-application-portal",
-          key: uniqueKey,
-          uploadId,
-          partNumber: i + 1,
-        }
-      );
-      const { url } = partRes.data;
-      const uploadRes = await axios.put(url, chunk, {
-        headers: { "Content-Type": file.type },
-        onUploadProgress: (evt: any) => {
-          if (!evt.total) return;
-          totalBytesUploaded += evt.loaded;
-          const percent = Math.round((totalBytesUploaded / file.size) * 100);
-          setUploadStates((prev) => ({
-            ...prev,
-            [docId]: { ...prev[docId], uploadProgress: Math.min(percent, 100) },
-          }));
-        },
-      });
-      parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
-    }
-    await axios.post(
-      `https://dev.apply.litschool.in/student/complete-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-        uploadId,
-        parts,
-      }
-    );
-    return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
-  };
-
-  const generateUniqueFileName = (originalName: string) => {
-    const timestamp = Date.now();
-    const sanitizedName = originalName.replace(/\s+/g, "-");
-    return `${timestamp}-${sanitizedName}`;
-  };
-
   const getStatusColor = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
       case "verification pending":
@@ -404,6 +330,10 @@ export function DocumentsTab({
                       <div className="text-sm text-muted-foreground">
                         {doc.type} • {doc.size} • Uploaded on{" "}
                         {new Date(docDetails?.date).toLocaleDateString()}
+                      </div>
+                    ) : uploadStates[doc.id]?.error ? (
+                      <div className="text-sm text-destructive">
+                        • {uploadStates[doc.id]?.error}
                       </div>
                     ) : (
                       <div className="text-sm text-muted-foreground">
@@ -448,7 +378,9 @@ export function DocumentsTab({
                         size="sm"
                         onClick={() => {
                           setOpen(true);
-                          setViewDoc(docDetails?.url);
+                          setViewDoc(
+                            `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${docDetails?.url}`
+                          );
                         }}
                       >
                         <Eye className="h-4 w-4 mr-2" /> View
@@ -472,7 +404,9 @@ export function DocumentsTab({
                               className="hidden"
                               disabled={latestCohort?.status === "dropped"}
                               id={`file-input-${doc.id}`}
-                              onChange={(e) => handleFileChange(e, doc.id)}
+                              onChange={(e) =>
+                                handleFileChange(e, doc.id, doc.folder)
+                              }
                             />
                           </label>
                         </div>
@@ -481,7 +415,10 @@ export function DocumentsTab({
                           variant="ghost"
                           size="sm"
                           onClick={() =>
-                            handleFileDownload(docDetails?.url, doc.name)
+                            handleFileDownload(
+                              `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${docDetails?.url}`,
+                              doc.name
+                            )
                           }
                           disabled={downloading}
                         >
@@ -509,7 +446,9 @@ export function DocumentsTab({
                           className="hidden"
                           disabled={latestCohort?.status === "dropped"}
                           id={`file-input-${doc.id}`}
-                          onChange={(e) => handleFileChange(e, doc.id)}
+                          onChange={(e) =>
+                            handleFileChange(e, doc.id, doc.folder)
+                          }
                         />
                       </label>
                     </div>
@@ -609,6 +548,10 @@ export function DocumentsTab({
                         {doc.type} • {doc.size} • Uploaded on{" "}
                         {new Date(docDetails?.date).toLocaleDateString()}
                       </div>
+                    ) : uploadStates[doc.id]?.error ? (
+                      <div className="text-sm text-destructive">
+                        • {uploadStates[doc.id]?.error}
+                      </div>
                     ) : (
                       <div className="text-sm text-muted-foreground">
                         • Upload in {doc.type} Format
@@ -652,7 +595,9 @@ export function DocumentsTab({
                         size="sm"
                         onClick={() => {
                           setOpen(true);
-                          setViewDoc(docDetails?.url);
+                          setViewDoc(
+                            `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${docDetails?.url}`
+                          );
                         }}
                       >
                         <Eye className="h-4 w-4 mr-2" /> View
@@ -661,7 +606,10 @@ export function DocumentsTab({
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          handleFileDownload(docDetails?.url, doc.name)
+                          handleFileDownload(
+                            `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${docDetails?.url}`,
+                            doc.name
+                          )
                         }
                       >
                         <Download className="h-4 w-4 mr-2" />
@@ -687,7 +635,9 @@ export function DocumentsTab({
                           className="hidden"
                           disabled={latestCohort?.status === "dropped"}
                           id={`file-input-${doc.id}`}
-                          onChange={(e) => handleFileChange(e, doc.id)}
+                          onChange={(e) =>
+                            handleFileChange(e, doc.id, doc.folder)
+                          }
                         />
                       </label>
                     </div>
@@ -817,7 +767,9 @@ export function DocumentsTab({
                           size="sm"
                           onClick={() => {
                             setOpen(true);
-                            setViewDoc(doc?.url);
+                            setViewDoc(
+                              `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${doc?.url}`
+                            );
                           }}
                         >
                           <Eye className="h-4 w-4 mr-2" />
@@ -827,7 +779,10 @@ export function DocumentsTab({
                           variant="ghost"
                           size="sm"
                           onClick={() =>
-                            handleFileDownload(doc?.url, doc?.name)
+                            handleFileDownload(
+                              `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${doc?.url}`,
+                              doc?.name
+                            )
                           }
                         >
                           <Download className="h-4 w-4 mr-2" />
@@ -858,8 +813,10 @@ export function DocumentsTab({
                 setNewDocName(e.target.value);
               }}
             />
-            {docNameError && (
-              <div className="text-[#FF503D] text-sm pl-3">{docNameError}</div>
+            {(uploadStates[newDocName]?.error || docNameError) && (
+              <div className="text-[#FF503D] text-sm pl-3">
+                {uploadStates[newDocName]?.error || docNameError}
+              </div>
             )}
           </div>
           <div className="flex gap-2 items-center">
@@ -909,7 +866,7 @@ export function DocumentsTab({
                       return;
                     } else {
                       setDocNameError("");
-                      handleFileChange(e, newDocName);
+                      handleFileChange(e, newDocName, "additional-document");
                     }
                   }}
                 />

@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import {
   FileIcon,
   FolderPlus,
@@ -42,18 +41,11 @@ import {
   XIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
-
-const s3Client = new S3Client({
-  region: process.env.NEXT_PUBLIC_AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY as string,
-  },
-});
+import { deleteS3Object, uploadDirect, uploadMultipart } from "@/app/api/aws";
+import { generateUniqueFileName } from "@/lib/utils/helpers";
 
 // Modified schema to ensure numeric fields are always defined with default values
 const formSchema = z.object({
@@ -67,7 +59,7 @@ const formSchema = z.object({
           config: z.array(
             z.object({
               type: z.string().nonempty("Task type is required"),
-              characterLimit: z.coerce.number().min(1).default(1000),
+              characterLimit: z.coerce.number().min(1).default(250),
               maxFiles: z.coerce.number().min(1).default(1),
               maxFileSize: z.coerce.number().min(1).default(500),
               allowedTypes: z.array(z.string()).default(["All"]),
@@ -113,7 +105,7 @@ export function ApplicationFormBuilder({
                     config: [
                       {
                         type: "",
-                        characterLimit: 1000, // Default value
+                        characterLimit: 250, // Default value
                         maxFiles: 1, // Default value
                         maxFileSize: 500, // Default value
                         allowedTypes: ["All"],
@@ -205,7 +197,7 @@ function TaskList({ nestIndex, control, form }: any) {
         config: [
           {
             type: "",
-            characterLimit: 1000, // Default value
+            characterLimit: 250, // Default value
             maxFiles: 1, // Default value
             maxFileSize: 500, // Default value
             allowedTypes: ["All"],
@@ -245,7 +237,7 @@ function TaskList({ nestIndex, control, form }: any) {
             config: [
               {
                 type: "",
-                characterLimit: 1000, // Default value
+                characterLimit: 250, // Default value
                 maxFiles: 1, // Default value
                 maxFileSize: 500, // Default value
                 allowedTypes: ["All"],
@@ -401,7 +393,7 @@ function Task({
               onClick={() =>
                 appendConfig({
                   type: "",
-                  characterLimit: 1000, // Default value
+                  characterLimit: 250, // Default value
                   maxFiles: 1, // Default value
                   maxFileSize: 500, // Default value
                   allowedTypes: ["All"],
@@ -430,16 +422,6 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState("");
-  const [fileSizeInput, setFileSizeInput] = useState<string>("500");
-
-  // Add this after the useState declarations in ResourcesSection
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
-    else if (bytes < 1024 * 1024 * 1024)
-      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-    else return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
-  };
 
   const {
     fields: linkFields,
@@ -481,11 +463,14 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
       return;
     }
 
-    const fileKey = generateUniqueFileName(file.name);
+    const fileKey = generateUniqueFileName(
+      file.name,
+      "application_task_form_resource"
+    );
     setFileName(fileKey);
 
     // Example size limit for direct vs. multipart: 5MB
-    const CHUNK_SIZE = 100 * 1024 * 1024; // 5 MB
+    const CHUNK_SIZE = 100 * 1024 * 1024; // 100 MB
 
     // Clear the file input so user can re-select if needed
     e.target.value = "";
@@ -496,11 +481,26 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
       let fileUrl = "";
       if (file.size <= CHUNK_SIZE) {
         // Use direct upload
-        fileUrl = await uploadDirect(file, fileKey);
+        fileUrl = await uploadDirect({
+          file,
+          fileKey,
+          onProgress: (percentComplete) => {
+            setUploadProgress(percentComplete);
+          },
+        });
+
         console.log("uploadDirect File URL:", fileUrl);
       } else {
         // Use multipart upload
-        fileUrl = await uploadMultipart(file, CHUNK_SIZE, fileKey);
+        fileUrl = await uploadMultipart({
+          file,
+          fileKey,
+          chunkSize: CHUNK_SIZE,
+          onProgress: (percentComplete) => {
+            setUploadProgress(percentComplete);
+          },
+        });
+
         console.log("uploadMultipart File URL:", fileUrl);
       }
 
@@ -516,133 +516,22 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
 
   const handleDeleteFile = async (fileKey: string, index?: number) => {
     try {
-      if (!fileKey) {
-        console.error("Invalid file URL:", fileKey);
-        return;
-      }
-        console.log("file URL:", fileKey);
-
-      // AWS S3 DeleteObject Command
-      const deleteCommand = new DeleteObjectCommand({
-        Bucket: "dev-application-portal", // Replace with your bucket name
-        Key: fileKey, // Key extracted from file URL
+      await deleteS3Object({
+        fileKey,
       });
 
-      await s3Client.send(deleteCommand);
-      console.log("File deleted successfully from S3:", fileKey);
-
-      // Remove from UI
-      removeFile(index);
+      // Remove from UI after successful deletion
+      if (index !== undefined) {
+        removeFile(index);
+      } else {
+        // setUploadedFile(null);
+        setUploading(false);
+        setUploadProgress(0);
+      }
     } catch (error) {
       console.error("Error deleting file:", error);
       setError("Failed to delete file. Try again.");
     }
-  };
-
-  // Direct upload to S3 using a single presigned URL
-  const uploadDirect = async (file: File, fileKey: string) => {
-    // Step 1: Get presigned URL from your server
-    // Make sure your endpoint returns something like { url: string }
-    const { data } = await axios.post(
-      `${process.env.API_URL}/admin/generate-presigned-url`,
-      {
-        bucketName: "dev-application-portal",
-        key: fileKey,
-      }
-    );
-    const { url, key } = data; // Suppose your API returns both presigned `url` and `key`
-    console.log("whatatata", url.split("?")[0]);
-
-    // Step 2: PUT file to that URL
-    const partResponse = await axios.put(url, file, {
-      headers: { "Content-Type": file.type },
-      onUploadProgress: (evt: any) => {
-        if (!evt.total) return;
-        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
-        setUploadProgress(percentComplete);
-      },
-    });
-
-    // Final S3 URL
-    return `${url.split("?")[0]}`;
-  };
-
-  /**
-   * Multipart upload with 5MB chunks, using your server endpoints for:
-   * - initiate-multipart-upload
-   * - generate-presigned-url-part
-   * - complete-multipart-upload
-   */
-  const uploadMultipart = async (
-    file: File,
-    chunkSize: number,
-    fileKey: string
-  ) => {
-    // Step 1: Initiate
-    const uniqueKey = fileKey;
-    const initiateRes = await axios.post(
-      `${process.env.API_URL}/admin/initiate-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-      }
-    );
-    const { uploadId } = initiateRes.data;
-
-    // Step 2: Upload each chunk
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    let totalBytesUploaded = 0;
-    const parts: { ETag: string; PartNumber: number }[] = [];
-
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
-
-      const partRes = await axios.post(
-        `${process.env.API_URL}/admin/generate-presigned-url-part`,
-        {
-          bucketName: "dev-application-portal",
-          key: uniqueKey,
-          uploadId,
-          partNumber: i + 1,
-        }
-      );
-      const { url } = partRes.data;
-
-      // Upload the chunk
-      const uploadRes = await axios.put(url, chunk, {
-        headers: { "Content-Type": file.type },
-        onUploadProgress: (evt: any) => {
-          if (!evt.total) return;
-          totalBytesUploaded += evt.loaded;
-          const percent = Math.round((totalBytesUploaded / file.size) * 100);
-          setUploadProgress(Math.min(percent, 100));
-        },
-      });
-      parts.push({ PartNumber: i + 1, ETag: uploadRes.headers.etag });
-    }
-
-    // Step 3: Complete
-    const partRes = await axios.post(
-      `${process.env.API_URL}/admin/complete-multipart-upload`,
-      {
-        bucketName: "dev-application-portal",
-        key: uniqueKey,
-        uploadId,
-        parts,
-      }
-    );
-
-    // Return final S3 URL
-    return `https://dev-application-portal.s3.amazonaws.com/${uniqueKey}`;
-  };
-
-  // Just a helper to generate a unique file name
-  const generateUniqueFileName = (originalName: string) => {
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 8);
-    return `${timestamp}-${originalName}`;
   };
 
   return (
@@ -663,9 +552,13 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
                     <FileIcon className="absolute left-2 top-3 w-4 h-4" />
                     <Input
                       type="url"
-                      className="pl-8 pr-12 text-sm truncate text-white w-full"
+                      className="pl-8 pr-16 text-sm truncate text-white w-full"
                       placeholder="Enter resource link"
-                      {...field}
+                      value={
+                        field.value
+                          ? `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${field.value}`
+                          : ""
+                      }
                       readOnly
                     />
                     <Button
@@ -673,9 +566,7 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
                       variant="ghost"
                       size="icon"
                       className="absolute right-2 top-1.5 h-7 rounded-full"
-                      onClick={() =>
-                        handleDeleteFile(field.value.split("/").pop(), index)
-                      }
+                      onClick={() => handleDeleteFile(field.value, index)}
                     >
                       <XIcon className="h-4 w-4" />
                     </Button>
@@ -738,7 +629,7 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
                     <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
                     <Input
                       type="url"
-                      className="pl-8 text-sm pr-12 truncate"
+                      className="pl-8 text-sm pr-16 truncate"
                       placeholder="Enter resource link"
                       {...field}
                     />
@@ -789,11 +680,7 @@ function ResourcesSection({ control, setValue, nestIndex, taskIndex }: any) {
           <Link2Icon className="w-4 h-4" /> Attach Resource Link
         </Button>
       </div>
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/50 rounded-md p-2 mt-2">
-          <p className="text-red-500 text-sm font-medium">{error}</p>
-        </div>
-      )}
+      {error && <p className="text-destructive text-sm -mt-2">{error}</p>}
     </div>
   );
 }
@@ -872,11 +759,11 @@ function Config({
                     type="number"
                     placeholder="Enter maximum characters"
                     {...field}
-                    value={field.value || 1000} // Ensure value is never undefined
+                    value={field.value || 250} // Ensure value is never undefined
                     onChange={(e) => {
                       const value =
                         e.target.value === ""
-                          ? 1000
+                          ? 250
                           : Number.parseInt(e.target.value);
                       field.onChange(value);
                     }}
@@ -997,29 +884,64 @@ function Config({
             />
             <div className="grid gap-2 mt-1">
               <Label>Allowed File Types</Label>
-              <div className="flex flex-wrap gap-1">
-                {["All", "DOC", "PPT", "PDF", "XLS", "PSD", "EPF", "AI"].map(
-                  (type) => (
-                    <div key={type} className="flex items-center">
-                      <Checkbox
-                        id={type}
-                        className="hidden"
-                        onClick={() => toggleFileType(type)}
-                        checked={selectedTypes.includes(type)}
-                        onChange={() => toggleFileType(type)}
-                      />
-                      <Label
-                        htmlFor={type}
-                        className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border $ {
-                    selectedTypes.includes(type) ? "bg-[#6808FE]" : "bg-[#0A0A0A]"
-                  }`}
-                      >
-                        {type}
-                      </Label>
-                    </div>
-                  )
+              <Controller
+                control={control}
+                name={`applicationFormDetail.${nestIndex}.task.${taskIndex}.config.${configIndex}.allowedTypes`}
+                defaultValue={["All"]} // Initialize with "All" selected
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-1">
+                    {[
+                      "All",
+                      "DOC",
+                      "PPT",
+                      "PDF",
+                      "XLS",
+                      "PSD",
+                      "EPF",
+                      "AI",
+                    ].map((type) => (
+                      <div key={type} className="flex items-center">
+                        <Checkbox
+                          className="hidden"
+                          id={`${type}-${taskIndex}-${configIndex}`}
+                          checked={field.value?.includes(type)}
+                          onCheckedChange={(checked) => {
+                            let newSelectedTypes = field.value || [];
+                            if (checked) {
+                              if (type === "All") {
+                                newSelectedTypes = ["All"];
+                              } else {
+                                newSelectedTypes = newSelectedTypes.filter(
+                                  (t: any) => t !== "All"
+                                );
+                                newSelectedTypes.push(type);
+                              }
+                            } else {
+                              newSelectedTypes = newSelectedTypes.filter(
+                                (t: any) => t !== type
+                              );
+                              if (newSelectedTypes.length === 0) {
+                                newSelectedTypes = ["All"];
+                              }
+                            }
+                            field.onChange(newSelectedTypes);
+                          }}
+                        />
+                        <Label
+                          htmlFor={`${type}-${taskIndex}-${configIndex}`}
+                          className={`flex items-center cursor-pointer px-4 py-2 h-8 rounded-md border ${
+                            field.value?.includes(type)
+                              ? "bg-[#6808FE]"
+                              : "bg-[#0A0A0A]"
+                          }`}
+                        >
+                          {type}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </div>
+              />
             </div>
           </>
         ) : null}

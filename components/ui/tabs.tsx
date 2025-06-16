@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cva, VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "@/lib/utils/utils";
 
@@ -13,7 +13,8 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: "bg-muted rounded-md",
-        outline: "border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950",
+        outline:
+          "border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950",
         ghost: "bg-transparent",
         secondary: "bg-transparent",
       },
@@ -31,9 +32,11 @@ const tabsTriggerVariants = cva(
     variants: {
       variant: {
         default: "",
-        destructive: "text-red-500 dark:text-red-900",
-        outline: "border border-slate-200 text-slate-900 dark:border-slate-800 dark:text-slate-50",
-        secondary: "text-white dark:text-slate-50 data-[state=active]:bg-[#212936] ",
+        destructive: "text-destructive dark:text-red-900",
+        outline:
+          "border border-slate-200 text-slate-900 dark:border-slate-800 dark:text-slate-50",
+        secondary:
+          "text-white dark:text-slate-50 data-[state=active]:bg-[#212936] ",
         sm: "h-8 rounded-full data-[state=active]:text-white text-sm data-[state=active]:bg-[#27272A]",
         xs: "h-7 rounded-full data-[state=active]:text-white text-[13px] data-[state=active]:bg-[#6808FE]",
       },
@@ -46,9 +49,14 @@ const tabsTriggerVariants = cva(
 
 const Tabs = TabsPrimitive.Root;
 
-interface TabsListProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>, VariantProps<typeof tabsListVariants> {}
+interface TabsListProps
+  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>,
+    VariantProps<typeof tabsListVariants> {}
 
-const TabsList = React.forwardRef<React.ElementRef<typeof TabsPrimitive.List>, TabsListProps>(({ className, variant, ...props }, ref) => (
+const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  TabsListProps
+>(({ className, variant, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(tabsListVariants({ variant, className }))}
@@ -57,9 +65,14 @@ const TabsList = React.forwardRef<React.ElementRef<typeof TabsPrimitive.List>, T
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
-interface TabsTriggerProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>, VariantProps<typeof tabsTriggerVariants> {}
+interface TabsTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>,
+    VariantProps<typeof tabsTriggerVariants> {}
 
-const TabsTrigger = React.forwardRef<React.ElementRef<typeof TabsPrimitive.Trigger>, TabsTriggerProps>(({ className, variant, ...props }, ref) => (
+const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  TabsTriggerProps
+>(({ className, variant, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(tabsTriggerVariants({ variant, className }))}
@@ -83,4 +96,4 @@ const TabsContent = React.forwardRef<
 ));
 TabsContent.displayName = TabsPrimitive.Content.displayName;
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsContent, TabsList, TabsTrigger };

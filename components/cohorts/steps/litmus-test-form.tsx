@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import {
   FileIcon,
   FolderPlus,
@@ -49,16 +48,9 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 
+import { deleteS3Object, uploadDirect, uploadMultipart } from "@/app/api/aws";
 import { Progress } from "@/components/ui/progress";
-import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
-
-const s3Client = new S3Client({
-  region: process.env.NEXT_PUBLIC_AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY as string,
-  },
-});
+import { generateUniqueFileName } from "@/lib/utils/helpers";
 
 // Modified schema to ensure numeric fields have default values
 const formSchema = z.object({
@@ -71,7 +63,7 @@ const formSchema = z.object({
         z.object({
           id: z.string(),
           type: z.string().nonempty("Submission type is required"),
-          characterLimit: z.coerce.number().min(1).default(1000),
+          characterLimit: z.coerce.number().min(1).default(250),
           maxFiles: z.coerce.string().min(1).default("1"),
           maxFileSize: z.coerce.string().min(1).default("500"),
           allowedTypes: z.array(z.string()).default(["All"]),
@@ -139,7 +131,7 @@ export function LitmusTestForm({
                 {
                   id: generateId(),
                   type: "",
-                  characterLimit: 1000, // Default value
+                  characterLimit: 250, // Default value
                   maxFiles: "1", // Default value
                   maxFileSize: "500", // Default value
                   allowedTypes: ["All"],
@@ -312,7 +304,7 @@ export function LitmusTestForm({
                   {
                     id: generateId(),
                     type: "",
-                    characterLimit: 1000, // Default value
+                    characterLimit: 250, // Default value
                     maxFiles: "1", // Default value
                     maxFileSize: "500", // Default value
                     allowedTypes: ["All"],
@@ -578,7 +570,7 @@ function TaskItem({
                 appendSubmissionType({
                   id: generateId(),
                   type: "",
-                  characterLimit: 1000, // Default value
+                  characterLimit: 250, // Default value
                   maxFiles: "1", // Default value
                   maxFileSize: "500", // Default value
                   allowedTypes: [],
@@ -705,11 +697,11 @@ function renderConfigFields(
                   type="number"
                   placeholder="Enter maximum characters"
                   {...field}
-                  value={field.value || 1000} // Ensure value is never undefined
+                  value={field.value || 250} // Ensure value is never undefined
                   onChange={(e) => {
                     const value =
                       e.target.value === ""
-                        ? 1000
+                        ? 250
                         : Number.parseInt(e.target.value);
                     field.onChange(value);
                   }}
@@ -920,15 +912,6 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState("");
 
-  // Add this helper function to format file sizes
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
-    else if (bytes < 1024 * 1024 * 1024)
-      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-    else return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
-  };
-
   const {
     fields: linkFields,
     append: appendLink,
@@ -970,7 +953,10 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
     }
 
     setFileName(file.name);
-    const fileKey = generateUniqueFileName(file.name);
+    const fileKey = generateUniqueFileName(
+      file.name,
+      "litmus_task_form_resource"
+    );
 
     // Example size limit for direct vs. multipart: 5MB
     const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -984,11 +970,24 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
       let fileUrl = "";
       if (file.size <= CHUNK_SIZE) {
         // Use direct upload
-        fileUrl = await uploadDirect(file);
+        fileUrl = await uploadDirect({
+          file,
+          fileKey,
+          onProgress: (percentComplete) => {
+            setUploadProgress(percentComplete);
+          },
+        });
         console.log("uploadDirect File URL:", fileUrl);
       } else {
         // Use multipart upload
-        fileUrl = await uploadMultipart(file, CHUNK_SIZE);
+        fileUrl = await uploadMultipart({
+          file,
+          fileKey,
+          chunkSize: CHUNK_SIZE,
+          onProgress: (percentComplete) => {
+            setUploadProgress(percentComplete);
+          },
+        });
         console.log("uploadMultipart File URL:", fileUrl);
       }
 
@@ -1002,139 +1001,24 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
     }
   };
 
-  const handleDeleteFile = async (fileUrl: string, index: number) => {
+  const handleDeleteFile = async (fileKey: string, index: number) => {
     try {
-      const fileKey = fileUrl.split("/").pop();
-
-      if (!fileKey) {
-        console.error("Invalid file URL:", fileUrl);
-        return;
-      }
-
-      // AWS S3 DeleteObject Command
-      const deleteCommand = new DeleteObjectCommand({
-        Bucket: "dev-application-portal", // Replace with your bucket name
-        Key: fileKey, // Key extracted from file URL
+      await deleteS3Object({
+        fileKey,
       });
 
-      await s3Client.send(deleteCommand);
-      console.log("File deleted successfully from S3:", fileUrl);
-
-      // Remove from UI
-      removeFile(index);
+      // Remove from UI after successful deletion
+      if (index !== undefined) {
+        removeFile(index);
+      } else {
+        // setUploadedFile(null);
+        setUploading(false);
+        setUploadProgress(0);
+      }
     } catch (error) {
       console.error("Error deleting file:", error);
       setError("Failed to delete file. Try again.");
     }
-  };
-
-  // Direct upload to S3 using a single presigned URL
-  const uploadDirect = async (file: File) => {
-    // Step 1: Get presigned URL from your server
-    // Make sure your endpoint returns something like { url: string }
-    const { data } = await axios.post(
-      `${process.env.API_URL}/admin/generate-presigned-url`,
-      {
-        bucketName: "dev-application-portal",
-        key: generateUniqueFileName(file.name),
-      }
-    );
-    const { url, key } = data; // Suppose your API returns both presigned `url` and `key`
-    console.log("whatatata", url.split("?")[0]);
-
-    // Step 2: PUT file to that URL
-    const partResponse = await axios.put(url, file, {
-      headers: { "Content-Type": file.type },
-      onUploadProgress: (evt: any) => {
-        if (!evt.total) return;
-        const percentComplete = Math.round((evt.loaded / evt.total) * 100);
-        setUploadProgress(percentComplete);
-      },
-    });
-
-    // Final S3 URL
-    return `${url.split("?")[0]}`;
-  };
-
-  /**
-   * Multipart upload with 5MB chunks, using your server endpoints for:
-   * - initiate-multipart-upload
-   * - generate-presigned-url-part
-   * - complete-multipart-upload
-   */
-  const uploadMultipart = async (file: File, chunkSize: number) => {
-    // 1) Initiate upload to get an uploadId
-    const fileName = generateUniqueFileName(file.name);
-    const initiateRes = await axios.post(
-      `${process.env.API_URL}/admin/initiateUpload`,
-      {
-        fileName,
-      }
-    );
-    const { uploadId } = initiateRes.data; // e.g. { uploadId: 'abc123' }
-
-    // 2) Calculate number of chunks
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    let uploadedBytes = 0;
-
-    // We'll track overall progress across all chunks
-    for (let i = 0; i < totalChunks; i++) {
-      // Slice out this chunk
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
-
-      // Create form data for the chunk
-      const formData = new FormData();
-      formData.append("file", chunk);
-      formData.append("index", `${i}`); // chunk index
-      formData.append("fileName", fileName);
-      formData.append("totalChunks", `${totalChunks}`);
-
-      // 3) Upload the chunk
-      await axios.post(
-        `${process.env.API_URL}/admin/upload-chunk?uploadId=${uploadId}`,
-        formData,
-        {
-          onUploadProgress: (evt) => {
-            if (!evt.total) return;
-            // evt.loaded: bytes uploaded in the current chunk
-            // We'll combine that with already-uploaded bytes
-            const chunkUploadedSoFar = evt.loaded;
-            const overallUploaded = uploadedBytes + chunkUploadedSoFar;
-
-            // Calculate overall percent
-            const percentComplete = Math.round(
-              (overallUploaded / file.size) * 100
-            );
-            setUploadProgress(percentComplete);
-          },
-        }
-      );
-
-      // When this chunk is fully done, add its size to the total
-      uploadedBytes += chunk.size;
-    }
-
-    // 4) Complete the upload
-    //    This tells your server: "All chunks are up, now merge them."
-    const completeRes = await axios.post(
-      `${process.env.API_URL}/admin/completeUpload`,
-      {
-        uploadId,
-        fileName,
-      }
-    );
-
-    // The server should respond with the final file URL
-    const { fileUrl } = completeRes.data;
-    return fileUrl;
-  };
-
-  // Just a helper to generate a unique file name
-  const generateUniqueFileName = (originalName: string) => {
-    const timestamp = Date.now();
-    return `${timestamp}-${originalName}`;
   };
 
   return (
@@ -1155,9 +1039,13 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
                     <FileIcon className="absolute left-2 top-3 w-4 h-4" />
                     <Input
                       type="url"
-                      className="pl-8 pr-12 text-sm truncate text-white w-full"
+                      className="pl-8 pr-16 text-sm truncate text-white w-full"
                       placeholder="Enter resource link"
-                      {...field}
+                      value={
+                        field.value
+                          ? `${process.env.NEXT_PUBLIC_AWS_RESOURCE_URL}/${field.value}`
+                          : ""
+                      }
                       readOnly
                     />
                     <Button
@@ -1227,7 +1115,7 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
                     <Link2Icon className="absolute left-2 top-3 w-4 h-4" />
                     <Input
                       type="url"
-                      className="pl-8 pr-12 text-sm truncate"
+                      className="pl-8 pr-16 text-sm truncate"
                       placeholder="Enter resource link"
                       {...field}
                     />
@@ -1278,11 +1166,7 @@ function ResourcesSection({ control, setValue, taskIndex }: any) {
           <Link2Icon className="w-4 h-4" /> Attach Resource Link
         </Button>
       </div>
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/50 rounded-md p-2 mt-2">
-          <p className="text-red-500 text-sm font-medium">{error}</p>
-        </div>
-      )}
+      {error && <p className="text-destructive text-sm -mt-2">{error}</p>}
     </div>
   );
 }
