@@ -169,7 +169,7 @@ export function NotificationsButton() {
 
     const handleUnreadNotifications = (unreadNotifications: Notification[]) => {
       if (unreadNotifications.length > 0) {
-        // console.log("Unread notifications received:", unreadNotifications);
+        console.log("Unread notifications received:", unreadNotifications);
         setNotifications(
           unreadNotifications.map((n) => ({
             ...n,
@@ -210,14 +210,14 @@ export function NotificationsButton() {
         return "#00A3FF";
       case "repeat":
         return "#FF791F";
-      case "onhold":
+      case "process on hold":
         return "#F8E000";
       case "success":
         return "#00CC92";
       case "failure":
         return "#FF503D";
       default:
-        return "#000000";
+        return "#ffffff";
     }
   }
 
